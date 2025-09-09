@@ -1,5 +1,3 @@
-# E-commerce Starter V2
-
 ## 🎯 Vision du projet
 
 **Un starter e-commerce universel, flexible et prêt à l'emploi** pour lancer rapidement des boutiques en ligne dans n'importe quelle niche et n'importe quel pays.
@@ -12,6 +10,8 @@ Ce n'est pas une boutique figée, mais **une base technique solide** que vous po
 - **🎨 Multi-niches** : Animaux, plantes, jouets, vêtements, électronique...
 - **🌐 Multi-langues** : Français/Anglais par défaut, extensible à d'autres langues
 - **⚡ Déploiement rapide** : De l'idée à la boutique en ligne en quelques jours
+
+---
 
 ## 📦 Périmètre MVP (Version 2.0)
 
@@ -37,7 +37,7 @@ Ce n'est pas une boutique figée, mais **une base technique solide** que vous po
 - Interface admin bilingue
 
 #### 🔒 **Sécurité professionnelle**
-- Authentification robuste (NextAuth.js)
+- Authentification robuste (Clerk)
 - Protection contre les attaques (rate limiting, CSRF, XSS)
 - Chiffrement des données sensibles
 - Logs d'audit complets
@@ -88,24 +88,26 @@ Expédition: USA + international
 ### Étapes de personnalisation (2-3 jours)
 
 1. **📝 Contenu** : Remplacer les données de demo
-   - Catégories et produits de votre niche
-   - Textes marketing adaptés
-   - Images et médias
+   - Catégories et produits de votre niche
+   - Textes marketing adaptés
+   - Images et médias
 
 2. **🎨 Design** : Adapter le thème visuel
-   - Couleurs de marque
-   - Logo et favicon
-   - Typographie
+   - Couleurs de marque
+   - Logo et favicon
+   - Typographie
 
 3. **🌍 Localisation** : Configurer le pays cible
-   - Devises et taxes locales
-   - Zones d'expédition
-   - Mentions légales conformes
+   - Devises et taxes locales
+   - Zones d'expédition
+   - Mentions légales conformes
 
 4. **⚙️ Intégrations** : Connecter vos services
-   - Paiement (Stripe/PayPal)
-   - Email (SendGrid/Mailgun)
-   - Analytics (GA4)
+   - Paiement (Stripe/PayPal)
+   - Email (SendGrid/Mailgun)
+   - Analytics (GA4)
+
+---
 
 ## 🛠️ Stack technique
 
@@ -113,9 +115,11 @@ Expédition: USA + international
 - **Backend** : Next.js API Routes + Prisma ORM
 - **Base de données** : PostgreSQL
 - **Paiements** : Stripe Payment Element
-- **Authentification** : NextAuth.js
+- **Authentification** : Clerk
 - **Déploiement** : Vercel/Railway/DigitalOcean
 - **Monitoring** : Sentry + Uptime monitoring
+
+---
 
 ## 📋 Phases de développement
 
@@ -149,6 +153,8 @@ Expédition: USA + international
 - Analytics et tracking
 - Déploiement et maintenance
 
+---
+
 ## 🎯 Objectifs du starter
 
 ### Pour les entrepreneurs
@@ -166,13 +172,19 @@ Expédition: USA + international
 - **Personnalisation** : Thèmes et configurations par client
 - **Support** : Documentation complète et communauté active
 
+---
+
 ## 📄 Licence
 
 MIT License - Utilisez librement pour vos projets commerciaux.
 
+---
+
 ## 🤝 Contribution
 
 Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les règles de contribution.
+
+---
 
 ## 📚 Documentation
 
@@ -181,6 +193,5 @@ Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les règles de contribution.
 - [Guide i18n](docs/6-i18n-seo/i18n-strategy.md)
 - [Documentation API](docs/4-api/openapi.yaml)
 
----
 
-**🎯 Mission** : Démocratiser le e-commerce en fournissant une base technique solide, flexible et internationale.
+
