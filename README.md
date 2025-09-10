@@ -36,6 +36,146 @@ Ce n'est pas une boutique figée, mais **une base technique solide** que vous po
 - SEO international (hreflang, sitemaps multilingues)
 - Interface admin bilingue
 
+##### Configuration i18n et ajout de langues
+
+Le système de traduction utilise une architecture modulaire qui permet d'ajouter facilement de nouvelles langues en quelques minutes.
+
+###### Structure du système i18n
+
+```
+src/lib/i18n/
+├── config.ts              # Configuration des langues
+├── utils.ts               # Fonctions utilitaires
+└── dictionaries/
+    ├── fr.json           # Traductions françaises
+    └── en.json           # Traductions anglaises
+```
+
+###### Ajouter une nouvelle langue
+
+**1. Créer le fichier de dictionnaire** (`src/lib/i18n/dictionaries/es.json`) :
+
+```json
+{
+  "common": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión"
+  },
+  "navbar": {
+    "brand": "Tu Tienda"
+  }
+}
+```
+
+**2. Mettre à jour la configuration** (`src/lib/i18n/config.ts`) :
+
+```typescript
+export const i18n = {
+  defaultLocale: 'fr',
+  locales: ['fr', 'en', 'es'] as const,  // Ajouter 'es'
+} as const;
+```
+
+**3. Détecter automatiquement les langues** :
+
+```typescript
+// Fonction utilitaire pour détecter la langue depuis l'URL
+export function getLocaleFromPath(pathname: string): Locale {
+  const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
+  const locale = localeMatch ? localeMatch[1] : i18n.defaultLocale;
+
+  return i18n.locales.includes(locale as Locale) ? locale as Locale : i18n.defaultLocale;
+}
+```
+
+##### Modifier les traductions existantes
+
+**Méthode simple** : Éditez directement les fichiers JSON :
+
+```json
+// src/lib/i18n/dictionaries/fr.json
+{
+  "navbar": {
+    "brand": "Votre Boutique"  // Changer ici
+  },
+  "common": {
+    "signUp": "S'enregistrer"   // Changer ici
+  }
+}
+```
+
+##### Fonctions utilitaires de traduction
+
+```typescript
+// src/lib/i18n/utils.ts
+export function useTranslations() {
+  return {
+    t: (key: string) => {
+      // Récupère la traduction selon la clé
+      const keys = key.split('.');
+      return getNestedValue(currentDictionary, keys);
+    }
+  };
+}
+
+// Utilisation dans les composants
+const t = useTranslations();
+return <h1>{t('navbar.brand')}</h1>;
+```
+
+##### Changer la langue par défaut
+
+Modifiez simplement la configuration :
+
+```typescript
+// src/lib/i18n/config.ts
+export const i18n = {
+  defaultLocale: 'en',    // Changé de 'fr' à 'en'
+  locales: ['fr', 'en'] as const,
+} as const;
+```
+
+##### URL et routing international
+
+Le système détecte automatiquement la langue depuis l'URL :
+
+```
+example.com/fr/products     → Français
+example.com/en/products     → Anglais
+example.com/products        → Langue par défaut
+```
+
+##### Intégration avec Next.js
+
+Pour une intégration complète avec les appareils Next.js d'internationalisation :
+
+```typescript
+// Configuration Next.js (next.config.js)
+module.exports = {
+  i18n: {
+    locales: ['fr', 'en'],
+    defaultLocale: 'fr',
+  },
+}
+```
+
+##### Debugging des traductions
+
+Si les traductions ne s'affichent pas :
+1. Vérifiez la syntaxe JSON
+2. Assurez-vous que la clé existe dans le dictionnaire
+3. Testez avec `console.log` les valeurs retournées
+4. Vérifiez que le composant importe correctement `useTranslations`
+
+##### Points importants
+
+- ✅ **Structure modulaire** : Chaque langue dans son propre fichier
+- ✅ **Clés organisées** : Groupées par domaine (navbar, products, etc.)
+- ✅ **Extensible** : Ajoutez autant de langues que nécessaire
+- ✅ **Maintenable** : Modifications isolées par fichier de langue
+- ✅ **Performance** : Chargement à la demande des dictionnaires
+
 #### 🔒 **Sécurité professionnelle**
 - Authentification robuste (Clerk)
 - Protection contre les attaques (rate limiting, CSRF, XSS)
@@ -106,6 +246,109 @@ Expédition: USA + international
    - Paiement (Stripe/PayPal)
    - Email (SendGrid/Mailgun)
    - Analytics (GA4)
+
+### 🔧 Configuration des thèmes CSS
+
+#### Système de variables CSS pour changement rapide de thème
+
+Le projet utilise un système avancé de variables CSS qui permet de changer complètement l'apparence de votre boutique en quelques minutes, sans toucher au code des composants.
+
+##### Structure du système de thème
+
+```css
+:root {
+  /* Couleurs de marque */
+  --primary: #6c47ff;          /* Couleur principale */
+  --primary-hover: #5b3fe6;     /* Couleur au survol */
+
+  /* Couleurs neutres */
+  --background: #ffffff;        /* Fond principal */
+  --foreground: #171717;        /* Texte principal */
+  --muted: #94a3b8;            /* Texte secondaire */
+
+  /* Autres couleurs utilitaires... */
+}
+```
+
+##### Méthodes de changement de thème
+
+###### **Méthode 1: Changement direct dans CSS**
+
+1. **Ouvrez le fichier** `src/app/globals.css`
+2. **Modifiez les variables** à la racine pour votre marque :
+
+```css
+:root {
+  --primary: #your-brand-color;
+  --background: #your-bg-color;
+  --foreground: #your-text-color;
+}
+```
+
+###### **Méthode 2: Utilisation des classes de thème prédéfinies**
+
+Ajoutez une classe au `<body>` de votre layout (`src/app/layout.tsx`) :
+
+```tsx
+<body className="theme-purple">    {/* Violet */}
+<body className="theme-indigo">    {/* Bleu */}
+<body className="theme-green">     {/* Vert */}
+<body className="theme-light">     {/* Clair */}
+<body className="theme-dark">      {/* Sombre */}
+```
+
+Exemple d'implémentation :
+
+```tsx
+// src/app/layout.tsx
+<body className={`${geistSans.variable} ${geistMono.variable} ${yourThemeClass} antialiased`}>
+```
+
+##### **Méthodes 3: Variables CSS dynamiques (programmatique)**
+
+```javascript
+// Changer en JavaScript/TypeScript
+document.documentElement.style.setProperty('--primary', '#FF6B6B');
+document.documentElement.style.setProperty('--background', '#F7F9FC');
+```
+
+##### Classes de thème prédéfinis disponibles
+
+| Classe | Description | Utilisation |
+|--------|-------------|-------------|
+| `.theme-light` | Thème clair | Pour sites web classiques |
+| `.theme-dark` | Thème sombre | Pour une expérience nocturne |
+| `.theme-purple` | Thème violet | Boutique créative/high-tech |
+| `.theme-indigo` | Thème indigo | Applications corporates |
+| `.theme-green` | Thème vert | Écologie & nature |
+
+##### Exemple concret pour une boutique de plantes
+
+```css
+/* Ajoutez dans src/app/globals.css */
+:root {
+  --primary: #22c55e;          /* Vert émeraude */
+  --primary-hover: #16a34a;    /* Vert plus foncé */
+  --accent: #f0fdf4;          /* Vert très pâle pour accents */
+  --muted: #86efac;           /* Vert pâle pour texte secondaire */
+}
+```
+
+##### Points importants
+
+- ✅ **Zéro recompilation** requise lors du changement des variables CSS
+- ✅ **Application instantanée** des modifications
+- ✅ **Séparation parfaite** entre logique métier et présentation
+- ✅ **Mode sombre automatique** si détecté dans le navigateur
+- ✅ **Extensible** : Ajoutez autant de variables que nécessaire
+
+##### Debugging des thèmes
+
+Si votre thème ne s'applique pas correctement :
+1. Vérifiez la syntaxe des variables CSS
+2. Assurez-vous que la classe est bien appliquée au `<body>`
+3. Videz le cache du navigateur (Ctrl+F5)
+4. Utilisez les DevTools pour inspecter les valeurs de variables
 
 ---
 
@@ -192,6 +435,3 @@ Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les règles de contribution.
 - [Architecture technique](docs/1-foundations/architecture.md)
 - [Guide i18n](docs/6-i18n-seo/i18n-strategy.md)
 - [Documentation API](docs/4-api/openapi.yaml)
-
-
-
