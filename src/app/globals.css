@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/* Theme CSS Variables for easy configuration */
 :root {
+  /* Base Colors */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand Colors */
+  --primary: #6c47ff;
+  --primary-hover: #5b3fe6;
+  --secondary: #64748b;
+  --accent: #f1f5f9;
+
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+
+  /* Neutral Colors */
+  --muted: #94a3b8;
+  --muted-foreground: #64748b;
+
+  /* Borders and Shadows */
+  --border: #e2e8f0;
+  --border-focus: var(--primary);
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
 }
 
 @theme inline {
+  /* Tailwind color mapping to our CSS vars */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-focus: var(--border-focus);
+
+  /* Shadow mapping */
+  --shadow-sm: var(--shadow);
+  --shadow-lg: var(--shadow-lg);
+
+  /* Font families */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark theme overrides */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --muted: #64748b;
+    --muted-foreground: #94a3b8;
+    --border: #334155;
+    --accent: #1e293b;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --shadow-lg: rgba(0, 0, 0, 0.4);
   }
+}
+
+/* E-commerce specific theme classes */
+.theme-primary {
+  color: var(--primary);
+}
+
+.theme-background {
+  background-color: var(--background);
+}
+
+.theme-foreground {
+  color: var(--foreground);
+}
+
+.theme-border {
+  border-color: var(--border);
+}
+
+/* Base styles */
+* {
+  border-color: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Utility classes for easy theme switching */
+.theme-light {
+  --background: #ffffff;
+  --foreground: #171717;
+  --muted: #94a3b8;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --accent: #f1f5f9;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+}
+
+.theme-dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --muted: #64748b;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --accent: #1e293b;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.4);
+}
+
+.theme-purple {
+  --primary: #6c47ff;
+  --primary-hover: #5b3fe6;
+}
+
+.theme-indigo {
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+}
+
+.theme-green {
+  --primary: #10b981;
+  --primary-hover: #059669;
 }

@@ -1,0 +1,55 @@
+{
+  "common": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "home": "Accueil",
+    "contact": "Contact"
+  },
+  "auth": {
+    "signedInAs": "Connecté en tant que",
+    "userProfile": "Profil utilisateur",
+    "manageAccount": "Gérer le compte",
+    "forgotPassword": "Mot de passe oublié",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe"
+  },
+  "navbar": {
+    "brand": "Votre Boutique",
+    "menu": "Menu",
+    "cart": "Panier",
+    "wishlist": "Liste d'envies",
+    "account": "Mon compte"
+  },
+  "products": {
+    "title": "Produits",
+    "categories": "Catégories",
+    "price": "Prix",
+    "addToCart": "Ajouter au panier",
+    "outOfStock": "Rupture de stock",
+    "inStock": "En stock"
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide",
+    "total": "Total",
+    "quantity": "Quantité",
+    "checkout": "Paiement",
+    "continueShopping": "Continuer les achats"
+  }
+}

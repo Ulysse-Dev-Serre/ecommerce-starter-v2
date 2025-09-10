@@ -30,6 +30,7 @@ async function main() {
   // - `prisma migrate reset`: Réinitialise la base de données.
   // - `--force`: Exécute la commande sans demander de confirmation.
   // - `--skip-seed`: Indique à Prisma de ne pas relancer le script de 'seed' après la réinitialisation.
+  // A vérifier la redondance de supression des données entre cette ligne et la suppression intégre dans seed.ts
   console.log('🗑️ Suppression et recréation de la base de données locale...');
   execSync('npx prisma migrate reset --force --skip-seed', { stdio: 'inherit' });
 

@@ -21,5 +21,5 @@ Pour tester l'ajout et la synchronisation des utilisateurs de Clerk avec la base
 
 - **Supprimer les bases de données Clerk et PostgreSQL.** Si on veut réinitialiser complètement les bases de données Clerk et PostgreSQL, il suffit d'exécuter le script   `reset-local.ts`.Bien vérifier les adresses courriel que vous souhaitez supprimer. Ligne 8 et 20
 ```bash
-  npm npm run db:reset
+  npm run db:reset
 ```
