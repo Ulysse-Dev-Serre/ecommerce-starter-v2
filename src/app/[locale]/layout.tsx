@@ -1,9 +1,9 @@
-// /src/app/layout.tsx
+// src/app/[locale]/layout.tsx
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Navbar } from "../components/layout/navbar";
-import "./globals.css";
+import { Navbar } from "../../components/layout/navbar";
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,21 +16,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  // Conservez les métadonnées de votre projet
   title: "Nom de votre site E-commerce",
   description: "Starter e-commerce universel, flexible et prêt à l'emploi.",
 };
 
+// Générer les paramètres statiques pour les locales
+export async function generateStaticParams() {
+  return [{ locale: 'fr' }, { locale: 'en' }];
+}
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+  params: { locale: string };
+}
+
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  params: { locale }
+}: RootLayoutProps) {
   return (
     <ClerkProvider>
-      <html lang="fr">
+      <html lang={locale}>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <Navbar />
+          <Navbar locale={locale} />
           {children}
         </body>
       </html>
