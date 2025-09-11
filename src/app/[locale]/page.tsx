@@ -2,19 +2,20 @@
 import Image from "next/image";
 
 interface HomeProps {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
 async function getMessages(locale: string) {
   try {
     return (await import(`../../lib/i18n/dictionaries/${locale}.json`)).default;
   } catch (error) {
-    // Fallback vers français si la locale n'existe pas
+    // Fallback to English if the locale doesn't exist
     return (await import(`../../lib/i18n/dictionaries/fr.json`)).default;
   }
 }
 
-export default async function Home({ params: { locale } }: HomeProps) {
+export default async function Home({ params }: HomeProps) {
+  const { locale } = await params;
   const messages = await getMessages(locale);
 
   return (

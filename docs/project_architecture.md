@@ -275,10 +275,12 @@ mon-ecommerce/
 │   ├── 12-playbooks/
 │   │   ├── deployment.md       # Déploiement
 │   │   └── incidents.md        # Gestion incidents
-│   └── 13-changes/
-│       ├── changelog.md        # Journal des changements
-│       └── migrations.md       # Guide migrations
-│
+│   ├── 13-changes/
+│   │    ├── changelog.md        # Journal des changements
+│   │    └── migrations.md       # Guide migrations
+│   ├──14-testing/
+│       ├── clerk-synchronization-guide.md   # p0
+│ 
 ├── public/
 │   ├── images/
 │   │   ├── products/           # Images produits
