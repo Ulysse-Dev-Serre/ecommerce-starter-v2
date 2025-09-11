@@ -27,13 +27,14 @@ export async function generateStaticParams() {
 
 interface RootLayoutProps {
   children: React.ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-  params: { locale }
+  params
 }: RootLayoutProps) {
+  const { locale } = await params;
   return (
     <ClerkProvider>
       <html lang={locale}>

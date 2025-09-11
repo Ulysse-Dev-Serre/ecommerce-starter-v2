@@ -5,7 +5,7 @@
 ## 📌 P0 – Fondations & CI/CD
 1. Définir la vision MVP et règles d’équipe  
 2. Configurer les environnements et secrets (local/dev/prod)  
-3. Choisir et configurer l’authentification (NextAuth, sessions)  
+3. Choisir et configurer l’authentification (clerk, sessions)  
 4. Mettre en place headers de sécurité HTTP et CORS basiques  
 5. Implémenter rate limiting minimal sur API sensibles  
 6. Concevoir le schéma initial de la base de données (Prisma)  
