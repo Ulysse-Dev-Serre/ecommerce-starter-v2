@@ -6,15 +6,9 @@ import type { NextRequest } from 'next/server';
 const locales = ['fr', 'en'];
 const defaultLocale = 'fr';
 
-// cette fonction n'est pas utilisée dans ce middleware, mais pourrait être utile ailleurs
-function getLocale(pathname: string): string {
-  // Vérifier si le chemin commence par une locale
-  for (const locale of locales) {
-    if (pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`) {
-      return locale;
-    }
-  }
-  return defaultLocale;
+// Fonction simple pour générer un ID unique compatible Edge Runtime
+function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
 function pathnameIsMissingLocale(pathname: string): boolean {
@@ -23,10 +17,37 @@ function pathnameIsMissingLocale(pathname: string): boolean {
   );
 }
 
+// Logger minimal pour middleware - seulement erreurs et redirections importantes
+function logMiddleware(level: 'INFO' | 'WARN' | 'ERROR', data: Record<string, any>, message: string) {
+  const shouldLog = 
+    level === 'ERROR' || // Toujours logger les erreurs
+    (level === 'WARN' && process.env.NODE_ENV !== 'production') || // Warnings en dev/staging
+    (level === 'INFO' && process.env.NODE_ENV === 'development'); // Info seulement en dev
+    
+  if (shouldLog) {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      level: level.toLowerCase(),
+      service: 'middleware',
+      ...data,
+      message
+    };
+    
+    if (level === 'ERROR') {
+      console.error(JSON.stringify(logEntry));
+    } else if (level === 'WARN') {
+      console.warn(JSON.stringify(logEntry));
+    } else {
+      console.log(JSON.stringify(logEntry));
+    }
+  }
+}
+
 export default clerkMiddleware((auth, req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
-
-  // Ignorer les fichiers statiques et les routes API
+  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  
+  // Ignorer les fichiers statiques silencieusement
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api') ||
@@ -36,21 +57,32 @@ export default clerkMiddleware((auth, req: NextRequest) => {
     return NextResponse.next();
   }
 
-  // Rediriger si la locale est manquante
+  // Logger seulement les redirections importantes (pas les visites normales)
   if (pathnameIsMissingLocale(pathname)) {
-    return NextResponse.redirect(
+    logMiddleware('WARN', {
+      requestId,
+      action: 'i18n_redirect',
+      from: pathname,
+      to: `/${defaultLocale}${pathname}`,
+      userAgent: req.headers.get('user-agent')?.substring(0, 100)
+    }, 'Locale missing - redirecting to default');
+    
+    const response = NextResponse.redirect(
       new URL(`/${defaultLocale}${pathname}`, req.url)
     );
+    response.headers.set('x-request-id', requestId);
+    return response;
   }
 
-  return NextResponse.next();
+  // Ajouter requestId à toutes les réponses sans logger
+  const response = NextResponse.next();
+  response.headers.set('x-request-id', requestId);
+  return response;
 });
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };
