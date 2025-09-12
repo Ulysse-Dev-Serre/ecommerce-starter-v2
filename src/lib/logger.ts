@@ -20,7 +20,7 @@ function generateId(): string {
 const createLogger = () => {
   const shouldLog = (level: string) => allowedLevels.includes(level);
   
-  const log = (level: 'info' | 'warn' | 'error' | 'debug', data: any, message?: string) => {
+  const log = (level: 'info' | 'warn' | 'error' | 'debug', data: Record<string, unknown>, message?: string) => {
     if (!shouldLog(level)) return; // Skip si niveau pas autorisé
     
     const logEntry = {
@@ -50,15 +50,15 @@ const createLogger = () => {
   };
 
   return {
-    info: (data: any, message?: string) => log('info', data, message),
-    warn: (data: any, message?: string) => log('warn', data, message),
-    error: (data: any, message?: string) => log('error', data, message),
-    debug: (data: any, message?: string) => log('debug', data, message),
-    child: (context: any) => ({
-      info: (data: any, message?: string) => log('info', { ...context, ...data }, message),
-      warn: (data: any, message?: string) => log('warn', { ...context, ...data }, message),
-      error: (data: any, message?: string) => log('error', { ...context, ...data }, message),
-      debug: (data: any, message?: string) => log('debug', { ...context, ...data }, message),
+    info: (data: Record<string, unknown>, message?: string) => log('info', data, message),
+    warn: (data: Record<string, unknown>, message?: string) => log('warn', data, message),
+    error: (data: Record<string, unknown>, message?: string) => log('error', data, message),
+    debug: (data: Record<string, unknown>, message?: string) => log('debug', data, message),
+    child: (context: Record<string, unknown>) => ({
+      info: (data: Record<string, unknown>, message?: string) => log('info', { ...context, ...data }, message),
+      warn: (data: Record<string, unknown>, message?: string) => log('warn', { ...context, ...data }, message),
+      error: (data: Record<string, unknown>, message?: string) => log('error', { ...context, ...data }, message),
+      debug: (data: Record<string, unknown>, message?: string) => log('debug', { ...context, ...data }, message),
     })
   };
 };

@@ -17,7 +17,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ locale }: NavbarProps) {
-  const [messages, setMessages] = useState<any>(null);
+  const [messages, setMessages] = useState<Record<string, Record<string, string>> | null>(null);
   const pathname = usePathname();
 
   // Charger les messages pour la locale actuelle
