@@ -3,12 +3,15 @@
 // Configuration des niveaux par environnement
 // Dans src/lib/logger.ts
 const LOG_LEVELS = {
-  development: process.env.LOG_LEVEL ? [process.env.LOG_LEVEL, 'warn', 'error'] : ['debug', 'info', 'warn', 'error'],
+  development: process.env.LOG_LEVEL
+    ? [process.env.LOG_LEVEL, 'warn', 'error']
+    : ['debug', 'info', 'warn', 'error'],
   production: ['warn', 'error'],
-  test: ['error']
+  test: ['error'],
 };
 
-const currentEnv = process.env.NODE_ENV as keyof typeof LOG_LEVELS || 'development';
+const currentEnv =
+  (process.env.NODE_ENV as keyof typeof LOG_LEVELS) || 'development';
 const allowedLevels = LOG_LEVELS[currentEnv];
 
 // Fonction pour générer un ID unique
@@ -19,21 +22,25 @@ function generateId(): string {
 // Logger avec contrôle par environnement
 const createLogger = () => {
   const shouldLog = (level: string) => allowedLevels.includes(level);
-  
-  const log = (level: 'info' | 'warn' | 'error' | 'debug', data: Record<string, unknown>, message?: string) => {
+
+  const log = (
+    level: 'info' | 'warn' | 'error' | 'debug',
+    data: Record<string, unknown>,
+    message?: string
+  ) => {
     if (!shouldLog(level)) return; // Skip si niveau pas autorisé
-    
+
     const logEntry = {
       timestamp: new Date().toISOString(),
       level,
       service: 'ecommerce-frontend',
       environment: currentEnv,
       ...(typeof data === 'object' ? data : { data }),
-      message: message || data?.message || ''
+      message: message || data?.message || '',
     };
 
     const logString = JSON.stringify(logEntry);
-    
+
     // En production, utiliser console approprié
     switch (level) {
       case 'error':
@@ -50,16 +57,24 @@ const createLogger = () => {
   };
 
   return {
-    info: (data: Record<string, unknown>, message?: string) => log('info', data, message),
-    warn: (data: Record<string, unknown>, message?: string) => log('warn', data, message),
-    error: (data: Record<string, unknown>, message?: string) => log('error', data, message),
-    debug: (data: Record<string, unknown>, message?: string) => log('debug', data, message),
+    info: (data: Record<string, unknown>, message?: string) =>
+      log('info', data, message),
+    warn: (data: Record<string, unknown>, message?: string) =>
+      log('warn', data, message),
+    error: (data: Record<string, unknown>, message?: string) =>
+      log('error', data, message),
+    debug: (data: Record<string, unknown>, message?: string) =>
+      log('debug', data, message),
     child: (context: Record<string, unknown>) => ({
-      info: (data: Record<string, unknown>, message?: string) => log('info', { ...context, ...data }, message),
-      warn: (data: Record<string, unknown>, message?: string) => log('warn', { ...context, ...data }, message),
-      error: (data: Record<string, unknown>, message?: string) => log('error', { ...context, ...data }, message),
-      debug: (data: Record<string, unknown>, message?: string) => log('debug', { ...context, ...data }, message),
-    })
+      info: (data: Record<string, unknown>, message?: string) =>
+        log('info', { ...context, ...data }, message),
+      warn: (data: Record<string, unknown>, message?: string) =>
+        log('warn', { ...context, ...data }, message),
+      error: (data: Record<string, unknown>, message?: string) =>
+        log('error', { ...context, ...data }, message),
+      debug: (data: Record<string, unknown>, message?: string) =>
+        log('debug', { ...context, ...data }, message),
+    }),
   };
 };
 
@@ -89,33 +104,53 @@ export const createRequestLogger = (requestId?: string) => {
 };
 
 // Helpers spécifiques respectant les niveaux
-export const logUserAction = (action: string, context: Partial<LogContext>, message?: string) => {
-  logger.info({
-    ...context,
-    action,
-    category: 'user_action',
-    requestId: context.requestId || generateId() // requestId obligatoire
-  }, message || `User action: ${action}`);
+export const logUserAction = (
+  action: string,
+  context: Partial<LogContext>,
+  message?: string
+) => {
+  logger.info(
+    {
+      ...context,
+      action,
+      category: 'user_action',
+      requestId: context.requestId || generateId(), // requestId obligatoire
+    },
+    message || `User action: ${action}`
+  );
 };
 
-export const logError = (error: Error | string, context: Partial<LogContext> = {}) => {
-  logger.error({
-    ...context,
-    error: error instanceof Error ? error.message : error,
-    category: 'error',
-    requestId: context.requestId || generateId() // requestId obligatoire
-  }, 'Application error');
+export const logError = (
+  error: Error | string,
+  context: Partial<LogContext> = {}
+) => {
+  logger.error(
+    {
+      ...context,
+      error: error instanceof Error ? error.message : error,
+      category: 'error',
+      requestId: context.requestId || generateId(), // requestId obligatoire
+    },
+    'Application error'
+  );
 };
 
-export const logPerformance = (operation: string, duration: number, context: Partial<LogContext> = {}) => {
+export const logPerformance = (
+  operation: string,
+  duration: number,
+  context: Partial<LogContext> = {}
+) => {
   const level = duration > 2000 ? 'warn' : 'info'; // Threshold plus élevé
-  logger[level]({
-    ...context,
-    operation,
-    duration,
-    category: 'performance',
-    requestId: context.requestId || generateId()
-  }, `${operation}: ${duration}ms`);
+  logger[level](
+    {
+      ...context,
+      operation,
+      duration,
+      category: 'performance',
+      requestId: context.requestId || generateId(),
+    },
+    `${operation}: ${duration}ms`
+  );
 };
 
 // Logger spécial pour sécurité (toujours loggé)
@@ -128,7 +163,7 @@ export const logSecurity = (event: string, context: Partial<LogContext>) => {
     category: 'security',
     event,
     ...context,
-    requestId: context.requestId || generateId()
+    requestId: context.requestId || generateId(),
   };
   console.warn(JSON.stringify(logEntry));
 };

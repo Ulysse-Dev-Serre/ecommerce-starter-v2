@@ -18,6 +18,7 @@ Ce n'est pas une boutique figée, mais **une base technique solide** que vous po
 ### Ce que vous obtenez out-of-the-box
 
 #### 🛍️ **Expérience client complète**
+
 - Catalogue produits avec variantes (taille, couleur, etc.)
 - Panier intelligent (invité + utilisateur connecté)
 - Checkout sécurisé avec Stripe
@@ -25,12 +26,14 @@ Ce n'est pas une boutique figée, mais **une base technique solide** que vous po
 - Emails transactionnels automatiques
 
 #### 🌍 **Multi-pays natif**
+
 - Support Canada/USA avec taxes locales (GST/QST/Sales Tax)
 - Calculs d'expédition par zones
 - Format des prix, dates et adresses selon la locale
 - Extensions prêtes pour autres pays
 
 #### 🗣️ **Bilingue par conception**
+
 - URLs localisées (`/fr/`, `/en/`)
 - Contenus traduits (produits, catégories, pages)
 - SEO international (hreflang, sitemaps multilingues)
@@ -73,7 +76,7 @@ src/lib/i18n/
 ```typescript
 export const i18n = {
   defaultLocale: 'fr',
-  locales: ['fr', 'en', 'es'] as const,  // Ajouter 'es'
+  locales: ['fr', 'en', 'es'] as const, // Ajouter 'es'
 } as const;
 ```
 
@@ -85,7 +88,9 @@ export function getLocaleFromPath(pathname: string): Locale {
   const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
   const locale = localeMatch ? localeMatch[1] : i18n.defaultLocale;
 
-  return i18n.locales.includes(locale as Locale) ? locale as Locale : i18n.defaultLocale;
+  return i18n.locales.includes(locale as Locale)
+    ? (locale as Locale)
+    : i18n.defaultLocale;
 }
 ```
 
@@ -97,10 +102,10 @@ export function getLocaleFromPath(pathname: string): Locale {
 // src/lib/i18n/dictionaries/fr.json
 {
   "navbar": {
-    "brand": "Votre Boutique"  // Changer ici
+    "brand": "Votre Boutique" // Changer ici
   },
   "common": {
-    "signUp": "S'enregistrer"   // Changer ici
+    "signUp": "S'enregistrer" // Changer ici
   }
 }
 ```
@@ -131,7 +136,7 @@ Modifiez simplement la configuration :
 ```typescript
 // src/lib/i18n/config.ts
 export const i18n = {
-  defaultLocale: 'en',    // Changé de 'fr' à 'en'
+  defaultLocale: 'en', // Changé de 'fr' à 'en'
   locales: ['fr', 'en'] as const,
 } as const;
 ```
@@ -157,12 +162,13 @@ module.exports = {
     locales: ['fr', 'en'],
     defaultLocale: 'fr',
   },
-}
+};
 ```
 
 ##### Debugging des traductions
 
 Si les traductions ne s'affichent pas :
+
 1. Vérifiez la syntaxe JSON
 2. Assurez-vous que la clé existe dans le dictionnaire
 3. Testez avec `console.log` les valeurs retournées
@@ -177,18 +183,21 @@ Si les traductions ne s'affichent pas :
 - ✅ **Performance** : Chargement à la demande des dictionnaires
 
 #### 🔒 **Sécurité professionnelle**
+
 - Authentification robuste (Clerk)
 - Protection contre les attaques (rate limiting, CSRF, XSS)
 - Chiffrement des données sensibles
 - Logs d'audit complets
 
 #### ⚙️ **Administration complète**
+
 - Interface admin responsive
 - CRUD produits/catégories multilingues
 - Gestion des commandes et utilisateurs
 - Système de rôles et permissions
 
 #### 📈 **Observabilité intégrée**
+
 - Monitoring des performances
 - Tracking des erreurs (Sentry)
 - Analytics e-commerce (GA4)
@@ -197,6 +206,7 @@ Si les traductions ne s'affichent pas :
 ### Exemples d'utilisation
 
 #### 🐕 **Boutique pour chiens - France**
+
 ```
 Domaine: chien-shop.fr
 Langue: Français uniquement
@@ -206,6 +216,7 @@ Expédition: France + DOM-TOM
 ```
 
 #### 🌱 **Boutique de plantes - Canada**
+
 ```
 Domaine: plantoasis.ca
 Langues: Français/Anglais
@@ -215,6 +226,7 @@ Expédition: Canada + certaines zones USA
 ```
 
 #### 🧸 **Boutique de jouets - États-Unis**
+
 ```
 Domaine: toyland.com
 Langue: Anglais
@@ -228,24 +240,24 @@ Expédition: USA + international
 ### Étapes de personnalisation (2-3 jours)
 
 1. **📝 Contenu** : Remplacer les données de demo
-   - Catégories et produits de votre niche
-   - Textes marketing adaptés
-   - Images et médias
+      - Catégories et produits de votre niche
+      - Textes marketing adaptés
+      - Images et médias
 
 2. **🎨 Design** : Adapter le thème visuel
-   - Couleurs de marque
-   - Logo et favicon
-   - Typographie
+      - Couleurs de marque
+      - Logo et favicon
+      - Typographie
 
 3. **🌍 Localisation** : Configurer le pays cible
-   - Devises et taxes locales
-   - Zones d'expédition
-   - Mentions légales conformes
+      - Devises et taxes locales
+      - Zones d'expédition
+      - Mentions légales conformes
 
 4. **⚙️ Intégrations** : Connecter vos services
-   - Paiement (Stripe/PayPal)
-   - Email (SendGrid/Mailgun)
-   - Analytics (GA4)
+      - Paiement (Stripe/PayPal)
+      - Email (SendGrid/Mailgun)
+      - Analytics (GA4)
 
 ### 🔧 Configuration des thèmes CSS
 
@@ -258,13 +270,13 @@ Le projet utilise un système avancé de variables CSS qui permet de changer com
 ```css
 :root {
   /* Couleurs de marque */
-  --primary: #6c47ff;          /* Couleur principale */
-  --primary-hover: #5b3fe6;     /* Couleur au survol */
+  --primary: #6c47ff; /* Couleur principale */
+  --primary-hover: #5b3fe6; /* Couleur au survol */
 
   /* Couleurs neutres */
-  --background: #ffffff;        /* Fond principal */
-  --foreground: #171717;        /* Texte principal */
-  --muted: #94a3b8;            /* Texte secondaire */
+  --background: #ffffff; /* Fond principal */
+  --foreground: #171717; /* Texte principal */
+  --muted: #94a3b8; /* Texte secondaire */
 
   /* Autres couleurs utilitaires... */
 }
@@ -314,23 +326,23 @@ document.documentElement.style.setProperty('--background', '#F7F9FC');
 
 ##### Classes de thème prédéfinis disponibles
 
-| Classe | Description | Utilisation |
-|--------|-------------|-------------|
-| `.theme-light` | Thème clair | Pour sites web classiques |
-| `.theme-dark` | Thème sombre | Pour une expérience nocturne |
-| `.theme-purple` | Thème violet | Boutique créative/high-tech |
-| `.theme-indigo` | Thème indigo | Applications corporates |
-| `.theme-green` | Thème vert | Écologie & nature |
+| Classe          | Description  | Utilisation                  |
+| --------------- | ------------ | ---------------------------- |
+| `.theme-light`  | Thème clair  | Pour sites web classiques    |
+| `.theme-dark`   | Thème sombre | Pour une expérience nocturne |
+| `.theme-purple` | Thème violet | Boutique créative/high-tech  |
+| `.theme-indigo` | Thème indigo | Applications corporates      |
+| `.theme-green`  | Thème vert   | Écologie & nature            |
 
 ##### Exemple concret pour une boutique de plantes
 
 ```css
 /* Ajoutez dans src/app/globals.css */
 :root {
-  --primary: #22c55e;          /* Vert émeraude */
-  --primary-hover: #16a34a;    /* Vert plus foncé */
-  --accent: #f0fdf4;          /* Vert très pâle pour accents */
-  --muted: #86efac;           /* Vert pâle pour texte secondaire */
+  --primary: #22c55e; /* Vert émeraude */
+  --primary-hover: #16a34a; /* Vert plus foncé */
+  --accent: #f0fdf4; /* Vert très pâle pour accents */
+  --muted: #86efac; /* Vert pâle pour texte secondaire */
 }
 ```
 
@@ -345,6 +357,7 @@ document.documentElement.style.setProperty('--background', '#F7F9FC');
 ##### Debugging des thèmes
 
 Si votre thème ne s'applique pas correctement :
+
 1. Vérifiez la syntaxe des variables CSS
 2. Assurez-vous que la classe est bien appliquée au `<body>`
 3. Videz le cache du navigateur (Ctrl+F5)
@@ -367,30 +380,35 @@ Si votre thème ne s'applique pas correctement :
 ## 📋 Phases de développement
 
 ### Phase 0 (P0) - Fondations ✅
+
 - Architecture technique de base
 - Sécurité et authentification
 - Base de données et migrations
 - CI/CD et qualité code
 
 ### Phase 1 (P1) - Core E-commerce 🚧
+
 - Catalogue produits et API
 - Panier et checkout Stripe
 - Gestion des commandes
 - Pages publiques essentielles
 
 ### Phase 2 (P2) - International & SEO 📋
+
 - i18n complet (FR/EN)
 - SEO multilingue avancé
 - Optimisations performances
 - Meta tags dynamiques
 
 ### Phase 3 (P3) - Admin & Sécurité 📋
+
 - Interface d'administration
 - Sécurité avancée (2FA, audits)
 - Tests automatisés (unit + E2E)
 - Monitoring et alertes
 
 ### Phase 4 (P4) - Production Ready 📋
+
 - Documentation complète
 - Conformité légale
 - Analytics et tracking
@@ -401,16 +419,19 @@ Si votre thème ne s'applique pas correctement :
 ## 🎯 Objectifs du starter
 
 ### Pour les entrepreneurs
+
 - **Time-to-market** : Lancez votre boutique en 1 semaine au lieu de 6 mois
 - **Coûts réduits** : Base technique éprouvée, pas de développement from scratch
 - **Scalabilité** : Architecture pensée pour grandir avec votre business
 
 ### Pour les développeurs
+
 - **Code quality** : TypeScript, tests, documentation, standards
 - **Maintenabilité** : Architecture modulaire, séparation des responsabilités
 - **Extensibilité** : APIs bien définies, hooks personnalisables
 
 ### Pour les agences
+
 - **Réutilisabilité** : Une base pour tous vos projets e-commerce
 - **Personnalisation** : Thèmes et configurations par client
 - **Support** : Documentation complète et communauté active

@@ -7,6 +7,7 @@ Cette configuration utilise Next.js App Router avec une approche basée sur des 
 ## Architecture
 
 ### Structure des dossiers
+
 ```
 src/
 ├── app/
@@ -23,7 +24,7 @@ src/
 ### Configuration des routes
 
 - **Langue par défaut** : Français (`fr`)
-- **URLs** : 
+- **URLs** :
   - `/` → redirige vers `/fr`
   - `/fr/` → contenu français
   - `/en/` → contenu anglais
@@ -31,7 +32,9 @@ src/
 ### Système de traduction
 
 #### Dictionnaires JSON
+
 Les traductions sont organisées par catégories dans des fichiers JSON :
+
 ```json
 {
   "common": { "signIn": "Se connecter" },
@@ -41,20 +44,23 @@ Les traductions sont organisées par catégories dans des fichiers JSON :
 ```
 
 #### Utilisation dans les composants
+
 ```typescript
 // Server Component
 const messages = await import(`../dictionaries/${locale}.json`);
 
-// Client Component  
+// Client Component
 useEffect(() => {
-  import(`../dictionaries/${locale}.json`)
-    .then(msgs => setMessages(msgs.default));
+  import(`../dictionaries/${locale}.json`).then(msgs =>
+    setMessages(msgs.default)
+  );
 }, [locale]);
 ```
 
 ### Middleware
 
 Le middleware combine :
+
 - **Clerk** : Authentification
 - **i18n** : Détection et redirection de langue
 - **Fallback** : Redirection automatique vers le français
@@ -62,6 +68,7 @@ Le middleware combine :
 ### Changement de langue
 
 Les utilisateurs peuvent changer de langue via :
+
 - Boutons FR/EN dans la navbar
 - Navigation directe (`/en/products`)
 - Conservation du contexte de page
@@ -76,6 +83,7 @@ Les utilisateurs peuvent changer de langue via :
 ### Extensibilité
 
 Pour ajouter une nouvelle langue :
+
 1. Créer `dictionaries/es.json`
 2. Ajouter `'es'` dans `locales`
 3. Créer les boutons de navigation

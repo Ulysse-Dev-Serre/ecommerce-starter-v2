@@ -16,7 +16,9 @@
     "dev:setup": "npm run db:push && npm run sync-clerk create && npm run sync-clerk sync && npm run db:seed",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@clerk/backend": "^2.13.0",
@@ -39,6 +41,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
     "prisma": "^6.15.0",
     "tailwindcss": "^4",
     "typescript": "^5"

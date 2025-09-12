@@ -7,13 +7,17 @@ export function useTranslations(): { t: (key: string) => string } {
     t: (key: string) => {
       const keys = key.split('.');
       const enDict =
-        keys.length === 1 ? key :
-        keys.length === 2 ? key.split('.')[1] :
-        keys.length === 3 ? key.split('.')[2] : key;
+        keys.length === 1
+          ? key
+          : keys.length === 2
+            ? key.split('.')[1]
+            : keys.length === 3
+              ? key.split('.')[2]
+              : key;
 
       // Simple fallback - in production this would use proper i18n library
       return enDict.charAt(0).toUpperCase() + enDict.slice(1);
-    }
+    },
   };
 }
 

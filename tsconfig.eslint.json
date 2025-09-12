@@ -4,11 +4,5 @@
     "allowJs": true,
     "checkJs": false
   },
-  "include": [
-    "eslint.config.mjs",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx"
-  ]
+  "include": ["eslint.config.mjs", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
 }

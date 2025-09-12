@@ -9,11 +9,13 @@ Ce guide documente les procédures pour gérer les migrations de la base de donn
 Utilisez cette commande pour créer une nouvelle migration et l'appliquer à votre base de données locale. Elle est conçue pour les environnements de développement.
 
 ### Commande :
+
 ```bash
 npx prisma migrate dev --name [nom_de_votre_migration]
 ```
 
-###  migration initiale 
+### migration initiale
+
 ```bash
 npx prisma migrate dev --name init
 ```
