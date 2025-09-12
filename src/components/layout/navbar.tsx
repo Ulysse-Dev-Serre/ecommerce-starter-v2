@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
 import { logger } from "../../lib/logger";
 
 interface NavbarProps {
@@ -22,39 +23,39 @@ export function Navbar({ locale }: NavbarProps) {
 
   // Charger les messages pour la locale actuelle
   useEffect(() => {
-    const loadMessages = async () => {
+    const loadMessages: () => Promise<void> = async () => {
       try {
         const msgs = await import(`../../lib/i18n/dictionaries/${locale}.json`);
         setMessages(msgs.default);
-        
+
         // Logger le chargement réussi des traductions
         logger.info({
           action: 'translations_loaded',
-          locale: locale,
+          locale,
           component: 'navbar'
         }, 'Translations loaded successfully');
-        
+
       } catch (error) {
         // Logger l'erreur de chargement
         logger.warn({
           action: 'translations_fallback',
-          locale: locale,
+          locale,
           error: error instanceof Error ? error.message : 'Unknown error',
           component: 'navbar'
         }, 'Failed to load translations, falling back to French');
-        
+
         // Fallback vers français
         const msgs = await import(`../../lib/i18n/dictionaries/fr.json`);
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   // Fonction pour changer de langue avec logging
-  const handleLanguageChange = (newLocale: string, event: React.MouseEvent) => {
+  const handleLanguageChange = (newLocale: string, event: React.MouseEvent): void => {
     event.preventDefault();
-    
+
     // Logger le changement de langue
     logger.info({
       action: 'language_change',
@@ -63,18 +64,18 @@ export function Navbar({ locale }: NavbarProps) {
       path: pathname,
       component: 'navbar'
     }, 'User changed language');
-    
+
     // Redirection
     window.location.href = pathname.replace(`/${locale}`, `/${newLocale}`);
   };
 
   // Fonction pour logger les clics de navigation
-  const handleNavigationClick = (destination: string) => {
+  const handleNavigationClick = (destination: string): void => {
     logger.info({
       action: 'navigation_click',
       from: pathname,
       to: destination,
-      locale: locale,
+      locale,
       component: 'navbar'
     }, 'User clicked navigation link');
   };
@@ -171,7 +172,7 @@ export function Navbar({ locale }: NavbarProps) {
                     logger.info({
                       action: 'auth_button_click',
                       type: 'sign_in',
-                      locale: locale,
+                      locale,
                       component: 'navbar'
                     }, 'User clicked sign in button');
                   }}

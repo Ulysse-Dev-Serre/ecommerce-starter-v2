@@ -1,6 +1,6 @@
 // i18n Utils - Dummy implementation for now
 // This is a placeholder that would integrate with Next.js i18n plugins
-export function useTranslations() {
+export function useTranslations(): { t: (key: string) => string } {
   // In a real implementation, this would be connected to Next.js next-intl or react-i18n
   // For now, we'll use the default French translations
   return {
@@ -18,7 +18,7 @@ export function useTranslations() {
 }
 
 // Get the current locale (placeholder)
-export function getCurrentLocale() {
+export function getCurrentLocale(): string {
   // This would detect the locale from the URL or browser settings
   return 'fr';
 }

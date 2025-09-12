@@ -1,7 +1,8 @@
 // src/app/[locale]/layout.tsx
-import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 import { Navbar } from "../../components/layout/navbar";
 import "../globals.css";
 
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 // Générer les paramètres statiques pour les locales
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<{ locale: string }[]> {
   return [{ locale: 'fr' }, { locale: 'en' }];
 }
 
@@ -33,7 +34,7 @@ interface RootLayoutProps {
 export default async function RootLayout({
   children,
   params
-}: RootLayoutProps) {
+}: RootLayoutProps): Promise<React.ReactElement> {
   const { locale } = await params;
   return (
     <ClerkProvider>

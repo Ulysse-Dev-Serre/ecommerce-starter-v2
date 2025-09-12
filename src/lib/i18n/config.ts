@@ -6,7 +6,7 @@ export const i18n = {
 
 export type Locale = (typeof i18n)['locales'][number];
 
-export function getMessages(locale: string) {
+export function getMessages(locale: string): Promise<Record<string, Record<string, string>>> {
   return import(`./dictionaries/${locale}.json`).then(module => module.default);
 }
 

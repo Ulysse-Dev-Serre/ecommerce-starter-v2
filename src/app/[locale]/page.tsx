@@ -5,18 +5,8 @@ interface HomeProps {
   params: Promise<{ locale: string }>;
 }
 
-async function getMessages(locale: string) {
-  try {
-    return (await import(`../../lib/i18n/dictionaries/${locale}.json`)).default;
-  } catch (error) {
-    // Fallback to English if the locale doesn't exist
-    return (await import(`../../lib/i18n/dictionaries/fr.json`)).default;
-  }
-}
-
-export default async function Home({ params }: HomeProps) {
+export default async function Home({ params }: HomeProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const messages = await getMessages(locale);
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">

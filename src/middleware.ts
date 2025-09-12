@@ -13,12 +13,12 @@ function generateRequestId(): string {
 
 function pathnameIsMissingLocale(pathname: string): boolean {
   return locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+    (locale: string) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
 }
 
 // Logger minimal pour middleware - seulement erreurs et redirections importantes
-function logMiddleware(level: 'INFO' | 'WARN' | 'ERROR', data: Record<string, any>, message: string) {
+function logMiddleware(level: 'INFO' | 'WARN' | 'ERROR', data: Record<string, unknown>, message: string): void {
   const shouldLog = 
     level === 'ERROR' || // Toujours logger les erreurs
     (level === 'WARN' && process.env.NODE_ENV !== 'production') || // Warnings en dev/staging
@@ -38,14 +38,14 @@ function logMiddleware(level: 'INFO' | 'WARN' | 'ERROR', data: Record<string, an
     } else if (level === 'WARN') {
       console.warn(JSON.stringify(logEntry));
     } else {
-      console.log(JSON.stringify(logEntry));
+      console.info(JSON.stringify(logEntry));
     }
   }
 }
 
 export default clerkMiddleware((auth, req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
-  const requestId = req.headers.get('x-request-id') || generateRequestId();
+  const requestId = req.headers.get('x-request-id') ?? generateRequestId();
   
   // Ignorer les fichiers statiques silencieusement
   if (
