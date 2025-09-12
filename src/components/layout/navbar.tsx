@@ -1,82 +1,95 @@
 // src/components/layout/navbar.tsx
-"use client";
+'use client';
 
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { logger } from "../../lib/logger";
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { logger } from '../../lib/logger';
 
 interface NavbarProps {
   locale: string;
 }
 
 export function Navbar({ locale }: NavbarProps) {
-  const [messages, setMessages] = useState<any>(null);
+  const [messages, setMessages] = useState<Record<
+    string,
+    Record<string, string>
+  > | null>(null);
   const pathname = usePathname();
 
   // Charger les messages pour la locale actuelle
   useEffect(() => {
-    const loadMessages = async () => {
+    const loadMessages: () => Promise<void> = async () => {
       try {
         const msgs = await import(`../../lib/i18n/dictionaries/${locale}.json`);
         setMessages(msgs.default);
-        
+
         // Logger le chargement réussi des traductions
-        logger.info({
-          action: 'translations_loaded',
-          locale: locale,
-          component: 'navbar'
-        }, 'Translations loaded successfully');
-        
+        logger.info(
+          {
+            action: 'translations_loaded',
+            locale,
+            component: 'navbar',
+          },
+          'Translations loaded successfully'
+        );
       } catch (error) {
         // Logger l'erreur de chargement
-        logger.warn({
-          action: 'translations_fallback',
-          locale: locale,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          component: 'navbar'
-        }, 'Failed to load translations, falling back to French');
-        
+        logger.warn(
+          {
+            action: 'translations_fallback',
+            locale,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            component: 'navbar',
+          },
+          'Failed to load translations, falling back to French'
+        );
+
         // Fallback vers français
         const msgs = await import(`../../lib/i18n/dictionaries/fr.json`);
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   // Fonction pour changer de langue avec logging
-  const handleLanguageChange = (newLocale: string, event: React.MouseEvent) => {
+  const handleLanguageChange = (
+    newLocale: string,
+    event: React.MouseEvent
+  ): void => {
     event.preventDefault();
-    
+
     // Logger le changement de langue
-    logger.info({
-      action: 'language_change',
-      from: locale,
-      to: newLocale,
-      path: pathname,
-      component: 'navbar'
-    }, 'User changed language');
-    
+    logger.info(
+      {
+        action: 'language_change',
+        from: locale,
+        to: newLocale,
+        path: pathname,
+        component: 'navbar',
+      },
+      'User changed language'
+    );
+
     // Redirection
     window.location.href = pathname.replace(`/${locale}`, `/${newLocale}`);
   };
 
   // Fonction pour logger les clics de navigation
-  const handleNavigationClick = (destination: string) => {
-    logger.info({
-      action: 'navigation_click',
-      from: pathname,
-      to: destination,
-      locale: locale,
-      component: 'navbar'
-    }, 'User clicked navigation link');
+  const handleNavigationClick = (destination: string): void => {
+    logger.info(
+      {
+        action: 'navigation_click',
+        from: pathname,
+        to: destination,
+        locale,
+        component: 'navbar',
+      },
+      'User clicked navigation link'
+    );
   };
 
   // Afficher un loading si les messages ne sont pas encore chargés
@@ -100,7 +113,7 @@ export function Navbar({ locale }: NavbarProps) {
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
           <div className="flex items-center">
-            <Link 
+            <Link
               href={`/${locale}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
@@ -112,23 +125,23 @@ export function Navbar({ locale }: NavbarProps) {
 
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link 
+            <Link
               href={`/${locale}`}
               className="text-foreground hover:text-primary transition-colors"
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
               {messages.common.home}
             </Link>
-            
-            <Link 
+
+            <Link
               href={`/${locale}/products`}
               className="text-foreground hover:text-primary transition-colors"
               onClick={() => handleNavigationClick(`/${locale}/products`)}
             >
               {messages.products.title}
             </Link>
-            
-            <Link 
+
+            <Link
               href={`/${locale}/contact`}
               className="text-foreground hover:text-primary transition-colors"
               onClick={() => handleNavigationClick(`/${locale}/contact`)}
@@ -138,21 +151,21 @@ export function Navbar({ locale }: NavbarProps) {
 
             {/* Sélecteur de langue */}
             <div className="flex items-center space-x-2 border-l pl-4 ml-4">
-              <button 
-                onClick={(e) => handleLanguageChange('fr', e)}
+              <button
+                onClick={e => handleLanguageChange('fr', e)}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
-                  locale === 'fr' 
-                    ? 'bg-primary text-white' 
+                  locale === 'fr'
+                    ? 'bg-primary text-white'
                     : 'text-foreground hover:bg-muted'
                 }`}
               >
                 FR
               </button>
-              <button 
-                onClick={(e) => handleLanguageChange('en', e)}
+              <button
+                onClick={e => handleLanguageChange('en', e)}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
-                  locale === 'en' 
-                    ? 'bg-primary text-white' 
+                  locale === 'en'
+                    ? 'bg-primary text-white'
                     : 'text-foreground hover:bg-muted'
                 }`}
               >
@@ -165,15 +178,18 @@ export function Navbar({ locale }: NavbarProps) {
           <div className="flex items-center space-x-4">
             <SignedOut>
               <SignInButton>
-                <button 
+                <button
                   className="bg-primary text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"
                   onClick={() => {
-                    logger.info({
-                      action: 'auth_button_click',
-                      type: 'sign_in',
-                      locale: locale,
-                      component: 'navbar'
-                    }, 'User clicked sign in button');
+                    logger.info(
+                      {
+                        action: 'auth_button_click',
+                        type: 'sign_in',
+                        locale,
+                        component: 'navbar',
+                      },
+                      'User clicked sign in button'
+                    );
                   }}
                 >
                   {messages.common.signIn} / {messages.common.signUp}
@@ -182,7 +198,7 @@ export function Navbar({ locale }: NavbarProps) {
             </SignedOut>
             <SignedIn>
               <div className="flex items-center space-x-2">
-                <Link 
+                <Link
                   href={`/${locale}/cart`}
                   className="text-foreground hover:text-muted-foreground p-2"
                   title={messages.navbar.cart}

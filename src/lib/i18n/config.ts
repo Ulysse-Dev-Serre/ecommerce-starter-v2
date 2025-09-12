@@ -6,7 +6,9 @@ export const i18n = {
 
 export type Locale = (typeof i18n)['locales'][number];
 
-export function getMessages(locale: string) {
+export function getMessages(
+  locale: string
+): Promise<Record<string, Record<string, string>>> {
   return import(`./dictionaries/${locale}.json`).then(module => module.default);
 }
 
@@ -14,5 +16,7 @@ export function getLocaleFromPath(pathname: string): Locale {
   const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
   const locale = localeMatch ? localeMatch[1] : i18n.defaultLocale;
 
-  return i18n.locales.includes(locale as Locale) ? locale as Locale : i18n.defaultLocale;
+  return i18n.locales.includes(locale as Locale)
+    ? (locale as Locale)
+    : i18n.defaultLocale;
 }

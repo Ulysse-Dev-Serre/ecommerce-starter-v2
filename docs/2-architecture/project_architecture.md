@@ -230,7 +230,7 @@ mon-ecommerce/
 │   ├── seed.ts                 # Script seed principal (P0)
 │   └── seeders/                # Dossier pour seeds spécialisés
 │       ├── categories.ts       # Seeds catégories
-│       ├── products.ts         # Seeds produits  
+│       ├── products.ts         # Seeds produits
 │       ├── users.ts            # Seeds utilisateurs
 │       └── demo-data.ts        # Jeu de données démo complet
 │
@@ -280,7 +280,7 @@ mon-ecommerce/
 │   │    └── migrations.md       # Guide migrations
 │   ├──14-testing/
 │       ├── clerk-synchronization-guide.md   # p0
-│ 
+│
 ├── public/
 │   ├── images/
 │   │   ├── products/           # Images produits
@@ -303,41 +303,49 @@ mon-ecommerce/
 ## Modifications spécifiques à Clerk
 
 ### Routes d'authentification
+
 - **Supprimé** : `/auth/login` et `/auth/register` (gérés par Clerk)
 - **Ajouté** : Routes Clerk standard pour les composants UI
 
 ### Configuration auth
+
 - **lib/clerk/** remplace **lib/auth/**
 - Middleware Clerk à la racine du projet
 - ClerkProvider dans le layout principal
 
 ### Composants auth
+
 - Composants Clerk pré-construits au lieu de formulaires custom
 - Gestion des états utilisateur simplifiée
 
 ### Webhooks
+
 - Webhook Clerk ajouté pour synchroniser les données utilisateur
 - Maintien du webhook Stripe pour les paiements
 
 ## Avantages de cette architecture avec Clerk
 
 ### Moins de code à maintenir
+
 - Pas de formulaires d'authentification à développer
 - Pas de gestion de sessions complexe
 - Interface utilisateur moderne incluse
 
 ### Fonctionnalités avancées incluses
+
 - 2FA natif
 - Social logins (Google, GitHub, etc.)
 - Gestion des organisations (si nécessaire plus tard)
 - Interface utilisateur responsive
 
 ### Sécurité renforcée
+
 - Protection contre les attaques par force brute
 - Gestion sécurisée des mots de passe
 - Compliance automatique avec les standards de sécurité
 
 ### Développement accéléré
+
 - Configuration en quelques minutes
 - Plus de temps pour se concentrer sur la logique e-commerce
 - Moins de tests d'authentification à écrire

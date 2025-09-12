@@ -13,40 +13,45 @@ function generateRequestId(): string {
 
 function pathnameIsMissingLocale(pathname: string): boolean {
   return locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+    (locale: string) =>
+      !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
 }
 
 // Logger minimal pour middleware - seulement erreurs et redirections importantes
-function logMiddleware(level: 'INFO' | 'WARN' | 'ERROR', data: Record<string, any>, message: string) {
-  const shouldLog = 
+function logMiddleware(
+  level: 'INFO' | 'WARN' | 'ERROR',
+  data: Record<string, unknown>,
+  message: string
+): void {
+  const shouldLog =
     level === 'ERROR' || // Toujours logger les erreurs
     (level === 'WARN' && process.env.NODE_ENV !== 'production') || // Warnings en dev/staging
     (level === 'INFO' && process.env.NODE_ENV === 'development'); // Info seulement en dev
-    
+
   if (shouldLog) {
     const logEntry = {
       timestamp: new Date().toISOString(),
       level: level.toLowerCase(),
       service: 'middleware',
       ...data,
-      message
+      message,
     };
-    
+
     if (level === 'ERROR') {
       console.error(JSON.stringify(logEntry));
     } else if (level === 'WARN') {
       console.warn(JSON.stringify(logEntry));
     } else {
-      console.log(JSON.stringify(logEntry));
+      console.info(JSON.stringify(logEntry));
     }
   }
 }
 
 export default clerkMiddleware((auth, req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
-  const requestId = req.headers.get('x-request-id') || generateRequestId();
-  
+  const requestId = req.headers.get('x-request-id') ?? generateRequestId();
+
   // Ignorer les fichiers statiques silencieusement
   if (
     pathname.startsWith('/_next') ||
@@ -59,14 +64,18 @@ export default clerkMiddleware((auth, req: NextRequest) => {
 
   // Logger seulement les redirections importantes (pas les visites normales)
   if (pathnameIsMissingLocale(pathname)) {
-    logMiddleware('WARN', {
-      requestId,
-      action: 'i18n_redirect',
-      from: pathname,
-      to: `/${defaultLocale}${pathname}`,
-      userAgent: req.headers.get('user-agent')?.substring(0, 100)
-    }, 'Locale missing - redirecting to default');
-    
+    logMiddleware(
+      'WARN',
+      {
+        requestId,
+        action: 'i18n_redirect',
+        from: pathname,
+        to: `/${defaultLocale}${pathname}`,
+        userAgent: req.headers.get('user-agent')?.substring(0, 100),
+      },
+      'Locale missing - redirecting to default'
+    );
+
     const response = NextResponse.redirect(
       new URL(`/${defaultLocale}${pathname}`, req.url)
     );

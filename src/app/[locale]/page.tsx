@@ -1,22 +1,14 @@
 // src/app/[locale]/page.tsx
-import Image from "next/image";
+import Image from 'next/image';
 
 interface HomeProps {
   params: Promise<{ locale: string }>;
 }
 
-async function getMessages(locale: string) {
-  try {
-    return (await import(`../../lib/i18n/dictionaries/${locale}.json`)).default;
-  } catch (error) {
-    // Fallback to English if the locale doesn't exist
-    return (await import(`../../lib/i18n/dictionaries/fr.json`)).default;
-  }
-}
-
-export default async function Home({ params }: HomeProps) {
+export default async function Home({
+  params,
+}: HomeProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const messages = await getMessages(locale);
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
@@ -29,24 +21,27 @@ export default async function Home({ params }: HomeProps) {
           height={38}
           priority
         />
-        
+
         <h1 className="text-2xl font-bold text-center sm:text-left">
-          {locale === 'fr' ? 'Bienvenue sur votre boutique' : 'Welcome to your shop'}
+          {locale === 'fr'
+            ? 'Bienvenue sur votre boutique'
+            : 'Welcome to your shop'}
         </h1>
-        
+
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
-            {locale === 'fr' ? 'Commencez par éditer' : 'Get started by editing'}{" "}
+            {locale === 'fr'
+              ? 'Commencez par éditer'
+              : 'Get started by editing'}{' '}
             <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
               src/app/[locale]/page.tsx
             </code>
             .
           </li>
           <li className="tracking-[-.01em]">
-            {locale === 'fr' 
-              ? 'Sauvegardez et voyez vos changements instantanément.' 
-              : 'Save and see your changes instantly.'
-            }
+            {locale === 'fr'
+              ? 'Sauvegardez et voyez vos changements instantanément.'
+              : 'Save and see your changes instantly.'}
           </li>
         </ol>
 
@@ -78,10 +73,9 @@ export default async function Home({ params }: HomeProps) {
 
         <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            {locale === 'fr' 
+            {locale === 'fr'
               ? `Langue actuelle: Français - Cliquez sur "EN" dans la navbar pour changer`
-              : `Current language: English - Click on "FR" in the navbar to change`
-            }
+              : `Current language: English - Click on "FR" in the navbar to change`}
           </p>
         </div>
       </main>
