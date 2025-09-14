@@ -1,28 +1,15 @@
-// i18n Utils - Dummy implementation for now
-// This is a placeholder that would integrate with Next.js i18n plugins
-export function useTranslations(): { t: (key: string) => string } {
-  // In a real implementation, this would be connected to Next.js next-intl or react-i18n
-  // For now, we'll use the default French translations
-  return {
-    t: (key: string) => {
-      const keys = key.split('.');
-      const enDict =
-        keys.length === 1
-          ? key
-          : keys.length === 2
-            ? key.split('.')[1]
-            : keys.length === 3
-              ? key.split('.')[2]
-              : key;
+import { getRequestConfig } from 'next-intl/server'
 
-      // Simple fallback - in production this would use proper i18n library
-      return enDict.charAt(0).toUpperCase() + enDict.slice(1);
-    },
-  };
-}
+export default getRequestConfig(async ({ locale }) => ({
+  messages: (await import(`./dictionaries/${locale}.json`)).default
+}))
 
-// Get the current locale (placeholder)
-export function getCurrentLocale(): string {
-  // This would detect the locale from the URL or browser settings
-  return 'fr';
+// Helper to get messages for server components
+export async function getMessages(locale: string) {
+  try {
+    return (await import(`./dictionaries/${locale}.json`)).default
+  } catch (error) {
+    // Fallback to French if locale not found
+    return (await import(`./dictionaries/fr.json`)).default
+  }
 }

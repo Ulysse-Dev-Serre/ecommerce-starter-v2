@@ -4,14 +4,14 @@
 
 ## 📌 P0 – Fondations & CI/CD
 
-1. Définir la vision MVP et règles d’équipe
+1. Définir la vision MVP 
 2. Configurer les environnements et secrets (local/dev/prod)
-3. Choisir et configurer l’authentification (clerk, sessions)
+3. Choisir et configurer l’authentification (clerk)
 4. Mettre en place headers de sécurité HTTP et CORS basiques
 5. Implémenter rate limiting minimal sur API sensibles
 6. Concevoir le schéma initial de la base de données (Prisma)
 7. Configurer pipeline Prisma (migrations + seeds)
-8. Définir stratégie i18n structurelle (locales, URLs `/fr` `/en`)
+8. Concevoir traduction i18n de base (locales, URLs `/fr` `/en`)
 9. Mettre en place logging structuré et observabilité minimale
 10. Créer pipeline CI/CD (lint, typecheck, build)
 
@@ -19,7 +19,7 @@
 
 ## 📌 P1 – E-commerce core
 
-11. Implémenter l’inscription et connexion avec NextAuth
+11. Synchroniser Clerk avec la base de données PostgreSQL
 12. Mettre en place rôles utilisateur de base (user/admin)
 13. Créer API Produits (CRUD + listing)
 14. Créer API Catégories (CRUD + listing)
@@ -32,12 +32,12 @@
 21. Créer pages panier et checkout côté frontend
 22. Envoyer emails transactionnels (confirmation commande)
 23. Créer un admin minimal (produits, catégories, commandes)
+24. Vérifier i18n routing (FR/EN, fallback) pour nouvel ajouts
 
 ---
 
 ## 📌 P2 – i18n & SEO
 
-24. Configurer Next.js i18n routing (FR/EN, fallback)
 25. Créer tables ou champs de traduction pour produits & catégories
 26. Gérer slugs localisés par langue
 27. Ajouter balises `<html lang>` et `hreflang` SEO
