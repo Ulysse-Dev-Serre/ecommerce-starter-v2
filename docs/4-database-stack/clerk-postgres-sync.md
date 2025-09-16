@@ -2,6 +2,34 @@
 
 ## 🔧 **Configuration Webhook (Prod & Développement)**
 
+### **Installation de ngrok sur Linux**
+
+**phase A : Installation via Snap**
+```bash
+sudo snap install ngrok
+```
+
+**Phase B : Créer un compte gratuit**
+- Rendez-vous sur [https://ngrok.com/](https://ngrok.com/)
+- Créez un compte gratuit
+
+**Phase C: Configuration du token d'authentification**
+```bash
+# Remplacez YOUR_TOKEN par le token fourni dans votre dashboard ngrok
+ngrok config add-authtoken YOUR_TOKEN
+```
+
+**Phase D : Exposition du serveur local**
+```bash
+# Expose le port 3000 de votre application Next.js
+ngrok http 3000
+```
+
+**Résultat :** ngrok génère une URL publique (ex: `https://abc123.ngrok.io`) que vous pouvez utiliser dans l'onglet webhooks de Clerk. 
+
+<br>
+---
+
 ### **1. Préparation environnement local**
 ```bash
 # Terminal 1 : Lancer l'application
