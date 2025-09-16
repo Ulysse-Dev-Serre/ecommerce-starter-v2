@@ -13,7 +13,6 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:reset": "npx tsx scripts/reset-local.ts",
     "sync-clerk": "npx tsx scripts/sync-clerk-users.ts",
-    "dev:setup": "npm run db:push && npm run sync-clerk create && npm run db:seed",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
