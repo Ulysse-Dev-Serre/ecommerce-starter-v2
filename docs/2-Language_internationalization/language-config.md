@@ -57,13 +57,26 @@ useEffect(() => {
 }, [locale]);
 ```
 
-### Middleware
+#### Mécanisme de basculement automatique
 
-Le middleware combine :
+Le système fonctionne avec ce principe simple :
 
-- **Clerk** : Authentification
-- **i18n** : Détection et redirection de langue
-- **Fallback** : Redirection automatique vers le français
+1. **`locale`** (prop reçue) → détermine quelle langue utiliser ("fr" ou "en")
+2. **Import dynamique** → charge le bon dictionnaire selon la locale :
+   - `locale = "fr"` → charge `fr.json`
+   - `locale = "en"` → charge `en.json`
+3. **`messages`** → contient tout le dictionnaire de la langue active
+4. **Changement de langue** → redirige vers la nouvelle URL avec la nouvelle locale, rechargeant automatiquement le composant avec le nouveau dictionnaire
+
+**Exemple concret dans la navbar :**
+```typescript
+// Accès aux traductions selon la locale active
+{messages.common.contact}     // "Contact" (fr) / "Contact" (en)
+{messages.common.home}        // "Accueil" (fr) / "Home" (en)
+{messages.products.title}     // "Produits" (fr) / "Products" (en)
+{messages.navbar.brand}       // "Votre Boutique" (fr) / "Your Shop" (en)
+```
+
 
 ### Changement de langue
 
@@ -82,12 +95,21 @@ Les utilisateurs peuvent changer de langue via :
 
 ### Extensibilité
 
-Pour ajouter une nouvelle langue :
+Pour ajouter une nouvelle langue (exemple : arabe "ar") :
 
-1. Créer `dictionaries/es.json`
-2. Ajouter `'es'` dans `locales`
-3. Créer les boutons de navigation
-4. Optionnel : adapter les routes (`/es/productos`)
+#### **Étapes obligatoires (fonctionnalité de base)**
+1. **Créer le dictionnaire** : `src/lib/i18n/dictionaries/ar.json`
+2. **Modifier `src/middleware.ts`** : `const locales = ['fr', 'en', 'ar'];`
+3. **Modifier `src/app/[locale]/layout.tsx`** : ajouter `{ locale: 'ar' }` dans `generateStaticParams()`
+
+#### **Étape optionnelle (interface utilisateur)**
+4. **Ajouter le bouton AR dans la navbar** pour permettre aux utilisateurs de changer facilement
+
+#### **Important à retenir**
+- **L'URL `http://localhost:3000/ar` fonctionnera** même sans le bouton navbar
+- **Le bouton navbar** = seulement **interface utilisateur** pour l'ergonomie
+- **La logique de routage i18n** est complètement indépendante de l'interface
+- Vous pouvez tester avec l'URL manuelle avant d'ajouter les boutons
 
 ### Bonnes pratiques
 

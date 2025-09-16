@@ -22,62 +22,15 @@ export default async function Home({
           priority
         />
 
-        <h1 className="text-2xl font-bold text-center sm:text-left">
+        <h1 className="text-2xl text-center sm:text-left">
           {locale === 'fr'
-            ? 'Bienvenue sur votre boutique'
-            : 'Welcome to your shop'}
+            ? "Starter de boutique e-commerce, ceci est un projet personnel complexe que je me suis donné pour objectif de terminer d'ici la fin du stage de fin de session. Le but de ce projet est de  développer Un starter e-commerce universel, flexible et prêt à l'emploi pour lancer rapidement des boutiques en ligne dans n'importe quelle niche et n'importe quel pays. Je profite du devoir pour mettre en place le système de connexion avec Clerk et d'approfondir ma compréhension avec une présentation vidéo."
+            : "E-commerce shop starter, this is a complex personal project that I have set as a goal to complete by the end of my end-of-session internship. The purpose of this project is to develop a universal, flexible, and ready-to-use e-commerce starter to quickly launch online stores in any niche and any country."}
         </h1>
 
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            {locale === 'fr'
-              ? 'Commencez par éditer'
-              : 'Get started by editing'}{' '}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/[locale]/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            {locale === 'fr'
-              ? 'Sauvegardez et voyez vos changements instantanément.'
-              : 'Save and see your changes instantly.'}
-          </li>
         </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            {locale === 'fr' ? 'Déployer maintenant' : 'Deploy now'}
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {locale === 'fr' ? 'Lire la documentation' : 'Read our docs'}
-          </a>
-        </div>
-
-        <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {locale === 'fr'
-              ? `Langue actuelle: Français - Cliquez sur "EN" dans la navbar pour changer`
-              : `Current language: English - Click on "FR" in the navbar to change`}
-          </p>
-        </div>
       </main>
     </div>
   );
