@@ -3,7 +3,16 @@
  * Refactored version of test-webhook.ts with better error handling
  */
 const { PrismaClient } = require('../../src/generated/prisma');
-const { mockUser } = require('../utils/mock-data');
+
+// Mock user data directement dans le fichier
+const mockUser = {
+  clerkId: 'test_user_123456',
+  email: 'test@example.com',
+  firstName: 'Test',
+  lastName: 'User',
+  imageUrl: 'https://example.com/avatar.jpg',
+  role: 'CLIENT'
+};
 
 async function testDatabaseOperations() {
   console.log('🧪 Testing database operations locally...\n');
