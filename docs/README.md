@@ -44,7 +44,7 @@ npx prisma db push
 ---
 
 ## **Étape 3 : Projet Clerk**
-- Créer un projet Clerk, configurer et appliquer les 2 clés :
+- Créer un projet Clerk, configurer et appliquer les 2 clés [Clerk](https://clerk.com/nextjs-authentication) :
   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=`
   - `CLERK_SECRET_KEY=`
 
@@ -63,45 +63,191 @@ Il est également possible d'utiliser le fichier `scripts/sync-clerk-users.ts` p
 npm run sync-clerk sync
 ```
 
-## **Étape 5 : Synchronisation en temps réel (méthode personnelle Linux)**
+## **Étape 5 : syncrhonisation front end en tempr eal grace a vercel. 
 
-Cette étape utilise **ngrok** pour exposer votre serveur local et permettre la synchronisation automatique entre Clerk et PostgreSQL lors de la création d'utilisateurs via la navbar frontend. Cela simule le comportement réel de l'application déployée.
 
-### **Principe de fonctionnement :**
-1. **ngrok** expose votre serveur local (`localhost:3000`) avec une URL publique
-2. Cette URL est configurée comme **webhook endpoint** dans Clerk
-3. Lorsqu'un utilisateur est créé/modifié dans Clerk, un webhook est envoyé à votre application
-4. Votre application synchronise automatiquement les données avec PostgreSQL
 
-### **Installation et configuration :**
-```bash
-# Installation ngrok (Linux)
-sudo snap install ngrok
+<br>
+<br>
 
-# Configuration avec votre token
-ngrok config add-authtoken YOUR_TOKEN
 
-# Exposition du serveur local
-ngrok http 3000
+---
+
+---
+
+## **Étape 6 : Tests de l'API Users avec Postman**
+
+Une fois l'application configurée et démarrée, on peut tester l'API de gestion des utilisateurs.
+
+###  **GET** /api/users - Lister tous les utilisateurs
+
+Dans Postman :
+- **Méthode :** GET
+- **URL :** `http://localhost:3000/api/users`
+
+**Réponse attendue :**
+```json
+{
+  "success": true,
+  "count": 3,
+  "users": [
+    {
+      "id": "cmfpj7dyk0002syd4wrqkzfl7",
+      "clerkId": "user_32sMQetRPq36eZjbezvIxLRtLxm",
+      "email": "admin@test.com",
+      "firstName": "Admin",
+      "lastName": "Test",
+      "role": "ADMIN",
+      "createdAt": "2025-09-18T14:54:16.941Z",
+      "updatedAt": "2025-09-18T14:54:16.941Z"
+    }
+  ],
+  "timestamp": "2025-09-18T14:54:21.417Z"
+}
 ```
 
-### **Résultat attendu :**
-- ✅ Création d'utilisateur via navbar → Synchronisation automatique en base
-- ✅ Test des webhooks en environnement de développement
-- ✅ Comportement identique à la production
+**Note :** Copiez un des ID affichés (ex: `cmfpj7dyk0002syd4wrqkzfl7`) pour le test suivant.
 
-### **Alternative Windows :** 
-Déployez le site sur Vercel pour obtenir une URL publique.
+---
 
-📖 **Documentation complète :** [clerk-postgres-sync.md](4-database-stack/clerk-postgres-sync.md) 
+###  **POST** /api/users/[id]/promote - Changer le rôle d'un utilisateur
+
+Bascule le rôle entre CLIENT et ADMIN. Si l'utilisateur est CLIENT, il devient ADMIN et vice versa.
+
+Dans Postman :
+- **Méthode :** POST  
+- **URL :** `http://localhost:3000/api/users/cmfpj7dyk0002syd4wrqkzfl7/promote`
+  (Remplacez `cmfpj7dyk0002syd4wrqkzfl7` par l'ID copié du test précédent)
+- **Headers :** `Content-Type: application/json`
+- **Body :** Aucun (sélectionner "none")
+
+**Réponse attendue :**
+```json
+{
+  "success": true,
+  "message": "User promoted to ADMIN successfully",
+  "previousRole": "CLIENT",
+  "newRole": "ADMIN",
+  "user": { ... },
+  "timestamp": "2025-09-18T15:10:32.123Z"
+}
+```
+
+**Pour retourner au rôle précédent :** Répétez la même requête POST avec la même URL.
+
+---
+
+###  **GET** /api/internal/health - Diagnostic système
+
+Cette route permet de vérifier rapidement l'état de  l'application et de la base de données.
+
+Dans Postman :
+- **Méthode :** GET
+- **URL :** `http://localhost:3000/api/internal/health`
+
+**Réponse attendue :**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2025-09-18T15:17:41.607Z",
+    "database": {
+      "connected": true,
+      "userCount": 3
+    },
+    "environment": "development",
+    "version": "0.1.0"
+  }
+}
+```
+
+**Utilité :** Confirme que le serveur Next.js et la base de données PostgreSQL fonctionnent correctement. Le `userCount` prouve que la connexion à la base est active.
 
 
 
+---
 
-<br>
-<br>
+## **Étape 7 : Tests automatisés avec Jest**
 
+Après avoir validé manuellement l'API avec Postman (Étape 6), cette étape ajoute des tests automatisés pour prouver le bon fonctionnement de l'API via des tests reproductibles.
 
+### **Architecture de test existante**
+
+Le projet utilise Jest avec une architecture professionnelle plutôt qu'axios car ceci est une partie de mon projet personnelle que j'ai tenté de redocumenter pour ce TP :
+
+```
+tests/
+├── utils/
+│   ├── setup.js           # Configuration globale des tests
+│   └── test-client.js     # Client HTTP réutilisable  
+└── __tests__/api/
+    ├── users.test.js      # Tests API Users
+    └── health.test.js     # Tests API Health
+```
+
+**Terminal 1 :** `npm run dev`  
+**Terminal 2 :** Exécuter les commandes suivantes
+
+#### **Exécution des tests :**
+```bash
+# Tests spécifiques
+npm test users.test.js
+npm test health.test.js
+```
+
+### **Résultats attendus**
+
+#### **Tests users.test.js :**
+```
+PASS tests/__tests__/api/users.test.js
+Users API
+  GET /api/users
+    ✓ should return users list successfully (495 ms)
+    ✓ should have correct response structure (335 ms)
+  POST /api/users/[id]/promote
+    ✓ should switch user role successfully (1602 ms)
+    ✓ should toggle back to original role (1076 ms)
+    ✓ should return 404 for invalid user ID (657 ms)
+
+Test Suites: 1 passed, 1 total
+Tests: 5 passed, 5 total
+```
+
+#### **Tests health.test.js :**
+```
+PASS tests/__tests__/api/health.test.js  
+Health API
+  GET /api/internal/health
+    ✓ should return health status successfully (331 ms)
+    ✓ should have correct health data structure (326 ms) 
+    ✓ should report healthy database connection (340 ms)
+
+Test Suites: 1 passed, 1 total
+Tests: 3 passed, 3 total
+```
+
+### **Validation complète du fonctionnement**
+
+Les tests automatisés prouvent :
+
+#### **Cas de succès :**
+- Récupération de la liste des utilisateurs
+- Changement de rôle CLIENT → ADMIN
+- Toggle retour ADMIN → CLIENT  
+- Health check avec connectivité base de données
+
+#### **Cas d'erreur :**
+- Gestion appropriée des erreurs 404
+- Logs d'avertissement pour utilisateurs inexistants
+- Réponses d'erreur structurées
+
+#### **Performance :**
+- Temps de réponse acceptables (< 2 secondes)
+- Cohérence entre les appels
+
+Les tests automatisés Jest prouvent le fonctionnement correct avec logs détaillés.
+---
 
 
 ---
@@ -123,18 +269,7 @@ Déployez le site sur Vercel pour obtenir une URL publique.
 ## 🧪 **Validation & Tests**
 
 ### **APIs Disponibles**
-```bash
-# Utilisateurs synchronisés
-curl http://localhost:3000/api/users
 
-# Santé système
-curl http://localhost:3000/api/internal/health
-```
-
-### **Interface Database**
-```bash
-npm run db:studio  # → http://localhost:5555
-```
 
 > **📋 Tests complets** : Voir [`clerk-postgres-sync.md`](./4-database-stack/clerk-postgres-sync.md) pour webhooks
 
