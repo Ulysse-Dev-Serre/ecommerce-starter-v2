@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+
 import 'dotenv/config';
 import Clerk from '@clerk/clerk-sdk-node';
 

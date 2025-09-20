@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server'
-import { getUserById, promoteUser } from '../../../../../lib/services/user.service'
-import { withError } from '../../../../../lib/middleware/withError'
+
 import { logger } from '../../../../../lib/logger'
+import { withError } from '../../../../../lib/middleware/withError'
+import { getUserById, promoteUser } from '../../../../../lib/services/user.service'
 
 // POST - Promouvoir/Rétrograder un utilisateur (CLIENT ↔ ADMIN)
-async function promoteUserHandler(_request, { params }) {
+async function promoteUserHandler(_request: Request, { params }: { params: Promise<{ id: string }> }): Promise<NextResponse> {
   const { id } = await params
   
   logger.info({ action: 'promote_user', userId: id }, `Processing role change for user ${id}`)

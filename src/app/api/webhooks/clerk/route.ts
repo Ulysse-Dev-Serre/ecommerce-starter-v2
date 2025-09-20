@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
 import { Webhook } from 'svix'
-import { processWebhookEvent } from '../../../../lib/services/webhook.service'
-import { withError } from '../../../../lib/middleware/withError'
+
 import { logger } from '../../../../lib/logger'
+import { withError } from '../../../../lib/middleware/withError'
+import { processWebhookEvent } from '../../../../lib/services/webhook.service'
 
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET
 
-async function handleClerkWebhook(req: NextRequest) {
+async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
   logger.info({
     action: 'clerk_webhook_received',
     timestamp: new Date().toISOString(),
@@ -36,7 +37,7 @@ async function handleClerkWebhook(req: NextRequest) {
   }
 
   // 3. Get and parse body
-  let payload: any
+  let payload: unknown
   let body: string
 
   try {
@@ -56,7 +57,7 @@ async function handleClerkWebhook(req: NextRequest) {
 
   // 4. Verify signature
   const webhook = new Webhook(webhookSecret)
-  let evt: any
+  let evt: unknown
 
   try {
     evt = webhook.verify(body, {

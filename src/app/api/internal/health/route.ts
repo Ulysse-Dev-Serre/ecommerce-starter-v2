@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getUserCount } from '../../../../lib/services/user.service'
-import { withError } from '../../../../lib/middleware/withError'
-import { logger } from '../../../../lib/logger'
 
-async function healthCheck() {
+import { logger } from '../../../../lib/logger'
+import { withError } from '../../../../lib/middleware/withError'
+import { getUserCount } from '../../../../lib/services/user.service'
+
+async function healthCheck(): Promise<NextResponse> {
   logger.info({ action: 'health_check' }, 'Performing health check')
   
   const userCount = await getUserCount()
@@ -16,7 +17,7 @@ async function healthCheck() {
       userCount,
     },
     environment: process.env.NODE_ENV,
-    version: process.env.npm_package_version || '0.1.0',
+    version: process.env.npm_package_version ?? '0.1.0',
   }
   
   logger.info({ 

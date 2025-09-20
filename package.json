@@ -30,6 +30,8 @@
     "@clerk/nextjs": "^6.31.10",
     "@faker-js/faker": "^10.0.0",
     "@prisma/client": "^6.15.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.2",
     "next": "15.5.2",
     "next-intl": "^4.3.8",

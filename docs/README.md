@@ -63,7 +63,16 @@ Il est également possible d'utiliser le fichier `scripts/sync-clerk-users.ts` p
 npm run sync-clerk sync
 ```
 
-## **Étape 5 : syncrhonisation front end en tempr eal grace a vercel. 
+## **Étape 5 : Synchronisation du front-end en temps réel avec Vercel**
+
+**Cette partie est complétée, mais je n’ai pas eu le temps de la documenter.**  
+Le principe est : déployer le site sur Vercel afin d’obtenir une URL accessible en ligne, puis l’intégrer dans notre webhook clerk et ensuite view le webhook clerk ajouter le CLERK_WEBHOOK_SECRET= dans le .env.
+
+Le but de cette étape est simplement d’avoir un front-end fonctionnel en premier. 
+
+Je développe ce projet sur la partition Linux de mon PC et, plutôt que d’utiliser Vercel, j’utilise un framework appelé Ngrok pour remplacer Vercel, qui n’est pas adapté à Windows. Bref, l’objectif ici est surtout d’obtenir un un syncho postgress et vercel lorsqu’on connecte un utilisateur via le login du front-end. C’est pour cette raison que je ne me suis pas attardé sur la documentation. Donc ici, on synchronise manuellement grâce à la méthode que nous avons vue précédemment a l'tape 4.
+
+ 
 
 
 

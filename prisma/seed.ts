@@ -1,13 +1,15 @@
 // prisma/seed.ts
+import { faker } from '@faker-js/faker';
+
 import {
   PrismaClient,
   UserRole,
   ProductStatus,
   Language,
   MediaType,
+  Category,
+  ProductAttribute,
 } from '../src/generated/prisma';
-import { faker } from '@faker-js/faker';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -200,8 +202,8 @@ const PRODUCT_ATTRIBUTES = [
   },
 ];
 
-async function clearDatabase() {
-  console.log('🗑️  Nettoyage de la base de données...');
+async function clearDatabase(): Promise<void> {
+  console.info('🗑️  Nettoyage de la base de données...');
 
   // L'ordre est important à cause des contraintes de clés étrangères
   await prisma.auditLog.deleteMany({});
@@ -235,8 +237,8 @@ async function clearDatabase() {
   await prisma.webhookEvent.deleteMany({});
 }
 
-async function seedUsers() {
-  console.log('👥 Création des utilisateurs de test...');
+async function seedUsers(): Promise<void> {
+  console.info('👥 Création des utilisateurs de test...');
 
   for (const userData of TEST_USERS) {
     const user = await prisma.user.upsert({
@@ -244,7 +246,7 @@ async function seedUsers() {
       update: userData,
       create: userData,
     });
-    console.log(`   ✅ Utilisateur créé: ${user.email} (${user.role})`);
+    console.info(`   ✅ Utilisateur créé: ${user.email} (${user.role})`);
 
     // Créer une adresse par défaut pour chaque utilisateur
     await prisma.address.create({
@@ -252,8 +254,8 @@ async function seedUsers() {
         userId: user.id,
         type: 'BOTH',
         isDefault: true,
-        firstName: user.firstName || 'Test',
-        lastName: user.lastName || 'User',
+        firstName: user.firstName ?? 'Test',
+        lastName: user.lastName ?? 'User',
         street: faker.location.streetAddress(),
         city: faker.location.city(),
         state: 'QC',
@@ -265,10 +267,10 @@ async function seedUsers() {
   }
 }
 
-async function seedCategories() {
-  console.log('📁 Création des catégories...');
+async function seedCategories(): Promise<Map<string, Category>> {
+  console.info('📁 Création des catégories...');
 
-  const categoryMap = new Map();
+  const categoryMap = new Map<string, Category>();
 
   // Créer d'abord les catégories parentes
   for (const categoryData of CATEGORIES.filter(c => !c.parentSlug)) {
@@ -293,7 +295,7 @@ async function seedCategories() {
         },
       });
     }
-    console.log(`   ✅ Catégorie créée: ${categoryData.slug}`);
+    console.info(`   ✅ Catégorie créée: ${categoryData.slug}`);
   }
 
   // Puis les sous-catégories
@@ -322,17 +324,17 @@ async function seedCategories() {
           },
         });
       }
-      console.log(`   ✅ Sous-catégorie créée: ${categoryData.slug}`);
+      console.info(`   ✅ Sous-catégorie créée: ${categoryData.slug}`);
     }
   }
 
   return categoryMap;
 }
 
-async function seedProductAttributes() {
-  console.log('🏷️  Création des attributs produits...');
+async function seedProductAttributes(): Promise<Map<string, ProductAttribute>> {
+  console.info('🏷️  Création des attributs produits...');
 
-  const attributeMap = new Map();
+  const attributeMap = new Map<string, ProductAttribute>();
 
   for (const attrData of PRODUCT_ATTRIBUTES) {
     const attribute = await prisma.productAttribute.create({
@@ -377,17 +379,17 @@ async function seedProductAttributes() {
       }
     }
 
-    console.log(`   ✅ Attribut créé: ${attrData.key}`);
+    console.info(`   ✅ Attribut créé: ${attrData.key}`);
   }
 
   return attributeMap;
 }
 
 async function seedProducts(
-  categoryMap: Map<string, any>,
-  attributeMap: Map<string, any>
-) {
-  console.log('📦 Création des produits...');
+  categoryMap: Map<string, Category>,
+  attributeMap: Map<string, ProductAttribute>
+): Promise<void> {
+  console.info('📦 Création des produits...');
 
   const SAMPLE_PRODUCTS = [
     {
@@ -616,12 +618,12 @@ async function seedProducts(
       });
     }
 
-    console.log(`   ✅ Produit créé: ${productData.slug}`);
+    console.info(`   ✅ Produit créé: ${productData.slug}`);
   }
 }
 
-async function seedTestData() {
-  console.log('🧪 Création de données de test supplémentaires...');
+async function seedTestData(): Promise<void> {
+  console.info('🧪 Création de données de test supplémentaires...');
 
   // Paramètres système
   await prisma.systemSetting.createMany({
@@ -651,22 +653,22 @@ async function seedTestData() {
     },
   });
 
-  console.log('   ✅ Données de test créées');
+  console.info('   ✅ Données de test créées');
 }
 
-async function main() {
-  console.log('🌱 Démarrage du seed de développement...');
-  console.log('');
-  console.log(
+async function main(): Promise<void> {
+  console.info('🌱 Démarrage du seed de développement...');
+  console.info('');
+  console.info(
     "⚠️  IMPORTANT: Assurez-vous d'avoir créé les utilisateurs suivants dans Clerk:"
   );
-  console.log('   - admin@test.com (avec le rôle admin)');
-  console.log('   - client@test.com');
-  console.log('   - marie@test.com');
-  console.log(
+  console.info('   - admin@test.com (avec le rôle admin)');
+  console.info('   - client@test.com');
+  console.info('   - marie@test.com');
+  console.info(
     '   Et mettez à jour les clerkId dans ce fichier avec les vrais IDs de Clerk.'
   );
-  console.log('');
+  console.info('');
 
   try {
     await clearDatabase();
@@ -676,19 +678,19 @@ async function main() {
     await seedProducts(categoryMap, attributeMap);
     await seedTestData();
 
-    console.log('');
-    console.log('✅ Seed terminé avec succès!');
-    console.log('');
-    console.log('📋 Résumé:');
-    console.log(`   - ${TEST_USERS.length} utilisateurs`);
-    console.log(`   - ${CATEGORIES.length} catégories`);
-    console.log(`   - ${PRODUCT_ATTRIBUTES.length} attributs produits`);
-    console.log('   - 3 produits avec variantes');
-    console.log('   - Paramètres système et coupon de test');
-    console.log('');
-    console.log('🔗 Comptes de test:');
-    console.log('   Admin: admin@test.com');
-    console.log('   Client: client@test.com / marie@test.com');
+    console.info('');
+    console.info('✅ Seed terminé avec succès!');
+    console.info('');
+    console.info('📋 Résumé:');
+    console.info(`   - ${TEST_USERS.length} utilisateurs`);
+    console.info(`   - ${CATEGORIES.length} catégories`);
+    console.info(`   - ${PRODUCT_ATTRIBUTES.length} attributs produits`);
+    console.info('   - 3 produits avec variantes');
+    console.info('   - Paramètres système et coupon de test');
+    console.info('');
+    console.info('🔗 Comptes de test:');
+    console.info('   Admin: admin@test.com');
+    console.info('   Client: client@test.com / marie@test.com');
   } catch (error) {
     console.error('❌ Erreur lors du seed:', error);
     throw error;

@@ -1,9 +1,9 @@
 /**
  * Webhooks API tests
  */
-const { setupTest, teardownTest } = require('../../utils/setup');
-const { mockClerkWebhookPayload, mockClerkUpdatePayload, mockClerkDeletePayload } = require('../../utils/mock-data');
 const userData = require('../../fixtures/user-data.json');
+const { mockClerkWebhookPayload, mockClerkUpdatePayload, mockClerkDeletePayload } = require('../../utils/mock-data');
+const { setupTest, teardownTest } = require('../../utils/setup');
 
 describe('Webhooks API', () => {
   let client;

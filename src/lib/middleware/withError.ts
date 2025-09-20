@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server'
+
 import { logger } from '../logger'
 
-type ApiHandler = (...args: any[]) => Promise<NextResponse> | NextResponse
+type HandlerArgs = unknown[]
+type ApiHandler = (...args: HandlerArgs) => Promise<NextResponse> | NextResponse
 
 export function withError(handler: ApiHandler) {
-  return async (...args: any[]) => {
+  return async (...args: HandlerArgs) => {
     try {
       return await handler(...args)
     } catch (error) {
