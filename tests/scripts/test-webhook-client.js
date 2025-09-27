@@ -1,8 +1,8 @@
 /**
  * Test script pour envoyer des webhooks au serveur debug
  */
-const TestClient = require('../utils/test-client');
 const { mockClerkWebhookPayload } = require('../utils/mock-data');
+const TestClient = require('../utils/test-client');
 
 async function testWebhookServer() {
   console.log('🧪 Testing webhook debug server...\n');

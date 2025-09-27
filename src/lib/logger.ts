@@ -11,7 +11,7 @@ const LOG_LEVELS = {
 };
 
 const currentEnv =
-  (process.env.NODE_ENV as keyof typeof LOG_LEVELS) || 'development';
+  (process.env.NODE_ENV) ?? 'development';
 const allowedLevels = LOG_LEVELS[currentEnv];
 
 // Fonction pour générer un ID unique
@@ -19,15 +19,23 @@ function generateId(): string {
   return `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+interface Logger {
+  info: (data: Record<string, unknown>, message?: string) => void
+  warn: (data: Record<string, unknown>, message?: string) => void
+  error: (data: Record<string, unknown>, message?: string) => void
+  debug: (data: Record<string, unknown>, message?: string) => void
+  child: (context: Record<string, unknown>) => Logger
+}
+
 // Logger avec contrôle par environnement
-const createLogger = () => {
-  const shouldLog = (level: string) => allowedLevels.includes(level);
+const createLogger = (): Logger => {
+  const shouldLog = (level: string): boolean => allowedLevels.includes(level);
 
   const log = (
     level: 'info' | 'warn' | 'error' | 'debug',
     data: Record<string, unknown>,
     message?: string
-  ) => {
+  ): void => {
     if (!shouldLog(level)) return; // Skip si niveau pas autorisé
 
     const logEntry = {
@@ -36,7 +44,7 @@ const createLogger = () => {
       service: 'ecommerce-frontend',
       environment: currentEnv,
       ...(typeof data === 'object' ? data : { data }),
-      message: message || data?.message || '',
+      message: message ?? data?.message ?? '',
     };
 
     const logString = JSON.stringify(logEntry);
@@ -51,7 +59,7 @@ const createLogger = () => {
         break;
       default:
         if (currentEnv === 'development') {
-          console.log(logString);
+          console.info(logString);
         }
     }
   };
@@ -98,8 +106,8 @@ export interface LogContext {
 }
 
 // Helper pour créer un logger avec requestId obligatoire
-export const createRequestLogger = (requestId?: string) => {
-  const id = requestId || generateId();
+export const createRequestLogger = (requestId?: string): Logger => {
+  const id = requestId ?? generateId();
   return logger.child({ requestId: id });
 };
 
@@ -108,28 +116,28 @@ export const logUserAction = (
   action: string,
   context: Partial<LogContext>,
   message?: string
-) => {
+): void => {
   logger.info(
     {
       ...context,
       action,
       category: 'user_action',
-      requestId: context.requestId || generateId(), // requestId obligatoire
+      requestId: context.requestId ?? generateId(),
     },
-    message || `User action: ${action}`
+    message ?? `User action: ${action}`
   );
 };
 
 export const logError = (
   error: Error | string,
   context: Partial<LogContext> = {}
-) => {
+): void => {
   logger.error(
     {
       ...context,
       error: error instanceof Error ? error.message : error,
       category: 'error',
-      requestId: context.requestId || generateId(), // requestId obligatoire
+      requestId: context.requestId ?? generateId(),
     },
     'Application error'
   );
@@ -139,22 +147,22 @@ export const logPerformance = (
   operation: string,
   duration: number,
   context: Partial<LogContext> = {}
-) => {
-  const level = duration > 2000 ? 'warn' : 'info'; // Threshold plus élevé
+): void => {
+  const level = duration > 2000 ? 'warn' : 'info';
   logger[level](
     {
       ...context,
       operation,
       duration,
       category: 'performance',
-      requestId: context.requestId || generateId(),
+      requestId: context.requestId ?? generateId(),
     },
     `${operation}: ${duration}ms`
   );
 };
 
 // Logger spécial pour sécurité (toujours loggé)
-export const logSecurity = (event: string, context: Partial<LogContext>) => {
+export const logSecurity = (event: string, context: Partial<LogContext>): void => {
   // Bypass des niveaux pour sécurité - toujours logué
   const logEntry = {
     timestamp: new Date().toISOString(),
@@ -163,7 +171,7 @@ export const logSecurity = (event: string, context: Partial<LogContext>) => {
     category: 'security',
     event,
     ...context,
-    requestId: context.requestId || generateId(),
+    requestId: context.requestId ?? generateId(),
   };
   console.warn(JSON.stringify(logEntry));
 };

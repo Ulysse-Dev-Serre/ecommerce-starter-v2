@@ -1,7 +1,8 @@
 // scripts/sync-clerk-users.ts
-import { PrismaClient, UserRole } from '../src/generated/prisma';
 import { createClerkClient } from '@clerk/backend';
 import * as dotenv from 'dotenv';
+
+import { PrismaClient, UserRole } from '../src/generated/prisma';
 
 // Charger les variables d'environnement
 dotenv.config({ path: '.env.local' });

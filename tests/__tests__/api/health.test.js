@@ -33,8 +33,9 @@ describe('Health API', () => {
         status: expect.any(String),
         timestamp: expect.any(String),
         environment: expect.any(String),
+        version: expect.any(String),
         database: {
-          status: expect.any(String),
+          connected: expect.any(Boolean),
           userCount: expect.any(Number)
         }
       });
@@ -45,7 +46,7 @@ describe('Health API', () => {
       const { data } = response.data;
 
       expect(data.status).toBe('healthy');
-      expect(data.database.status).toBe('connected');
+      expect(data.database.connected).toBe(true);
       expect(data.database.userCount).toBeGreaterThanOrEqual(0);
     });
   });
