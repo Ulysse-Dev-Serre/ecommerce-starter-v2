@@ -1,132 +1,187 @@
-# Guidelines SEO pour Site Multilingue
+# SEO Guidelines - Configuration Multilingue
 
-## Configuration technique
+## Objectif
+
+Documentation technique pour configurer le SEO multilingue sur une nouvelle boutique e-commerce. Focus sur les éléments critiques à implémenter pour le référencement Google FR/EN.
+
+---
+
+## Checklist Pré-Lancement
 
 ### URLs et structure
+- [ ] URLs distinctes par langue (`/fr/`, `/en/`)
+- [ ] Pas de paramètres (`?lang=fr`) ou hash (`#fr`)
+- [ ] Structure cohérente : `/fr/produits/categorie/nom-produit`
+- [ ] Slugs traduits : `/fr/produits/` vs `/en/products/`
 
-**✅ Bonne pratique actuelle :**
+### Métadonnées obligatoires
+- [ ] Title unique par page/langue (50-60 caractères)
+- [ ] Meta description unique (150-160 caractères)
+- [ ] Open Graph locale : `fr_CA`, `en_US`
+- [ ] Images alt text traduit
 
-- `/fr/` pour le français
-- `/en/` pour l'anglais
-- URLs distinctes par langue
+### Configuration automatique à vérifier
+- [ ] Hreflang tags générés par Next.js
+- [ ] Canonical URLs par version
+- [ ] Sitemap XML accessible `/sitemap.xml`
+- [ ] Robots.txt configuré
 
-**❌ À éviter :**
+### Performance
+- [ ] PageSpeed > 90 mobile/desktop
+- [ ] Core Web Vitals dans le vert
+- [ ] Images optimisées avec noms descriptifs
 
-- Paramètres d'URL (`?lang=fr`)
-- Hash fragments (`#fr`)
-- Détection automatique sans choix utilisateur
+---
 
-### Métadonnées par langue
+## Configuration Technique
 
-#### Dans layout.tsx
+### Métadonnées dans layout.tsx
 
 ```typescript
 export async function generateMetadata({ params: { locale } }: Props) {
   const messages = await getMessages(locale);
-
+  
   return {
     title: messages.meta.title,
     description: messages.meta.description,
     openGraph: {
       locale: locale === 'fr' ? 'fr_CA' : 'en_US',
+      title: messages.meta.ogTitle,
     },
   };
 }
 ```
 
-#### Hreflang tags
+### Structure URLs recommandée
 
-Next.js gère automatiquement les tags hreflang :
+```
+Produits :
+/fr/produits/categorie/nom-produit-francais
+/en/products/category/english-product-name
 
+Catégories :
+/fr/plantes/plantes-interieur
+/en/plants/indoor-plants
+```
+
+### Hreflang automatique
+
+Next.js génère automatiquement :
 ```html
-<link rel="alternate" hreflang="fr" href="/fr/" />
-<link rel="alternate" hreflang="en" href="/en/" />
-<link rel="alternate" hreflang="x-default" href="/fr/" />
+<link rel="alternate" hreflang="fr" href="/fr/produits" />
+<link rel="alternate" hreflang="en" href="/en/products" />
+<link rel="alternate" hreflang="x-default" href="/fr/produits" />
 ```
 
-### Contenu et traduction
+---
 
-#### Stratégie de contenu
+## Contenu par Niche
 
-- **Traduction complète** : Pas de contenu mixte
-- **Adaptation culturelle** : Prix, dates, formats
-- **Images localisées** : Texte dans les images traduit
-- **Devise et unités** : CAD vs USD, km vs miles
+### Mots-clés cibles
 
-#### URLs localisées
+**Plantes (FR/EN) :**
+- FR : "plantes d'intérieur", "plante facile entretien", "livraison plantes Québec"
+- EN : "indoor plants", "low maintenance plants", "plants Canada shipping"
 
+**Animaux (FR/EN) :**
+- FR : "accessoires chien", "collier personnalisé", "jouets chat qualité"
+- EN : "dog accessories", "personalized collar", "premium cat toys"
+
+**Jouets (FR/EN) :**
+- FR : "jouets éducatifs", "jouets sécuritaires bébé", "idées cadeaux enfant"
+- EN : "educational toys", "safe baby toys", "kids gift ideas"
+
+### Structure contenu
+
+**Pages produits :**
 ```
-/fr/produits/categorie-a
-/en/products/category-a
+H1: [Nom produit] - [Bénéfice principal]
+H2: Description (150-300 mots avec mots-clés naturels)
+H2: Caractéristiques
+H2: Guide utilisation/entretien
+H2: Avis clients
 ```
 
-### Performance SEO
-
-#### Sitemap multilingue
-
-Générer un sitemap avec toutes les versions :
-
-```xml
-<url>
-  <loc>https://monsite.com/fr/produits</loc>
-  <xhtml:link rel="alternate" hreflang="en" href="https://monsite.com/en/products"/>
-  <xhtml:link rel="alternate" hreflang="fr" href="https://monsite.com/fr/produits"/>
-</url>
+**Pages catégories :**
+```
+H1: [Catégorie] - [Proposition valeur]
+H2: Guide d'achat
+H2: Types de produits
+H2: Comment choisir
+H2: FAQ
 ```
 
-#### Indexation
+---
 
-- **Robots.txt** : Pas de restriction par langue
-- **Canonical URLs** : Une par version linguistique
-- **Schema markup** : Adapter la langue
+## Monitoring Essentiel
 
-### Redirections et erreurs
+### Google Search Console
+- Propriété par langue ou filtres `/fr/`, `/en/`
+- Surveillance erreurs indexation
+- Mots-clés en progression
+- Performance par page
 
-#### Gestion 404
+### Google Analytics 4
+- Segmentation par langue
+- Entonnoirs conversion par source
+- Revenus organiques vs payants
+- Événements e-commerce trackés
 
-- Page 404 dans la langue de l'URL
-- Suggestions dans la bonne langue
-- Liens de navigation traduits
+### KPIs techniques
+- Pages indexées vs total
+- Positions moyennes par mot-clé
+- CTR par page importante
+- Core Web Vitals
 
-#### Redirections
+### KPIs business
+- Trafic organique % du total
+- Conversion organique vs payant
+- Coût acquisition client organique
+- Revenus organiques mensuels
 
-- **301** : Changement permanent de structure
-- **302** : Redirection temporaire (détection géo)
-- **JavaScript** : Changement côté client uniquement
+---
 
-### Analytics et suivi
+## Actions Post-Lancement
 
-#### Segmentation
+### Hebdomadaire
+- Vérifier erreurs Search Console
+- Analyser nouveaux mots-clés
+- Corriger liens cassés
 
-- **Google Analytics** : Vues par langue
-- **Search Console** : Propriétés séparées ou filtres
-- **Mots-clés** : Recherche par marché linguistique
+### Mensuel
+- Optimiser pages CTR faible
+- Ajouter contenu saisonnier
+- Mettre à jour métadonnées performantes
 
-#### KPIs spécifiques
+### Trimestriel
+- Audit technique complet
+- Expansion mots-clés longue traîne
+- Révision stratégie contenu
 
-- Taux de conversion par langue
-- Temps de session par marché
-- Pages populaires par région
+---
 
-### Checklist de lancement
+## Points Critiques
 
-**Technique :**
+### Configuration obligatoire
+- URLs propres par langue (pas de paramètres)
+- Métadonnées uniques par page
+- Sitemap multilingue fonctionnel
+- Temps de chargement optimisé
 
-- [ ] URLs propres par langue
-- [ ] Hreflang configuré
-- [ ] Sitemap multilingue
-- [ ] Meta descriptions traduites
+### Contenu différenciant
+- Mots-clés locaux (Canada, Québec)
+- Descriptions produits uniques
+- Contenu éducatif par niche
+- Optimisation recherche vocale
 
-**Contenu :**
+### Avantages techniques
+- URLs flexibles vs limitations Shopify
+- Vitesse optimisée
+- Structure données personnalisée
+- Contrôle complet markup
 
-- [ ] Traductions complètes
-- [ ] Images localisées
-- [ ] Formats adaptés (prix, dates)
-- [ ] Navigation traduite
-
-**Monitoring :**
-
-- [ ] Analytics segmenté
-- [ ] Search Console configuré
-- [ ] Tests de vitesse par région
-- [ ] Suivi des erreurs 404
+### Métriques de succès
+- 40-60% trafic organique visé
+- Conversion organique supérieure vs pub
+- Réduction coût acquisition long terme
+- Indépendance plateformes publicitaires
