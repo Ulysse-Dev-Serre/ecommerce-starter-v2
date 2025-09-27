@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getAllUsers } from '../../../lib/services/user.service'
-import { withError } from '../../../lib/middleware/withError'
-import { logger } from '../../../lib/logger'
 
-async function getUsers() {
+import { logger } from '../../../lib/logger'
+import { withError } from '../../../lib/middleware/withError'
+import { getAllUsers } from '../../../lib/services/user.service'
+
+async function getUsers(): Promise<NextResponse> {
   logger.info({ action: 'get_all_users' }, 'Fetching all users')
   
   const users = await getAllUsers()

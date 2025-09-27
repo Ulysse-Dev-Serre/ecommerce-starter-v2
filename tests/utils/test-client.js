@@ -92,7 +92,7 @@ class TestClient {
   _formatResponse(response, data) {
     return {
       status: response.status,
-      data: data,
+      data,
       headers: Object.fromEntries(response.headers.entries()),
       success: response.status >= 200 && response.status < 300,
       error: response.status >= 400 ? data : null

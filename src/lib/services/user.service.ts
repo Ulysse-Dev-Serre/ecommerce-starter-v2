@@ -1,5 +1,5 @@
+import type { UserRole, User } from '../../generated/prisma'
 import { prisma } from '../db/prisma'
-import { UserRole } from '../../generated/prisma'
 import { logger } from '../logger'
 
 export interface CreateUserData {
@@ -19,10 +19,12 @@ export interface UpdateUserData {
   role?: UserRole
 }
 
+type UserWithBasicInfo = Pick<User, 'id' | 'clerkId' | 'email' | 'firstName' | 'lastName' | 'imageUrl' | 'role' | 'createdAt' | 'updatedAt'>
+
 /**
  * Get all users with basic information
  */
-export async function getAllUsers() {
+export async function getAllUsers(): Promise<UserWithBasicInfo[]> {
   return prisma.user.findMany({
     select: {
       id: true,
@@ -49,9 +51,71 @@ export async function getUserCount(): Promise<number> {
 }
 
 /**
+ * Get user by database ID (not clerkId)
+ */
+export async function getUserById(id: string): Promise<UserWithBasicInfo | null> {
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      clerkId: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      imageUrl: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  })
+}
+
+/**
+ * Get user by Clerk ID
+ */
+export async function getUserByClerkId(clerkId: string): Promise<User | null> {
+  return prisma.user.findUnique({
+    where: { clerkId },
+  })
+}
+
+/**
+ * Promote/demote user role (CLIENT ↔ ADMIN)
+ */
+export async function promoteUser(id: string, newRole: UserRole): Promise<UserWithBasicInfo> {
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: { 
+      role: newRole,
+      updatedAt: new Date()
+    },
+    select: {
+      id: true,
+      clerkId: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      imageUrl: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    }
+  })
+
+  logger.info({
+    action: 'user_role_updated',
+    userId: id,
+    newRole,
+    email: updatedUser.email,
+  }, `User role updated to ${newRole}`)
+
+  return updatedUser
+}
+
+/**
  * Create user from Clerk webhook data
  */
-export async function createUserFromClerk(userData: CreateUserData) {
+export async function createUserFromClerk(userData: CreateUserData): Promise<User> {
   const user = await prisma.user.create({
     data: {
       clerkId: userData.clerkId,
@@ -59,7 +123,7 @@ export async function createUserFromClerk(userData: CreateUserData) {
       firstName: userData.firstName,
       lastName: userData.lastName,
       imageUrl: userData.imageUrl,
-      role: userData.role || UserRole.CLIENT,
+      role: userData.role ?? UserRole.CLIENT,
     },
   })
 
@@ -76,7 +140,7 @@ export async function createUserFromClerk(userData: CreateUserData) {
 /**
  * Update or create user from Clerk webhook data
  */
-export async function upsertUserFromClerk(clerkId: string, userData: UpdateUserData) {
+export async function upsertUserFromClerk(clerkId: string, userData: UpdateUserData): Promise<User> {
   const user = await prisma.user.upsert({
     where: { clerkId },
     update: {
@@ -89,11 +153,11 @@ export async function upsertUserFromClerk(clerkId: string, userData: UpdateUserD
     },
     create: {
       clerkId,
-      email: userData.email || '',
+      email: userData.email ?? '',
       firstName: userData.firstName,
       lastName: userData.lastName,
       imageUrl: userData.imageUrl,
-      role: userData.role || UserRole.CLIENT,
+      role: userData.role ?? UserRole.CLIENT,
     },
   })
 
@@ -109,7 +173,7 @@ export async function upsertUserFromClerk(clerkId: string, userData: UpdateUserD
 /**
  * Delete user by Clerk ID
  */
-export async function deleteUserByClerkId(clerkId: string) {
+export async function deleteUserByClerkId(clerkId: string): Promise<{ count: number }> {
   const result = await prisma.user.deleteMany({
     where: { clerkId },
   })
@@ -128,13 +192,4 @@ export async function deleteUserByClerkId(clerkId: string) {
   }
 
   return result
-}
-
-/**
- * Get user by Clerk ID
- */
-export async function getUserByClerkId(clerkId: string) {
-  return prisma.user.findUnique({
-    where: { clerkId },
-  })
 }

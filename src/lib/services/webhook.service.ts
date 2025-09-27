@@ -1,12 +1,26 @@
-import { WebhookEvent } from '@clerk/nextjs/server'
-import { UserRole } from '../../generated/prisma'
+import type { UserRole, User } from '../../generated/prisma'
 import { logger } from '../logger'
 import { createUserFromClerk, upsertUserFromClerk, deleteUserByClerkId } from './user.service'
+
+interface ClerkWebhookEventData {
+  id: string
+  email_addresses?: Array<{
+    id: string
+    email_address: string
+  }>
+  primary_email_address_id?: string
+  first_name?: string | null
+  last_name?: string | null
+  image_url?: string | null
+  public_metadata?: {
+    role?: string
+  }
+}
 
 /**
  * Process Clerk user.created webhook event
  */
-export async function handleUserCreated(eventData: any) {
+export async function handleUserCreated(eventData: ClerkWebhookEventData): Promise<User> {
   logger.info({
     action: 'webhook_user_created',
     userId: eventData.id,
@@ -19,7 +33,7 @@ export async function handleUserCreated(eventData: any) {
   }
 
   const primaryEmail = eventData.email_addresses?.find(
-    (email: any) => email.id === eventData.primary_email_address_id
+    (email) => email.id === eventData.primary_email_address_id
   )
 
   if (!primaryEmail) {
@@ -51,7 +65,7 @@ export async function handleUserCreated(eventData: any) {
 /**
  * Process Clerk user.updated webhook event
  */
-export async function handleUserUpdated(eventData: any) {
+export async function handleUserUpdated(eventData: ClerkWebhookEventData): Promise<User> {
   logger.info({
     action: 'webhook_user_updated',
     userId: eventData.id,
@@ -62,7 +76,7 @@ export async function handleUserUpdated(eventData: any) {
   }
 
   const primaryEmail = eventData.email_addresses?.find(
-    (email: any) => email.id === eventData.primary_email_address_id
+    (email) => email.id === eventData.primary_email_address_id
   )
 
   if (!primaryEmail) {
@@ -88,7 +102,7 @@ export async function handleUserUpdated(eventData: any) {
 /**
  * Process Clerk user.deleted webhook event
  */
-export async function handleUserDeleted(eventData: any) {
+export async function handleUserDeleted(eventData: ClerkWebhookEventData): Promise<{ count: number }> {
   logger.info({
     action: 'webhook_user_deleted',
     userId: eventData.id,
@@ -104,7 +118,7 @@ export async function handleUserDeleted(eventData: any) {
 /**
  * Process webhook event based on type
  */
-export async function processWebhookEvent(eventType: string, eventData: any) {
+export async function processWebhookEvent(eventType: string, eventData: ClerkWebhookEventData): Promise<User | { count: number } | null> {
   switch (eventType) {
     case 'user.created':
       return handleUserCreated(eventData)
