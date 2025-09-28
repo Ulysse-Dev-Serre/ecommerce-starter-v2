@@ -36,6 +36,29 @@ export default async function RootLayout({
   params,
 }: RootLayoutProps): Promise<React.ReactElement> {
   const { locale } = await params;
+
+  // Vérifier si on a une vraie clé Clerk (pas une clé mock pour CI)
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  const hasValidClerkKey =
+    clerkKey?.startsWith('pk_live_') ||
+    (clerkKey?.startsWith('pk_test_') &&
+      clerkKey !== 'pk_test_mock_key_for_ci_build_only');
+
+  if (!hasValidClerkKey) {
+    // Mode CI/build sans Clerk
+    return (
+      <html lang={locale}>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          {children}
+        </body>
+      </html>
+    );
+  }
+
+  // Mode normal avec Clerk
   return (
     <ClerkProvider>
       <html lang={locale}>
