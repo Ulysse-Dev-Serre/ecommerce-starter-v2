@@ -12,11 +12,11 @@ const url = require('url');
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
-    
+
     req.on('data', chunk => {
       body += chunk.toString();
     });
-    
+
     req.on('end', () => {
       try {
         resolve(body ? JSON.parse(body) : {});
@@ -24,7 +24,7 @@ function parseBody(req) {
         resolve(body);
       }
     });
-    
+
     req.on('error', reject);
   });
 }
@@ -35,21 +35,24 @@ function parseBody(req) {
 function logWebhook(req, body) {
   console.log('\n🔥 WEBHOOK RECEIVED!');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  
+
   console.log('📋 Headers:');
   Object.entries(req.headers).forEach(([key, value]) => {
-    if (key.toLowerCase().includes('svix') || key.toLowerCase().includes('clerk')) {
+    if (
+      key.toLowerCase().includes('svix') ||
+      key.toLowerCase().includes('clerk')
+    ) {
       console.log(`  ${key}: ${value}`);
     }
   });
-  
+
   console.log('\n📦 Body:');
   if (typeof body === 'object') {
     console.log(JSON.stringify(body, null, 2));
   } else {
     console.log(body);
   }
-  
+
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 }
 
@@ -69,43 +72,46 @@ async function handleRequest(req, res) {
   const parsedUrl = url.parse(req.url, true);
   const path = parsedUrl.pathname;
   const method = req.method;
-  
+
   console.log(`[${timestamp}] ${method} ${path}`);
-  
+
   try {
     if (method === 'POST' && path === '/test-webhook') {
       const body = await parseBody(req);
       logWebhook(req, body);
-      
+
       sendJSON(res, {
         received: true,
         timestamp: new Date().toISOString(),
-        type: body?.type || 'unknown'
+        type: body?.type || 'unknown',
       });
-      
     } else if (method === 'GET' && path === '/health') {
       sendJSON(res, {
         status: 'healthy',
         service: 'webhook-debug-server',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
-      
     } else {
       console.log(`⚠️  Received ${method} request to ${path}`);
-      sendJSON(res, {
-        error: 'Endpoint not found',
-        availableEndpoints: [
-          'POST /test-webhook',
-          'GET /health'
-        ]
-      }, 404);
+      sendJSON(
+        res,
+        {
+          error: 'Endpoint not found',
+          availableEndpoints: ['POST /test-webhook', 'GET /health'],
+        },
+        404
+      );
     }
   } catch (error) {
     console.error('❌ Error handling request:', error.message);
-    sendJSON(res, {
-      error: 'Internal server error',
-      message: error.message
-    }, 500);
+    sendJSON(
+      res,
+      {
+        error: 'Internal server error',
+        message: error.message,
+      },
+      500
+    );
   }
 }
 

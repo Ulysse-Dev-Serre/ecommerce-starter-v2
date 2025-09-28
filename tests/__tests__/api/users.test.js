@@ -34,7 +34,7 @@ describe('Users API', () => {
       expect(response.data).toMatchObject({
         success: true,
         count: expect.any(Number),
-        timestamp: expect.any(String)
+        timestamp: expect.any(String),
       });
     });
   });
@@ -64,12 +64,16 @@ describe('Users API', () => {
 
     test('should toggle back to original role', async () => {
       // Premier switch
-      const firstResponse = await client.post(`/api/users/${testUserId}/promote`);
+      const firstResponse = await client.post(
+        `/api/users/${testUserId}/promote`
+      );
       const firstNewRole = firstResponse.data.newRole;
       const firstPreviousRole = firstResponse.data.previousRole;
 
       // Deuxième switch (retour)
-      const secondResponse = await client.post(`/api/users/${testUserId}/promote`);
+      const secondResponse = await client.post(
+        `/api/users/${testUserId}/promote`
+      );
 
       expect(secondResponse.data.previousRole).toBe(firstNewRole);
       expect(secondResponse.data.newRole).toBe(firstPreviousRole);

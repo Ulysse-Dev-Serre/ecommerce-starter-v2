@@ -7,6 +7,7 @@
 ### Philosophie
 
 Base technique solide et modulaire, pas une boutique figée :
+
 - **🌍 Multi-pays** : Taxes locales, devises, zones d'expédition configurables
 - **🎨 Multi-niches** : Animaux, plantes, jouets, vêtements, électronique...
 - **🌐 Multi-langues** : Français/Anglais par défaut, extensible à d'autres langues
@@ -32,23 +33,27 @@ npm run dev
 ## 📦 Fonctionnalités incluses
 
 ### 🛍️ **E-commerce complet**
+
 - Catalogue produits avec variantes
 - Panier intelligent (invité + connecté)
 - Checkout sécurisé Stripe
 - Gestion commandes et emails automatiques
 
 ### 🌍 **International par design**
+
 - Support multi-pays (Canada/USA/France)
 - URLs bilingues (`/fr/`, `/en/`) avec SEO optimisé
 - Calculs taxes et expédition localisés
 
 ### 🔒 **Production-ready**
+
 - Authentification robuste (Clerk)
 - Sécurité avancée (rate limiting, CSRF, XSS)
 - Monitoring et logs structurés
 - Tests automatisés
 
 ### 🎨 **Personnalisation rapide**
+
 - Système de thèmes CSS en quelques clics
 - Configuration par variables d'environnement
 - Architecture modulaire extensible
@@ -60,7 +65,7 @@ npm run dev
 ## 🛠️ Stack technique
 
 - **Frontend** : Next.js 15 + TypeScript + Tailwind CSS
-- **Backend** : Next.js API Routes + Prisma ORM  
+- **Backend** : Next.js API Routes + Prisma ORM
 - **Base de données** : PostgreSQL
 - **Auth** : Clerk
 - **Paiements** : Stripe
@@ -92,15 +97,18 @@ npm run build            # Build production
 ## 📚 Documentation
 
 ### 🚀 **Premier démarrage**
+
 - **[Installation & Setup](docs/setup.md)** - Guide complet étape par étape
 - **[Clerk ↔ PostgreSQL](docs/4-database-stack/clerk-postgres-sync.md)** - Synchronisation utilisateurs
 
 ### 📖 **Compréhension du projet**
+
 - **[Navigation documentation](docs/INDEX.md)** - Table des matières intelligente
 - **[Architecture](docs/1-foundations/architecture.md)** - Structure technique complète
 - **[Roadmap](docs/1-foundations/Roadmap.md)** - Évolution et milestones
 
 ### 🔧 **Guides techniques**
+
 - **[Système i18n](docs/2-Language_internationalization/language-config.md)** - Ajouter des langues
 - **[Thèmes CSS](docs/3-development-tools/theming.md)** - Personnaliser l'apparence
 - **[Logging & Debug](docs/3-development-tools/logging.md)** - Monitoring avancé
@@ -110,16 +118,19 @@ npm run build            # Build production
 ## 🎯 Objectifs du starter
 
 ### Pour l'entreprise
+
 - **Time-to-market** : Boutique en 1 semaine au lieu de 6 mois
 - **Coûts réduits** : Base technique éprouvée
 - **Scalabilité** : Architecture pensée pour grandir
 
-### Pour le développement  
+### Pour le développement
+
 - **Code quality** : TypeScript, tests, documentation
 - **Maintenabilité** : Architecture modulaire
 - **Extensibilité** : APIs bien définies
 
 ### Pour les projets clients
+
 - **Réutilisabilité** : Base pour plusieurs projets e-commerce
 - **Personnalisation** : Thèmes par client
 - **Support** : Documentation complète

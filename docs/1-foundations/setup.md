@@ -57,6 +57,7 @@ npx prisma migrate dev --name init
 À ce stade, l'authentification Clerk est fonctionnelle.
 
 **Test utilisateur** via script :
+
 ```bash
 npm run sync-clerk create
 ```
@@ -95,13 +96,13 @@ Accès : `http://localhost:3000`
 
 ## Stack technique
 
-| Couche | Technologie | Rôle |
-|--------|-------------|------|
-| **Frontend** | Next.js 15 + TypeScript | App Router + SSR |
-| **Auth** | Clerk | Authentification + webhooks |
-| **Database** | PostgreSQL + Prisma | ORM + migrations |
-| **Traductions** | next-intl (FR/EN) | Routage multilingue |
-| **Styling** | Tailwind CSS | Design system |
+| Couche          | Technologie             | Rôle                        |
+| --------------- | ----------------------- | --------------------------- |
+| **Frontend**    | Next.js 15 + TypeScript | App Router + SSR            |
+| **Auth**        | Clerk                   | Authentification + webhooks |
+| **Database**    | PostgreSQL + Prisma     | ORM + migrations            |
+| **Traductions** | next-intl (FR/EN)       | Routage multilingue         |
+| **Styling**     | Tailwind CSS            | Design system               |
 
 ---
 
@@ -114,8 +115,9 @@ npm run dev:setup
 ```
 
 **Actions automatiques :**
+
 1. `npm run db:push` - Synchronise schéma Prisma
-2. `npm run sync-clerk create` - Crée comptes test Clerk  
+2. `npm run sync-clerk create` - Crée comptes test Clerk
 3. `npm run db:seed` - Ajoute données exemple
 
 ---

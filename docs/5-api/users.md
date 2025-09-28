@@ -125,12 +125,14 @@ npm test users.test.js
 ### Cas testés
 
 **Succès :**
+
 - Récupération liste utilisateurs
 - Structure de réponse correcte
 - Changement de rôle CLIENT → ADMIN
 - Retour ADMIN → CLIENT
 
 **Erreurs :**
+
 - ID utilisateur invalide (404)
 - Gestion appropriée des erreurs
 

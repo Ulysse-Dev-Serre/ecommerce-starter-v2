@@ -11,14 +11,14 @@ const mockUser = {
   firstName: 'Test',
   lastName: 'User',
   imageUrl: 'https://example.com/avatar.jpg',
-  role: 'CLIENT'
+  role: 'CLIENT',
 };
 
 async function testDatabaseOperations() {
   console.log('🧪 Testing database operations locally...\n');
-  
+
   const prisma = new PrismaClient();
-  
+
   try {
     // Test connection
     console.log('1. Testing database connection');
@@ -27,37 +27,37 @@ async function testDatabaseOperations() {
 
     // Clean up any existing test data
     await prisma.user.deleteMany({
-      where: { clerkId: { startsWith: 'test_' } }
+      where: { clerkId: { startsWith: 'test_' } },
     });
 
     // Test user creation
     console.log('\n2. Testing user creation');
     const user = await prisma.user.create({
-      data: mockUser
+      data: mockUser,
     });
     console.log('✅ User created successfully:', {
       id: user.id,
       clerkId: user.clerkId,
       email: user.email,
       name: `${user.firstName} ${user.lastName}`,
-      role: user.role
+      role: user.role,
     });
 
     // Test user update
     console.log('\n3. Testing user update');
     const updatedUser = await prisma.user.update({
       where: { clerkId: mockUser.clerkId },
-      data: { firstName: 'Updated Test' }
+      data: { firstName: 'Updated Test' },
     });
     console.log('✅ User updated successfully:', {
       oldName: mockUser.firstName,
-      newName: updatedUser.firstName
+      newName: updatedUser.firstName,
     });
 
     // Test user query
     console.log('\n4. Testing user query');
     const foundUser = await prisma.user.findUnique({
-      where: { clerkId: mockUser.clerkId }
+      where: { clerkId: mockUser.clerkId },
     });
     console.log('✅ User found successfully:', !!foundUser);
 
@@ -69,27 +69,26 @@ async function testDatabaseOperations() {
     // Test user deletion
     console.log('\n6. Testing user deletion');
     await prisma.user.delete({
-      where: { clerkId: mockUser.clerkId }
+      where: { clerkId: mockUser.clerkId },
     });
     console.log('✅ User deleted successfully');
 
     // Verify deletion
     const deletedUser = await prisma.user.findUnique({
-      where: { clerkId: mockUser.clerkId }
+      where: { clerkId: mockUser.clerkId },
     });
     console.log('✅ Deletion verified:', deletedUser === null);
 
     console.log('\n🎉 All database operations working correctly!');
-
   } catch (error) {
     console.error('❌ Database test failed:', error.message);
-    
+
     if (error.code === 'P1001') {
       console.error('🔌 Database connection failed. Check your DATABASE_URL');
     } else if (error.code === 'P2002') {
       console.error('🔄 Unique constraint violation. Cleaning up test data...');
     }
-    
+
     process.exit(1);
   } finally {
     await prisma.$disconnect();

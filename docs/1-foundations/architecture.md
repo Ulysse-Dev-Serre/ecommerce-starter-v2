@@ -26,7 +26,6 @@
 │
 ├── docs/                                    # Documentation technique complète
 │   ├── INDEX.md                             # Index navigation documentation
-│   ├── README.md                            # Guide démarrage documentation
 │   ├── 1-foundations/                       # Concepts base architecture
 │   │   ├── architecture.md                  # Architecture technique système
 │   │   ├── Roadmap.md                       # Feuille route développement
@@ -37,6 +36,7 @@
 │   ├── 3-development-tools/                # Outils qualité développement
 │   │   ├── eslint-prettier.md               # Formatage automatique code
 │   │   ├── logging.md                       # Système logs structurés
+│   │   ├── theming.md
 │   │   └── security-headers.md              # Headers sécurité HTTP
 │   └── 4-database-stack/                   # Base données PostgreSQL
 │       ├── clerk-postgres-sync.md           # Synchronisation Clerk database
@@ -51,16 +51,11 @@
 │           └── migration.sql                # Code SQL migration
 │
 ├── public/                                  # Assets statiques publics
-│   ├── file.svg                             # Icône fichier interface
-│   ├── globe.svg                            # Icône globe i18n
 │   ├── next.svg                             # Logo NextJS
-│   ├── vercel.svg                           # Logo Vercel déploiement
-│   └── window.svg                           # Icône fenêtre interface
 │
 ├── scripts/                                 # Scripts utilitaires développement
 │   ├── reset-local.ts                       # Reset environnement local
 │   ├── sync-clerk-users.ts                  # Synchronisation utilisateurs Clerk
-│   └── test-webhook.ts.old                  # Tests webhook anciens
 │
 ├── src/                                     # Code source application
 │   ├── middleware.ts                        # Middleware NextJS i18n
@@ -160,76 +155,87 @@
 
 ## 🔄 **Flux de Données**
 
-
-
 ## 🎯 **Principes Architecture**
 
 ### **Separation of Concerns**
+
 - **Routes API** : Thin controllers (validation + response)
 - **Services** : Business logic pure (testable)
 - **Prisma** : Data access layer (singleton)
 - **Middleware** : Cross-cutting concerns (erreurs, logs)
 
 ### **Single Responsibility**
+
 - **1 service = 1 domaine métier** (users, webhooks, etc.)
 - **1 route = 1 endpoint** (pas de logique complexe)
 - **1 middleware = 1 responsabilité** (erreurs, auth, etc.)
 
 ### **Dependency Injection**
-```typescript
 
+```typescript
 // ✅ Après (singleton réutilisable)
-import { prisma } from '@/lib/db/prisma'
+import { prisma } from '@/lib/db/prisma';
 ```
 
 ## 🛠️ **Patterns Implémentés**
 
 ### **Singleton Pattern** (Prisma)
+
 ```typescript
 // lib/db/prisma.ts
-const globalForPrisma = global as unknown as { prisma?: PrismaClient }
+const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 
-export const prisma = globalForPrisma.prisma || new PrismaClient({
-  log: ['error', 'warn'],
-})
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['error', 'warn'],
+  });
 ```
 
 ### **Service Layer Pattern**
+
 ```typescript
 // lib/services/user.service.ts
 export async function getAllUsers() {
-  return prisma.user.findMany({ /* ... */ })
+  return prisma.user.findMany({
+    /* ... */
+  });
 }
 
 export async function createUserFromClerk(data: CreateUserData) {
-  return prisma.user.create({ /* ... */ })
+  return prisma.user.create({
+    /* ... */
+  });
 }
 ```
 
 ### **Error Handling Pattern**
+
 ```typescript
 // lib/middleware/withError.ts
 export function withError(handler: ApiHandler) {
   return async (...args: any[]) => {
     try {
-      return await handler(...args)
+      return await handler(...args);
     } catch (error) {
-      logger.error(error)
-      return NextResponse.json({ error: '...' }, { status: 500 })
+      logger.error(error);
+      return NextResponse.json({ error: '...' }, { status: 500 });
     }
-  }
+  };
 }
 ```
 
 ## 📊 **Performance & Scalabilité**
 
 ### **Optimisations Implémentées**
+
 - **Prisma Singleton** : Évite les fuites de connexion
 - **Logging Structuré** : JSON logs pour monitoring
 - **Error Boundaries** : Gestion centralisée des erreurs
 - **Service Layer** : Code réutilisable et testable
 
 ### **Prêt pour Scale**
+
 - **Horizontal** : Services isolés → microservices faciles
 - **Vertical** : Prisma connection pooling ready
 - **Monitoring** : Logs structurés → APM integration
@@ -238,32 +244,33 @@ export function withError(handler: ApiHandler) {
 ## 🧪 **Testabilité**
 
 ### **Unit Tests** (Services)
+
 ```typescript
 // __tests__/services/user.service.test.ts
-import { createUserFromClerk } from '@/lib/services/user.service'
+import { createUserFromClerk } from '@/lib/services/user.service';
 
 // Mock Prisma
-jest.mock('@/lib/db/prisma')
+jest.mock('@/lib/db/prisma');
 
 test('should create user from Clerk data', async () => {
-  const userData = { clerkId: 'user_123', email: 'test@example.com' }
-  const result = await createUserFromClerk(userData)
-  expect(result.email).toBe('test@example.com')
-})
+  const userData = { clerkId: 'user_123', email: 'test@example.com' };
+  const result = await createUserFromClerk(userData);
+  expect(result.email).toBe('test@example.com');
+});
 ```
 
 ### **Integration Tests** (APIs)
+
 ```typescript
 // __tests__/api/users.test.ts
-import { GET } from '@/app/api/users/route'
+import { GET } from '@/app/api/users/route';
 
 test('GET /api/users should return users list', async () => {
-  const request = new Request('http://localhost:3000/api/users')
-  const response = await GET(request)
-  const data = await response.json()
-  
-  expect(response.status).toBe(200)
-  expect(data.success).toBe(true)
-})
-```
+  const request = new Request('http://localhost:3000/api/users');
+  const response = await GET(request);
+  const data = await response.json();
 
+  expect(response.status).toBe(200);
+  expect(data.success).toBe(true);
+});
+```

@@ -10,8 +10,7 @@ const LOG_LEVELS = {
   test: ['error'],
 };
 
-const currentEnv =
-  (process.env.NODE_ENV) ?? 'development';
+const currentEnv = process.env.NODE_ENV ?? 'development';
 const allowedLevels = LOG_LEVELS[currentEnv];
 
 // Fonction pour générer un ID unique
@@ -20,11 +19,11 @@ function generateId(): string {
 }
 
 interface Logger {
-  info: (data: Record<string, unknown>, message?: string) => void
-  warn: (data: Record<string, unknown>, message?: string) => void
-  error: (data: Record<string, unknown>, message?: string) => void
-  debug: (data: Record<string, unknown>, message?: string) => void
-  child: (context: Record<string, unknown>) => Logger
+  info: (data: Record<string, unknown>, message?: string) => void;
+  warn: (data: Record<string, unknown>, message?: string) => void;
+  error: (data: Record<string, unknown>, message?: string) => void;
+  debug: (data: Record<string, unknown>, message?: string) => void;
+  child: (context: Record<string, unknown>) => Logger;
 }
 
 // Logger avec contrôle par environnement
@@ -73,7 +72,7 @@ const createLogger = (): Logger => {
       log('error', data, message),
     debug: (data: Record<string, unknown>, message?: string) =>
       log('debug', data, message),
-    child: (context: Record<string, unknown>) => ({
+    child: (context: Record<string, unknown>): Logger => ({
       info: (data: Record<string, unknown>, message?: string) =>
         log('info', { ...context, ...data }, message),
       warn: (data: Record<string, unknown>, message?: string) =>
@@ -82,6 +81,8 @@ const createLogger = (): Logger => {
         log('error', { ...context, ...data }, message),
       debug: (data: Record<string, unknown>, message?: string) =>
         log('debug', { ...context, ...data }, message),
+      child: (childContext: Record<string, unknown>): Logger =>
+        createLogger().child({ ...context, ...childContext }),
     }),
   };
 };
@@ -162,7 +163,10 @@ export const logPerformance = (
 };
 
 // Logger spécial pour sécurité (toujours loggé)
-export const logSecurity = (event: string, context: Partial<LogContext>): void => {
+export const logSecurity = (
+  event: string,
+  context: Partial<LogContext>
+): void => {
   // Bypass des niveaux pour sécurité - toujours logué
   const logEntry = {
     timestamp: new Date().toISOString(),

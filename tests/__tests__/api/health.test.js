@@ -36,8 +36,8 @@ describe('Health API', () => {
         version: expect.any(String),
         database: {
           connected: expect.any(Boolean),
-          userCount: expect.any(Number)
-        }
+          userCount: expect.any(Number),
+        },
       });
     });
 

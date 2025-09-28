@@ -22,7 +22,10 @@
     "test:webhook:client": "node tests/scripts/test-webhook-client.js",
     "test:deps": "node tests/scripts/install-test-deps.js",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "ci": "npm run typecheck && npm run lint && npm run format:check && npm run build",
+    "ci:fix": "npm run format && npm run lint --fix"
   },
   "dependencies": {
     "@clerk/backend": "^2.13.0",
