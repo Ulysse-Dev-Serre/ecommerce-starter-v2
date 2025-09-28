@@ -20,10 +20,10 @@ const eslintConfig = [
       'next-env.d.ts',
       'dist/**',
       'src/generated/**',
-      'postcss.config.mjs',  // Ignore postcss config
-      'tests/**',           // Ignore temporairement les tests
-      'scripts/**',         // Ignore les scripts utilitaires
-      '**/*.test.js',       // Ignore tous les fichiers de test
+      'postcss.config.mjs', // Ignore postcss config
+      'tests/**', // Ignore temporairement les tests
+      'scripts/**', // Ignore les scripts utilitaires
+      '**/*.test.js', // Ignore tous les fichiers de test
       '**/*.test.ts',
     ],
   },

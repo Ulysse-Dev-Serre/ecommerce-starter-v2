@@ -10,13 +10,13 @@ const TestClient = require('./test-client');
  */
 async function setupTest() {
   const client = new TestClient();
-  
+
   // Check if server is running
   const isRunning = await client.isServerRunning();
   if (!isRunning) {
     throw new Error('⚠️  Serveur non démarré. Lancer: npm run dev');
   }
-  
+
   return { client };
 }
 
@@ -53,5 +53,5 @@ module.exports = {
   setupTest,
   teardownTest,
   wait,
-  retry
+  retry,
 };

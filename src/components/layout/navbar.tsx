@@ -4,7 +4,7 @@
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState, type MouseEvent } from 'react';
+import React, { useEffect, useState, type MouseEvent } from 'react';
 
 import { logger } from '../../lib/logger';
 
@@ -12,8 +12,11 @@ interface NavbarProps {
   locale: string;
 }
 
-export function Navbar({ locale }: NavbarProps): JSX.Element {
-  const [messages, setMessages] = useState<Record<string, Record<string, string>> | null>(null);
+export function Navbar({ locale }: NavbarProps): React.JSX.Element {
+  const [messages, setMessages] = useState<Record<
+    string,
+    Record<string, string>
+  > | null>(null);
   const pathname = usePathname();
 
   // Charger les messages pour la locale actuelle
@@ -53,10 +56,7 @@ export function Navbar({ locale }: NavbarProps): JSX.Element {
   }, [locale]);
 
   // Fonction pour changer de langue avec logging
-  const handleLanguageChange = (
-    newLocale: string,
-    event: MouseEvent
-  ): void => {
+  const handleLanguageChange = (newLocale: string, event: MouseEvent): void => {
     event.preventDefault();
 
     // Logger le changement de langue

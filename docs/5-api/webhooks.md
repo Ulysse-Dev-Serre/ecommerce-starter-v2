@@ -11,6 +11,7 @@ Les webhooks permettent aux services externes d'envoyer automatiquement des donn
 **🎯 Fonction :** Synchronise automatiquement les utilisateurs entre Clerk et la base de données PostgreSQL
 
 **⚡ Événements gérés :**
+
 - ✅ **Utilisateur créé** → Ajout automatique en base
 - ✅ **Utilisateur modifié** → Mise à jour automatique en base
 - ✅ **Utilisateur supprimé** → Suppression automatique en base
@@ -23,11 +24,13 @@ Les webhooks permettent aux services externes d'envoyer automatiquement des donn
 
 ## 🔮 **Webhooks futurs prévus**
 
-### **💳 Stripe - Gestion des paiements** 
-*À configurer plus tard*
+### **💳 Stripe - Gestion des paiements**
+
+_À configurer plus tard_
 
 **🎯 Fonction :** Gestion automatique des paiements et commandes  
 **⚡ Événements prévus :**
+
 - `payment_intent.succeeded` → Marquer commande comme payée
 - `payment_intent.failed` → Annuler commande
 - `invoice.payment_succeeded` → Activer abonnement
@@ -37,10 +40,12 @@ Les webhooks permettent aux services externes d'envoyer automatiquement des donn
 ---
 
 ### **📧 Emails - Suivi de livraison**
-*À configurer plus tard*
+
+_À configurer plus tard_
 
 **🎯 Fonction :** Tracking des emails envoyés (confirmations, notifications)  
 **⚡ Événements prévus :**
+
 - `delivered` → Log email livré avec succès
 - `bounced` → Marquer adresse email invalide
 - `opened` → Analytics d'ouverture
@@ -50,10 +55,12 @@ Les webhooks permettent aux services externes d'envoyer automatiquement des donn
 ---
 
 ### **📦 Livraison - Suivi de colis**
-*À configurer plus tard* 
+
+_À configurer plus tard_
 
 **🎯 Fonction :** Mise à jour automatique du statut des livraisons  
 **⚡ Événements prévus :**
+
 - `package.in_transit` → Mettre à jour statut commande
 - `package.delivered` → Notifier client et clôturer commande
 - `package.exception` → Gérer les problèmes de livraison
@@ -65,11 +72,13 @@ Les webhooks permettent aux services externes d'envoyer automatiquement des donn
 ## 🎯 **Différence : Webhooks vs Actions internes**
 
 ### **🌐 Webhooks (Services externes → Votre app)**
+
 - **Clerk** vous informe : "Un utilisateur s'est inscrit"
-- **Stripe** vous informe : "Un paiement a été réussi" 
+- **Stripe** vous informe : "Un paiement a été réussi"
 - **Transporteur** vous informe : "Le colis est livré"
 
 ### **🏠 Actions internes (Votre interface → Votre base)**
+
 - Admin ajoute un produit → Direct vers PostgreSQL
 - Client ajoute au panier → Direct vers PostgreSQL
 - Modification des stocks → Direct vers PostgreSQL
@@ -81,6 +90,7 @@ Les webhooks permettent aux services externes d'envoyer automatiquement des donn
 ## 🔍 **Debugging et monitoring**
 
 ### **📊 Logs disponibles**
+
 Tous les webhooks génèrent des logs détaillés pour le monitoring et le debugging :
 
 ```bash
@@ -89,11 +99,12 @@ npm run dev
 
 # Les webhooks apparaissent avec des détails complets :
 # - Événement reçu
-# - Données synchronisées  
+# - Données synchronisées
 # - Erreurs éventuelles
 ```
 
 ### **🛠️ Outils de test**
+
 - **ngrok** pour exposer localhost en développement
 - **Clerk Dashboard** pour déclencher des événements test
 - **Scripts de test** pour créer des utilisateurs factices

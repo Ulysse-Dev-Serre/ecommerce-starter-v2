@@ -43,14 +43,14 @@ class TestClient {
    */
   async _makeRequest(endpoint, method, data = null, config = {}) {
     const url = `${this.baseURL}${endpoint}`;
-    
+
     const options = {
       method,
       headers: {
         'Content-Type': 'application/json',
-        ...config.headers
+        ...config.headers,
       },
-      signal: AbortSignal.timeout(this.timeout)
+      signal: AbortSignal.timeout(this.timeout),
     };
 
     if (data && (method === 'POST' || method === 'PUT')) {
@@ -60,10 +60,10 @@ class TestClient {
     try {
       const response = await fetch(url, options);
       let responseData;
-      
+
       // Clone response before reading body to avoid "Body already read" error
       const responseClone = response.clone();
-      
+
       try {
         responseData = await response.json();
       } catch {
@@ -95,7 +95,7 @@ class TestClient {
       data,
       headers: Object.fromEntries(response.headers.entries()),
       success: response.status >= 200 && response.status < 300,
-      error: response.status >= 400 ? data : null
+      error: response.status >= 400 ? data : null,
     };
   }
 

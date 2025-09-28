@@ -36,7 +36,7 @@ async function syncClerkUsers() {
       }
 
       // Déterminer le rôle basé sur l'email ou les métadonnées
-      let role = UserRole.CLIENT;
+      let role: UserRole = UserRole.CLIENT;
       if (email.includes('admin')) {
         role = UserRole.ADMIN;
       }

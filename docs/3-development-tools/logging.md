@@ -16,10 +16,12 @@ Ce document décrit le système de logging structuré du projet pour un monitori
 ### **⚡ Quand les logs se déclenchent**
 
 **🤖 Automatiquement :**
+
 - ✅ **Erreurs API** → `withError.ts` attrape et log toutes les erreurs
 - ✅ **Performance lente** → `logPerformance()` génère un warning si > 2 secondes
 
 **👤 Manuellement :**
+
 - ✅ **Actions utilisateur** → `logUserAction('purchase', { userId: '123' })`
 - ✅ **Erreurs métier** → `logError('Paiement échoué', { orderId: '456' })`
 - ✅ **Informations** → `logger.info({ step: 'validation' }, 'Début validation')`
@@ -27,13 +29,15 @@ Ce document décrit le système de logging structuré du projet pour un monitori
 ### **🎯 Rôle des fichiers**
 
 **🧠 `src/lib/logger.ts` - Le cerveau**
-- Décide quels logs afficher selon l'environnement  
-- Formate tout en JSON avec `timestamp`, `requestId`, etc.  
+
+- Décide quels logs afficher selon l'environnement
+- Formate tout en JSON avec `timestamp`, `requestId`, etc.
 - Fournit les fonctions helper (`logUserAction`, `logError`, etc.)
 
 **🛡️ `src/lib/middleware/withError.ts` - Le garde du corps**
-- Protection automatique des API routes  
-- Capture TOUTES les erreurs non gérées  
+
+- Protection automatique des API routes
+- Capture TOUTES les erreurs non gérées
 - Log l'erreur + retourne une réponse d'erreur propre
 
 ---
@@ -43,48 +47,53 @@ Ce document décrit le système de logging structuré du projet pour un monitori
 ### **Fonctions principales**
 
 ```typescript
-import { logger, logUserAction, logError, createRequestLogger } from '@/lib/logger'
+import {
+  logger,
+  logUserAction,
+  logError,
+  createRequestLogger,
+} from '@/lib/logger';
 
 // Logger de base
-logger.info({ userId: '123' }, 'Action réussie')
-logger.error({ error: 'Connection failed' }, 'Erreur de connexion')
+logger.info({ userId: '123' }, 'Action réussie');
+logger.error({ error: 'Connection failed' }, 'Erreur de connexion');
 
 // Logger avec contexte (recommandé pour APIs)
-const requestLogger = createRequestLogger()
-requestLogger.info({ step: 'validation' }, 'Début validation')
+const requestLogger = createRequestLogger();
+requestLogger.info({ step: 'validation' }, 'Début validation');
 
 // Helpers spécialisés
-logUserAction('product_view', { userId: '123', productId: '456' })
-logError(error, { userId: '123', component: 'checkout' })
+logUserAction('product_view', { userId: '123', productId: '456' });
+logError(error, { userId: '123', component: 'checkout' });
 ```
 
 ### **Exemple concret dans une API**
 
 ```typescript
-import { createRequestLogger, logUserAction } from '@/lib/logger'
+import { createRequestLogger, logUserAction } from '@/lib/logger';
 
 export async function POST(request: Request) {
-  const logger = createRequestLogger() // 🆔 ID unique pour tracer
-  
-  logUserAction('purchase_attempt', { userId: '123', productId: 'abc' })
-  
+  const logger = createRequestLogger(); // 🆔 ID unique pour tracer
+
+  logUserAction('purchase_attempt', { userId: '123', productId: 'abc' });
+
   try {
-    logger.info({ step: 'validation' }, 'Début validation commande')
+    logger.info({ step: 'validation' }, 'Début validation commande');
     // ... logique métier
-    
   } catch (error) {
     // 🚨 withError.ts va automatiquement logger cette erreur
-    throw error
+    throw error;
   }
 }
 ```
 
 **Ce qui s'affiche :**
+
 ```json
 {
   "timestamp": "2025-09-28T10:30:15.123Z",
   "level": "info",
-  "service": "ecommerce-frontend", 
+  "service": "ecommerce-frontend",
   "requestId": "id_1727516215123_xyz789",
   "userId": "123",
   "action": "purchase_attempt",
@@ -98,6 +107,7 @@ export async function POST(request: Request) {
 ## ⚙️ **Commandes pratiques**
 
 ### **Lancer avec différents niveaux de logs**
+
 ```bash
 # Développement - TOUS les logs (recommandé)
 npm run dev
@@ -110,6 +120,7 @@ npm run test
 ```
 
 ### **Filtrer les logs en développement**
+
 ```bash
 # Voir uniquement les erreurs
 npm run dev | grep '"level":"error"'
@@ -126,38 +137,46 @@ npm run dev | grep '"category":"performance"'
 ## 📋 **Référence rapide**
 
 ### **Niveaux par environnement**
+
 - 🟢 **Développement** : debug, info, warn, error
-- 🟡 **Production** : warn, error  
+- 🟡 **Production** : warn, error
 - 🔴 **Tests** : error
 
 ### **Catégories disponibles**
+
 - `user_action` - Actions utilisateur
-- `system` - Événements système  
+- `system` - Événements système
 - `error` - Erreurs applicatives
 - `performance` - Métriques de performance
 - `security` - Événements sécurité
 
 ### **✅ Bonnes pratiques**
+
 1. **Toujours utiliser `requestId`** pour tracer les requêtes
-2. **Inclure le contexte métier** (userId, productId, etc.)  
+2. **Inclure le contexte métier** (userId, productId, etc.)
 3. **Ne jamais logger de données sensibles** (passwords, tokens, etc.)
 4. **Utiliser les helpers** (`logUserAction`, `logError`) plutôt que `logger` direct
 
 ### **❌ À éviter**
+
 ```typescript
 // Pas assez de contexte
-logger.info({}, 'Something happened')
+logger.info({}, 'Something happened');
 
-// Données sensibles  
-logger.info({ password: 'secret123' }, 'User login')
+// Données sensibles
+logger.info({ password: 'secret123' }, 'User login');
 ```
 
 ### **✅ Recommandé**
+
 ```typescript
 // Contexte riche et sécurisé
-logger.info({ 
-  userId: '123', 
-  action: 'login_success',
-  requestId: 'req-456' 
-}, 'User successfully authenticated')
+logger.info(
+  {
+    userId: '123',
+    action: 'login_success',
+    requestId: 'req-456',
+  },
+  'User successfully authenticated'
+);
 ```

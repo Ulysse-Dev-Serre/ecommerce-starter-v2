@@ -4,12 +4,12 @@ const config = {
   roots: ['<rootDir>/tests'],
   testMatch: [
     '<rootDir>/tests/**/__tests__/**/*.{js,ts}',
-    '<rootDir>/tests/**/?(*.)+(spec|test).{js,ts}'
+    '<rootDir>/tests/**/?(*.)+(spec|test).{js,ts}',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
     '!src/**/*.d.ts',
-    '!src/generated/**'
+    '!src/generated/**',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
@@ -17,7 +17,7 @@ const config = {
   testTimeout: 30000,
   verbose: true,
   clearMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
 };
 
 module.exports = config;

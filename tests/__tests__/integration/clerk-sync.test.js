@@ -3,7 +3,11 @@
  */
 const { PrismaClient } = require('../../../src/generated/prisma');
 const userData = require('../../fixtures/user-data.json');
-const { mockClerkWebhookPayload, mockClerkUpdatePayload, mockClerkDeletePayload } = require('../../utils/mock-data');
+const {
+  mockClerkWebhookPayload,
+  mockClerkUpdatePayload,
+  mockClerkDeletePayload,
+} = require('../../utils/mock-data');
 const { setupTest, teardownTest } = require('../../utils/setup');
 
 describe('Clerk Synchronization Integration', () => {
@@ -25,7 +29,7 @@ describe('Clerk Synchronization Integration', () => {
     // Clean up test data
     try {
       await prisma.user.deleteMany({
-        where: { clerkId: { startsWith: 'test_' } }
+        where: { clerkId: { startsWith: 'test_' } },
       });
     } catch (error) {
       // Ignore cleanup errors
@@ -45,21 +49,21 @@ describe('Clerk Synchronization Integration', () => {
 
       // Verify user was created in database
       const user = await prisma.user.findUnique({
-        where: { clerkId: mockClerkWebhookPayload.data.id }
+        where: { clerkId: mockClerkWebhookPayload.data.id },
       });
 
       expect(user).toBeDefined();
-      expect(user.email).toBe(mockClerkWebhookPayload.data.email_addresses[0].email_address);
+      expect(user.email).toBe(
+        mockClerkWebhookPayload.data.email_addresses[0].email_address
+      );
       expect(user.firstName).toBe(mockClerkWebhookPayload.data.first_name);
     });
 
     test('should update user via webhook and verify changes', async () => {
       // Create user first
-      await client.post(
-        '/api/webhooks/clerk',
-        mockClerkWebhookPayload,
-        { headers: userData.clerkWebhookHeaders }
-      );
+      await client.post('/api/webhooks/clerk', mockClerkWebhookPayload, {
+        headers: userData.clerkWebhookHeaders,
+      });
 
       // Update user via webhook
       const updateResponse = await client.post(
@@ -72,20 +76,22 @@ describe('Clerk Synchronization Integration', () => {
 
       // Verify changes in database
       const updatedUser = await prisma.user.findUnique({
-        where: { clerkId: mockClerkUpdatePayload.data.id }
+        where: { clerkId: mockClerkUpdatePayload.data.id },
       });
 
-      expect(updatedUser.email).toBe(mockClerkUpdatePayload.data.email_addresses[0].email_address);
-      expect(updatedUser.firstName).toBe(mockClerkUpdatePayload.data.first_name);
+      expect(updatedUser.email).toBe(
+        mockClerkUpdatePayload.data.email_addresses[0].email_address
+      );
+      expect(updatedUser.firstName).toBe(
+        mockClerkUpdatePayload.data.first_name
+      );
     });
 
     test('should delete user via webhook and verify removal', async () => {
       // Create user first
-      await client.post(
-        '/api/webhooks/clerk',
-        mockClerkWebhookPayload,
-        { headers: userData.clerkWebhookHeaders }
-      );
+      await client.post('/api/webhooks/clerk', mockClerkWebhookPayload, {
+        headers: userData.clerkWebhookHeaders,
+      });
 
       // Delete user via webhook
       const deleteResponse = await client.post(
@@ -98,7 +104,7 @@ describe('Clerk Synchronization Integration', () => {
 
       // Verify user was deleted from database
       const deletedUser = await prisma.user.findUnique({
-        where: { clerkId: mockClerkDeletePayload.data.id }
+        where: { clerkId: mockClerkDeletePayload.data.id },
       });
 
       expect(deletedUser).toBeNull();

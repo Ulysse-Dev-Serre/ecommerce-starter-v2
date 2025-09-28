@@ -300,7 +300,9 @@ async function seedCategories(): Promise<Map<string, Category>> {
 
   // Puis les sous-catégories
   for (const categoryData of CATEGORIES.filter(c => c.parentSlug)) {
-    const parentCategory = categoryMap.get(categoryData.parentSlug);
+    const parentCategory = categoryData.parentSlug
+      ? categoryMap.get(categoryData.parentSlug)
+      : null;
     if (parentCategory) {
       const category = await prisma.category.create({
         data: {

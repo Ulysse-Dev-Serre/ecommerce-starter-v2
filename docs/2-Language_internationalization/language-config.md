@@ -41,17 +41,17 @@ Les traductions sont organisées par catégories :
 
 ```json
 {
-  "common": { 
+  "common": {
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
     "signOut": "Se déconnecter"
   },
-  "navbar": { 
+  "navbar": {
     "brand": "Votre Boutique",
     "home": "Accueil",
     "products": "Produits"
   },
-  "products": { 
+  "products": {
     "title": "Produits",
     "addToCart": "Ajouter au panier"
   }
@@ -84,11 +84,18 @@ Principe de fonctionnement :
 4. **Changement de langue** → redirige vers nouvelle URL, recharge automatiquement
 
 **Exemple concret :**
+
 ```typescript
 // Accès aux traductions selon la locale active
-{messages.common.contact}     // "Contact" (fr) / "Contact" (en)
-{messages.navbar.home}        // "Accueil" (fr) / "Home" (en)
-{messages.products.title}     // "Produits" (fr) / "Products" (en)
+{
+  messages.common.contact;
+} // "Contact" (fr) / "Contact" (en)
+{
+  messages.navbar.home;
+} // "Accueil" (fr) / "Home" (en)
+{
+  messages.products.title;
+} // "Produits" (fr) / "Products" (en)
 ```
 
 ---
@@ -150,7 +157,7 @@ export function generateStaticParams() {
   return [
     { locale: 'fr' },
     { locale: 'en' },
-    { locale: 'es' } // Ajouter cette ligne
+    { locale: 'es' }, // Ajouter cette ligne
   ];
 }
 ```
@@ -226,7 +233,7 @@ export function useTranslations(messages: any) {
     t: (key: string) => {
       const keys = key.split('.');
       return getNestedValue(messages, keys);
-    }
+    },
   };
 }
 
@@ -262,6 +269,7 @@ export const i18n = {
 ```
 
 **Impact :**
+
 - `/` redirigera vers `/en` au lieu de `/fr`
 - Langue de fallback devient l'anglais
 - URLs sans locale utilisent l'anglais
@@ -328,16 +336,19 @@ Les utilisateurs peuvent changer de langue via :
 ### Problèmes courants
 
 **1. Traductions ne s'affichent pas :**
+
 - Vérifier la syntaxe JSON (virgules, guillemets)
 - S'assurer que la clé existe dans le dictionnaire
 - Tester avec `console.log(messages)` les valeurs retournées
 
 **2. Mauvaise langue chargée :**
+
 - Vérifier le paramètre `locale` reçu par le composant
 - Inspecter l'URL dans le navigateur
 - Vérifier le middleware de redirection
 
 **3. Clés manquantes :**
+
 - S'assurer que toutes les langues ont les mêmes clés
 - Implémenter un fallback vers la langue par défaut
 - Utiliser un outil de validation JSON
