@@ -4,23 +4,23 @@
 
 ## 📌 P0 – Fondations & CI/CD
 
-1. Définir la vision MVP 
-2. Configurer les environnements et secrets (local/dev/prod)
-3. Choisir et configurer l’authentification (clerk)
-4. Mettre en place headers de sécurité HTTP et CORS basiques
-5. Implémenter rate limiting minimal sur API sensibles
-6. Concevoir le schéma initial de la base de données (Prisma)
-7. Configurer pipeline Prisma (migrations + seeds)
-8. Concevoir traduction i18n de base (locales, URLs `/fr` `/en`)
-9. Mettre en place logging structuré et observabilité minimale
-10. Créer pipeline CI/CD (lint, typecheck, build)
+1. Définir la vision MVP                                             ✅
+2. Configurer les environnements et secrets (local/dev/prod)         ✅
+3. Choisir et configurer l’authentification (clerk)                  ✅
+4. Mettre en place headers de sécurité HTTP et CORS basiques         ✅
+5. Synchroniser Clerk avec la base de données PostgreSQL (webhooks)  ✅
+6. Concevoir le schéma initial de la base de données (Prisma)        ✅
+7. Configurer pipeline Prisma (migrations + seeds utilisateur)       ✅
+8. Mettre en place rôles utilisateur de base (user/admin)
+9. Mettre en place logging structuré et observabilité minimale       ✅
+10. Concevoir traduction i18n de base (locales, URLs `/fr` `/en`)     ✅
+11. Créer pipeline CI/CD (lint, typecheck, build)
+
 
 ---
 
 ## 📌 P1 – E-commerce core
 
-11. Synchroniser Clerk avec la base de données PostgreSQL
-12. Mettre en place rôles utilisateur de base (user/admin)
 13. Créer API Produits (CRUD + listing)
 14. Créer API Catégories (CRUD + listing)
 15. Implémenter gestion du panier invité et utilisateur
@@ -33,6 +33,7 @@
 22. Envoyer emails transactionnels (confirmation commande)
 23. Créer un admin minimal (produits, catégories, commandes)
 24. Vérifier i18n routing (FR/EN, fallback) pour nouvel ajouts
+25. Implémenter rate limiting minimal sur API sensibles 
 
 ---
 

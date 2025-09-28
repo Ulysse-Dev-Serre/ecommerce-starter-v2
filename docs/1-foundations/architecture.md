@@ -26,7 +26,6 @@
 │
 ├── docs/                                    # Documentation technique complète
 │   ├── INDEX.md                             # Index navigation documentation
-│   ├── README.md                            # Guide démarrage documentation
 │   ├── 1-foundations/                       # Concepts base architecture
 │   │   ├── architecture.md                  # Architecture technique système
 │   │   ├── Roadmap.md                       # Feuille route développement
@@ -37,6 +36,7 @@
 │   ├── 3-development-tools/                # Outils qualité développement
 │   │   ├── eslint-prettier.md               # Formatage automatique code
 │   │   ├── logging.md                       # Système logs structurés
+│   │   ├── theming.md 
 │   │   └── security-headers.md              # Headers sécurité HTTP
 │   └── 4-database-stack/                   # Base données PostgreSQL
 │       ├── clerk-postgres-sync.md           # Synchronisation Clerk database
@@ -50,17 +50,12 @@
 │       └── 20250909181335_init/             # Migration initiale database
 │           └── migration.sql                # Code SQL migration
 │
-├── public/                                  # Assets statiques publics
-│   ├── file.svg                             # Icône fichier interface
-│   ├── globe.svg                            # Icône globe i18n
+├── public/                                  # Assets statiques publics  
 │   ├── next.svg                             # Logo NextJS
-│   ├── vercel.svg                           # Logo Vercel déploiement
-│   └── window.svg                           # Icône fenêtre interface
-│
+│     
 ├── scripts/                                 # Scripts utilitaires développement
 │   ├── reset-local.ts                       # Reset environnement local
 │   ├── sync-clerk-users.ts                  # Synchronisation utilisateurs Clerk
-│   └── test-webhook.ts.old                  # Tests webhook anciens
 │
 ├── src/                                     # Code source application
 │   ├── middleware.ts                        # Middleware NextJS i18n
