@@ -1,0 +1,22 @@
+# Prettier ignore - Fichiers à ne pas formater strictement
+
+# Documentation markdown - Formatage libre
+docs/**/*.md
+*.md
+
+# Fichiers générés  
+node_modules/
+.next/
+dist/
+build/
+.git/
+
+# Fichiers de configuration qui peuvent avoir leur propre format
+.env*
+*.log
+
+# Fichiers JSON volumineux
+package-lock.json
+
+# Tests - formatage moins strict
+tests/**/*.js
