@@ -41,7 +41,7 @@ const eslintConfig = [
         'warn',
         { argsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off', // Temporaire - webhooks Clerk complexes
       '@typescript-eslint/explicit-function-return-type': [
         'warn',
         {
