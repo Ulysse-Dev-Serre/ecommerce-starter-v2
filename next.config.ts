@@ -23,7 +23,7 @@ const securityHeaders = [
   },
   {
     key: 'Access-Control-Allow-Origin',
-    value: process.env.NEXT_PUBLIC_CORS_ORIGIN || '*',
+    value: process.env.NEXT_PUBLIC_CORS_ORIGIN ?? '*',
   },
 ];
 

@@ -30,6 +30,7 @@ npm run ci          # ✅ Pipeline complet réussi
 ### **✅ Étape 1 : Corrections TypeScript effectuées**
 
 **Fichiers corrigés :**
+
 - `src/lib/services/webhook.service.ts` → Import UserRole + types explicites
 - `src/lib/services/user.service.ts` → Import UserRole corrigé
 - `src/app/api/webhooks/clerk/route.ts` → Types unknown → any
@@ -45,6 +46,7 @@ npm run ci          # ✅ Pipeline complet réussi
 ### **✅ Étape 2 : Pipeline et scripts créés**
 
 **Nouveaux fichiers :**
+
 - `.github/workflows/ci.yml` → Pipeline GitHub Actions automatique
 - Scripts ajoutés dans `package.json` :
   - `typecheck` → Vérification TypeScript seule
@@ -186,6 +188,7 @@ npx tsc --noEmit    # → ✅ 0 erreurs TypeScript
 ## 🛠️ **Commandes utiles pour le développement**
 
 ### **🔍 Vérifications individuelles**
+
 ```bash
 npm run typecheck     # TypeScript seulement
 npm run lint          # ESLint seulement
@@ -194,17 +197,20 @@ npm run build         # Build seulement
 ```
 
 ### **🔧 Pipeline complet**
+
 ```bash
 npm run ci            # Vérification complète (comme en CI)
 npm run ci:fix        # Auto-correction + vérification
 ```
 
 ### **🎨 Formatage**
+
 ```bash
 npm run format        # Formater tout le code
 ```
 
 ### **📊 Statut actuel vérifié**
+
 - ✅ TypeScript : 0 erreurs
 - ⚠️ ESLint : 5 warnings (non bloquants)
 - ✅ Prettier : Code formaté
@@ -212,4 +218,5 @@ npm run format        # Formater tout le code
 - ✅ Pipeline local : Fonctionnel
 
 ### **🚀 Prochaine étape**
+
 Configurer les branches protégées sur GitHub pour activer le CI automatique sur push/PR.

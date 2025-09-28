@@ -56,7 +56,7 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
   }
 
   // 3. Get and parse body
-  let payload: any;
+  let payload: unknown;
   let body: string;
 
   try {
@@ -66,9 +66,9 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
     logger.info(
       {
         action: 'webhook_payload_parsed',
-        eventType: payload.type,
-        userId: payload.data?.id,
-        email: payload.data?.email_addresses?.[0]?.email_address,
+        eventType: (payload as any)?.type,
+        userId: (payload as any)?.data?.id,
+        email: (payload as any)?.data?.email_addresses?.[0]?.email_address,
       },
       'Webhook payload parsed'
     );
@@ -85,7 +85,7 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
 
   // 4. Verify signature
   const webhook = new Webhook(webhookSecret);
-  let evt: any;
+  let evt: unknown;
 
   try {
     evt = webhook.verify(body, {
@@ -109,27 +109,27 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
 
   // 5. Process the webhook event
   try {
-    await processWebhookEvent(evt.type, evt.data);
+    await processWebhookEvent((evt as any).type, (evt as any).data);
 
     logger.info(
       {
         action: 'webhook_processed_successfully',
-        eventType: evt.type,
-        userId: evt.data?.id,
+        eventType: (evt as any).type,
+        userId: (evt as any).data?.id,
       },
       'Webhook processed successfully'
     );
 
     return NextResponse.json({
       success: true,
-      eventType: evt.type,
+      eventType: (evt as any).type,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     logger.error(
       {
         action: 'webhook_processing_failed',
-        eventType: evt.type,
+        eventType: (evt as any).type,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
       'Failed to process webhook event'
@@ -139,7 +139,7 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: false,
       error: 'Processing failed',
-      eventType: evt.type,
+      eventType: (evt as any).type,
       timestamp: new Date().toISOString(),
     });
   }
