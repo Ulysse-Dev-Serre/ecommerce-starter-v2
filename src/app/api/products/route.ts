@@ -5,9 +5,7 @@ import { logger } from '../../../lib/logger';
 import { withError } from '../../../lib/middleware/withError';
 import { getProducts } from '../../../lib/services/product.service';
 
-async function getProductsHandler(
-  request: NextRequest
-): Promise<NextResponse> {
+async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { searchParams } = new URL(request.url);
 
@@ -20,9 +18,7 @@ async function getProductsHandler(
   const language = searchParams.get('language') as Language | null;
   const sortBy = (searchParams.get('sortBy') ??
     'createdAt') as keyof typeof sortByMap;
-  const sortOrder = (searchParams.get('sortOrder') ?? 'desc') as
-    | 'asc'
-    | 'desc';
+  const sortOrder = (searchParams.get('sortOrder') ?? 'desc') as 'asc' | 'desc';
 
   const sortByMap = {
     createdAt: 'createdAt',

@@ -201,12 +201,13 @@ function buildCategoryTree(
   });
 
   categories.forEach(cat => {
-    const categoryNode = categoryMap.get(cat.id)!;
+    const categoryNode = categoryMap.get(cat.id);
+    if (!categoryNode) return;
 
     if (cat.parentId) {
       const parent = categoryMap.get(cat.parentId);
       if (parent) {
-        parent.children = parent.children || [];
+        parent.children = parent.children ?? [];
         parent.children.push(categoryNode);
       } else {
         rootCategories.push(categoryNode);

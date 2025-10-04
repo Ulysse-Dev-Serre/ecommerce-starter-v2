@@ -6,7 +6,7 @@ interface ShopPageProps {
 export default async function ShopPage({
   params,
   searchParams,
-}: ShopPageProps) {
+}: ShopPageProps): Promise<React.JSX.Element> {
   const { locale } = await params;
   const { page = '1', category } = await searchParams;
 
@@ -19,7 +19,7 @@ export default async function ShopPage({
   });
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/products?${queryParams}`,
+    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/api/products?${queryParams}`,
     { next: { revalidate: 60 } }
   );
 
@@ -35,21 +35,22 @@ export default async function ShopPage({
         {products.map((product: any) => {
           const translation = product.translations[0];
           const firstVariant = product.variants[0];
-          const price = firstVariant?.pricing[0]?.price || '0';
-          const image = firstVariant?.media[0]?.url || '/placeholder.png';
+          const price = firstVariant?.pricing[0]?.price ?? '0';
+          const image = firstVariant?.media[0]?.url ?? '/placeholder.png';
 
           return (
             <div
               key={product.id}
               className="border border-[var(--border)] rounded-lg p-4 hover:shadow-lg transition"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={image}
-                alt={translation?.name || product.slug}
+                alt={translation?.name ?? product.slug}
                 className="w-full h-48 object-cover rounded-md mb-3"
               />
               <h3 className="font-semibold text-lg mb-1">
-                {translation?.name || product.slug}
+                {translation?.name ?? product.slug}
               </h3>
               <p className="text-sm text-[var(--muted-foreground)] mb-3">
                 {translation?.shortDescription}

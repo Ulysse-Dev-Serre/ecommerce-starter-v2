@@ -607,7 +607,10 @@ export async function cleanInvalidCartItems(cartId: string): Promise<number> {
     if (product.deletedAt !== null) return true;
     if (product.status !== 'ACTIVE') return true;
 
-    if (variant.inventory?.trackInventory && !variant.inventory.allowBackorder) {
+    if (
+      variant.inventory?.trackInventory &&
+      !variant.inventory.allowBackorder
+    ) {
       if (variant.inventory.stock < item.quantity) return true;
     }
 

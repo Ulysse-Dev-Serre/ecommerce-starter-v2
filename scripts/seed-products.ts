@@ -87,7 +87,7 @@ const PRODUCT_TEMPLATES = [
       fr: {
         name: 'Dell XPS 15',
         description:
-          "Laptop Dell performant avec écran 15.6\" 4K et processeur Intel Core i7.",
+          'Laptop Dell performant avec écran 15.6" 4K et processeur Intel Core i7.',
         shortDescription: 'Ordinateur portable Dell haute performance',
       },
       en: {
@@ -122,8 +122,7 @@ const PRODUCT_TEMPLATES = [
       },
       en: {
         name: 'Premium Hoodie',
-        description:
-          'Thick organic cotton hoodie, perfect for any season.',
+        description: 'Thick organic cotton hoodie, perfect for any season.',
         shortDescription: 'Premium organic cotton hoodie',
       },
     },
@@ -164,7 +163,8 @@ const PRODUCT_TEMPLATES = [
     translations: {
       fr: {
         name: 'Jeans Slim Fit',
-        description: 'Jeans coupe ajustée en denim stretch pour un confort optimal.',
+        description:
+          'Jeans coupe ajustée en denim stretch pour un confort optimal.',
         shortDescription: 'Jeans slim confortable',
       },
       en: {

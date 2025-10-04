@@ -121,7 +121,7 @@ export function withAuth(handler: ApiHandler) {
 /**
  * Middleware pour protéger les routes admin - rôle ADMIN requis
  */
-export function withAdmin(handler: ApiHandler) {
+export function withAdmin(handler: ApiHandler): ApiHandler {
   return withAuth(async (...args: any[]) => {
     const authContext = args[args.length - 1] as AuthContext;
 
