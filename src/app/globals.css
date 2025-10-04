@@ -1,33 +1,11 @@
 @import 'tailwindcss';
 
-/* Theme CSS Variables for easy configuration */
-:root {
-  /* Base Colors */
-  --background: #ffffff;
-  --foreground: #171717;
-
-  /* Brand Colors */
-  --primary: #6c47ff;
-  --primary-hover: #5b3fe6;
-  --secondary: #64748b;
-  --accent: #f1f5f9;
-
-  /* Status Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-
-  /* Neutral Colors */
-  --muted: #94a3b8;
-  --muted-foreground: #64748b;
-
-  /* Borders and Shadows */
-  --border: #e2e8f0;
-  --border-focus: var(--primary);
-  --shadow: rgba(0, 0, 0, 0.1);
-  --shadow-lg: rgba(0, 0, 0, 0.15);
-}
+/* 
+ * 🎨 SYSTÈME DE THÈME
+ * Pour créer un nouveau thème : dupliquer themes/neutral.css
+ * Pour activer un thème : modifier la ligne ci-dessous
+ */
+@import '../styles/themes/neutral.css'; /* ← Thème actif */
 
 @theme inline {
   /* Tailwind color mapping to our CSS vars */

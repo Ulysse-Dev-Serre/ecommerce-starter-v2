@@ -32,6 +32,7 @@
   "navbar": {
     "brand": "Votre Boutique",
     "menu": "Menu",
+    "shop": "Boutique",
     "cart": "Panier",
     "wishlist": "Liste d'envies",
     "account": "Mon compte"
@@ -43,6 +44,10 @@
     "addToCart": "Ajouter au panier",
     "outOfStock": "Rupture de stock",
     "inStock": "En stock"
+  },
+  "shop": {
+    "title": "Boutique",
+    "addToCart": "Ajouter"
   },
   "cart": {
     "title": "Panier",
