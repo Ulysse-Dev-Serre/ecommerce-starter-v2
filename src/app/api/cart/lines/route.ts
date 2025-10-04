@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { auth } from '@clerk/nextjs/server';
+import { cookies } from 'next/headers';
+import { NextRequest, NextResponse } from 'next/server';
 
+import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
 import { addToCart } from '../../../../lib/services/cart.service';
-import { prisma } from '../../../../lib/db/prisma';
 
 async function addToCartHandler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
