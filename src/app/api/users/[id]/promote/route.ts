@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { logger } from '../../../../../lib/logger';
+import { withAdmin } from '../../../../../lib/middleware/withAuth';
 import { withError } from '../../../../../lib/middleware/withError';
 import {
   getUserById,
@@ -8,6 +9,7 @@ import {
 } from '../../../../../lib/services/user.service';
 
 // POST - Promouvoir/Rétrograder un utilisateur (CLIENT ↔ ADMIN)
+// PROTECTED: Admin only
 async function promoteUserHandler(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -71,4 +73,4 @@ async function promoteUserHandler(
   });
 }
 
-export const POST = withError(promoteUserHandler);
+export const POST = withError(withAdmin(promoteUserHandler));

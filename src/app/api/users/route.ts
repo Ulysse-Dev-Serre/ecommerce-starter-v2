@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { logger } from '../../../lib/logger';
+import { withAdmin } from '../../../lib/middleware/withAuth';
 import { withError } from '../../../lib/middleware/withError';
 import { getAllUsers } from '../../../lib/services/user.service';
 
+// PROTECTED: Admin only
 async function getUsers(): Promise<NextResponse> {
   logger.info({ action: 'get_all_users' }, 'Fetching all users');
 
@@ -25,4 +27,4 @@ async function getUsers(): Promise<NextResponse> {
   });
 }
 
-export const GET = withError(getUsers);
+export const GET = withError(withAdmin(getUsers));

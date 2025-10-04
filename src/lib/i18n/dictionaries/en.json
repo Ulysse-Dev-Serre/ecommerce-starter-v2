@@ -32,6 +32,7 @@
   "navbar": {
     "brand": "Your Store",
     "menu": "Menu",
+    "shop": "Shop",
     "cart": "Cart",
     "wishlist": "Wishlist",
     "account": "My account"
@@ -43,6 +44,10 @@
     "addToCart": "Add to cart",
     "outOfStock": "Out of stock",
     "inStock": "In stock"
+  },
+  "shop": {
+    "title": "Shop",
+    "addToCart": "Add"
   },
   "cart": {
     "title": "Cart",

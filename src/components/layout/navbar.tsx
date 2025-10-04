@@ -131,11 +131,11 @@ export function Navbar({ locale }: NavbarProps): React.JSX.Element {
             </Link>
 
             <Link
-              href={`/${locale}/products`}
+              href={`/${locale}/shop`}
               className="text-foreground hover:text-primary transition-colors"
-              onClick={() => handleNavigationClick(`/${locale}/products`)}
+              onClick={() => handleNavigationClick(`/${locale}/shop`)}
             >
-              {messages.products.title}
+              {messages.navbar.shop}
             </Link>
 
             <Link
