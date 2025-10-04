@@ -303,7 +303,11 @@ async function seedProducts() {
           data: {
             productId: product.id,
             sku: variantData.sku,
-            weight: faker.number.float({ min: 0.2, max: 2.5, precision: 0.01 }),
+            weight: faker.number.float({
+              min: 0.2,
+              max: 2.5,
+              fractionDigits: 2,
+            }),
           },
         });
 
