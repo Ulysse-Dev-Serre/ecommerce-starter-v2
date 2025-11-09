@@ -1,6 +1,8 @@
 # 📖 Index Documentation - E-Commerce Starter V2
 
 ## 🚀 Démarrage Rapide
+npm run dev
+npx prisma studio
 
 | Document                              | Description                               | Priorité        |
 | ------------------------------------- | ----------------------------------------- | --------------- |

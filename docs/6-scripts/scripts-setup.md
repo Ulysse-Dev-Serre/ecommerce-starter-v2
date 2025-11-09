@@ -213,31 +213,102 @@ npm run sync-clerk sync
 
 ## 🧪 Scripts de test
 
-### `npm run test`
+### Architecture des tests
 
-**Description:** Exécute tous les tests unitaires Jest.
+Les tests sont organisés par type dans `tests/` :
+```
+tests/
+├── setup/          # Configuration Jest et utilitaires (jest.setup.js, test-client.js, db.setup.js, auth.factory.js)
+├── unit/           # Tests unitaires (logique isolée, mockée, rapides)
+│   └── services/   # Tests des services métier
+├── integration/    # Tests d'intégration (API avec vraie DB)
+│   └── api/        # Tests des endpoints API
+├── e2e/            # Tests end-to-end (parcours utilisateur complets)
+├── fixtures/       # Données de test réutilisables
+└── scripts/        # Scripts utilitaires de test
+```
+
+---
+
+### `npm test`
+
+**Description:** Exécute tous les tests (unitaires + intégration + e2e).
 
 **Utilisation:**
 ```bash
-npm run test
+npm test
 ```
+
+---
+
+### `npm test -- --testPathPattern=unit`
+
+**Description:** Exécute uniquement les tests unitaires (rapides, mockés).
+
+**Utilisation:**
+```bash
+npm test -- --testPathPattern=unit
+```
+
+**Cas d'usage:** Tests de services métier isolés sans dépendances externes (base de données, API).
+
+---
+
+### `npm test -- --testPathPattern=integration`
+
+**Description:** Exécute uniquement les tests d'intégration (API avec vraie DB).
+
+**Utilisation:**
+```bash
+npm test -- --testPathPattern=integration
+```
+
+**Cas d'usage:** Tests des endpoints API avec base de données réelle. Nécessite que le serveur soit démarré (`npm run dev`).
+
+---
+
+### `npm test -- --testPathPattern=e2e`
+
+**Description:** Exécute uniquement les tests end-to-end.
+
+**Utilisation:**
+```bash
+npm test -- --testPathPattern=e2e
+```
+
+**Cas d'usage:** Tests de parcours utilisateur complets avec Playwright.
+
+---
+
+### `npm test -- --coverage`
+
+**Description:** Exécute les tests avec rapport de couverture de code.
+
+**Utilisation:**
+```bash
+npm test -- --coverage
+```
+
+**Résultat:** Génère un rapport dans le dossier `coverage/`.
 
 ---
 
 ### `npm run test:watch`
 
-**Description:** Exécute Jest en mode watch (re-test automatique sur changement).
+**Description:** Exécute Jest en mode watch (re-test automatique sur changement de fichiers).
 
 **Utilisation:**
 ```bash
 npm run test:watch
 ```
 
+**Cas d'usage:** Développement en mode TDD (Test-Driven Development).
+
 ---
 
 ### `npm run test:e2e`
 
-**Description:** Exécute les tests end-to-end avec Playwright.
+**Description:** Exécute les tests end-to-end avec Playwright (si configuré).
 
 **Utilisation:**
 ```bash

@@ -1,131 +1,47 @@
-# Tests
+# Tests Architecture
 
-Organisation des tests pour le projet e-commerce starter v2.
+Architecture de tests organisée par type pour faciliter l'exécution ciblée et la maintenance.
 
 ## Structure
 
 ```
 tests/
-├── __tests__/           # Tests Jest automatisés
-│   └── api/            # Tests des endpoints API
-│       ├── health.test.js
-│       └── cart.test.js
-├── scripts/            # Scripts de test standalone
-│   ├── database-test.js      # Test connexion DB
-│   ├── validate-features.js  # Validation complète (recommandé)
-│   └── webhook-debug.js      # Serveur debug webhooks
-├── utils/              # Utilitaires de test
-│   ├── test-client.js  # Client HTTP pour tests
-│   └── setup.js        # Setup/teardown
-├── jest.setup.js       # Configuration Jest
-└── README.md          # Ce fichier
+ ├── setup/                    # Configuration et utilitaires globaux
+ │   ├── jest.setup.js        # Configuration Jest globale
+ │   ├── db.setup.js          # Seed et reset de la DB de test
+ │   ├── auth.factory.js      # Génération d'utilisateurs (admin/user)
+ │   ├── test.setup.js        # Setup/teardown des tests
+ │   └── test-client.js       # Client HTTP pour tests API
+ │
+ ├── unit/                     # Tests unitaires (isolés, mockés)
+ │   └── services/            # Tests des services métier
+ │
+ ├── integration/              # Tests d'intégration (vraie DB)
+ │   └── api/                 # Tests des endpoints API
+ │       ├── attributes.test.js
+ │       ├── cart.test.js
+ │       └── health.test.js
+ │
+ ├── e2e/                      # Tests end-to-end
+ │
+ ├── fixtures/                 # Données de test réutilisables
+ │   └── products.fixture.js
+ │
+ └── scripts/                  # Scripts utilitaires
 ```
 
-## Types de tests
-
-### Tests API Jest (`__tests__/api/`)
-
-- **health.test.js** - Tests de l'API health (3 tests)
-- **cart.test.js** - Tests de l'API panier (1 test)
-
-## Scripts de test
-
-### 🎯 Validation complète (`scripts/validate-features.js`) **RECOMMANDÉ**
-
-Script principal de validation - teste toutes les fonctionnalités clés :
-- Health check API
-- Connexion database
-- Endpoints produits
-- Protection admin
-- Gestion des rôles
-- Opérations panier
-- Validation stock
-- Webhooks Clerk
+## Commandes
 
 ```bash
-node tests/scripts/validate-features.js
+# Tous les tests
+npm test
+
+# Tests unitaires uniquement (rapides)
+npm test -- --testPathPattern=unit
+
+# Tests d'intégration uniquement
+npm test -- --testPathPattern=integration
+
+# Tests e2e uniquement
+npm test -- --testPathPattern=e2e
 ```
-
-**Résultat** : 8 tests - taux de réussite 100%
-
-### 🗄️ Test base de données (`scripts/database-test.js`)
-
-Test rapide de la connexion et opérations DB (CRUD utilisateur).
-
-```bash
-npm run test:db
-# ou
-node tests/scripts/database-test.js
-```
-
-### 🔧 Debug webhook (`scripts/webhook-debug.js`)
-
-Serveur de debug pour intercepter et inspecter les webhooks Clerk.
-
-```bash
-npm run test:webhook
-# ou
-node tests/scripts/webhook-debug.js
-```
-
-Expose un serveur sur `http://localhost:3001/test-webhook`
-
-## Utilitaires
-
-### TestClient (`utils/test-client.js`)
-
-Client HTTP unifié pour les tests avec gestion d'erreurs intégrée.
-
-```javascript
-const TestClient = require('./utils/test-client');
-const client = new TestClient();
-
-const response = await client.get('/api/products');
-```
-
-### Setup (`utils/setup.js`)
-
-Fonctions de configuration et nettoyage des tests.
-
-```javascript
-const { setupTest, teardownTest } = require('./utils/setup');
-```
-
-## Utilisation
-
-### Prérequis
-
-- Serveur de développement lancé (`npm run dev`)
-- Base de données configurée et accessible
-
-### Tests automatisés (Jest)
-
-```bash
-npm test                    # Tous les tests Jest (health + cart)
-npm run test:watch          # Tests en mode watch
-```
-
-**Tests inclus** :
-- 3 tests health API ✅
-- 1 test panier ✅
-- **Total : 4 tests**
-
-### Scripts de validation
-
-```bash
-# Recommandé : Validation complète de toutes les fonctionnalités
-node tests/scripts/validate-features.js
-
-# Test connexion database
-npm run test:db
-
-# Serveur debug webhooks
-npm run test:webhook
-```
-
-## Bonnes pratiques
-
-1. **Isolation** - Chaque test nettoie ses données
-2. **Réutilisabilité** - Utiliser les utilitaires communs
-3. **Lisibilité** - Tests bien documentés et nommés
-4. **Performance** - Tests parallélisables quand possible

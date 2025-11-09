@@ -1,7 +1,7 @@
 /**
  * Health API tests
  */
-const { setupTest, teardownTest } = require('../../utils/setup');
+const { setupTest, teardownTest } = require('../../setup/test.setup');
 
 describe('Health API', () => {
   let client;

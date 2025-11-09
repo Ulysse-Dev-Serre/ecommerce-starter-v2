@@ -3,8 +3,9 @@ const config = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: [
-    '<rootDir>/tests/**/__tests__/**/*.{js,ts}',
-    '<rootDir>/tests/**/?(*.)+(spec|test).{js,ts}',
+    '<rootDir>/tests/unit/**/?(*.)+(spec|test).{js,ts}',
+    '<rootDir>/tests/integration/**/?(*.)+(spec|test).{js,ts}',
+    '<rootDir>/tests/e2e/**/?(*.)+(spec|test).{js,ts}',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
@@ -13,7 +14,7 @@ const config = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  setupFilesAfterEnv: ['<rootDir>/tests/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup/jest.setup.js'],
   testTimeout: 30000,
   verbose: true,
   clearMocks: true,
