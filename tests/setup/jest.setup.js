@@ -3,8 +3,22 @@
  * Global configuration for all tests
  */
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 // Set test environment variables
 process.env.NODE_ENV = 'test';
+
+// Vérifier que TEST_API_KEY est chargée
+if (!process.env.TEST_API_KEY) {
+  console.error('⚠️  TEST_API_KEY non trouvée dans .env');
+  console.error('Ajoutez TEST_API_KEY=votre-clé dans .env ou .env.local');
+}
+
+// Mock withAuth middleware pour bypass Clerk authentication en tests
+jest.mock('../../src/lib/middleware/withAuth', () => 
+  require('../../src/lib/middleware/withAuth.test')
+);
 
 // Increase test timeout for slow database operations
 jest.setTimeout(30000);
