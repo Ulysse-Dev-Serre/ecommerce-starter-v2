@@ -504,9 +504,9 @@ export async function getAllProducts(): Promise<ProductWithTranslations[]> {
 }
 
 /**
- * Get product by ID (simple version)
+ * Get product by ID (simple version for admin/delete)
  */
-export async function getProductById(
+export async function getProductByIdSimple(
   id: string
 ): Promise<ProductWithTranslations | null> {
   return prisma.product.findFirst({
