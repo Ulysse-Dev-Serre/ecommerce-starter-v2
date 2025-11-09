@@ -241,17 +241,22 @@ Toutes les requêtes sont loggées avec `requestId` pour debug.
 
 ---
 
-## POST /api/products
+## Routes Admin
+
+Les endpoints de création, modification et suppression sont déplacés vers `/api/admin/products` pour une meilleure séparation des responsabilités.
+
+### POST /api/admin/products
 
 **Protection**: ADMIN uniquement
 
 Crée un nouveau produit.
 
-### Requête
+#### Requête
 
 ```bash
-curl -X POST http://localhost:3000/api/products \
+curl -X POST http://localhost:3000/api/admin/products \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
   -d '{
     "slug": "nouveau-produit",
     "status": "DRAFT",
@@ -268,11 +273,12 @@ curl -X POST http://localhost:3000/api/products \
   }'
 ```
 
-### Réponse (201 Created)
+#### Réponse (201 Created)
 
 ```json
 {
   "success": true,
+  "requestId": "...",
   "product": {
     "id": "...",
     "slug": "nouveau-produit",
@@ -286,24 +292,56 @@ curl -X POST http://localhost:3000/api/products \
 
 ---
 
-## PUT /api/products/[id]
+### GET /api/admin/products/[id]
+
+**Protection**: ADMIN uniquement
+
+Récupère un produit par ID pour l'administration (inclut tous les statuts, même DRAFT et ARCHIVED).
+
+#### Requête
+
+```bash
+curl http://localhost:3000/api/admin/products/cmgbhqta8002xkspro4e68y1l \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+```
+
+#### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "requestId": "...",
+  "data": {
+    "id": "cmgbhqta8002xkspro4e68y1l",
+    "slug": "nouveau-produit",
+    "status": "DRAFT",
+    "translations": [...]
+  },
+  "timestamp": "2025-10-03T23:56:00.000Z"
+}
+```
+
+---
+
+### PUT /api/admin/products/[id]
 
 **Protection**: ADMIN uniquement
 
 Modifie un produit existant.
 
-### Requête
+#### Requête
 
 ```bash
-curl -X PUT http://localhost:3000/api/products/cmgbhqta8002xkspro4e68y1l \
+curl -X PUT http://localhost:3000/api/admin/products/cmgbhqta8002xkspro4e68y1l \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
   -d '{
     "status": "ACTIVE",
     "isFeatured": true
   }'
 ```
 
-### Réponse (200 OK)
+#### Réponse (200 OK)
 
 ```json
 {
@@ -322,23 +360,25 @@ curl -X PUT http://localhost:3000/api/products/cmgbhqta8002xkspro4e68y1l \
 
 ---
 
-## DELETE /api/products/[id]
+### DELETE /api/admin/products/[id]
 
 **Protection**: ADMIN uniquement
 
 Supprime un produit (soft delete).
 
-### Requête
+#### Requête
 
 ```bash
-curl -X DELETE http://localhost:3000/api/products/cmgbhqta8002xkspro4e68y1l
+curl -X DELETE http://localhost:3000/api/admin/products/cmgbhqta8002xkspro4e68y1l \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
 ```
 
-### Réponse (200 OK)
+#### Réponse (200 OK)
 
 ```json
 {
   "success": true,
+  "requestId": "...",
   "product": {
     "id": "cmgbhqta8002xkspro4e68y1l",
     "slug": "nouveau-produit",

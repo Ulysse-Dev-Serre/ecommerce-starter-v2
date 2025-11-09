@@ -58,12 +58,10 @@ export const POST = withError(withAdmin(adminHandler));
 
 ## Tableau des routes protégées
 
-### Routes API
+### Routes API Publiques
 
 | Route | Méthode | Protection | Rôle requis | Description |
 |-------|---------|------------|-------------|-------------|
-| `/api/users` | GET | ✅ `withAdmin` | ADMIN | Liste tous les utilisateurs |
-| `/api/users/[id]/promote` | POST | ✅ `withAdmin` | ADMIN | Changer le rôle d'un utilisateur |
 | `/api/products` | GET | ❌ Publique | - | Liste des produits |
 | `/api/products/[slug]` | GET | ❌ Publique | - | Détail d'un produit |
 | `/api/categories` | GET | ❌ Publique | - | Liste des catégories |
@@ -71,11 +69,23 @@ export const POST = withError(withAdmin(adminHandler));
 | `/api/webhooks/clerk` | POST | ❌ Publique* | - | Webhook Clerk (*signature vérifiée) |
 | `/api/internal/health` | GET | ❌ Publique | - | Health check |
 
+### Routes API Admin (protégées)
+
+| Route | Méthode | Protection | Rôle requis | Description |
+|-------|---------|------------|-------------|-------------|
+| `/api/users` | GET | ✅ `withAdmin` | ADMIN | Liste tous les utilisateurs |
+| `/api/users/[id]/promote` | POST | ✅ `withAdmin` | ADMIN | Changer le rôle d'un utilisateur |
+| `/api/admin/products` | POST | ✅ `withAdmin` | ADMIN | Créer un produit |
+| `/api/admin/products/[id]` | GET | ✅ `withAdmin` | ADMIN | Récupérer produit (tous statuts) |
+| `/api/admin/products/[id]` | PUT | ✅ `withAdmin` | ADMIN | Modifier un produit |
+| `/api/admin/products/[id]` | DELETE | ✅ `withAdmin` | ADMIN | Supprimer un produit |
+| `/api/admin/attributes` | GET/POST | ✅ `withAdmin` | ADMIN | Gestion des attributs |
+| `/api/admin/attributes/[id]/values` | POST | ✅ `withAdmin` | ADMIN | Ajouter valeur attribut |
+
 ### Routes futures (à protéger)
 
 | Route | Protection prévue | Rôle |
 |-------|------------------|------|
-| `/api/admin/products` | `withAdmin` | ADMIN |
 | `/api/admin/categories` | `withAdmin` | ADMIN |
 | `/api/admin/orders` | `withAdmin` | ADMIN |
 | `/api/cart` | `withAuth` | CLIENT/ADMIN |

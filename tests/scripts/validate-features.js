@@ -61,8 +61,8 @@ async function validateFeatures() {
 
   // Test 4: POST Product (Admin required - devrait échouer sans auth)
   try {
-    console.log('4️⃣  Test POST /api/products (Protection Admin)');
-    const createProduct = await client.post('/api/products', {
+    console.log('4️⃣  Test POST /api/admin/products (Protection Admin)');
+    const createProduct = await client.post('/api/admin/products', {
       slug: `test-${Date.now()}`,
       status: 'DRAFT',
       translations: [{ language: 'FR', name: 'Test Product' }],

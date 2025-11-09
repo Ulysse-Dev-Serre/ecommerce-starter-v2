@@ -2,18 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { ProductStatus, Language } from '../../../generated/prisma';
 import { logger } from '../../../lib/logger';
-import { withAdmin } from '../../../lib/middleware/withAuth';
 import { withError } from '../../../lib/middleware/withError';
 import {
   withRateLimit,
   RateLimits,
 } from '../../../lib/middleware/withRateLimit';
-import {
-  getProducts,
-  createProduct,
-  CreateProductData,
-} from '../../../lib/services/product.service';
+import { getProducts } from '../../../lib/services/product.service';
 
+/**
+ * GET /api/products
+ * Liste publique des produits avec filtres et pagination
+ * 
+ * Query params:
+ * - page: number (default: 1)
+ * - limit: number (default: 20, max: 100)
+ * - status: DRAFT | ACTIVE | INACTIVE | ARCHIVED (default: ACTIVE)
+ * - featured: boolean
+ * - search: string (requires language param)
+ * - language: EN | FR
+ * - sortBy: createdAt | updatedAt | name | price (default: createdAt)
+ * - sortOrder: asc | desc (default: desc)
+ */
 async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { searchParams } = new URL(request.url);
@@ -101,52 +110,6 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
   );
 }
 
-
-
-async function createProductHandler(
-  request: Request
-): Promise<NextResponse> {
-  const body = await request.json();
-
-  logger.info(
-    { action: 'create_product', slug: body.slug },
-    'Creating new product'
-  );
-
-  const productData: CreateProductData = {
-    slug: body.slug,
-    status: body.status,
-    isFeatured: body.isFeatured,
-    sortOrder: body.sortOrder,
-    translations: body.translations,
-  };
-
-  const product = await createProduct(productData);
-
-  logger.info(
-    {
-      action: 'product_created_successfully',
-      productId: product.id,
-      slug: product.slug,
-    },
-    `Product created: ${product.slug}`
-  );
-
-  return NextResponse.json(
-    {
-      success: true,
-      product,
-      message: 'Product created successfully',
-      timestamp: new Date().toISOString(),
-    },
-    { status: 201 }
-  );
-}
-
 export const GET = withError(
   withRateLimit(getProductsHandler, RateLimits.PUBLIC)
-);
-
-export const POST = withError(
-  withAdmin(withRateLimit(createProductHandler, RateLimits.ADMIN))
 );
