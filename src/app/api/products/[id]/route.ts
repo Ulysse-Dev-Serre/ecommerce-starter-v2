@@ -2,59 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { ProductStatus, Language } from '../../../../generated/prisma';
 import { logger } from '../../../../lib/logger';
-import { withAdmin } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
 import {
-  deleteProduct,
-  getProductByIdSimple,
   getProductBySlug,
   isProductAvailable,
-  updateProduct,
-  UpdateProductData,
 } from '../../../../lib/services/product.service';
 
-async function deleteProductHandler(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse> {
-  const { id } = await params;
-
-  logger.info(
-    { action: 'delete_product', productId: id },
-    `Processing deletion for product ${id}`
-  );
-
-  const product = await getProductByIdSimple(id);
-  if (!product) {
-    logger.warn(
-      { action: 'delete_product_not_found', productId: id },
-      `Product ${id} not found`
-    );
-    return NextResponse.json(
-      { success: false, error: 'Product not found' },
-      { status: 404 }
-    );
-  }
-
-  const deletedProduct = await deleteProduct(id);
-
-  logger.info(
-    {
-      action: 'product_deleted_successfully',
-      productId: id,
-      slug: deletedProduct.slug,
-    },
-    `Product deleted successfully: ${deletedProduct.slug}`
-  );
-
-  return NextResponse.json({
-    success: true,
-    product: deletedProduct,
-    message: 'Product deleted successfully',
-    timestamp: new Date().toISOString(),
-  });
-}
-
+/**
+ * GET /api/products/[id]
+ * Récupère les détails publics d'un produit par slug
+ * 
+ * Query params:
+ * - language: EN | FR (optional)
+ */
 async function getProductHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -152,100 +112,4 @@ async function getProductHandler(
   });
 }
 
-async function updateProductHandler(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
-  const { id } = await params;
-  const body = await request.json();
-
-  logger.info(
-    {
-      requestId,
-      action: 'update_product',
-      productId: id,
-    },
-    `Updating product: ${id}`
-  );
-
-  const product = await getProductByIdSimple(id);
-  if (!product) {
-    logger.warn(
-      {
-        requestId,
-        action: 'update_product_not_found',
-        productId: id,
-      },
-      `Product not found: ${id}`
-    );
-    return NextResponse.json(
-      {
-        success: false,
-        requestId,
-        error: 'Product not found',
-        timestamp: new Date().toISOString(),
-      },
-      {
-        status: 404,
-        headers: {
-          'X-Request-ID': requestId,
-        },
-      }
-    );
-  }
-
-  const updateData: UpdateProductData = {};
-
-  if (body.slug !== undefined) updateData.slug = body.slug;
-  if (body.status !== undefined) {
-    if (Object.values(ProductStatus).includes(body.status)) {
-      updateData.status = body.status;
-    } else {
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: 'Invalid status',
-          message: `Status must be one of: ${Object.values(ProductStatus).join(', ')}`,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
-    }
-  }
-  if (body.isFeatured !== undefined) updateData.isFeatured = body.isFeatured;
-  if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
-
-  const updatedProduct = await updateProduct(id, updateData);
-
-  logger.info(
-    {
-      requestId,
-      action: 'product_updated_successfully',
-      productId: id,
-      slug: updatedProduct.slug,
-      updatedFields: Object.keys(updateData),
-    },
-    `Product updated: ${updatedProduct.slug}`
-  );
-
-  return NextResponse.json(
-    {
-      success: true,
-      requestId,
-      data: updatedProduct,
-      message: 'Product updated successfully',
-      timestamp: new Date().toISOString(),
-    },
-    {
-      headers: {
-        'X-Request-ID': requestId,
-      },
-    }
-  );
-}
-
 export const GET = withError(getProductHandler);
-export const PUT = withError(withAdmin(updateProductHandler));
-export const DELETE = withError(withAdmin(deleteProductHandler));

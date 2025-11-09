@@ -29,9 +29,14 @@ Système de rate limiting pour protéger l'API contre les abus et garantir une u
 - `DELETE /api/cart/lines/[id]` - Supprimer item
 
 #### Routes admin (30 req/min)
-- `POST /api/products` - Créer produit
-- `PUT /api/products/[id]` - Modifier produit
-- `DELETE /api/products/[id]` - Supprimer produit
+- `POST /api/admin/products` - Créer produit
+- `GET /api/admin/products/[id]` - Récupérer produit (admin)
+- `PUT /api/admin/products/[id]` - Modifier produit
+- `DELETE /api/admin/products/[id]` - Supprimer produit
+- `GET /api/admin/attributes` - Liste attributs
+- `POST /api/admin/attributes` - Créer attribut
+- `POST /api/admin/attributes/[id]/values` - Ajouter valeur
+- `GET /api/users` - Liste utilisateurs
 - `POST /api/users/[id]/promote` - Changer rôle
 
 #### Webhooks (100 req/min)
