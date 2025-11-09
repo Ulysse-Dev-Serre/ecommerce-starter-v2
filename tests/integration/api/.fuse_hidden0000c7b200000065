@@ -1,7 +1,7 @@
 /**
  * Cart API - User cart operations
  */
-const { setupTest, teardownTest } = require('../../utils/setup');
+const { setupTest, teardownTest } = require('../../setup/test.setup');
 const { PrismaClient } = require('../../../src/generated/prisma');
 
 describe('Cart API - User', () => {
