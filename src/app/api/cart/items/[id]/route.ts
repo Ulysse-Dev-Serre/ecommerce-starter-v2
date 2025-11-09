@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 
+import { prisma } from '../../../../../lib/db/prisma';
 import { logger } from '../../../../../lib/logger';
 import { withError } from '../../../../../lib/middleware/withError';
-import { removeCartLine } from '../../../../../lib/services/cart.service';
 
 async function deleteCartItemHandler(
   _request: Request,
@@ -16,18 +16,23 @@ async function deleteCartItemHandler(
   );
 
   try {
-    await removeCartLine(id);
+    // Direct deletion for admin/test purposes (no auth check)
+    const deletedItem = await prisma.cartItem.delete({
+      where: { id },
+    });
 
     logger.info(
       {
         action: 'cart_item_removed_successfully',
         cartItemId: id,
+        cartId: deletedItem.cartId,
       },
       `Cart item removed successfully`
     );
 
     return NextResponse.json({
       success: true,
+      cartItem: deletedItem,
       message: 'Item removed from cart successfully',
       timestamp: new Date().toISOString(),
     });
