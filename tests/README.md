@@ -2,6 +2,38 @@
 
 Architecture de tests organisée par type pour faciliter l'exécution ciblée et la maintenance.
 
+## ⚠️ Configuration requise
+
+### TEST_API_KEY pour les tests d'intégration
+
+Les tests d'intégration qui appellent les routes admin protégées nécessitent une API key de test.
+
+**Configuration (une seule fois) :**
+
+1. Générez une clé secrète aléatoire :
+```bash
+openssl rand -hex 32
+```
+
+2. Ajoutez-la dans `.env.local` :
+```bash
+TEST_API_KEY=votre-clé-générée-ici
+```
+
+3. **NE JAMAIS** committer cette clé dans Git
+
+**Comment ça fonctionne :**
+- Les tests utilisent `getTestAuthHeaders()` qui ajoute le header `x-test-api-key`
+- Le middleware `withAuth` vérifie ce header (uniquement en non-production)
+- Si la clé est valide, l'authentification Clerk est bypassée
+- L'utilisateur admin réel (ulyssebo255@gmail.com) est utilisé pour les tests
+
+**Voir la documentation complète dans :**
+- `src/lib/middleware/withAuth.ts` - Logique de bypass
+- `tests/setup/auth.factory.js` - Fonction `getTestAuthHeaders()`
+
+---
+
 ## Structure
 
 ```
