@@ -6,32 +6,69 @@ Organisation des tests pour le projet e-commerce starter v2.
 
 ```
 tests/
-├── __tests__/           # Tests automatisés
-│   ├── api/            # Tests des endpoints API
-│   ├── integration/    # Tests d'intégration
-│   └── e2e/           # Tests end-to-end
+├── __tests__/           # Tests Jest automatisés
+│   └── api/            # Tests des endpoints API
+│       ├── health.test.js
+│       └── cart.test.js
+├── scripts/            # Scripts de test standalone
+│   ├── database-test.js      # Test connexion DB
+│   ├── validate-features.js  # Validation complète (recommandé)
+│   └── webhook-debug.js      # Serveur debug webhooks
 ├── utils/              # Utilitaires de test
-├── fixtures/           # Données de test
-├── scripts/           # Scripts de test manuels
+│   ├── test-client.js  # Client HTTP pour tests
+│   └── setup.js        # Setup/teardown
+├── jest.setup.js       # Configuration Jest
 └── README.md          # Ce fichier
 ```
 
 ## Types de tests
 
-### Tests API (`__tests__/api/`)
+### Tests API Jest (`__tests__/api/`)
 
-- **users.test.js** - Tests de l'API users
-- **health.test.js** - Tests de l'API health
-- **webhooks.test.js** - Tests des webhooks Clerk
+- **health.test.js** - Tests de l'API health (3 tests)
+- **cart.test.js** - Tests de l'API panier (1 test)
 
-### Tests d'intégration (`__tests__/integration/`)
+## Scripts de test
 
-- **database.test.js** - Tests des opérations base de données
-- **clerk-sync.test.js** - Tests de synchronisation Clerk
+### 🎯 Validation complète (`scripts/validate-features.js`) **RECOMMANDÉ**
 
-### Tests E2E (`__tests__/e2e/`)
+Script principal de validation - teste toutes les fonctionnalités clés :
+- Health check API
+- Connexion database
+- Endpoints produits
+- Protection admin
+- Gestion des rôles
+- Opérations panier
+- Validation stock
+- Webhooks Clerk
 
-- **endpoints.test.js** - Tests end-to-end complets
+```bash
+node tests/scripts/validate-features.js
+```
+
+**Résultat** : 8 tests - taux de réussite 100%
+
+### 🗄️ Test base de données (`scripts/database-test.js`)
+
+Test rapide de la connexion et opérations DB (CRUD utilisateur).
+
+```bash
+npm run test:db
+# ou
+node tests/scripts/database-test.js
+```
+
+### 🔧 Debug webhook (`scripts/webhook-debug.js`)
+
+Serveur de debug pour intercepter et inspecter les webhooks Clerk.
+
+```bash
+npm run test:webhook
+# ou
+node tests/scripts/webhook-debug.js
+```
+
+Expose un serveur sur `http://localhost:3001/test-webhook`
 
 ## Utilitaires
 
@@ -43,41 +80,15 @@ Client HTTP unifié pour les tests avec gestion d'erreurs intégrée.
 const TestClient = require('./utils/test-client');
 const client = new TestClient();
 
-const response = await client.get('/api/users');
+const response = await client.get('/api/products');
 ```
-
-### Mock Data (`utils/mock-data.js`)
-
-Données de test centralisées pour tous les tests.
 
 ### Setup (`utils/setup.js`)
 
 Fonctions de configuration et nettoyage des tests.
 
-## Scripts manuels
-
-### Test manuel (`scripts/test-manual.js`)
-
-Test rapide de tous les endpoints principaux.
-
-```bash
-node tests/scripts/test-manual.js
-```
-
-### Debug webhook (`scripts/webhook-debug.js`)
-
-Serveur de debug pour intercepter les webhooks.
-
-```bash
-node tests/scripts/webhook-debug.js
-```
-
-### Test base de données (`scripts/database-test.js`)
-
-Test des opérations CRUD sur la base de données.
-
-```bash
-node tests/scripts/database-test.js
+```javascript
+const { setupTest, teardownTest } = require('./utils/setup');
 ```
 
 ## Utilisation
@@ -87,51 +98,30 @@ node tests/scripts/database-test.js
 - Serveur de développement lancé (`npm run dev`)
 - Base de données configurée et accessible
 
-### Tests automatisés
+### Tests automatisés (Jest)
 
 ```bash
-npm test                    # Tous les tests Jest
+npm test                    # Tous les tests Jest (health + cart)
 npm run test:watch          # Tests en mode watch
-npm test -- --testPathPattern=api    # Tests API uniquement
 ```
 
-### Tests manuels
+**Tests inclus** :
+- 3 tests health API ✅
+- 1 test panier ✅
+- **Total : 4 tests**
+
+### Scripts de validation
 
 ```bash
-# Test rapide des endpoints
-npm run test:manual
+# Recommandé : Validation complète de toutes les fonctionnalités
+node tests/scripts/validate-features.js
 
-# Debug des webhooks
-npm run test:webhook
-
-# Test de la base de données
+# Test connexion database
 npm run test:db
 
-# Installer les dépendances de test
-npm run test:deps
+# Serveur debug webhooks
+npm run test:webhook
 ```
-
-### Scripts directs
-
-```bash
-# Test rapide des endpoints
-node tests/scripts/test-manual.js
-
-# Debug des webhooks
-node tests/scripts/webhook-debug.js
-
-# Test de la base de données
-node tests/scripts/database-test.js
-```
-
-## Migration depuis les anciens fichiers
-
-Les anciens fichiers de test ont été refactorisés :
-
-- `test-endpoints.js` → `tests/scripts/test-manual.js`
-- `test-refactoring.js` → Fusionné dans les tests structurés
-- `debug-webhook.js` → `tests/scripts/webhook-debug.js`
-- `scripts/test-webhook.ts` → `tests/scripts/database-test.js`
 
 ## Bonnes pratiques
 

@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { ProductStatus, Language } from '../../../generated/prisma';
 import { logger } from '../../../lib/logger';
-import { withAdmin } from '../../../lib/middleware/withAuth';
 import { withError } from '../../../lib/middleware/withError';
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../lib/middleware/withRateLimit';
 import {
   getProducts,
   createProduct,
@@ -22,6 +17,7 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 100);
   const status = searchParams.get('status') as ProductStatus | null;
   const isFeatured = searchParams.get('featured');
+  const categorySlug = searchParams.get('category');
   const search = searchParams.get('search');
   const language = searchParams.get('language') as Language | null;
   const sortBy = (searchParams.get('sortBy') ??
@@ -43,6 +39,7 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
       limit,
       status,
       isFeatured,
+      categorySlug,
       search,
       language,
       sortBy,
@@ -60,6 +57,10 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
 
   if (isFeatured !== null) {
     filters.isFeatured = isFeatured === 'true';
+  }
+
+  if (categorySlug) {
+    filters.categorySlug = categorySlug;
   }
 
   if (search && language) {
@@ -101,7 +102,7 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
   );
 }
 
-
+export const GET = withError(getProductsHandler);
 
 async function createProductHandler(
   request: Request
@@ -143,10 +144,4 @@ async function createProductHandler(
   );
 }
 
-export const GET = withError(
-  withRateLimit(getProductsHandler, RateLimits.PUBLIC)
-);
-
-export const POST = withError(
-  withAdmin(withRateLimit(createProductHandler, RateLimits.ADMIN))
-);
+export const POST = withError(createProductHandler);
