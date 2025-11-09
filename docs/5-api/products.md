@@ -238,3 +238,113 @@ Toutes les requêtes sont loggées avec `requestId` pour debug.
 
 - Max pagination: 100 produits/page
 - Recommandé: 12-24 (storefront), 50 (admin)
+
+---
+
+## POST /api/products
+
+**Protection**: ADMIN uniquement
+
+Crée un nouveau produit.
+
+### Requête
+
+```bash
+curl -X POST http://localhost:3000/api/products \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "nouveau-produit",
+    "status": "DRAFT",
+    "isFeatured": false,
+    "sortOrder": 0,
+    "translations": [
+      {
+        "language": "FR",
+        "name": "Nouveau Produit",
+        "description": "Description complète",
+        "shortDescription": "Description courte"
+      }
+    ]
+  }'
+```
+
+### Réponse (201 Created)
+
+```json
+{
+  "success": true,
+  "product": {
+    "id": "...",
+    "slug": "nouveau-produit",
+    "status": "DRAFT",
+    "translations": [...]
+  },
+  "message": "Product created successfully",
+  "timestamp": "2025-10-03T23:55:00.000Z"
+}
+```
+
+---
+
+## PUT /api/products/[id]
+
+**Protection**: ADMIN uniquement
+
+Modifie un produit existant.
+
+### Requête
+
+```bash
+curl -X PUT http://localhost:3000/api/products/cmgbhqta8002xkspro4e68y1l \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "ACTIVE",
+    "isFeatured": true
+  }'
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "requestId": "...",
+  "data": {
+    "id": "cmgbhqta8002xkspro4e68y1l",
+    "slug": "nouveau-produit",
+    "status": "ACTIVE",
+    "isFeatured": true
+  },
+  "message": "Product updated successfully",
+  "timestamp": "2025-10-03T23:56:00.000Z"
+}
+```
+
+---
+
+## DELETE /api/products/[id]
+
+**Protection**: ADMIN uniquement
+
+Supprime un produit (soft delete).
+
+### Requête
+
+```bash
+curl -X DELETE http://localhost:3000/api/products/cmgbhqta8002xkspro4e68y1l
+```
+
+### Réponse (200 OK)
+
+```json
+{
+  "success": true,
+  "product": {
+    "id": "cmgbhqta8002xkspro4e68y1l",
+    "slug": "nouveau-produit",
+    "deletedAt": "2025-10-03T23:57:00.000Z"
+  },
+  "message": "Product deleted successfully",
+  "timestamp": "2025-10-03T23:57:00.000Z"
+}
+```

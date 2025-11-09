@@ -5,6 +5,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../lib/middleware/withRateLimit';
 import { addToCart } from '../../../../lib/services/cart.service';
 
 async function addToCartHandler(request: NextRequest): Promise<NextResponse> {
@@ -155,4 +159,6 @@ async function addToCartHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const POST = withError(addToCartHandler);
+export const POST = withError(
+  withRateLimit(addToCartHandler, RateLimits.CART_WRITE)
+);

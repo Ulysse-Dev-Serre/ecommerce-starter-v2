@@ -48,7 +48,24 @@ curl http://localhost:3000/api/users
 
 ## POST /api/users/[id]/promote
 
+**Protection**: ADMIN uniquement
+
 Bascule le rôle d'un utilisateur entre CLIENT et ADMIN.
+
+### Comment promouvoir un utilisateur en administrateur
+
+**Étape 1**: Récupérer l'ID de l'utilisateur
+```bash
+curl http://localhost:3000/api/users
+```
+
+**Étape 2**: Promouvoir l'utilisateur
+```bash
+curl -X POST http://localhost:3000/api/users/[ID]/promote \
+  -H "Content-Type: application/json"
+```
+
+**Étape 3**: Répéter la même commande pour rétrograder (toggle)
 
 ### Paramètres
 
