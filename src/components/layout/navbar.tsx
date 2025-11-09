@@ -1,7 +1,7 @@
 // src/components/layout/navbar.tsx
 'use client';
 
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useState, type MouseEvent } from 'react';
@@ -10,14 +10,16 @@ import { logger } from '../../lib/logger';
 
 interface NavbarProps {
   locale: string;
+  userRole?: string;
 }
 
-export function Navbar({ locale }: NavbarProps): React.JSX.Element {
+export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   const [messages, setMessages] = useState<Record<
     string,
     Record<string, string>
   > | null>(null);
   const pathname = usePathname();
+  const { isSignedIn } = useUser();
 
   // Charger les messages pour la locale actuelle
   useEffect(() => {
@@ -145,6 +147,17 @@ export function Navbar({ locale }: NavbarProps): React.JSX.Element {
             >
               {messages.common.contact}
             </Link>
+
+            {/* Admin Dashboard - Visible uniquement pour les admins */}
+            {isSignedIn && userRole === 'ADMIN' && (
+              <Link
+                href={`/${locale}/admin`}
+                className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                onClick={() => handleNavigationClick(`/${locale}/admin`)}
+              >
+                📊 Dashboard
+              </Link>
+            )}
 
             {/* Sélecteur de langue */}
             <div className="flex items-center space-x-2 border-l pl-4 ml-4">
