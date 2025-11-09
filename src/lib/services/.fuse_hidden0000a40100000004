@@ -1,4 +1,5 @@
-import { Prisma, ProductStatus, Language, Product } from '../../generated/prisma';
+<<<<<<< HEAD
+import { Prisma, ProductStatus, Language } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 
@@ -443,14 +444,10 @@ export function isProductAvailable(product: ProductProjection): boolean {
 
 /**
  * Get product count for health checks
- */
-export async function getProductCount(): Promise<number> {
-  return prisma.product.count({
-    where: {
-      deletedAt: null,
-    },
-  });
-}
+=======
+import { Product, ProductStatus, Language } from '../../generated/prisma';
+import { prisma } from '../db/prisma';
+import { logger } from '../logger';
 
 export interface CreateProductData {
   slug: string;
@@ -487,7 +484,7 @@ type ProductWithTranslations = Product & {
 };
 
 /**
- * Get all products with translations (simple version for admin)
+ * Get all products with translations
  */
 export async function getAllProducts(): Promise<ProductWithTranslations[]> {
   return prisma.product.findMany({
@@ -504,7 +501,21 @@ export async function getAllProducts(): Promise<ProductWithTranslations[]> {
 }
 
 /**
- * Get product by ID (simple version)
+ * Get product count
+>>>>>>> 21e55e0 (Ajout des endpoints pour ajouter et supprimer des produits dans la base de données (pour l'admin), ainsi que leurs tests.)
+ */
+export async function getProductCount(): Promise<number> {
+  return prisma.product.count({
+    where: {
+      deletedAt: null,
+    },
+  });
+}
+<<<<<<< HEAD
+=======
+
+/**
+ * Get product by ID
  */
 export async function getProductById(
   id: string
@@ -512,6 +523,23 @@ export async function getProductById(
   return prisma.product.findFirst({
     where: {
       id,
+      deletedAt: null,
+    },
+    include: {
+      translations: true,
+    },
+  });
+}
+
+/**
+ * Get product by slug
+ */
+export async function getProductBySlug(
+  slug: string
+): Promise<ProductWithTranslations | null> {
+  return prisma.product.findFirst({
+    where: {
+      slug,
       deletedAt: null,
     },
     include: {
@@ -627,3 +655,4 @@ export async function hardDeleteProduct(id: string): Promise<Product> {
 
   return deletedProduct;
 }
+>>>>>>> 21e55e0 (Ajout des endpoints pour ajouter et supprimer des produits dans la base de données (pour l'admin), ainsi que leurs tests.)

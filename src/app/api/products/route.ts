@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ProductStatus, Language } from '../../../generated/prisma';
 import { logger } from '../../../lib/logger';
 import { withError } from '../../../lib/middleware/withError';
-import { getProducts } from '../../../lib/services/product.service';
+import {
+  getProducts,
+  createProduct,
+  CreateProductData,
+} from '../../../lib/services/product.service';
 
 async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
@@ -99,3 +103,45 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
 }
 
 export const GET = withError(getProductsHandler);
+
+async function createProductHandler(
+  request: Request
+): Promise<NextResponse> {
+  const body = await request.json();
+
+  logger.info(
+    { action: 'create_product', slug: body.slug },
+    'Creating new product'
+  );
+
+  const productData: CreateProductData = {
+    slug: body.slug,
+    status: body.status,
+    isFeatured: body.isFeatured,
+    sortOrder: body.sortOrder,
+    translations: body.translations,
+  };
+
+  const product = await createProduct(productData);
+
+  logger.info(
+    {
+      action: 'product_created_successfully',
+      productId: product.id,
+      slug: product.slug,
+    },
+    `Product created: ${product.slug}`
+  );
+
+  return NextResponse.json(
+    {
+      success: true,
+      product,
+      message: 'Product created successfully',
+      timestamp: new Date().toISOString(),
+    },
+    { status: 201 }
+  );
+}
+
+export const POST = withError(createProductHandler);
