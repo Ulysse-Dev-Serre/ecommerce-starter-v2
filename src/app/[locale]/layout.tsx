@@ -41,7 +41,7 @@ export default async function RootLayout({
   const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   const hasValidClerkKey =
-    clerkKey?.startsWith('pk_live_') ??
+    clerkKey?.startsWith('pk_live_') ||
     (clerkKey?.startsWith('pk_test_') &&
       clerkKey !== 'pk_test_mock_key_for_ci_build_only');
 
