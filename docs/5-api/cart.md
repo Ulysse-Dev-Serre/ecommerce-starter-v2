@@ -369,3 +369,203 @@ const handleSignIn = async () => {
   router.refresh();
 };
 ```
+- Sécurité : Middleware `withError` pour gestion erreurs
+- Audit : Logs structurés pour traçabilité
+
+---
+
+## Tests automatisés
+
+### Jest
+
+```bash
+# Tests spécifiques cart
+npm test cart.test.js
+```
+
+### Cas testés
+
+**POST /api/cart/items :**
+
+- ✅ Ajout pour utilisateur anonyme
+- ✅ Ajout pour utilisateur authentifié
+- ✅ Ajout de plusieurs items différents au même panier
+- ✅ Mise à jour automatique de quantité (même variante ajoutée 2×)
+- ✅ Quantité par défaut (1) si non spécifiée
+- ✅ Erreur 400 si userId ET anonymousId manquants
+- ✅ Erreur 400 si variantId manquant
+- ✅ Structure de réponse correcte
+
+**DELETE /api/cart/items/[id] :**
+
+- ✅ Suppression réussie d'un item
+- ✅ Erreur 404 pour ID inexistant
+- ✅ Erreur 404 pour item déjà supprimé
+- ✅ Structure de réponse correcte
+
+**Workflow complet :**
+
+- ✅ Scénario intégré : ajout de 3 items, suppression d'un, vérification état final
+
+### Résultats attendus
+
+```
+PASS tests/__tests__/api/cart.test.js
+Cart API
+  POST /api/cart/items
+    ✓ should add item to cart for anonymous user
+    ✓ should add item to cart for authenticated user
+    ✓ should add multiple different items to same cart
+    ✓ should update quantity when adding same variant twice
+    ✓ should default quantity to 1 when not provided
+    ✓ should fail when neither userId nor anonymousId provided
+    ✓ should fail when variantId is missing
+    ✓ should have correct response structure
+  DELETE /api/cart/items/[id]
+    ✓ should delete cart item successfully
+    ✓ should return 404 for non-existent cart item
+    ✓ should return 404 for already deleted cart item
+    ✓ should have correct response structure
+  Cart workflow integration
+    ✓ should complete full cart workflow: add, add more, remove one
+
+Test Suites: 1 passed, 1 total
+Tests: 13 passed, 13 total
+```
+
+### Données de test
+
+Les tests utilisent les **vraies variantes** créées par le seed :
+
+- `IPH15PRO-128-BLACK` - iPhone 15 Pro 128GB Noir
+- `IPH15PRO-256-BLACK` - iPhone 15 Pro 256GB Noir  
+- `IPH15PRO-128-WHITE` - iPhone 15 Pro 128GB Blanc
+- `MBA-M3-256-SILVER` - MacBook Air M3 256GB Argent
+- `TSHIRT-CLASSIC-M-BLACK` - T-Shirt Classique M Noir
+
+---
+
+## Notes techniques
+
+### Structure des données
+
+- Table `Cart` avec statut enum (`ACTIVE`, `ABANDONED`, `CONVERTED`)
+- Table `CartItem` avec contrainte unique par panier/variante
+- Support utilisateurs connectés (`userId`) et anonymes (`anonymousId`)
+- Cascade delete : suppression cart → suppression items
+
+### Gestion utilisateurs anonymes
+
+- **anonymousId** : Identifiant unique généré côté client (cookie, localStorage)
+- **Persistance** : Le panier survit tant que l'anonymousId est conservé
+- **Migration** : Possibilité future de transférer panier anonyme vers compte utilisateur
+- **Expiration** : Champ `expiresAt` pour cleanup automatique des paniers abandonnés
+
+### Gestion des quantités
+
+- **Addition automatique** : Ajouter 2× la même variante cumule les quantités
+- **Pas de limite** : Aucune validation de stock lors de l'ajout (à implémenter si souhaité)
+- **Mise à jour** : Pour changer une quantité, re-poster avec la nouvelle valeur incrémentale
+
+### Évolutions futures
+
+**Endpoints à ajouter :**
+
+- `GET /api/cart` - Récupérer le panier complet d'un utilisateur
+- `GET /api/cart/[id]` - Détails d'un panier spécifique
+- `PATCH /api/cart/items/[id]` - Modifier la quantité d'un item
+- `DELETE /api/cart/[id]` - Vider complètement un panier
+- `POST /api/cart/merge` - Fusionner panier anonyme avec compte utilisateur
+
+**Fonctionnalités prévues :**
+
+- Validation du stock avant ajout au panier
+- Calcul automatique des totaux (subtotal, taxes, livraison)
+- Gestion des coupons de réduction
+- Sauvegarde pour achat ultérieur
+- Recommandations de produits similaires
+- Cleanup automatique des paniers expirés
+
+### Sécurité
+
+- Aucune authentification requise (développement)
+- En production : 
+  - Valider que `userId` correspond à l'utilisateur connecté
+  - Rate limiting pour les paniers anonymes
+  - Validation CSRF pour les mutations
+- Logs automatiques de toutes les opérations
+- Pas d'exposition des IDs sensibles
+
+### Base de données
+
+- Relations : Cart → User (optionnel), Cart → CartItem → ProductVariant
+- Indexation : userId, anonymousId, status, expiresAt
+- Contrainte unique : `[cartId, variantId]` pour éviter doublons
+- Timestamps automatiques (createdAt, updatedAt, addedAt)
+
+---
+
+## Exemples d'utilisation
+
+### Scénario 1 : Visiteur anonyme
+
+```bash
+# 1. Ajouter un iPhone au panier
+curl -X POST http://localhost:3000/api/cart/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "anonymousId": "visitor-12345",
+    "variantId": "cm-iphone-variant-id",
+    "quantity": 1
+  }'
+
+# 2. Ajouter un T-shirt
+curl -X POST http://localhost:3000/api/cart/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "anonymousId": "visitor-12345",
+    "variantId": "cm-tshirt-variant-id",
+    "quantity": 2
+  }'
+
+# 3. Changer d'avis, supprimer l'iPhone
+curl -X DELETE http://localhost:3000/api/cart/items/[CART_ITEM_ID]
+```
+
+### Scénario 2 : Utilisateur connecté
+
+```bash
+# 1. Récupérer l'ID utilisateur
+USER_ID=$(curl http://localhost:3000/api/users | jq -r '.users[0].id')
+
+# 2. Ajouter un MacBook au panier
+curl -X POST http://localhost:3000/api/cart/items \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"userId\": \"$USER_ID\",
+    \"variantId\": \"cm-macbook-variant-id\",
+    \"quantity\": 1
+  }"
+```
+
+### Scénario 3 : Mise à jour quantité
+
+```bash
+# Ajouter 2 t-shirts
+curl -X POST http://localhost:3000/api/cart/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "anonymousId": "visitor-99999",
+    "variantId": "cm-tshirt-variant-id",
+    "quantity": 2
+  }'
+
+# En ajouter 3 de plus (total = 5)
+curl -X POST http://localhost:3000/api/cart/items \
+  -H "Content-Type: application/json" \
+  -d '{
+    "anonymousId": "visitor-99999",
+    "variantId": "cm-tshirt-variant-id",
+    "quantity": 3
+  }'
+```
