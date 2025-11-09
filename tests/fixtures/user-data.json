@@ -1,0 +1,24 @@
+{
+  "validUser": {
+    "clerkId": "test_clerk_id_123",
+    "email": "test@example.com",
+    "firstName": "Test",
+    "lastName": "User",
+    "imageUrl": "https://example.com/avatar.jpg",
+    "role": "CLIENT"
+  },
+  "adminUser": {
+    "clerkId": "admin_clerk_id_456",
+    "email": "admin@example.com",
+    "firstName": "Admin",
+    "lastName": "User",
+    "imageUrl": "https://example.com/admin-avatar.jpg",
+    "role": "ADMIN"
+  },
+  "clerkWebhookHeaders": {
+    "content-type": "application/json",
+    "svix-id": "msg_test123",
+    "svix-signature": "v1,test-signature",
+    "svix-timestamp": "1640995200"
+  }
+}

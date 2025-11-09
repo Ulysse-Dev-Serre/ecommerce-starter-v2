@@ -20,7 +20,7 @@ const TEST_USERS = [
     clerkId: 'user_test_admin_123', // Remplacez par un vrai clerkId après création
     email: 'admin@test.com',
     firstName: 'Admin',
-    lastName: 'Test',
+    lastName: 'Hydro',
     role: UserRole.ADMIN,
     imageUrl:
       'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
@@ -29,68 +29,31 @@ const TEST_USERS = [
     // Client test - vous devrez créer cet utilisateur dans Clerk
     clerkId: 'user_test_client_456', // Remplacez par un vrai clerkId après création
     email: 'client@test.com',
-    firstName: 'Jean',
-    lastName: 'Dupont',
+    firstName: 'Client',
+    lastName: 'Jardinier',
     role: UserRole.CLIENT,
     imageUrl:
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
-  },
-  {
-    // Client test 2
-    clerkId: 'user_test_client2_789',
-    email: 'marie@test.com',
-    firstName: 'Marie',
-    lastName: 'Martin',
-    role: UserRole.CLIENT,
-    imageUrl:
-      'https://images.unsplash.com/photo-1494790108755-2616b332c5b1?w=400&h=400&fit=crop&crop=face',
   },
 ];
 
 // Catégories de base
 const CATEGORIES = [
   {
-    slug: 'electronics',
+    slug: 'hydroponic-systems',
     translations: {
       fr: {
-        name: 'Électronique',
-        description: 'Tous nos appareils électroniques',
+        name: 'Systèmes Hydroponiques',
+        description: 'Systèmes de culture hydroponique pour plantes',
       },
-      en: { name: 'Electronics', description: 'All our electronic devices' },
+      en: { name: 'Hydroponic Systems', description: 'Hydroponic growing systems for plants' },
     },
   },
   {
-    slug: 'smartphones',
-    parentSlug: 'electronics',
+    slug: 'sensors-monitoring',
     translations: {
-      fr: { name: 'Smartphones', description: 'Téléphones intelligents' },
-      en: { name: 'Smartphones', description: 'Smart phones' },
-    },
-  },
-  {
-    slug: 'laptops',
-    parentSlug: 'electronics',
-    translations: {
-      fr: {
-        name: 'Ordinateurs portables',
-        description: 'Laptops et ultrabooks',
-      },
-      en: { name: 'Laptops', description: 'Laptops and ultrabooks' },
-    },
-  },
-  {
-    slug: 'clothing',
-    translations: {
-      fr: { name: 'Vêtements', description: 'Mode et vêtements' },
-      en: { name: 'Clothing', description: 'Fashion and clothing' },
-    },
-  },
-  {
-    slug: 'mens-clothing',
-    parentSlug: 'clothing',
-    translations: {
-      fr: { name: 'Vêtements homme', description: 'Mode masculine' },
-      en: { name: "Men's Clothing", description: "Men's fashion" },
+      fr: { name: 'Capteurs et Monitoring', description: 'Capteurs pour surveillance des plantes' },
+      en: { name: 'Sensors & Monitoring', description: 'Sensors for plant monitoring' },
     },
   },
 ];
@@ -105,24 +68,10 @@ const PRODUCT_ATTRIBUTES = [
     },
     values: [
       {
-        value: 'red',
+        value: 'green',
         translations: {
-          fr: { displayName: 'Rouge' },
-          en: { displayName: 'Red' },
-        },
-      },
-      {
-        value: 'blue',
-        translations: {
-          fr: { displayName: 'Bleu' },
-          en: { displayName: 'Blue' },
-        },
-      },
-      {
-        value: 'black',
-        translations: {
-          fr: { displayName: 'Noir' },
-          en: { displayName: 'Black' },
+          fr: { displayName: 'Vert' },
+          en: { displayName: 'Green' },
         },
       },
       {
@@ -130,72 +79,6 @@ const PRODUCT_ATTRIBUTES = [
         translations: {
           fr: { displayName: 'Blanc' },
           en: { displayName: 'White' },
-        },
-      },
-    ],
-  },
-  {
-    key: 'size',
-    translations: {
-      fr: { name: 'Taille' },
-      en: { name: 'Size' },
-    },
-    values: [
-      {
-        value: 'xs',
-        translations: { fr: { displayName: 'XS' }, en: { displayName: 'XS' } },
-      },
-      {
-        value: 's',
-        translations: { fr: { displayName: 'S' }, en: { displayName: 'S' } },
-      },
-      {
-        value: 'm',
-        translations: { fr: { displayName: 'M' }, en: { displayName: 'M' } },
-      },
-      {
-        value: 'l',
-        translations: { fr: { displayName: 'L' }, en: { displayName: 'L' } },
-      },
-      {
-        value: 'xl',
-        translations: { fr: { displayName: 'XL' }, en: { displayName: 'XL' } },
-      },
-    ],
-  },
-  {
-    key: 'storage',
-    translations: {
-      fr: { name: 'Stockage' },
-      en: { name: 'Storage' },
-    },
-    values: [
-      {
-        value: '64gb',
-        translations: {
-          fr: { displayName: '64 Go' },
-          en: { displayName: '64GB' },
-        },
-      },
-      {
-        value: '128gb',
-        translations: {
-          fr: { displayName: '128 Go' },
-          en: { displayName: '128GB' },
-        },
-      },
-      {
-        value: '256gb',
-        translations: {
-          fr: { displayName: '256 Go' },
-          en: { displayName: '256GB' },
-        },
-      },
-      {
-        value: '512gb',
-        translations: {
-          fr: { displayName: '512 Go' },
-          en: { displayName: '512GB' },
         },
       },
     ],
@@ -395,126 +278,76 @@ async function seedProducts(
 
   const SAMPLE_PRODUCTS = [
     {
-      slug: 'iphone-15-pro',
-      categorySlug: 'smartphones',
+      slug: 'hydroponic-growing-system',
+      categorySlug: 'hydroponic-systems',
       isFeatured: true,
       translations: {
         fr: {
-          name: 'iPhone 15 Pro',
+          name: 'Système de Culture Hydroponique',
           description:
-            'Le dernier iPhone avec puce A17 Pro et caméra révolutionnaire.',
-          shortDescription: 'Smartphone Apple dernière génération',
+            'Système hydroponique complet pour cultiver vos plantes sans sol. Idéal pour légumes et herbes aromatiques.',
+          shortDescription: 'Système hydroponique tout-en-un',
         },
         en: {
-          name: 'iPhone 15 Pro',
+          name: 'Hydroponic Growing System',
           description:
-            'The latest iPhone with A17 Pro chip and revolutionary camera.',
-          shortDescription: 'Latest generation Apple smartphone',
+            'Complete hydroponic system to grow your plants without soil. Perfect for vegetables and herbs.',
+          shortDescription: 'All-in-one hydroponic system',
         },
       },
       variants: [
         {
-          sku: 'IPH15PRO-128-BLACK',
+          sku: 'HYDRO-SYS-GREEN',
           attributes: [
-            { key: 'color', value: 'black' },
-            { key: 'storage', value: '128gb' },
+            { key: 'color', value: 'green' },
           ],
-          price: 1299.99,
-          stock: 50,
+          price: 149.99,
+          stock: 20,
         },
         {
-          sku: 'IPH15PRO-256-BLACK',
-          attributes: [
-            { key: 'color', value: 'black' },
-            { key: 'storage', value: '256gb' },
-          ],
-          price: 1499.99,
-          stock: 30,
-        },
-        {
-          sku: 'IPH15PRO-128-WHITE',
+          sku: 'HYDRO-SYS-WHITE',
           attributes: [
             { key: 'color', value: 'white' },
-            { key: 'storage', value: '128gb' },
           ],
-          price: 1299.99,
-          stock: 25,
-        },
-      ],
-    },
-    {
-      slug: 'macbook-air-m3',
-      categorySlug: 'laptops',
-      isFeatured: true,
-      translations: {
-        fr: {
-          name: 'MacBook Air M3',
-          description:
-            'MacBook Air avec la nouvelle puce M3, ultra-mince et puissant.',
-          shortDescription: 'Ordinateur portable Apple M3',
-        },
-        en: {
-          name: 'MacBook Air M3',
-          description:
-            'MacBook Air with the new M3 chip, ultra-thin and powerful.',
-          shortDescription: 'Apple M3 laptop',
-        },
-      },
-      variants: [
-        {
-          sku: 'MBA-M3-256-SILVER',
-          attributes: [
-            { key: 'color', value: 'white' },
-            { key: 'storage', value: '256gb' },
-          ],
-          price: 1499.99,
+          price: 149.99,
           stock: 15,
         },
       ],
     },
     {
-      slug: 't-shirt-classic',
-      categorySlug: 'mens-clothing',
-      isFeatured: false,
+      slug: 'soil-humidity-sensor',
+      categorySlug: 'sensors-monitoring',
+      isFeatured: true,
       translations: {
         fr: {
-          name: 'T-Shirt Classique',
-          description: 'T-shirt en coton bio, confortable et durable.',
-          shortDescription: 'T-shirt coton bio',
+          name: 'Capteur d\'Humidité du Sol',
+          description:
+            'Capteur intelligent pour mesurer l\'humidité du sol en temps réel. Connecté à une application mobile.',
+          shortDescription: 'Capteur d\'humidité connecté',
         },
         en: {
-          name: 'Classic T-Shirt',
-          description: 'Organic cotton t-shirt, comfortable and durable.',
-          shortDescription: 'Organic cotton t-shirt',
+          name: 'Soil Humidity Sensor',
+          description:
+            'Smart sensor to measure soil humidity in real-time. Connected to mobile app.',
+          shortDescription: 'Connected humidity sensor',
         },
       },
       variants: [
         {
-          sku: 'TSHIRT-CLASSIC-M-BLACK',
+          sku: 'SENSOR-HUM-GREEN',
           attributes: [
-            { key: 'color', value: 'black' },
-            { key: 'size', value: 'm' },
+            { key: 'color', value: 'green' },
           ],
-          price: 29.99,
-          stock: 100,
+          price: 39.99,
+          stock: 50,
         },
         {
-          sku: 'TSHIRT-CLASSIC-L-BLACK',
-          attributes: [
-            { key: 'color', value: 'black' },
-            { key: 'size', value: 'l' },
-          ],
-          price: 29.99,
-          stock: 80,
-        },
-        {
-          sku: 'TSHIRT-CLASSIC-M-WHITE',
+          sku: 'SENSOR-HUM-WHITE',
           attributes: [
             { key: 'color', value: 'white' },
-            { key: 'size', value: 'm' },
           ],
-          price: 29.99,
-          stock: 75,
+          price: 39.99,
+          stock: 45,
         },
       ],
     },
@@ -664,9 +497,8 @@ async function main(): Promise<void> {
   console.info(
     "⚠️  IMPORTANT: Assurez-vous d'avoir créé les utilisateurs suivants dans Clerk:"
   );
-  console.info('   - admin@test.com (avec le rôle admin)');
-  console.info('   - client@test.com');
-  console.info('   - marie@test.com');
+  console.info('   - admin@test.com (Admin Hydro)');
+  console.info('   - client@test.com (Client Jardinier)');
   console.info(
     '   Et mettez à jour les clerkId dans ce fichier avec les vrais IDs de Clerk.'
   );
@@ -685,14 +517,14 @@ async function main(): Promise<void> {
     console.info('');
     console.info('📋 Résumé:');
     console.info(`   - ${TEST_USERS.length} utilisateurs`);
-    console.info(`   - ${CATEGORIES.length} catégories`);
-    console.info(`   - ${PRODUCT_ATTRIBUTES.length} attributs produits`);
-    console.info('   - 3 produits avec variantes');
+    console.info(`   - ${CATEGORIES.length} catégories (Hydroponique & Capteurs)`);
+    console.info(`   - ${PRODUCT_ATTRIBUTES.length} attribut produit (couleur)`);
+    console.info('   - 2 produits hydroponiques avec 2 variantes chacun (4 variantes total)');
     console.info('   - Paramètres système et coupon de test');
     console.info('');
     console.info('🔗 Comptes de test:');
     console.info('   Admin: admin@test.com');
-    console.info('   Client: client@test.com / marie@test.com');
+    console.info('   Client: client@test.com');
   } catch (error) {
     console.error('❌ Erreur lors du seed:', error);
     throw error;
