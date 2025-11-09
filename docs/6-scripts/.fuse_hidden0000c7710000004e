@@ -1,0 +1,496 @@
+# 📜 Scripts de gestion du projet
+
+Documentation complète des scripts organisée selon un flux logique de développement.
+
+---
+
+## 📋 Table des matières
+
+
+1. [Gestion Clerk - Authentification](#-2-gestion-clerk---authentification)
+2. [Gestion base de données - Structure et données](#-3-gestion-base-de-données---structure-et-données)
+3. [Tests et validation](#-4-tests-et-validation)
+4. [Workflows recommandés](#-workflows-recommandés)
+
+---
+
+
+## 👥 1. Gestion Clerk - Authentification
+
+**Ordre logique :** D'abord créer les utilisateurs dans Clerk, ensuite les synchroniser vers PostgreSQL.
+
+### `npm run sync-clerk create`
+
+**Fichier:** `scripts/sync-clerk-users.ts`
+
+**Objectif:** Créer les utilisateurs de test dans Clerk (le système d'authentification).
+
+**Ce qu'il fait:**
+- Crée 3 utilisateurs dans Clerk via l'API :
+  - `admin@test.com` (Admin Test, rôle admin)
+  - `client@test.com` (Jean Dupont, rôle client)
+  - `marie@test.com` (Marie Martin, rôle client)
+- Mot de passe par défaut : `A_dmin_P@ssw0rd!123`
+- Évite les doublons (vérifie avant de créer)
+
+**Utilisation:**
+```bash
+npm run sync-clerk create
+```
+
+**⚠️ Prérequis :** Variable `CLERK_SECRET_KEY` configurée dans `.env`
+
+---
+
+### `npm run sync-clerk sync`
+
+**Fichier:** `scripts/sync-clerk-users.ts`
+
+**Objectif:** Synchroniser les utilisateurs de Clerk vers PostgreSQL.
+
+**Ce qu'il fait:**
+1. Récupère tous les utilisateurs depuis Clerk (max 100)
+2. Pour chaque utilisateur :
+   - **Existe en DB** → Met à jour (email, nom, imageUrl, role)
+   - **N'existe pas** → Crée un nouvel enregistrement
+3. Détermine le rôle automatiquement (ADMIN si email contient "admin", sinon CLIENT)
+4. Affiche les `clerkId` réels pour référence
+
+**Utilisation:**
+```bash
+npm run sync-clerk sync
+```
+
+**Sortie typique:**
+```
+✅ Utilisateur mis à jour: admin@test.com
+✅ Utilisateur mis à jour: client@test.com
+🆕 Nouvel utilisateur créé: marie@test.com
+
+```
+
+**💡 À ce stade :** Les utilisateurs existent dans Clerk ET dans PostgreSQL, mais sans données complémentaires (adresses, etc.).
+
+---
+
+## 🗄️ 3. Gestion base de données - Structure et données
+
+### 3.1 Gestion du schéma (Structure)
+
+#### `npm run db:migrate`
+
+**Objectif:** Créer et appliquer une migration Prisma (pour changements de structure).
+
+**Utilisation:**
+```bash
+npm run db:migrate
+```
+
+**Quand l'utiliser:**
+- Après modification du `schema.prisma`
+- Génère un fichier versionné dans `prisma/migrations/`
+- **Recommandé pour production** (historique des changements)
+
+---
+
+#### `npm run db:push`
+
+**Objectif:** Synchroniser le schéma directement sans créer de migration.
+
+**Utilisation:**
+```bash
+npm run db:push
+```
+
+**Différence avec migrate:**
+- Pas de fichier de migration créé
+- **Utile pour prototypage rapide en développement**
+- Ne pas utiliser en production
+
+---
+
+#### `npm run db:studio`
+
+**Objectif:** Interface graphique pour visualiser et modifier la base de données.
+
+**Utilisation:**
+```bash
+npm run db:studio
+```
+
+**Interface:** `http://localhost:5555`
+
+**Fonctionnalités:**
+- Voir toutes les tables et données
+- Modifier manuellement les enregistrements
+- Explorer les relations
+- Déboguer les problèmes de données
+
+---
+
+### 3.2 Gestion des données (Seeding)
+
+**Ordre logique :** Seed principal → Seed produits supplémentaires → Nettoyage si nécessaire
+
+#### `npm run db:seed`
+
+**Fichier:** `prisma/seed.ts`
+
+**Objectif:** Initialiser la base avec un jeu de données complet et cohérent.
+
+**Ce qu'il fait:**
+1. **Nettoie toutes les tables** de la base de données
+2. **Enrichit les utilisateurs** admin et client (créés par sync-clerk) :
+   - Ajoute des adresses de livraison/facturation
+   - Met à jour les informations complètes
+3. **Crée les catégories de base** :
+   - Systèmes Hydroponiques
+   - Capteurs et Monitoring
+4. **Crée un attribut produit** : color (vert, blanc)
+5. **Crée 2 produits avec variantes** :
+   - Système de Culture Hydroponique (2 variantes)
+   - Capteur d'Humidité du Sol (2 variantes)
+6. **Crée les paramètres système** : site_name, currency_default, tax_rate, etc.
+7. **Crée un coupon de test** : `WELCOME10` (10% réduction, min 50$)
+
+**Utilisation:**
+```bash
+npm run db:seed
+```
+
+**⚠️ Important :** Ce script suppose que les utilisateurs existent déjà dans PostgreSQL (via `sync-clerk sync`).
+
+**💡 Résultat :** Base de données complète avec 2 produits et utilisateurs enrichis.
+
+---
+
+#### `npm run db:seed-products`
+
+**Fichier:** `scripts/seed-products.ts`
+
+**Objectif:** Ajouter des produits supplémentaires SANS toucher aux données existantes.
+
+**Ce qu'il fait:**
+- Ajoute 6 nouveaux produits :
+  - Samsung Galaxy S24 (2 variantes)
+  - MacBook Pro 14" M3 (1 variante)
+  - Dell XPS 15 (1 variante)
+  - Hoodie Premium (3 variantes)
+  - Jeans Slim Fit (3 variantes)
+  - Google Pixel 8 Pro (2 variantes)
+- Vérifie que les catégories existent
+- Ignore les produits déjà existants (basé sur le slug)
+- Crée les traductions FR/EN automatiquement
+
+**Utilisation:**
+```bash
+npm run db:seed-products
+```
+
+**⚠️ Prérequis :** Les catégories `smartphones`, `laptops`, `mens-clothing` doivent exister.
+
+**Cas d'usage:**
+- Enrichir le catalogue après seed initial
+- Tester la pagination (9 produits au total)
+- Ajouter des produits sans perdre les données
+
+---
+
+### 3.3 Nettoyage et reset
+
+**Ordre logique :** Du moins destructif au plus destructif
+
+#### `npm run db:clean-products`
+
+**Fichier:** `scripts/clean-products.ts`
+
+**Objectif:** Nettoyer TOUT ce qui est lié aux produits (garde uniquement les utilisateurs).
+
+**Ce qu'il supprime (dans l'ordre):**
+1. **Avis produits** (Review)
+2. **Items de panier** (CartItem)
+3. **Paniers** (Cart)
+4. **Produits** avec cascade automatique:
+   - ProductTranslation
+   - ProductCategory (liens)
+   - ProductVariant
+   - ProductVariantPricing
+   - ProductVariantInventory
+   - ProductVariantAttributeValue
+   - ProductMedia
+5. **Attributs produits** avec cascade:
+   - ProductAttribute
+   - ProductAttributeTranslation
+   - ProductAttributeValue
+   - ProductAttributeValueTranslation
+6. **Catégories** avec cascade:
+   - Category
+   - CategoryTranslation
+
+**Conserve uniquement:**
+- ✅ Utilisateurs et rôles
+- ✅ Adresses utilisateurs
+- ✅ Paramètres système
+- ✅ Coupons
+- ✅ Commandes (Order, OrderItem, Payment, Shipment)
+- ✅ Webhooks
+- ✅ Logs d'audit
+
+**Utilisation:**
+```bash
+npm run db:clean-products
+```
+
+**Cas d'usage:**
+- Vider le catalogue avant de tester l'ajout manuel via dashboard
+- Nettoyer sans perdre les utilisateurs Clerk synchronisés
+- Recommencer les tests produits sur une base propre
+
+---
+
+#### `npm run db:reset`
+
+**Fichier:** `scripts/reset-local.ts`
+
+**Objectif:** Reset COMPLET de l'environnement (Clerk + Base de données).
+
+**Ce qu'il fait:**
+1. **Supprime les utilisateurs de Clerk** :
+   - Tous les emails `@test.com`
+   - Utilisateurs listés dans `testEmails[]`
+2. **Supprime et recrée la base de données** :
+   - Exécute `prisma migrate reset --force`
+   - **NE lance PAS le seed automatiquement** (`--skip-seed`)
+
+**Utilisation:**
+```bash
+npm run db:reset
+```
+
+**⚠️ ATTENTION :** Cette commande est DESTRUCTIVE ! Elle supprime :
+- ❌ Tous les utilisateurs Clerk de test
+- ❌ Toute la base de données (structure + données)
+
+**💡 Après ce reset :** Vous devez recommencer tout le workflow (voir section Workflows).
+
+---
+
+## 🧪 4. Tests et validation
+
+### Tests automatisés (Jest)
+
+#### `npm run test`
+
+**Objectif:** Exécuter tous les tests unitaires et d'intégration.
+
+**Tests inclus:**
+- 3 tests Health API
+- 1 test Cart API
+- **Total : 4 tests**
+
+**Utilisation:**
+```bash
+npm run test
+```
+
+**⚠️ Prérequis :** Serveur lancé (`npm run dev`) et base de données accessible.
+
+---
+
+#### `npm run test:watch`
+
+**Objectif:** Tests en mode watch (re-exécution automatique).
+
+**Utilisation:**
+```bash
+npm run test:watch
+```
+
+---
+
+### Scripts de test manuels
+
+#### `npm run test:db`
+
+**Fichier:** `tests/scripts/database-test.js`
+
+**Objectif:** Test rapide de connexion et opérations CRUD.
+
+**Utilisation:**
+```bash
+npm run test:db
+```
+
+---
+
+#### `npm run test:webhook`
+
+**Fichier:** `tests/scripts/webhook-debug.js`
+
+**Objectif:** Serveur de debug pour intercepter les webhooks Clerk.
+
+**Utilisation:**
+```bash
+npm run test:webhook
+```
+
+**Serveur:** `http://localhost:3001/test-webhook`
+
+---
+
+#### Validation complète
+
+**Fichier:** `tests/scripts/validate-features.js`
+
+**Objectif:** Validation complète de toutes les fonctionnalités clés.
+
+**Tests inclus:** 8 tests (health, database, produits, admin, rôles, panier, stock, webhooks)
+
+**Utilisation:**
+```bash
+node tests/scripts/validate-features.js
+```
+
+**Résultat attendu :** Taux de réussite 100%
+
+---
+
+## 📊 Workflows recommandés
+
+### 🆕 Workflow 1 : Configuration initiale du projet
+
+**Situation :** Vous clonez le projet pour la première fois.
+
+```bash
+# 1. Installer les dépendances
+npm install
+
+# 2. Configurer les variables d'environnement
+cp .env.example .env
+# Éditer .env.local avec vos clés Clerk et DATABASE_URL
+
+# 3. Créer la structure de la base de données
+npm run db:migrate
+
+# 4. CLERK : Créer les utilisateurs de test dans Clerk
+npm run sync-clerk create
+# ➜ Crée admin@test.com, client@test.com, marie@test.com dans Clerk
+
+# 5. CLERK : Synchroniser Clerk → PostgreSQL
+npm run sync-clerk sync
+# ➜ Copie les 3 utilisateurs dans PostgreSQL avec leurs clerkId réels
+
+# 6. DATABASE : Seed complet (enrichit admin/client + produits de base)
+npm run db:seed
+# ➜ Ajoute adresses, catégories, 2 produits, paramètres, coupons
+
+# 7. DATABASE : Ajouter plus de produits (optionnel)
+npm run db:seed-products
+# ➜ Ajoute 6 produits supplémentaires (9 au total)
+
+# 8. Valider que tout fonctionne
+node tests/scripts/validate-features.js
+# ➜ Doit afficher : 8/8 tests réussis ✅
+
+# 9. Lancer le serveur
+npm run dev
+```
+
+
+
+### 🔄 Workflow 2 : Reset COMPLET (tout recommencer à zéro)
+
+**Situation :** Vous voulez repartir de zéro (Clerk + Database).
+
+```bash
+# 1. Reset TOTAL (Clerk + DB)
+npm run db:reset
+
+# 2. Recréer les utilisateurs dans Clerk
+npm run sync-clerk create
+
+# 3. Synchroniser Clerk → PostgreSQL
+npm run sync-clerk sync
+
+# 4. Seed complet
+npm run db:seed
+
+# 5. Ajouter plus de produits (optionnel)
+npm run db:seed-products
+
+# 6. Valider
+node tests/scripts/validate-features.js
+```
+
+---
+
+### 🛍️ Workflow 3 : Reset UNIQUEMENT les produits
+
+**Situation :** Vous voulez vider le catalogue mais garder les utilisateurs.
+
+```bash
+# 1. Nettoyer uniquement les produits et paniers
+npm run db:clean-products
+
+# 2. Ajouter de nouveaux produits
+npm run db:seed-products
+# ou relancer le seed complet si vous voulez aussi les 2 produits de base
+```
+
+**✅ Avantage :** Les utilisateurs Clerk sont préservés (pas besoin de resync).
+
+---
+
+### 🔧 Workflow 4 : Développement quotidien
+
+```bash
+# Terminal 1 : Serveur
+npm run dev
+
+# Terminal 2 : Tests en continu
+npm run test:watch
+
+# Terminal 3 : Vérifications TypeScript
+npm run typecheck
+```
+
+---
+
+### ✅ Workflow 5 : Avant un commit
+
+```bash
+# Option 1 : Corriger automatiquement
+npm run ci:fix
+
+# Option 2 : Vérifier sans modifier
+npm run ci
+```
+
+---
+
+## 📝 Points clés à retenir
+
+### Ordre logique de setup
+
+```
+1️⃣ CLERK      : sync-clerk create    (Créer utilisateurs dans Clerk)
+2️⃣ CLERK      : sync-clerk sync      (Copier vers PostgreSQL)
+3️⃣ DATABASE   : db:seed              (Enrichir données + 2 produits)
+4️⃣ DATABASE   : db:seed-products     (Ajouter 6 produits - optionnel)
+```
+
+
+
+### Environnements
+
+- ⚠️ Les scripts de reset/clean sont pour **développement local uniquement**
+- ❌ **Ne JAMAIS exécuter en production**
+
+### Migrations vs Push
+
+- `db:migrate` → Crée un fichier de migration (versionné, pour prod)
+- `db:push` → Synchronisation directe (prototype rapide, dev only)
+
+---
+
+

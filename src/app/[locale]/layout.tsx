@@ -1,9 +1,11 @@
 // src/app/[locale]/layout.tsx
 import { ClerkProvider } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { Navbar } from '../../components/layout/navbar';
+import { prisma } from '@/lib/db/prisma';
 import '../globals.css';
 
 const geistSans = Geist({
@@ -58,6 +60,22 @@ export default async function RootLayout({
     );
   }
 
+  // Récupérer le rôle de l'utilisateur
+  let userRole: string | undefined;
+  try {
+    const { userId: clerkId } = await auth();
+    if (clerkId) {
+      const user = await prisma.user.findUnique({
+        where: { clerkId },
+        select: { role: true },
+      });
+      userRole = user?.role;
+    }
+  } catch (error) {
+    // Ignorer les erreurs (utilisateur non connecté, etc.)
+    userRole = undefined;
+  }
+
   // Mode normal avec Clerk
   return (
     <ClerkProvider>
@@ -65,7 +83,7 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <Navbar locale={locale} />
+          <Navbar locale={locale} userRole={userRole} />
           {children}
         </body>
       </html>
