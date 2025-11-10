@@ -145,7 +145,7 @@ export async function getProducts(
       _count: 'desc',
     };
   } else {
-    orderBy[options.sortBy ?? 'createdAt'] = options.sortOrder ?? 'desc';
+    orderBy[options.sortBy ?? 'sortOrder'] = options.sortOrder ?? 'asc';
   }
 
   const [products, total] = await Promise.all([
