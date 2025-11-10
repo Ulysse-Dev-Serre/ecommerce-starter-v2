@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Package, 
@@ -10,61 +11,90 @@ import {
   Settings,
   FileText,
   BarChart3,
-  Tag
+  Tag,
+  Home
 } from 'lucide-react';
-
-const menuItems = [
-  {
-    title: 'Dashboard',
-    href: '/admin',
-    icon: LayoutDashboard,
-  },
-  {
-    title: 'Products',
-    href: '/admin/products',
-    icon: Package,
-  },
-  {
-    title: 'Orders',
-    href: '/admin/orders',
-    icon: ShoppingCart,
-  },
-  {
-    title: 'Customers',
-    href: '/admin/customers',
-    icon: Users,
-  },
-  {
-    title: 'Categories',
-    href: '/admin/categories',
-    icon: Tag,
-  },
-  {
-    title: 'Analytics',
-    href: '/admin/analytics',
-    icon: BarChart3,
-  },
-  {
-    title: 'Content',
-    href: '/admin/content',
-    icon: FileText,
-  },
-  {
-    title: 'Settings',
-    href: '/admin/settings',
-    icon: Settings,
-  },
-];
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const params = useParams();
+  const locale = (params.locale as string) || 'en';
+  const [messages, setMessages] = useState<any>(null);
+
+  useEffect(() => {
+    const loadMessages = async () => {
+      try {
+        const msgs = await import(
+          `../../../lib/i18n/dictionaries/${locale}.json`
+        );
+        setMessages(msgs.default);
+      } catch (error) {
+        console.error('Failed to load translations:', error);
+        const msgs = await import(`../../../lib/i18n/dictionaries/en.json`);
+        setMessages(msgs.default);
+      }
+    };
+    loadMessages();
+  }, [locale]);
+
+  if (!messages) {
+    return (
+      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white">
+        <div className="flex h-full flex-col">
+          <div className="flex h-16 items-center border-b border-gray-200 px-6">
+            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  const t = messages.admin.sidebar;
+
+  const menuItems = [
+    {
+      title: t.dashboard,
+      href: `/${locale}/admin`,
+      icon: LayoutDashboard,
+    },
+    {
+      title: t.products,
+      href: `/${locale}/admin/products`,
+      icon: Package,
+    },
+    {
+      title: t.orders,
+      href: `/${locale}/admin/orders`,
+      icon: ShoppingCart,
+    },
+    {
+      title: t.customers,
+      href: `/${locale}/admin/customers`,
+      icon: Users,
+    },
+    {
+      title: t.analytics,
+      href: `/${locale}/admin/analytics`,
+      icon: BarChart3,
+    },
+    {
+      title: t.content,
+      href: `/${locale}/admin/content`,
+      icon: FileText,
+    },
+    {
+      title: t.settings,
+      href: `/${locale}/admin/settings`,
+      icon: Settings,
+    },
+  ];
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-gray-200 bg-white">
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center border-b border-gray-200 px-6">
-          <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+          <h1 className="text-xl font-bold text-gray-900">{t.adminPanel}</h1>
         </div>
 
         {/* Navigation */}
@@ -91,9 +121,16 @@ export function AdminSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 p-4 space-y-3">
+          <Link
+            href={`/${locale}`}
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          >
+            <Home className="h-5 w-5" />
+            {t.backToSite || 'Back to site'}
+          </Link>
           <div className="text-xs text-gray-500">
-            Admin Dashboard v1.0
+            {t.version}
           </div>
         </div>
       </div>

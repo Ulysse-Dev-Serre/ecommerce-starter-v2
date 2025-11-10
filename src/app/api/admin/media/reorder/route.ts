@@ -7,19 +7,19 @@ import { withRateLimit, RateLimits } from '../../../../../lib/middleware/withRat
 import { prisma } from '../../../../../lib/db/prisma';
 
 /**
- * PUT /api/admin/products/reorder
- * Met à jour l'ordre de tri (sortOrder) de plusieurs produits en batch
+ * PUT /api/admin/media/reorder
+ * Met à jour l'ordre de tri (sortOrder) de plusieurs médias en batch
  * 
  * Body:
  * {
- *   products: [
+ *   media: [
  *     { id: string, sortOrder: number },
  *     { id: string, sortOrder: number },
  *     ...
  *   ]
  * }
  */
-async function reorderProductsHandler(
+async function reorderMediaHandler(
   request: NextRequest,
   authContext: AuthContext
 ): Promise<NextResponse> {
@@ -31,20 +31,20 @@ async function reorderProductsHandler(
     logger.info(
       {
         requestId,
-        action: 'reorder_products_admin',
+        action: 'reorder_media_admin',
         userId: authContext.userId,
-        productCount: body.products?.length || 0,
+        mediaCount: body.media?.length || 0,
       },
-      'Admin reordering products'
+      'Admin reordering media'
     );
 
-    if (!body.products || !Array.isArray(body.products)) {
+    if (!body.media || !Array.isArray(body.media)) {
       return NextResponse.json(
         {
           success: false,
           requestId,
           error: 'Invalid request',
-          message: 'products array is required',
+          message: 'media array is required',
           timestamp: new Date().toISOString(),
         },
         {
@@ -56,15 +56,15 @@ async function reorderProductsHandler(
       );
     }
 
-    // Valider que chaque produit a un id et sortOrder
-    for (const product of body.products) {
-      if (!product.id || typeof product.sortOrder !== 'number') {
+    // Valider que chaque média a un id et sortOrder
+    for (const mediaItem of body.media) {
+      if (!mediaItem.id || typeof mediaItem.sortOrder !== 'number') {
         return NextResponse.json(
           {
             success: false,
             requestId,
-            error: 'Invalid product data',
-            message: 'Each product must have an id and sortOrder number',
+            error: 'Invalid media data',
+            message: 'Each media must have an id and sortOrder number',
             timestamp: new Date().toISOString(),
           },
           {
@@ -77,12 +77,12 @@ async function reorderProductsHandler(
       }
     }
 
-    // Mettre à jour tous les produits en transaction
+    // Mettre à jour tous les médias en transaction
     await prisma.$transaction(
-      body.products.map((product: { id: string; sortOrder: number }) =>
-        prisma.product.update({
-          where: { id: product.id },
-          data: { sortOrder: product.sortOrder },
+      body.media.map((mediaItem: { id: string; sortOrder: number }) =>
+        prisma.productMedia.update({
+          where: { id: mediaItem.id },
+          data: { sortOrder: mediaItem.sortOrder },
         })
       )
     );
@@ -90,18 +90,18 @@ async function reorderProductsHandler(
     logger.info(
       {
         requestId,
-        action: 'products_reordered_successfully',
-        productCount: body.products.length,
+        action: 'media_reordered_successfully',
+        mediaCount: body.media.length,
       },
-      `${body.products.length} products reordered successfully`
+      `${body.media.length} media files reordered successfully`
     );
 
     return NextResponse.json(
       {
         success: true,
         requestId,
-        message: 'Products reordered successfully',
-        updatedCount: body.products.length,
+        message: 'Media reordered successfully',
+        updatedCount: body.media.length,
         timestamp: new Date().toISOString(),
       },
       {
@@ -114,10 +114,10 @@ async function reorderProductsHandler(
     logger.error(
       {
         requestId,
-        action: 'reorder_products_error',
+        action: 'reorder_media_error',
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Failed to reorder products'
+      'Failed to reorder media'
     );
 
     throw error;
@@ -125,5 +125,5 @@ async function reorderProductsHandler(
 }
 
 export const PUT = withError(
-  withAdmin(withRateLimit(reorderProductsHandler, RateLimits.ADMIN))
+  withAdmin(withRateLimit(reorderMediaHandler, RateLimits.ADMIN))
 );
