@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, X, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, X, Plus, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 interface Translation {
@@ -61,6 +61,7 @@ export default function EditProductPage({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [product, setProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<Variant[]>([]);
@@ -175,14 +176,34 @@ export default function EditProductPage({
 
     setSaving(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
+      // Préparer les données avec les traductions
+      const payload = {
+        ...formData,
+        translations: [
+          {
+            language: 'EN' as const,
+            name: enTranslation.name,
+            description: enTranslation.description || null,
+            shortDescription: enTranslation.shortDescription || null,
+          },
+          {
+            language: 'FR' as const,
+            name: frTranslation.name,
+            description: frTranslation.description || null,
+            shortDescription: frTranslation.shortDescription || null,
+          },
+        ],
+      };
+
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -191,9 +212,16 @@ export default function EditProductPage({
         throw new Error(data.message || 'Failed to update product');
       }
 
-      router.push('/admin/products');
+      setSuccessMessage('Product updated successfully!');
+      
+      // Recharger les données du produit
+      await loadProduct(productId);
+      
+      // Scroll to top pour voir le message de succès
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSaving(false);
     }
@@ -237,6 +265,8 @@ export default function EditProductPage({
       }
 
       await loadVariants(productId);
+      setSuccessMessage('Variant updated successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update variant');
     }
@@ -268,6 +298,8 @@ export default function EditProductPage({
       }
 
       await loadVariants(productId);
+      setSuccessMessage('Variant deleted successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete variant');
     }
@@ -325,6 +357,8 @@ export default function EditProductPage({
 
       setNewVariants([]);
       await loadVariants(productId);
+      setSuccessMessage('New variants added successfully!');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create variants');
     }
@@ -394,6 +428,7 @@ export default function EditProductPage({
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/admin/products" className="rounded-lg p-2 hover:bg-gray-100">
@@ -404,7 +439,32 @@ export default function EditProductPage({
             <p className="mt-2 text-sm text-gray-600">{enTranslation.name || 'Product details'}</p>
           </div>
         </div>
+        <button
+          onClick={handleUpdateProduct}
+          disabled={saving}
+          className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? t.saving : tc.save}
+        </button>
       </div>
+
+      {/* Messages de succès et d'erreur */}
+      {successMessage && (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100">
+              <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-medium text-green-900">{tc.success || 'Success'}</h3>
+              <p className="mt-1 text-sm text-green-700">{successMessage}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
@@ -418,71 +478,111 @@ export default function EditProductPage({
         </div>
       )}
 
-      <form onSubmit={handleUpdateProduct} className="space-y-6">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">{t.basicInfo}</h2>
+      {/* Layout en 2 colonnes pour grands écrans */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Colonne gauche - Informations de base */}
+        <div className="space-y-6">
+          {/* Basic Info */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">{t.basicInfo}</h2>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                {t.slug} <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.slug}
-                onChange={e => setFormData({ ...formData, slug: e.target.value })}
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-                required
-              />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.slug} <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.slug}
+                  onChange={e => setFormData({ ...formData, slug: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t.status}</label>
+                <select
+                  value={formData.status}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      status: e.target.value as typeof formData.status,
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                >
+                  <option value="DRAFT">{t.draft}</option>
+                  <option value="ACTIVE">{t.active}</option>
+                  <option value="INACTIVE">{t.inactive}</option>
+                  <option value="ARCHIVED">{t.archived}</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isFeatured"
+                  checked={formData.isFeatured}
+                  onChange={e => setFormData({ ...formData, isFeatured: e.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                />
+                <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                  {t.featured}
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">{t.sortOrder}</label>
+                <input
+                  type="number"
+                  value={formData.sortOrder}
+                  onChange={e =>
+                    setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Media Section - Placeholder */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              {t.media || 'Media'}
+            </h2>
+            
+            <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8">
+              <div className="text-center">
+                <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <p className="mt-2 text-sm font-medium text-gray-900">
+                  {t.uploadMedia || 'Upload images and videos'}
+                </p>
+                <p className="mt-1 text-xs text-gray-500">
+                  {t.mediaPlaceholder || 'Media management coming soon'}
+                </p>
+                <button
+                  type="button"
+                  disabled
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed"
+                >
+                  <Upload className="h-4 w-4" />
+                  {t.selectFiles || 'Select files'}
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">{t.status}</label>
-              <select
-                value={formData.status}
-                onChange={e =>
-                  setFormData({
-                    ...formData,
-                    status: e.target.value as typeof formData.status,
-                  })
-                }
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              >
-                <option value="DRAFT">{t.draft}</option>
-                <option value="ACTIVE">{t.active}</option>
-                <option value="INACTIVE">{t.inactive}</option>
-                <option value="ARCHIVED">{t.archived}</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isFeatured"
-                checked={formData.isFeatured}
-                onChange={e => setFormData({ ...formData, isFeatured: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-              />
-              <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
-                {t.featured}
-              </label>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">{t.sortOrder}</label>
-              <input
-                type="number"
-                value={formData.sortOrder}
-                onChange={e =>
-                  setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })
-                }
-                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-              />
+            <div className="mt-4 rounded-lg bg-blue-50 p-3">
+              <p className="text-xs text-blue-700">
+                💡 {t.mediaNote || 'This section will allow you to upload and manage product images and videos. Backend integration in progress.'}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="space-y-4">
+        {/* Colonne droite - Traductions */}
+        <div className="space-y-6">
+          {/* English Translation */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               🇬🇧 {t.english}
@@ -490,19 +590,46 @@ export default function EditProductPage({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t.productName}
+                  {t.productName} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={enTranslation.name}
-                  disabled
-                  className="mt-1 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-600"
+                  onChange={e => setEnTranslation({ ...enTranslation, name: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  required
                 />
-                <p className="mt-1 text-xs text-gray-500">{t.editingTranslationsComingSoon}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.shortDescription}
+                </label>
+                <input
+                  type="text"
+                  value={enTranslation.shortDescription}
+                  onChange={e => setEnTranslation({ ...enTranslation, shortDescription: e.target.value })}
+                  placeholder={t.shortDescriptionPlaceholder || 'Brief product summary'}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.fullDescription}
+                </label>
+                <textarea
+                  value={enTranslation.description}
+                  onChange={e => setEnTranslation({ ...enTranslation, description: e.target.value })}
+                  placeholder={t.fullDescriptionPlaceholder || 'Detailed product description'}
+                  rows={6}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
               </div>
             </div>
           </div>
 
+          {/* French Translation */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               🇫🇷 {t.french}
@@ -515,34 +642,42 @@ export default function EditProductPage({
                 <input
                   type="text"
                   value={frTranslation.name}
-                  disabled
-                  className="mt-1 w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-600"
+                  onChange={e => setFrTranslation({ ...frTranslation, name: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 />
-                <p className="mt-1 text-xs text-gray-500">{t.editingTranslationsComingSoon}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.shortDescription}
+                </label>
+                <input
+                  type="text"
+                  value={frTranslation.shortDescription}
+                  onChange={e => setFrTranslation({ ...frTranslation, shortDescription: e.target.value })}
+                  placeholder={t.shortDescriptionPlaceholder || 'Résumé bref du produit'}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.fullDescription}
+                </label>
+                <textarea
+                  value={frTranslation.description}
+                  onChange={e => setFrTranslation({ ...frTranslation, description: e.target.value })}
+                  placeholder={t.fullDescriptionPlaceholder || 'Description détaillée du produit'}
+                  rows={6}
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex items-center justify-end gap-4">
-          <Link
-            href="/admin/products"
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            {tc.cancel}
-          </Link>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-          >
-            <Save className="h-4 w-4" />
-            {saving ? t.saving : tc.save}
-          </button>
-        </div>
-      </form>
-
-      {/* Variantes existantes */}
+      {/* Section Variantes - Pleine largeur */}
       <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           {t.variants} ({variants.length})
@@ -572,7 +707,7 @@ export default function EditProductPage({
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {variants.map(variant => (
-                  <tr key={variant.id}>
+                  <tr key={variant.id} className="hover:bg-gray-50">
                     <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
                       {getVariantName(variant)}
                     </td>
@@ -661,7 +796,7 @@ export default function EditProductPage({
                     </button>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         {t.productName} (EN) <span className="text-red-500">*</span>
@@ -727,17 +862,37 @@ export default function EditProductPage({
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={handleSaveNewVariants}
-              className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-            >
-              <Save className="h-4 w-4" />
-              {tc.save} {newVariants.length} {t.variant}
-              {newVariants.length > 1 ? 's' : ''}
-            </button>
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleSaveNewVariants}
+                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+              >
+                <Save className="h-4 w-4" />
+                {tc.save} {newVariants.length} {t.variant}
+                {newVariants.length > 1 ? 's' : ''}
+              </button>
+            </div>
           </>
         )}
+      </div>
+
+      {/* Footer avec boutons d'action */}
+      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+        <Link
+          href="/admin/products"
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          {tc.cancel}
+        </Link>
+        <button
+          onClick={handleUpdateProduct}
+          disabled={saving}
+          className="flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? t.saving : tc.save}
+        </button>
       </div>
     </div>
   );
