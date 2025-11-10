@@ -74,7 +74,13 @@ async function ensureGenericVariantAttribute() {
   });
 
   if (!attribute) {
-    logger.info("Création de l'attribut générique variant_type");
+    logger.info(
+      {
+        action: 'create_generic_attribute',
+        key: GENERIC_ATTRIBUTE_KEY,
+      },
+      "Création de l'attribut générique variant_type"
+    );
 
     attribute = await prisma.productAttribute.create({
       data: {

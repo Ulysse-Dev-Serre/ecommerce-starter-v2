@@ -41,6 +41,7 @@ const TEST_USERS = [
 const CATEGORIES = [
   {
     slug: 'hydroponic-systems',
+    parentSlug: undefined,
     translations: {
       fr: {
         name: 'Systèmes Hydroponiques',
@@ -54,6 +55,7 @@ const CATEGORIES = [
   },
   {
     slug: 'sensors-monitoring',
+    parentSlug: undefined,
     translations: {
       fr: {
         name: 'Capteurs et Monitoring',
