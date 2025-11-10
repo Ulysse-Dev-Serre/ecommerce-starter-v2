@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Package, Plus, Search, Filter } from 'lucide-react';
+import { Package, Plus, Search, Filter, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface ProductTranslation {
@@ -47,6 +47,7 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -109,6 +110,31 @@ export default function ProductsPage() {
                          product.slug.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
+
+  const handleDelete = async (productId: string) => {
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingId(productId);
+
+    try {
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete product');
+      }
+
+      // Remove product from state
+      setProducts(products.filter(p => p.id !== productId));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete product');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -330,12 +356,26 @@ export default function ProductsPage() {
                     {product.variants.length} variant{product.variants.length !== 1 ? 's' : ''}
                   </td>
                   <td className="px-6 py-4 text-right text-sm">
-                    <Link
-                      href={`/admin/products/${product.id}/edit`}
-                      className="text-gray-600 hover:text-gray-900"
-                    >
-                      Edit
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/products/${product.id}/edit`}
+                        className="text-gray-600 hover:text-gray-900"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        disabled={deletingId === product.id}
+                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                        title="Delete product"
+                      >
+                        {deletingId === product.id ? (
+                          <span className="text-xs">Deleting...</span>
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
