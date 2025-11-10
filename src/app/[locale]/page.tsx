@@ -1,5 +1,7 @@
-// src/app/[locale]/page.tsx
-import Image from 'next/image';
+import Link from 'next/link';
+
+import { Language, ProductStatus } from '@/generated/prisma';
+import { getProducts } from '@/lib/services/product.service';
 
 interface HomeProps {
   params: Promise<{ locale: string }>;
@@ -9,27 +11,87 @@ export default async function Home({
   params,
 }: HomeProps): Promise<React.ReactElement> {
   const { locale } = await params;
+  
+  const language = locale.toUpperCase() as Language;
+  
+  const { products: featuredProducts } = await getProducts(
+    {
+      status: ProductStatus.ACTIVE,
+      isFeatured: true,
+      language,
+    },
+    {
+      page: 1,
+      limit: 8,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    }
+  );
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
+    <div className="flex-1">
+      <section className="bg-gradient-to-r from-gray-100 to-gray-200 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl font-bold">Hero</h1>
+        </div>
+      </section>
 
-        <h1 className="text-2xl text-center sm:text-left">
-          {locale === 'fr'
-            ? "Starter de boutique e-commerce, ceci est un projet personnel complexe que je me suis donné pour objectif de terminer d'ici la fin du stage de fin de session. Le but de ce projet est de  développer Un starter e-commerce universel, flexible et prêt à l'emploi pour lancer rapidement des boutiques en ligne dans n'importe quelle niche et n'importe quel pays. Je profite du devoir pour mettre en place le système de connexion avec Clerk et d'approfondir ma compréhension avec une présentation vidéo."
-            : 'E-commerce shop starter, this is a complex personal project that I have set as a goal to complete by the end of my end-of-session internship. The purpose of this project is to develop a universal, flexible, and ready-to-use e-commerce starter to quickly launch online stores in any niche and any country.'}
-        </h1>
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            {locale === 'fr' ? 'Produits en vedette' : 'Featured Products'}
+          </h2>
 
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left"></ol>
-      </main>
+          {featuredProducts.length === 0 ? (
+            <p className="text-center text-gray-500">
+              {locale === 'fr'
+                ? 'Aucun produit en vedette pour le moment.'
+                : 'No featured products at the moment.'}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {featuredProducts.map(product => {
+                const translation = product.translations.find(
+                  t => t.language === language
+                );
+                const primaryImage = product.media?.find(m => m.isPrimary);
+
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/${locale}/product/${product.slug}`}
+                    className="group border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="aspect-square bg-gray-200 relative overflow-hidden">
+                      {primaryImage ? (
+                        <img
+                          src={primaryImage.url}
+                          alt={primaryImage.alt || translation?.name || ''}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          {locale === 'fr' ? 'Pas d\'image' : 'No image'}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
+                        {translation?.name || product.slug}
+                      </h3>
+                      {translation?.shortDescription && (
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {translation.shortDescription}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

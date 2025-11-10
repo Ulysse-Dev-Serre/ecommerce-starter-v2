@@ -1,0 +1,109 @@
+import { StorageProvider, StorageProviderType, StorageConfig } from './types';
+import { LocalStorageProvider } from './providers/local.provider';
+import { S3StorageProvider } from './providers/s3.provider';
+
+/**
+ * Factory pour créer le bon provider de stockage selon la configuration
+ */
+export class StorageService {
+  private static instance: StorageProvider;
+
+  /**
+   * Retourne l'instance singleton du provider de stockage configuré
+   */
+  static getProvider(): StorageProvider {
+    if (!this.instance) {
+      this.instance = this.createProvider();
+    }
+    return this.instance;
+  }
+
+  /**
+   * Crée le provider de stockage selon la configuration
+   */
+  private static createProvider(): StorageProvider {
+    const config = this.getConfig();
+
+    switch (config.provider) {
+      case 'local':
+        return new LocalStorageProvider(
+          config.local?.uploadDir || 'public/uploads',
+          config.local?.publicPath || '/uploads'
+        );
+
+      case 's3':
+        if (!config.s3) {
+          throw new Error('S3 configuration is missing');
+        }
+        return new S3StorageProvider({
+          bucket: config.s3.bucket,
+          region: config.s3.region,
+          accessKeyId: config.s3.accessKeyId,
+          secretAccessKey: config.s3.secretAccessKey,
+          endpoint: config.s3.endpoint,
+        });
+
+      case 'cloudinary':
+        throw new Error('Cloudinary provider not yet implemented');
+
+      default:
+        throw new Error(`Unknown storage provider: ${config.provider}`);
+    }
+  }
+
+  /**
+   * Charge la configuration depuis les variables d'environnement
+   */
+  private static getConfig(): StorageConfig {
+    const provider = (process.env.STORAGE_PROVIDER || 'local') as StorageProviderType;
+
+    const config: StorageConfig = {
+      provider,
+    };
+
+    // Configuration locale
+    if (provider === 'local') {
+      config.local = {
+        uploadDir: process.env.STORAGE_LOCAL_UPLOAD_DIR || 'public/uploads',
+        publicPath: process.env.STORAGE_LOCAL_PUBLIC_PATH || '/uploads',
+      };
+    }
+
+    // Configuration S3
+    if (provider === 's3') {
+      config.s3 = {
+        bucket: process.env.STORAGE_S3_BUCKET || '',
+        region: process.env.STORAGE_S3_REGION || 'us-east-1',
+        accessKeyId: process.env.STORAGE_S3_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.STORAGE_S3_SECRET_ACCESS_KEY || '',
+        endpoint: process.env.STORAGE_S3_ENDPOINT,
+      };
+    }
+
+    // Configuration Cloudinary
+    if (provider === 'cloudinary') {
+      config.cloudinary = {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+        apiKey: process.env.CLOUDINARY_API_KEY || '',
+        apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+      };
+    }
+
+    return config;
+  }
+
+  /**
+   * Réinitialise l'instance (utile pour les tests)
+   */
+  static resetInstance(): void {
+    // @ts-ignore
+    this.instance = undefined;
+  }
+}
+
+/**
+ * Helper pour obtenir rapidement le provider
+ */
+export const getStorageProvider = (): StorageProvider => {
+  return StorageService.getProvider();
+};
