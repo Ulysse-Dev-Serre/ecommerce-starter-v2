@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { Language, ProductStatus } from '@/generated/prisma';
 import { getProducts } from '@/lib/services/product.service';
 
+// Disable static generation for this page (requires DB)
+export const dynamic = 'force-dynamic';
+
 interface HomeProps {
   params: Promise<{ locale: string }>;
 }

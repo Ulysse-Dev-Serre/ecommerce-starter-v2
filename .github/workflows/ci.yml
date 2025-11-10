@@ -42,6 +42,7 @@ jobs:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_mock_key_for_ci_build_only
       CLERK_SECRET_KEY: sk_test_mock_key_for_ci_build_only
       NEXT_PUBLIC_CORS_ORIGIN: '*'
+      DATABASE_URL: postgresql://user:password@localhost:5432/ci_db?schema=public
 
     steps:
       - name: Checkout code
