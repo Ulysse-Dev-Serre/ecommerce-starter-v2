@@ -68,7 +68,7 @@ export default function NewProductPage() {
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   const handleTranslationChange = (
@@ -489,8 +489,8 @@ export default function NewProductPage() {
               {variants.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
                   <p className="text-sm text-gray-600">
-                    Aucune variante ajoutée. Cliquez sur "{tc.add} {t.variant}"
-                    pour commencer.
+                    Aucune variante ajoutée. Cliquez sur &quot;{tc.add}{' '}
+                    {t.variant}&quot; pour commencer.
                   </p>
                   <p className="mt-2 text-xs text-red-600">
                     ⚠️ Au moins 1 variante est requise

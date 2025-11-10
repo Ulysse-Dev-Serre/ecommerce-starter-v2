@@ -97,7 +97,7 @@ export class StorageService {
    * Réinitialise l'instance (utile pour les tests)
    */
   static resetInstance(): void {
-    // @ts-ignore
+    // @ts-expect-error - Reset needed for tests
     this.instance = undefined;
   }
 }

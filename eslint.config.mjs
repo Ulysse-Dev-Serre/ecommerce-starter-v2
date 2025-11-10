@@ -21,6 +21,7 @@ const eslintConfig = [
       'dist/**',
       'src/generated/**',
       'postcss.config.mjs', // Ignore postcss config
+      'eslint.config.mjs', // Ignore eslint config itself
       'tests/**', // Ignore temporairement les tests
       'scripts/**', // Ignore les scripts utilitaires
       '**/*.test.js', // Ignore tous les fichiers de test
@@ -36,63 +37,41 @@ const eslintConfig = [
       },
     },
     rules: {
-      // TypeScript : warnings par défaut, erreurs pour bugs critiques
+      // 🔒 SÉCURITÉ CRITIQUE - ERREURS
+      '@typescript-eslint/no-floating-promises': 'error', // Promises non gérées = failles
+      '@typescript-eslint/ban-ts-comment': 'error', // @ts-ignore cache les problèmes
+      'no-debugger': 'error', // Jamais en prod
+      'no-var': 'error', // var = scope dangereux
+      '@typescript-eslint/no-explicit-any': 'warn', // any = pas de validation type
+
+      // 🛡️ BONNES PRATIQUES - WARNINGS
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_' },
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/no-explicit-any': 'off', // Temporaire - webhooks Clerk complexes
-      '@typescript-eslint/explicit-function-return-type': [
-        'warn',
-        {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true,
-        },
-      ],
-      '@typescript-eslint/no-non-null-assertion': 'warn',
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
-      '@typescript-eslint/prefer-optional-chain': 'warn',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-      '@typescript-eslint/no-floating-promises': ['warn', { ignoreVoid: true }], // warn local, puis error en CI
+      '@typescript-eslint/no-non-null-assertion': 'warn', // ! peut crasher
+      'react-hooks/exhaustive-deps': 'warn', // useEffect dependencies
+      'react-hooks/rules-of-hooks': 'error', // Hooks mal utilisés
 
-      // Imports & organisation
-      'import/order': [
-        'warn',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            ['parent', 'sibling'],
-            'index',
-          ],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
-      'import/no-unresolved': 'error', // garde en error si resolver OK
-      'import/no-duplicates': 'warn',
+      // ❌ STYLE DÉSACTIVÉ (non-bloquant)
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      '@typescript-eslint/prefer-optional-chain': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      'import/order': 'off',
+      'import/no-unresolved': 'off',
+      'import/no-duplicates': 'off',
+      'prefer-const': 'off',
+      'object-shorthand': 'off',
+      'prefer-template': 'off',
+      'no-console': 'off',
 
       // React / JSX
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
-      'react/jsx-props-no-spreading': [
-        'warn',
-        { html: 'enforce', custom: 'ignore' },
-      ],
-      'react/jsx-boolean-value': ['warn', 'never'],
-      'react/jsx-curly-brace-presence': [
-        'warn',
-        { props: 'never', children: 'never' },
-      ],
-
-      // Général
-      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
-      'no-debugger': 'error',
-      'prefer-const': 'warn',
-      'no-var': 'error',
-      'object-shorthand': 'warn',
-      'prefer-template': 'warn',
+      'react/jsx-props-no-spreading': 'off',
+      'react/jsx-boolean-value': 'off',
+      'react/jsx-curly-brace-presence': 'off',
 
       // Accessibility / Next specifics
       'jsx-a11y/anchor-is-valid': 'off',

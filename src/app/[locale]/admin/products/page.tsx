@@ -233,12 +233,12 @@ export default function ProductsPage() {
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   useEffect(() => {
     if (messages) {
-      fetchProducts();
+      void fetchProducts();
     }
   }, [statusFilter, messages]);
 
@@ -378,7 +378,7 @@ export default function ProductsPage() {
     } catch (err) {
       console.error('Failed to save order:', err);
       // Recharger les produits en cas d'erreur
-      fetchProducts();
+      void fetchProducts();
       alert(
         err instanceof Error
           ? err.message

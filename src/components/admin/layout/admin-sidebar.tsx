@@ -34,7 +34,7 @@ export function AdminSidebar() {
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   if (!messages) {

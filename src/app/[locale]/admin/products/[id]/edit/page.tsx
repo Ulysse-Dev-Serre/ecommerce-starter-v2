@@ -184,12 +184,12 @@ export default function EditProductPage({
   );
 
   useEffect(() => {
-    params.then(p => {
+    void params.then(p => {
       setProductId(p.id);
       setLocale(p.locale || 'en');
-      loadProduct(p.id);
-      loadVariants(p.id);
-      loadMedia(p.id);
+      void loadProduct(p.id);
+      void loadVariants(p.id);
+      void loadMedia(p.id);
     });
   }, [params]);
 
@@ -208,7 +208,7 @@ export default function EditProductPage({
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   const loadProduct = async (id: string) => {
@@ -416,7 +416,7 @@ export default function EditProductPage({
     } catch (err) {
       console.error('Failed to save media order:', err);
       // Recharger les médias en cas d'erreur
-      loadMedia(productId);
+      void loadMedia(productId);
       setError('Failed to save media order. Please try again.');
     } finally {
       setReorderingMedia(false);
