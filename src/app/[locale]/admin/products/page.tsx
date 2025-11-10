@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Package, Plus, Search, Filter, Trash2, GripVertical } from 'lucide-react';
+import {
+  Package,
+  Plus,
+  Search,
+  Filter,
+  Trash2,
+  GripVertical,
+} from 'lucide-react';
 import Link from 'next/link';
 import {
   DndContext,
@@ -121,7 +128,10 @@ function SortableProductRow({
           <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
             {product.media && product.media.length > 0 ? (
               <img
-                src={product.media.find(m => m.isPrimary)?.url || product.media[0].url}
+                src={
+                  product.media.find(m => m.isPrimary)?.url ||
+                  product.media[0].url
+                }
                 alt={getProductName(product.translations)}
                 className="h-full w-full object-cover opacity-80"
               />
@@ -131,7 +141,7 @@ function SortableProductRow({
               </div>
             )}
           </div>
-          
+
           {/* Infos produit */}
           <div>
             <div className="font-medium text-gray-900">
@@ -162,9 +172,7 @@ function SortableProductRow({
       </td>
       <td className="px-6 py-4 text-sm text-gray-900">
         {product.variants.length}{' '}
-        {product.variants.length !== 1
-          ? t.variants.toLowerCase()
-          : t.variant}
+        {product.variants.length !== 1 ? t.variants.toLowerCase() : t.variant}
       </td>
       <td className="px-6 py-4 text-right text-sm">
         <div className="flex items-center justify-end gap-3">

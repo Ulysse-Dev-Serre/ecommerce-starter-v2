@@ -55,7 +55,8 @@ export class StorageService {
    * Charge la configuration depuis les variables d'environnement
    */
   private static getConfig(): StorageConfig {
-    const provider = (process.env.STORAGE_PROVIDER || 'local') as StorageProviderType;
+    const provider = (process.env.STORAGE_PROVIDER ||
+      'local') as StorageProviderType;
 
     const config: StorageConfig = {
       provider,

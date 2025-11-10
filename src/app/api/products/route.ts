@@ -12,7 +12,7 @@ import { getProducts } from '../../../lib/services/product.service';
 /**
  * GET /api/products
  * Liste publique des produits avec filtres et pagination
- * 
+ *
  * Query params:
  * - page: number (default: 1)
  * - limit: number (default: 20, max: 100)

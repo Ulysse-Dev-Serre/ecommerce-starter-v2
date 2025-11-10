@@ -16,17 +16,29 @@ export class LocalStorageProvider implements StorageProvider {
   private uploadDir: string;
   private publicPath: string;
 
-  constructor(uploadDir: string = 'public/uploads', publicPath: string = '/uploads') {
+  constructor(
+    uploadDir: string = 'public/uploads',
+    publicPath: string = '/uploads'
+  ) {
     this.uploadDir = uploadDir;
     this.publicPath = publicPath;
   }
 
-  async upload(file: File | Buffer, options?: UploadOptions): Promise<UploadResult> {
+  async upload(
+    file: File | Buffer,
+    options?: UploadOptions
+  ): Promise<UploadResult> {
     const {
       path: relativePath = 'general',
       filename,
       maxSize = 10 * 1024 * 1024, // 10MB par défaut
-      allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4'],
+      allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'video/mp4',
+      ],
     } = options || {};
 
     // Convertir File en Buffer si nécessaire

@@ -12,7 +12,7 @@ import {
 /**
  * POST /api/admin/products/[id]/variants/simple
  * Crée des variantes simples avec noms EN/FR (pour l'UI admin simplifiée)
- * 
+ *
  * Body:
  * {
  *   variants: [

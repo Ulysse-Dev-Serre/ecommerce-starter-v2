@@ -3,13 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '../../../../../lib/logger';
 import { AuthContext, withAdmin } from '../../../../../lib/middleware/withAuth';
 import { withError } from '../../../../../lib/middleware/withError';
-import { withRateLimit, RateLimits } from '../../../../../lib/middleware/withRateLimit';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../../lib/middleware/withRateLimit';
 import { prisma } from '../../../../../lib/db/prisma';
 
 /**
  * PUT /api/admin/products/reorder
  * Met à jour l'ordre de tri (sortOrder) de plusieurs produits en batch
- * 
+ *
  * Body:
  * {
  *   products: [

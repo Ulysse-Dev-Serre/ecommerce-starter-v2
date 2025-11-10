@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '../../../../../lib/logger';
 import { AuthContext, withAdmin } from '../../../../../lib/middleware/withAuth';
 import { withError } from '../../../../../lib/middleware/withError';
-import { withRateLimit, RateLimits } from '../../../../../lib/middleware/withRateLimit';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../../lib/middleware/withRateLimit';
 import { getStorageProvider } from '../../../../../lib/storage/storage.service';
 import { prisma } from '../../../../../lib/db/prisma';
 import { MediaType } from '../../../../../generated/prisma';
@@ -11,7 +14,7 @@ import { MediaType } from '../../../../../generated/prisma';
 /**
  * POST /api/admin/media/upload
  * Upload des fichiers médias (images, vidéos)
- * 
+ *
  * FormData:
  * - file: File (required)
  * - productId: string (optional)
@@ -86,8 +89,8 @@ async function uploadMediaHandler(
     const relativePath = productId
       ? `products/${year}/${productId}`
       : variantId
-      ? `variants/${year}/${variantId}`
-      : `general/${year}`;
+        ? `variants/${year}/${variantId}`
+        : `general/${year}`;
 
     // Upload via le provider de stockage
     const storage = getStorageProvider();

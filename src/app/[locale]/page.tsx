@@ -11,9 +11,9 @@ export default async function Home({
   params,
 }: HomeProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  
+
   const language = locale.toUpperCase() as Language;
-  
+
   const { products: featuredProducts } = await getProducts(
     {
       status: ProductStatus.ACTIVE,
@@ -71,7 +71,7 @@ export default async function Home({
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          {locale === 'fr' ? 'Pas d\'image' : 'No image'}
+                          {locale === 'fr' ? "Pas d'image" : 'No image'}
                         </div>
                       )}
                     </div>

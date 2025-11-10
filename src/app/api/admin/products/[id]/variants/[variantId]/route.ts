@@ -73,7 +73,7 @@ async function getVariantHandler(
           variantProductId: variant.product.id,
           requestedProductId: productId,
         },
-        'La variante n\'appartient pas à ce produit'
+        "La variante n'appartient pas à ce produit"
       );
 
       return NextResponse.json(
@@ -81,7 +81,7 @@ async function getVariantHandler(
           success: false,
           requestId,
           error: 'Variante invalide',
-          message: 'Cette variante n\'appartient pas au produit spécifié',
+          message: "Cette variante n'appartient pas au produit spécifié",
           timestamp: new Date().toISOString(),
         },
         {
@@ -133,7 +133,7 @@ async function getVariantHandler(
 /**
  * PUT /api/admin/products/[id]/variants/[variantId]
  * Met à jour une variante
- * 
+ *
  * Body:
  * {
  *   sku?: string,
@@ -201,7 +201,7 @@ async function updateVariantHandler(
           success: false,
           requestId,
           error: 'Variante invalide',
-          message: 'Cette variante n\'appartient pas au produit spécifié',
+          message: "Cette variante n'appartient pas au produit spécifié",
           timestamp: new Date().toISOString(),
         },
         {
@@ -336,7 +336,7 @@ async function deleteVariantHandler(
           success: false,
           requestId,
           error: 'Variante invalide',
-          message: 'Cette variante n\'appartient pas au produit spécifié',
+          message: "Cette variante n'appartient pas au produit spécifié",
           timestamp: new Date().toISOString(),
         },
         {

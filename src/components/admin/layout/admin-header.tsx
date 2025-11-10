@@ -15,10 +15,8 @@ export function AdminHeader() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          
-          <h2 className="text-lg font-semibold text-gray-900">
-            Welcome back
-          </h2>
+
+          <h2 className="text-lg font-semibold text-gray-900">Welcome back</h2>
         </div>
 
         {/* Right side */}
@@ -30,12 +28,12 @@ export function AdminHeader() {
           </button>
 
           {/* User menu */}
-          <UserButton 
+          <UserButton
             afterSignOutUrl="/"
             appearance={{
               elements: {
-                avatarBox: "h-9 w-9"
-              }
+                avatarBox: 'h-9 w-9',
+              },
             }}
           />
         </div>

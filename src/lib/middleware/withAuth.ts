@@ -1,29 +1,29 @@
 /**
  * Middleware d'authentification pour les routes API
- * 
+ *
  * ============================================
  * 🧪 BYPASS AUTHENTICATION POUR LES TESTS
  * ============================================
- * 
+ *
  * Les tests d'intégration peuvent bypass l'authentification Clerk en utilisant
  * un header spécial d'API key de test.
- * 
+ *
  * Configuration requise:
  * 1. Variable d'environnement: TEST_API_KEY=votre-clé-secrète-ici
  * 2. Header dans les requêtes de test: x-test-api-key: votre-clé-secrète-ici
- * 
+ *
  * ⚠️ SÉCURITÉ:
  * - Fonctionne UNIQUEMENT en environnement de développement (NODE_ENV !== 'production')
  * - La clé doit être définie dans .env.local (ne JAMAIS committer)
  * - Désactivé automatiquement en production
- * 
+ *
  * Exemple d'utilisation dans les tests:
  * ```javascript
  * const response = await client.get('/api/admin/attributes', {
  *   headers: { 'x-test-api-key': process.env.TEST_API_KEY }
  * });
  * ```
- * 
+ *
  * Voir: tests/setup/auth.factory.js pour la fonction getTestAuthHeaders()
  * ============================================
  */
@@ -57,18 +57,21 @@ export function withAuth(handler: ApiHandler) {
       // Cela permet aux tests d'intégration de contourner l'authentification Clerk
       const request = args[0] as Request;
       const testApiKey = request.headers.get('x-test-api-key');
-      
-      logger.info({
-        action: 'test_bypass_check',
-        hasTestApiKey: !!testApiKey,
-        hasEnvKey: !!process.env.TEST_API_KEY,
-        keysMatch: testApiKey === process.env.TEST_API_KEY,
-        nodeEnv: process.env.NODE_ENV
-      }, '🧪 Checking test bypass conditions');
-      
+
+      logger.info(
+        {
+          action: 'test_bypass_check',
+          hasTestApiKey: !!testApiKey,
+          hasEnvKey: !!process.env.TEST_API_KEY,
+          keysMatch: testApiKey === process.env.TEST_API_KEY,
+          nodeEnv: process.env.NODE_ENV,
+        },
+        '🧪 Checking test bypass conditions'
+      );
+
       if (
-        testApiKey && 
-        process.env.TEST_API_KEY && 
+        testApiKey &&
+        process.env.TEST_API_KEY &&
         testApiKey === process.env.TEST_API_KEY &&
         process.env.NODE_ENV !== 'production'
       ) {

@@ -1,7 +1,7 @@
 /**
  * Version TEST du middleware withAuth
  * Utilisé automatiquement par Jest via mock dans jest.setup.js
- * 
+ *
  * ⚠️ NE PAS IMPORTER DIRECTEMENT - Jest le charge automatiquement
  */
 

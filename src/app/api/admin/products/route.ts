@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '../../../../lib/logger';
 import { AuthContext, withAdmin } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
-import { withRateLimit, RateLimits } from '../../../../lib/middleware/withRateLimit';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../lib/middleware/withRateLimit';
 import {
   createProduct,
   CreateProductData,
@@ -12,7 +15,7 @@ import {
 /**
  * POST /api/admin/products
  * Crée un nouveau produit (admin uniquement)
- * 
+ *
  * Body:
  * {
  *   slug: string,
@@ -72,7 +75,7 @@ async function createProductHandler(
         message: 'Product created successfully',
         timestamp: new Date().toISOString(),
       },
-      { 
+      {
         status: 201,
         headers: {
           'X-Request-ID': requestId,
@@ -90,16 +93,20 @@ async function createProductHandler(
     );
 
     // Handle Prisma unique constraint errors
-    if (error instanceof Error && error.message.includes('Unique constraint failed on the fields: (`slug`)')) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Unique constraint failed on the fields: (`slug`)')
+    ) {
       return NextResponse.json(
         {
           success: false,
           requestId,
           error: 'Duplicate slug',
-          message: 'A product with this slug already exists. Please choose a different slug.',
+          message:
+            'A product with this slug already exists. Please choose a different slug.',
           timestamp: new Date().toISOString(),
         },
-        { 
+        {
           status: 400,
           headers: {
             'X-Request-ID': requestId,

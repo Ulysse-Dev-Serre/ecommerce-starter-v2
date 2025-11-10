@@ -3,16 +3,16 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useParams } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Users, 
-  ShoppingCart, 
+import {
+  LayoutDashboard,
+  Package,
+  Users,
+  ShoppingCart,
   Settings,
   FileText,
   BarChart3,
   Tag,
-  Home
+  Home,
 } from 'lucide-react';
 
 export function AdminSidebar() {
@@ -99,8 +99,9 @@ export function AdminSidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+          {menuItems.map(item => {
+            const isActive =
+              pathname === item.href || pathname?.startsWith(item.href + '/');
             const Icon = item.icon;
 
             return (
@@ -129,9 +130,7 @@ export function AdminSidebar() {
             <Home className="h-5 w-5" />
             {t.backToSite || 'Back to site'}
           </Link>
-          <div className="text-xs text-gray-500">
-            {t.version}
-          </div>
+          <div className="text-xs text-gray-500">{t.version}</div>
         </div>
       </div>
     </aside>

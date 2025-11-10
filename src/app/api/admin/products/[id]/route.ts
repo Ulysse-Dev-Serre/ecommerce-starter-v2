@@ -4,7 +4,10 @@ import { ProductStatus } from '../../../../../generated/prisma';
 import { logger } from '../../../../../lib/logger';
 import { AuthContext, withAdmin } from '../../../../../lib/middleware/withAuth';
 import { withError } from '../../../../../lib/middleware/withError';
-import { withRateLimit, RateLimits } from '../../../../../lib/middleware/withRateLimit';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../../lib/middleware/withRateLimit';
 import {
   getProductByIdSimple,
   updateProduct,
@@ -103,7 +106,7 @@ async function getProductHandler(
 /**
  * PUT /api/admin/products/[id]
  * Met à jour un produit (admin uniquement)
- * 
+ *
  * Body:
  * {
  *   slug?: string,
