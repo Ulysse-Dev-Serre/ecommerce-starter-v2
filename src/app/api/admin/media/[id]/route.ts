@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '../../../../../lib/logger';
 import { AuthContext, withAdmin } from '../../../../../lib/middleware/withAuth';
 import { withError } from '../../../../../lib/middleware/withError';
-import { withRateLimit, RateLimits } from '../../../../../lib/middleware/withRateLimit';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../../lib/middleware/withRateLimit';
 import { getStorageProvider } from '../../../../../lib/storage/storage.service';
 import { prisma } from '../../../../../lib/db/prisma';
 
@@ -72,7 +75,10 @@ async function deleteMediaHandler(
           action: 'storage_delete_failed',
           mediaId: id,
           url: media.url,
-          error: storageError instanceof Error ? storageError.message : 'Unknown error',
+          error:
+            storageError instanceof Error
+              ? storageError.message
+              : 'Unknown error',
         },
         'Failed to delete file from storage, continuing with database deletion'
       );

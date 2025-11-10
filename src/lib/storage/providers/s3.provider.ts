@@ -8,7 +8,7 @@ import {
 /**
  * Provider de stockage S3 (AWS S3, DigitalOcean Spaces, etc.)
  * À implémenter lorsque vous migrerez vers le cloud
- * 
+ *
  * Installation requise: npm install @aws-sdk/client-s3
  */
 export class S3StorageProvider implements StorageProvider {
@@ -32,12 +32,15 @@ export class S3StorageProvider implements StorageProvider {
     this.endpoint = config.endpoint;
   }
 
-  async upload(file: File | Buffer, options?: UploadOptions): Promise<UploadResult> {
+  async upload(
+    file: File | Buffer,
+    options?: UploadOptions
+  ): Promise<UploadResult> {
     // TODO: Implémenter l'upload S3
     // Exemple d'implémentation:
-    // 
+    //
     // import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-    // 
+    //
     // const client = new S3Client({
     //   region: this.region,
     //   credentials: {
@@ -47,8 +50,8 @@ export class S3StorageProvider implements StorageProvider {
     //   ...(this.endpoint && { endpoint: this.endpoint }),
     // });
     //
-    // const buffer = file instanceof File 
-    //   ? Buffer.from(await file.arrayBuffer()) 
+    // const buffer = file instanceof File
+    //   ? Buffer.from(await file.arrayBuffer())
     //   : file;
     //
     // const key = `${options?.path || 'general'}/${options?.filename || Date.now()}`;
@@ -68,22 +71,26 @@ export class S3StorageProvider implements StorageProvider {
     //   mimeType: file instanceof File ? file.type : 'application/octet-stream',
     // };
 
-    throw new Error('S3StorageProvider not yet implemented. Install @aws-sdk/client-s3 and implement this method.');
+    throw new Error(
+      'S3StorageProvider not yet implemented. Install @aws-sdk/client-s3 and implement this method.'
+    );
   }
 
   async delete(options: DeleteOptions): Promise<void> {
     // TODO: Implémenter la suppression S3
-    // 
+    //
     // import { DeleteObjectCommand } from '@aws-sdk/client-s3';
-    // 
+    //
     // const key = this.extractKeyFromUrl(options.url);
-    // 
+    //
     // await client.send(new DeleteObjectCommand({
     //   Bucket: this.bucket,
     //   Key: key,
     // }));
 
-    throw new Error('S3StorageProvider not yet implemented. Install @aws-sdk/client-s3 and implement this method.');
+    throw new Error(
+      'S3StorageProvider not yet implemented. Install @aws-sdk/client-s3 and implement this method.'
+    );
   }
 
   getUrl(path: string): string {
@@ -91,15 +98,15 @@ export class S3StorageProvider implements StorageProvider {
     // return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${path}`;
     // ou pour DigitalOcean Spaces:
     // return `https://${this.bucket}.${this.region}.digitaloceanspaces.com/${path}`;
-    
+
     throw new Error('S3StorageProvider not yet implemented.');
   }
 
   async exists(path: string): Promise<boolean> {
     // TODO: Vérifier l'existence d'un fichier S3
-    // 
+    //
     // import { HeadObjectCommand } from '@aws-sdk/client-s3';
-    // 
+    //
     // try {
     //   await client.send(new HeadObjectCommand({
     //     Bucket: this.bucket,

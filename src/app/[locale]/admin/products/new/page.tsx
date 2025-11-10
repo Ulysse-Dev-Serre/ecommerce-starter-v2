@@ -36,8 +36,18 @@ export default function NewProductPage() {
     isFeatured: false,
     sortOrder: 0,
     translations: [
-      { language: 'EN' as const, name: '', description: '', shortDescription: '' },
-      { language: 'FR' as const, name: '', description: '', shortDescription: '' },
+      {
+        language: 'EN' as const,
+        name: '',
+        description: '',
+        shortDescription: '',
+      },
+      {
+        language: 'FR' as const,
+        name: '',
+        description: '',
+        shortDescription: '',
+      },
     ],
   });
 
@@ -46,15 +56,19 @@ export default function NewProductPage() {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const msgs = await import(`../../../../../lib/i18n/dictionaries/${locale}.json`);
+        const msgs = await import(
+          `../../../../../lib/i18n/dictionaries/${locale}.json`
+        );
         setMessages(msgs.default);
       } catch (error) {
         console.error('Failed to load translations:', error);
-        const msgs = await import(`../../../../../lib/i18n/dictionaries/en.json`);
+        const msgs = await import(
+          `../../../../../lib/i18n/dictionaries/en.json`
+        );
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   const handleTranslationChange = (
@@ -78,7 +92,11 @@ export default function NewProductPage() {
     handleTranslationChange(0, 'name', name);
     if (!formData.slug) {
       const newSlug = generateSlug(name);
-      setFormData(prev => ({ ...prev, slug: newSlug, translations: prev.translations }));
+      setFormData(prev => ({
+        ...prev,
+        slug: newSlug,
+        translations: prev.translations,
+      }));
     }
   };
 
@@ -213,7 +231,10 @@ export default function NewProductPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/products" className="rounded-lg p-2 hover:bg-gray-100">
+          <Link
+            href="/admin/products"
+            className="rounded-lg p-2 hover:bg-gray-100"
+          >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
@@ -277,7 +298,9 @@ export default function NewProductPage() {
                   <input
                     type="text"
                     value={formData.slug}
-                    onChange={e => setFormData({ ...formData, slug: e.target.value })}
+                    onChange={e =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
                     placeholder="product-url-slug"
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                     required
@@ -316,7 +339,10 @@ export default function NewProductPage() {
                     }
                     className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                   />
-                  <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="isFeatured"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     {t.featured}
                   </label>
                 </div>
@@ -329,7 +355,10 @@ export default function NewProductPage() {
                     type="number"
                     value={formData.sortOrder}
                     onChange={e =>
-                      setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })
+                      setFormData({
+                        ...formData,
+                        sortOrder: parseInt(e.target.value) || 0,
+                      })
                     }
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                   />
@@ -344,9 +373,13 @@ export default function NewProductPage() {
                   className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
                 >
                   <h2 className="mb-4 text-lg font-semibold text-gray-900">
-                    {translation.language === 'EN' ? `🇬🇧 ${t.english}` : `🇫🇷 ${t.french}`}
+                    {translation.language === 'EN'
+                      ? `🇬🇧 ${t.english}`
+                      : `🇫🇷 ${t.french}`}
                     {translation.language === 'EN' && (
-                      <span className="ml-2 text-sm font-normal text-red-500">*</span>
+                      <span className="ml-2 text-sm font-normal text-red-500">
+                        *
+                      </span>
                     )}
                   </h2>
 
@@ -364,7 +397,11 @@ export default function NewProductPage() {
                         onChange={e =>
                           translation.language === 'EN'
                             ? handleEnglishNameChange(e.target.value)
-                            : handleTranslationChange(index, 'name', e.target.value)
+                            : handleTranslationChange(
+                                index,
+                                'name',
+                                e.target.value
+                              )
                         }
                         placeholder={t.productName}
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -380,7 +417,11 @@ export default function NewProductPage() {
                         type="text"
                         value={translation.shortDescription}
                         onChange={e =>
-                          handleTranslationChange(index, 'shortDescription', e.target.value)
+                          handleTranslationChange(
+                            index,
+                            'shortDescription',
+                            e.target.value
+                          )
                         }
                         placeholder={t.shortDescriptionPlaceholder}
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -394,7 +435,11 @@ export default function NewProductPage() {
                       <textarea
                         value={translation.description}
                         onChange={e =>
-                          handleTranslationChange(index, 'description', e.target.value)
+                          handleTranslationChange(
+                            index,
+                            'description',
+                            e.target.value
+                          )
                         }
                         placeholder={t.fullDescriptionPlaceholder}
                         rows={4}
@@ -444,7 +489,8 @@ export default function NewProductPage() {
               {variants.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
                   <p className="text-sm text-gray-600">
-                    Aucune variante ajoutée. Cliquez sur "{tc.add} {t.variant}" pour commencer.
+                    Aucune variante ajoutée. Cliquez sur &quot;{tc.add}{' '}
+                    {t.variant}&quot; pour commencer.
                   </p>
                   <p className="mt-2 text-xs text-red-600">
                     ⚠️ Au moins 1 variante est requise
@@ -474,13 +520,18 @@ export default function NewProductPage() {
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            {t.productName} (EN) <span className="text-red-500">*</span>
+                            {t.productName} (EN){' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={variant.nameEN}
                             onChange={e =>
-                              handleVariantChange(variant.id, 'nameEN', e.target.value)
+                              handleVariantChange(
+                                variant.id,
+                                'nameEN',
+                                e.target.value
+                              )
                             }
                             placeholder="Green"
                             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -490,13 +541,18 @@ export default function NewProductPage() {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            {t.productName} (FR) <span className="text-red-500">*</span>
+                            {t.productName} (FR){' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={variant.nameFR}
                             onChange={e =>
-                              handleVariantChange(variant.id, 'nameFR', e.target.value)
+                              handleVariantChange(
+                                variant.id,
+                                'nameFR',
+                                e.target.value
+                              )
                             }
                             placeholder="Vert"
                             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -506,14 +562,19 @@ export default function NewProductPage() {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            {t.price} (CAD) <span className="text-red-500">*</span>
+                            {t.price} (CAD){' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="number"
                             step="0.01"
                             value={variant.price}
                             onChange={e =>
-                              handleVariantChange(variant.id, 'price', e.target.value)
+                              handleVariantChange(
+                                variant.id,
+                                'price',
+                                e.target.value
+                              )
                             }
                             placeholder="49.99"
                             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -529,7 +590,11 @@ export default function NewProductPage() {
                             type="number"
                             value={variant.stock}
                             onChange={e =>
-                              handleVariantChange(variant.id, 'stock', e.target.value)
+                              handleVariantChange(
+                                variant.id,
+                                'stock',
+                                e.target.value
+                              )
                             }
                             placeholder="0"
                             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -567,7 +632,10 @@ export default function NewProductPage() {
                   {loading
                     ? t.creating
                     : variants.length > 0
-                      ? t.createProductWithVariants.replace('{{count}}', variants.length.toString())
+                      ? t.createProductWithVariants.replace(
+                          '{{count}}',
+                          variants.length.toString()
+                        )
                       : t.createProduct}
                 </button>
               </div>

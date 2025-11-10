@@ -1,7 +1,13 @@
 // src/components/layout/navbar.tsx
 'use client';
 
-import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
+import {
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useEffect, useState, type MouseEvent } from 'react';
@@ -14,10 +20,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
-  const [messages, setMessages] = useState<Record<
-    string,
-    Record<string, string>
-  > | null>(null);
+  const [messages, setMessages] = useState<any | null>(null);
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 

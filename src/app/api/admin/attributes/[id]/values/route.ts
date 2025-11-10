@@ -13,7 +13,7 @@ import {
 /**
  * POST /api/admin/attributes/[id]/values
  * Ajoute une nouvelle valeur à un attribut
- * 
+ *
  * Body:
  * {
  *   value: string,
@@ -72,7 +72,7 @@ async function addValueHandler(
         attributeId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Erreur lors de l\'ajout de la valeur d\'attribut'
+      "Erreur lors de l'ajout de la valeur d'attribut"
     );
 
     // Gérer les erreurs de contrainte unique

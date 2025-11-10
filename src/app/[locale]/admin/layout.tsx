@@ -5,6 +5,9 @@ import { UserRole } from '@/generated/prisma';
 import { AdminSidebar } from '@/components/admin/layout/admin-sidebar';
 import { AdminHeader } from '@/components/admin/layout/admin-header';
 
+// Disable static generation (requires DB & Auth)
+export const dynamic = 'force-dynamic';
+
 export default async function AdminLayout({
   children,
 }: {
@@ -31,11 +34,9 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-gray-50">
       <AdminSidebar />
       <AdminHeader />
-      
+
       <main className="ml-64 pt-16">
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </main>
     </div>
   );

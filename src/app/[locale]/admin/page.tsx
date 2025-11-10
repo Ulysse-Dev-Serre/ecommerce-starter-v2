@@ -1,4 +1,11 @@
-import { BarChart3, Package, ShoppingCart, Users, TrendingUp, DollarSign } from 'lucide-react';
+import {
+  BarChart3,
+  Package,
+  ShoppingCart,
+  Users,
+  TrendingUp,
+  DollarSign,
+} from 'lucide-react';
 
 export default function AdminDashboard() {
   const stats = [
@@ -44,7 +51,7 @@ export default function AdminDashboard() {
 
       {/* Stats grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+        {stats.map(stat => {
           const Icon = stat.icon;
           return (
             <div
@@ -55,15 +62,21 @@ export default function AdminDashboard() {
                 <div className="rounded-lg bg-gray-100 p-2">
                   <Icon className="h-5 w-5 text-gray-700" />
                 </div>
-                <span className={`text-sm font-medium ${
-                  stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <span
+                  className={`text-sm font-medium ${
+                    stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
                   {stat.change}
                 </span>
               </div>
               <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-600">{stat.title}</h3>
-                <p className="mt-2 text-2xl font-bold text-gray-900">{stat.value}</p>
+                <h3 className="text-sm font-medium text-gray-600">
+                  {stat.title}
+                </h3>
+                <p className="mt-2 text-2xl font-bold text-gray-900">
+                  {stat.value}
+                </p>
               </div>
             </div>
           );
@@ -75,7 +88,9 @@ export default function AdminDashboard() {
         {/* Revenue chart placeholder */}
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Revenue Overview</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Revenue Overview
+            </h3>
             <BarChart3 className="h-5 w-5 text-gray-400" />
           </div>
           <div className="flex h-64 items-center justify-center rounded-lg bg-gray-50">
@@ -86,14 +101,21 @@ export default function AdminDashboard() {
         {/* Recent orders placeholder */}
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Recent Orders
+            </h3>
             <TrendingUp className="h-5 w-5 text-gray-400" />
           </div>
           <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between border-b border-gray-100 pb-3">
+            {[1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className="flex items-center justify-between border-b border-gray-100 pb-3"
+              >
                 <div>
-                  <p className="text-sm font-medium text-gray-900">Order #{1000 + i}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    Order #{1000 + i}
+                  </p>
                   <p className="text-xs text-gray-500">2 minutes ago</p>
                 </div>
                 <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">

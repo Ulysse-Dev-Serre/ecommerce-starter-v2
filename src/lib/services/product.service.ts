@@ -1,4 +1,9 @@
-import { Prisma, ProductStatus, Language, Product } from '../../generated/prisma';
+import {
+  Prisma,
+  ProductStatus,
+  Language,
+  Product,
+} from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 

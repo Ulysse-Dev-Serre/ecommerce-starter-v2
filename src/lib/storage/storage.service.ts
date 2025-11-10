@@ -55,7 +55,8 @@ export class StorageService {
    * Charge la configuration depuis les variables d'environnement
    */
   private static getConfig(): StorageConfig {
-    const provider = (process.env.STORAGE_PROVIDER || 'local') as StorageProviderType;
+    const provider = (process.env.STORAGE_PROVIDER ||
+      'local') as StorageProviderType;
 
     const config: StorageConfig = {
       provider,
@@ -96,7 +97,7 @@ export class StorageService {
    * Réinitialise l'instance (utile pour les tests)
    */
   static resetInstance(): void {
-    // @ts-ignore
+    // @ts-expect-error - Reset needed for tests
     this.instance = undefined;
   }
 }

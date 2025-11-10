@@ -41,19 +41,30 @@ const TEST_USERS = [
 const CATEGORIES = [
   {
     slug: 'hydroponic-systems',
+    parentSlug: undefined,
     translations: {
       fr: {
         name: 'Systèmes Hydroponiques',
         description: 'Systèmes de culture hydroponique pour plantes',
       },
-      en: { name: 'Hydroponic Systems', description: 'Hydroponic growing systems for plants' },
+      en: {
+        name: 'Hydroponic Systems',
+        description: 'Hydroponic growing systems for plants',
+      },
     },
   },
   {
     slug: 'sensors-monitoring',
+    parentSlug: undefined,
     translations: {
-      fr: { name: 'Capteurs et Monitoring', description: 'Capteurs pour surveillance des plantes' },
-      en: { name: 'Sensors & Monitoring', description: 'Sensors for plant monitoring' },
+      fr: {
+        name: 'Capteurs et Monitoring',
+        description: 'Capteurs pour surveillance des plantes',
+      },
+      en: {
+        name: 'Sensors & Monitoring',
+        description: 'Sensors for plant monitoring',
+      },
     },
   },
 ];
@@ -298,17 +309,13 @@ async function seedProducts(
       variants: [
         {
           sku: 'HYDRO-SYS-GREEN',
-          attributes: [
-            { key: 'color', value: 'green' },
-          ],
+          attributes: [{ key: 'color', value: 'green' }],
           price: 149.99,
           stock: 20,
         },
         {
           sku: 'HYDRO-SYS-WHITE',
-          attributes: [
-            { key: 'color', value: 'white' },
-          ],
+          attributes: [{ key: 'color', value: 'white' }],
           price: 149.99,
           stock: 15,
         },
@@ -320,10 +327,10 @@ async function seedProducts(
       isFeatured: true,
       translations: {
         fr: {
-          name: 'Capteur d\'Humidité du Sol',
+          name: "Capteur d'Humidité du Sol",
           description:
-            'Capteur intelligent pour mesurer l\'humidité du sol en temps réel. Connecté à une application mobile.',
-          shortDescription: 'Capteur d\'humidité connecté',
+            "Capteur intelligent pour mesurer l'humidité du sol en temps réel. Connecté à une application mobile.",
+          shortDescription: "Capteur d'humidité connecté",
         },
         en: {
           name: 'Soil Humidity Sensor',
@@ -335,17 +342,13 @@ async function seedProducts(
       variants: [
         {
           sku: 'SENSOR-HUM-GREEN',
-          attributes: [
-            { key: 'color', value: 'green' },
-          ],
+          attributes: [{ key: 'color', value: 'green' }],
           price: 39.99,
           stock: 50,
         },
         {
           sku: 'SENSOR-HUM-WHITE',
-          attributes: [
-            { key: 'color', value: 'white' },
-          ],
+          attributes: [{ key: 'color', value: 'white' }],
           price: 39.99,
           stock: 45,
         },
@@ -517,9 +520,15 @@ async function main(): Promise<void> {
     console.info('');
     console.info('📋 Résumé:');
     console.info(`   - ${TEST_USERS.length} utilisateurs`);
-    console.info(`   - ${CATEGORIES.length} catégories (Hydroponique & Capteurs)`);
-    console.info(`   - ${PRODUCT_ATTRIBUTES.length} attribut produit (couleur)`);
-    console.info('   - 2 produits hydroponiques avec 2 variantes chacun (4 variantes total)');
+    console.info(
+      `   - ${CATEGORIES.length} catégories (Hydroponique & Capteurs)`
+    );
+    console.info(
+      `   - ${PRODUCT_ATTRIBUTES.length} attribut produit (couleur)`
+    );
+    console.info(
+      '   - 2 produits hydroponiques avec 2 variantes chacun (4 variantes total)'
+    );
     console.info('   - Paramètres système et coupon de test');
     console.info('');
     console.info('🔗 Comptes de test:');

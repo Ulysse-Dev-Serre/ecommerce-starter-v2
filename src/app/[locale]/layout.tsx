@@ -9,6 +9,9 @@ import { ConditionalFooter } from '../../components/layout/conditional-footer';
 import { prisma } from '@/lib/db/prisma';
 import '../globals.css';
 
+// Disable static generation (requires DB & Auth)
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],

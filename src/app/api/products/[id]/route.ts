@@ -11,7 +11,7 @@ import {
 /**
  * GET /api/products/[id]
  * Récupère les détails publics d'un produit par slug
- * 
+ *
  * Query params:
  * - language: EN | FR (optional)
  */

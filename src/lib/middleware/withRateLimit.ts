@@ -10,10 +10,7 @@ interface RateLimitConfig {
 }
 
 // Stockage en mémoire des requêtes (simple pour début, à remplacer par Redis en prod)
-const requestStore = new Map<
-  string,
-  { count: number; resetTime: number }
->();
+const requestStore = new Map<string, { count: number; resetTime: number }>();
 
 /**
  * Middleware de rate limiting simple

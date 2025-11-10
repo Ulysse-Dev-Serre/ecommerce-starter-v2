@@ -13,7 +13,7 @@ import {
 /**
  * GET /api/admin/attributes
  * Liste tous les attributs avec leurs traductions
- * 
+ *
  * Query params:
  * - language: EN | FR (optionnel) - Filtre les traductions par langue
  */
@@ -64,7 +64,7 @@ async function getAttributesHandler(
 /**
  * POST /api/admin/attributes
  * Crée un nouvel attribut avec ses traductions
- * 
+ *
  * Body:
  * {
  *   key: string,

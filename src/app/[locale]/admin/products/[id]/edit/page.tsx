@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, X, Plus, Trash2, Upload, Image as ImageIcon, GripVertical } from 'lucide-react';
+import {
+  ArrowLeft,
+  Save,
+  X,
+  Plus,
+  Trash2,
+  Upload,
+  Image as ImageIcon,
+  GripVertical,
+} from 'lucide-react';
 import Link from 'next/link';
 import {
   DndContext,
@@ -175,12 +184,12 @@ export default function EditProductPage({
   );
 
   useEffect(() => {
-    params.then(p => {
+    void params.then(p => {
       setProductId(p.id);
       setLocale(p.locale || 'en');
-      loadProduct(p.id);
-      loadVariants(p.id);
-      loadMedia(p.id);
+      void loadProduct(p.id);
+      void loadVariants(p.id);
+      void loadMedia(p.id);
     });
   }, [params]);
 
@@ -193,11 +202,13 @@ export default function EditProductPage({
         setMessages(msgs.default);
       } catch (error) {
         console.error('Failed to load translations:', error);
-        const msgs = await import(`../../../../../../lib/i18n/dictionaries/en.json`);
+        const msgs = await import(
+          `../../../../../../lib/i18n/dictionaries/en.json`
+        );
         setMessages(msgs.default);
       }
     };
-    loadMessages();
+    void loadMessages();
   }, [locale]);
 
   const loadProduct = async (id: string) => {
@@ -219,8 +230,12 @@ export default function EditProductPage({
         sortOrder: productData.sortOrder,
       });
 
-      const enTrans = productData.translations.find((t: Translation) => t.language === 'EN');
-      const frTrans = productData.translations.find((t: Translation) => t.language === 'FR');
+      const enTrans = productData.translations.find(
+        (t: Translation) => t.language === 'EN'
+      );
+      const frTrans = productData.translations.find(
+        (t: Translation) => t.language === 'FR'
+      );
 
       if (enTrans) {
         setEnTranslation({
@@ -274,9 +289,11 @@ export default function EditProductPage({
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (!productId) return;
-    
+
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -290,7 +307,7 @@ export default function EditProductPage({
         formData.append('file', file);
         formData.append('productId', productId);
         formData.append('alt', file.name);
-        
+
         // Définir la première image comme principale si aucune image n'existe
         if (media.length === 0 && i === 0) {
           formData.append('isPrimary', 'true');
@@ -310,7 +327,7 @@ export default function EditProductPage({
       // Recharger les médias
       await loadMedia(productId);
       setSuccessMessage('Images uploaded successfully!');
-      
+
       // Effacer le message après 3 secondes
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
@@ -327,7 +344,11 @@ export default function EditProductPage({
     if (!messages) return;
 
     const t = messages.admin.products;
-    if (!confirm(t.deleteMediaConfirm || 'Are you sure you want to delete this image?')) {
+    if (
+      !confirm(
+        t.deleteMediaConfirm || 'Are you sure you want to delete this image?'
+      )
+    ) {
       return;
     }
 
@@ -395,7 +416,7 @@ export default function EditProductPage({
     } catch (err) {
       console.error('Failed to save media order:', err);
       // Recharger les médias en cas d'erreur
-      loadMedia(productId);
+      void loadMedia(productId);
       setError('Failed to save media order. Please try again.');
     } finally {
       setReorderingMedia(false);
@@ -445,10 +466,10 @@ export default function EditProductPage({
       }
 
       setSuccessMessage('Product updated successfully!');
-      
+
       // Recharger les données du produit
       await loadProduct(productId);
-      
+
       // Scroll to top pour voir le message de succès
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -504,16 +525,15 @@ export default function EditProductPage({
     }
   };
 
-  const handleDeleteVariant = async (variantId: string, variantName: string) => {
+  const handleDeleteVariant = async (
+    variantId: string,
+    variantName: string
+  ) => {
     if (!productId) return;
     if (!messages) return;
 
     const t = messages.admin.products;
-    if (
-      !confirm(
-        t.deleteVariantConfirm.replace('{{sku}}', variantName)
-      )
-    ) {
+    if (!confirm(t.deleteVariantConfirm.replace('{{sku}}', variantName))) {
       return;
     }
 
@@ -553,7 +573,9 @@ export default function EditProductPage({
     field: 'nameEN' | 'nameFR' | 'price' | 'stock',
     value: string
   ) => {
-    setNewVariants(newVariants.map(v => (v.id === id ? { ...v, [field]: value } : v)));
+    setNewVariants(
+      newVariants.map(v => (v.id === id ? { ...v, [field]: value } : v))
+    );
   };
 
   const handleDeleteNewVariant = (id: string) => {
@@ -574,13 +596,16 @@ export default function EditProductPage({
         })),
       };
 
-      const response = await fetch(`/api/admin/products/${productId}/variants/simple`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(variantsPayload),
-      });
+      const response = await fetch(
+        `/api/admin/products/${productId}/variants/simple`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(variantsPayload),
+        }
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -592,15 +617,18 @@ export default function EditProductPage({
       setSuccessMessage('New variants added successfully!');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create variants');
+      setError(
+        err instanceof Error ? err.message : 'Failed to create variants'
+      );
     }
   };
 
   const getVariantName = (variant: Variant): string => {
     if (variant.attributeValues.length === 0) return variant.sku;
-    const translation = variant.attributeValues[0].attributeValue.translations.find(
-      t => t.language === locale.toUpperCase()
-    );
+    const translation =
+      variant.attributeValues[0].attributeValue.translations.find(
+        t => t.language === locale.toUpperCase()
+      );
     return (
       translation?.displayName ||
       variant.attributeValues[0].attributeValue.translations[0]?.displayName ||
@@ -626,7 +654,9 @@ export default function EditProductPage({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t.editProduct}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t.editProduct}
+            </h1>
             <p className="mt-2 text-sm text-gray-600">{tc.loading}</p>
           </div>
         </div>
@@ -642,7 +672,9 @@ export default function EditProductPage({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t.editProduct}</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t.editProduct}
+            </h1>
           </div>
         </div>
         <div className="rounded-lg border border-red-200 bg-red-50 p-12 text-center shadow-sm">
@@ -663,12 +695,19 @@ export default function EditProductPage({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/admin/products" className="rounded-lg p-2 hover:bg-gray-100">
+          <Link
+            href="/admin/products"
+            className="rounded-lg p-2 hover:bg-gray-100"
+          >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t.editProduct}</h1>
-            <p className="mt-2 text-sm text-gray-600">{enTranslation.name || 'Product details'}</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t.editProduct}
+            </h1>
+            <p className="mt-2 text-sm text-gray-600">
+              {enTranslation.name || 'Product details'}
+            </p>
           </div>
         </div>
         <button
@@ -686,12 +725,22 @@ export default function EditProductPage({
         <div className="rounded-lg border border-green-200 bg-green-50 p-4">
           <div className="flex items-start gap-3">
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100">
-              <svg className="h-3 w-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              <svg
+                className="h-3 w-3 text-green-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-green-900">{tc.success || 'Success'}</h3>
+              <h3 className="font-medium text-green-900">
+                {tc.success || 'Success'}
+              </h3>
               <p className="mt-1 text-sm text-green-700">{successMessage}</p>
             </div>
           </div>
@@ -716,7 +765,9 @@ export default function EditProductPage({
         <div className="space-y-6">
           {/* Basic Info */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">{t.basicInfo}</h2>
+            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+              {t.basicInfo}
+            </h2>
 
             <div className="space-y-4">
               <div>
@@ -726,14 +777,18 @@ export default function EditProductPage({
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={e => setFormData({ ...formData, slug: e.target.value })}
+                  onChange={e =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">{t.status}</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.status}
+                </label>
                 <select
                   value={formData.status}
                   onChange={e =>
@@ -756,10 +811,15 @@ export default function EditProductPage({
                   type="checkbox"
                   id="isFeatured"
                   checked={formData.isFeatured}
-                  onChange={e => setFormData({ ...formData, isFeatured: e.target.checked })}
+                  onChange={e =>
+                    setFormData({ ...formData, isFeatured: e.target.checked })
+                  }
                   className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                 />
-                <label htmlFor="isFeatured" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="isFeatured"
+                  className="text-sm font-medium text-gray-700"
+                >
                   {t.featured}
                 </label>
               </div>
@@ -771,7 +831,7 @@ export default function EditProductPage({
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               {t.media || 'Media'}
             </h2>
-            
+
             {/* Upload Zone */}
             <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-8">
               <div className="text-center">
@@ -784,7 +844,9 @@ export default function EditProductPage({
                 </p>
                 <label className="mt-4 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                   <Upload className="h-4 w-4" />
-                  {uploading ? (t.uploading || 'Uploading...') : (t.selectFiles || 'Select files')}
+                  {uploading
+                    ? t.uploading || 'Uploading...'
+                    : t.selectFiles || 'Select files'}
                   <input
                     type="file"
                     multiple
@@ -807,10 +869,12 @@ export default function EditProductPage({
                     </p>
                   </div>
                 )}
-                
+
                 <div className="mt-4 rounded-lg bg-blue-50 p-3">
                   <p className="text-xs text-blue-700">
-                    💡 {t.dragToReorderMedia || 'Drag and drop images to reorder them'}
+                    💡{' '}
+                    {t.dragToReorderMedia ||
+                      'Drag and drop images to reorder them'}
                   </p>
                 </div>
 
@@ -824,7 +888,7 @@ export default function EditProductPage({
                     strategy={rectSortingStrategy}
                   >
                     <div className="mt-4 grid grid-cols-3 gap-4">
-                      {media.map((item) => (
+                      {media.map(item => (
                         <SortableMediaItem
                           key={item.id}
                           item={item}
@@ -855,7 +919,9 @@ export default function EditProductPage({
                 <input
                   type="text"
                   value={enTranslation.name}
-                  onChange={e => setEnTranslation({ ...enTranslation, name: e.target.value })}
+                  onChange={e =>
+                    setEnTranslation({ ...enTranslation, name: e.target.value })
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                   required
                 />
@@ -868,8 +934,15 @@ export default function EditProductPage({
                 <input
                   type="text"
                   value={enTranslation.shortDescription}
-                  onChange={e => setEnTranslation({ ...enTranslation, shortDescription: e.target.value })}
-                  placeholder={t.shortDescriptionPlaceholder || 'Brief product summary'}
+                  onChange={e =>
+                    setEnTranslation({
+                      ...enTranslation,
+                      shortDescription: e.target.value,
+                    })
+                  }
+                  placeholder={
+                    t.shortDescriptionPlaceholder || 'Brief product summary'
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 />
               </div>
@@ -880,8 +953,16 @@ export default function EditProductPage({
                 </label>
                 <textarea
                   value={enTranslation.description}
-                  onChange={e => setEnTranslation({ ...enTranslation, description: e.target.value })}
-                  placeholder={t.fullDescriptionPlaceholder || 'Detailed product description'}
+                  onChange={e =>
+                    setEnTranslation({
+                      ...enTranslation,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder={
+                    t.fullDescriptionPlaceholder ||
+                    'Detailed product description'
+                  }
                   rows={6}
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 />
@@ -902,7 +983,9 @@ export default function EditProductPage({
                 <input
                   type="text"
                   value={frTranslation.name}
-                  onChange={e => setFrTranslation({ ...frTranslation, name: e.target.value })}
+                  onChange={e =>
+                    setFrTranslation({ ...frTranslation, name: e.target.value })
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 />
               </div>
@@ -914,8 +997,15 @@ export default function EditProductPage({
                 <input
                   type="text"
                   value={frTranslation.shortDescription}
-                  onChange={e => setFrTranslation({ ...frTranslation, shortDescription: e.target.value })}
-                  placeholder={t.shortDescriptionPlaceholder || 'Résumé bref du produit'}
+                  onChange={e =>
+                    setFrTranslation({
+                      ...frTranslation,
+                      shortDescription: e.target.value,
+                    })
+                  }
+                  placeholder={
+                    t.shortDescriptionPlaceholder || 'Résumé bref du produit'
+                  }
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 />
               </div>
@@ -926,8 +1016,16 @@ export default function EditProductPage({
                 </label>
                 <textarea
                   value={frTranslation.description}
-                  onChange={e => setFrTranslation({ ...frTranslation, description: e.target.value })}
-                  placeholder={t.fullDescriptionPlaceholder || 'Description détaillée du produit'}
+                  onChange={e =>
+                    setFrTranslation({
+                      ...frTranslation,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder={
+                    t.fullDescriptionPlaceholder ||
+                    'Description détaillée du produit'
+                  }
                   rows={6}
                   className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                 />
@@ -981,7 +1079,9 @@ export default function EditProductPage({
                           step="0.01"
                           defaultValue={variant.pricing[0]?.price || '0.00'}
                           onBlur={e =>
-                            handleUpdateVariant(variant.id, { price: e.target.value })
+                            handleUpdateVariant(variant.id, {
+                              price: e.target.value,
+                            })
                           }
                           className="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                         />
@@ -1003,7 +1103,12 @@ export default function EditProductPage({
                     <td className="whitespace-nowrap px-4 py-3 text-right">
                       <button
                         type="button"
-                        onClick={() => handleDeleteVariant(variant.id, getVariantName(variant))}
+                        onClick={() =>
+                          handleDeleteVariant(
+                            variant.id,
+                            getVariantName(variant)
+                          )
+                        }
                         className="text-red-600 hover:text-red-900"
                         title={tc.delete}
                       >
@@ -1059,13 +1164,18 @@ export default function EditProductPage({
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        {t.productName} (EN) <span className="text-red-500">*</span>
+                        {t.productName} (EN){' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={variant.nameEN}
                         onChange={e =>
-                          handleNewVariantChange(variant.id, 'nameEN', e.target.value)
+                          handleNewVariantChange(
+                            variant.id,
+                            'nameEN',
+                            e.target.value
+                          )
                         }
                         placeholder="Green"
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -1074,13 +1184,18 @@ export default function EditProductPage({
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        {t.productName} (FR) <span className="text-red-500">*</span>
+                        {t.productName} (FR){' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={variant.nameFR}
                         onChange={e =>
-                          handleNewVariantChange(variant.id, 'nameFR', e.target.value)
+                          handleNewVariantChange(
+                            variant.id,
+                            'nameFR',
+                            e.target.value
+                          )
                         }
                         placeholder="Vert"
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -1096,7 +1211,11 @@ export default function EditProductPage({
                         step="0.01"
                         value={variant.price}
                         onChange={e =>
-                          handleNewVariantChange(variant.id, 'price', e.target.value)
+                          handleNewVariantChange(
+                            variant.id,
+                            'price',
+                            e.target.value
+                          )
                         }
                         placeholder="49.99"
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
@@ -1111,7 +1230,11 @@ export default function EditProductPage({
                         type="number"
                         value={variant.stock}
                         onChange={e =>
-                          handleNewVariantChange(variant.id, 'stock', e.target.value)
+                          handleNewVariantChange(
+                            variant.id,
+                            'stock',
+                            e.target.value
+                          )
                         }
                         placeholder="0"
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"

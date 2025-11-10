@@ -78,7 +78,7 @@ async function getVariantsHandler(
 /**
  * POST /api/admin/products/[id]/variants
  * Crée des variantes manuellement OU génère automatiquement toutes les combinaisons
- * 
+ *
  * Mode manuel (tableau de variantes):
  * Body: {
  *   variants: [
@@ -91,7 +91,7 @@ async function getVariantsHandler(
  *     ...
  *   ]
  * }
- * 
+ *
  * Mode auto-génération (config):
  * Body: {
  *   generate: true,

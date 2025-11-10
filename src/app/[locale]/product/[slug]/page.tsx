@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { Language, ProductStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/db/prisma';
 
+// Disable static generation (requires DB)
+export const dynamic = 'force-dynamic';
+
 interface ProductPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }

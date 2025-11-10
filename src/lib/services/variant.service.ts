@@ -74,8 +74,14 @@ async function ensureGenericVariantAttribute() {
   });
 
   if (!attribute) {
-    logger.info('Création de l\'attribut générique variant_type');
-    
+    logger.info(
+      {
+        action: 'create_generic_attribute',
+        key: GENERIC_ATTRIBUTE_KEY,
+      },
+      "Création de l'attribut générique variant_type"
+    );
+
     attribute = await prisma.productAttribute.create({
       data: {
         key: GENERIC_ATTRIBUTE_KEY,
@@ -144,7 +150,7 @@ function generateSku(
       .replace('{product}', productSlug.toUpperCase())
       .replace('{attr}', attrValue.toUpperCase());
   }
-  
+
   // Pattern par défaut: PRODUCTSLUG-ATTR
   return `${productSlug.toUpperCase()}-${attrValue.toUpperCase()}`;
 }
@@ -205,11 +211,7 @@ export async function generateVariantCombinations(
   const variants: CreateVariantData[] = [];
 
   for (const attrValue of attrValues) {
-    const sku = generateSku(
-      product.slug,
-      attrValue.value,
-      config.skuPattern
-    );
+    const sku = generateSku(product.slug, attrValue.value, config.skuPattern);
 
     variants.push({
       sku,
@@ -273,8 +275,10 @@ export async function createSimpleVariants(
 
   for (const variantData of variants) {
     // Générer une clé unique pour la valeur d'attribut
-    const valueKey = variantData.nameEN.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-    
+    const valueKey = variantData.nameEN
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_');
+
     // Créer ou récupérer la valeur d'attribut
     const attributeValue = await ensureAttributeValue(
       attribute.id,
@@ -374,7 +378,7 @@ export async function createVariants(
   // Valider chaque variante
   variants.forEach((variant, index) => {
     validateVariantAttributes(variant.attributeValueIds);
-    
+
     if (!variant.sku) {
       throw new Error(`SKU manquant pour la variante ${index + 1}`);
     }
@@ -382,7 +386,7 @@ export async function createVariants(
 
   // Créer toutes les variantes en transaction
   const createdVariants = await prisma.$transaction(
-    variants.map((variantData) =>
+    variants.map(variantData =>
       prisma.productVariant.create({
         data: {
           productId,
@@ -394,10 +398,10 @@ export async function createVariants(
           dimensions: variantData.dimensions
             ? (variantData.dimensions as Prisma.InputJsonValue)
             : undefined,
-          
+
           // Lier les attributs
           attributeValues: {
-            create: variantData.attributeValueIds.map((attributeValueId) => ({
+            create: variantData.attributeValueIds.map(attributeValueId => ({
               attributeValueId,
             })),
           },
@@ -552,9 +556,10 @@ export async function updateVariant(
 
   // Construire les données de mise à jour
   const variantUpdate: any = {};
-  
+
   if (updateData.sku !== undefined) variantUpdate.sku = updateData.sku;
-  if (updateData.barcode !== undefined) variantUpdate.barcode = updateData.barcode;
+  if (updateData.barcode !== undefined)
+    variantUpdate.barcode = updateData.barcode;
   if (updateData.weight !== undefined) {
     variantUpdate.weight = new Prisma.Decimal(updateData.weight);
   }
@@ -563,7 +568,7 @@ export async function updateVariant(
   }
 
   // Transaction pour mettre à jour variante + pricing + inventory
-  const updatedVariant = await prisma.$transaction(async (tx) => {
+  const updatedVariant = await prisma.$transaction(async tx => {
     // Mise à jour de la variante elle-même
     const updated = await tx.productVariant.update({
       where: { id: variantId },
@@ -576,13 +581,14 @@ export async function updateVariant(
     // Mise à jour du pricing si fourni
     if (updateData.pricing && variant.pricing.length > 0) {
       const currentPricing = variant.pricing[0];
-      
+
       await tx.productVariantPricing.update({
         where: { id: currentPricing.id },
         data: {
-          price: updateData.pricing.price !== undefined
-            ? new Prisma.Decimal(updateData.pricing.price)
-            : undefined,
+          price:
+            updateData.pricing.price !== undefined
+              ? new Prisma.Decimal(updateData.pricing.price)
+              : undefined,
           currency: updateData.pricing.currency,
           priceType: updateData.pricing.priceType,
           isActive: updateData.pricing.isActive,
