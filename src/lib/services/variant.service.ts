@@ -1,10 +1,20 @@
-import { Prisma } from '../../generated/prisma';
+import { Prisma, Language } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 
 // ============================================
 // TYPES
 // ============================================
+
+export interface SimpleVariantData {
+  nameEN: string;
+  nameFR: string;
+  price: number;
+  stock: number;
+  currency?: string;
+}
+
+const GENERIC_ATTRIBUTE_KEY = 'variant_type';
 
 export interface VariantAttributeValue {
   attributeValueId: string;
@@ -29,7 +39,7 @@ export interface CreateVariantData {
   barcode?: string;
   weight?: number;
   dimensions?: { length?: number; width?: number; height?: number };
-  attributeValueIds: string[]; // Exactement 2 IDs
+  attributeValueIds: string[]; // Exactement 1 ID
   pricing: VariantPricing;
   inventory?: VariantInventory;
 }
@@ -44,11 +54,10 @@ export interface UpdateVariantData {
 }
 
 export interface GenerateVariantsConfig {
-  attribute1Id: string; // Attribut "style" (couleur, type...)
-  attribute2Id: string; // Attribut "configuration" (quantité, longueur...)
+  attributeId: string; // Attribut unique (couleur, type, etc.)
   defaultPricing: VariantPricing;
   defaultInventory?: VariantInventory;
-  skuPattern?: string; // Ex: "SOIL-{attr1}-{attr2}"
+  skuPattern?: string; // Ex: "SOIL-{attr}"
 }
 
 // ============================================
@@ -56,32 +65,97 @@ export interface GenerateVariantsConfig {
 // ============================================
 
 /**
- * Génère un SKU automatique basé sur les attributs
+ * Assure qu'un attribut générique "variant_type" existe
+ * Crée l'attribut s'il n'existe pas, sinon le retourne
+ */
+async function ensureGenericVariantAttribute() {
+  let attribute = await prisma.productAttribute.findUnique({
+    where: { key: GENERIC_ATTRIBUTE_KEY },
+  });
+
+  if (!attribute) {
+    logger.info('Création de l\'attribut générique variant_type');
+    
+    attribute = await prisma.productAttribute.create({
+      data: {
+        key: GENERIC_ATTRIBUTE_KEY,
+        inputType: 'select',
+        isRequired: true,
+        sortOrder: 0,
+        translations: {
+          create: [
+            { language: Language.EN, name: 'Variant' },
+            { language: Language.FR, name: 'Variante' },
+          ],
+        },
+      },
+    });
+  }
+
+  return attribute;
+}
+
+/**
+ * Crée ou récupère une valeur d'attribut pour un nom de variante
+ */
+async function ensureAttributeValue(
+  attributeId: string,
+  valueKey: string,
+  nameEN: string,
+  nameFR: string
+) {
+  let attributeValue = await prisma.productAttributeValue.findUnique({
+    where: {
+      attributeId_value: {
+        attributeId,
+        value: valueKey,
+      },
+    },
+  });
+
+  if (!attributeValue) {
+    attributeValue = await prisma.productAttributeValue.create({
+      data: {
+        attributeId,
+        value: valueKey,
+        translations: {
+          create: [
+            { language: Language.EN, displayName: nameEN },
+            { language: Language.FR, displayName: nameFR },
+          ],
+        },
+      },
+    });
+  }
+
+  return attributeValue;
+}
+
+/**
+ * Génère un SKU automatique basé sur l'attribut
  */
 function generateSku(
   productSlug: string,
-  attr1Value: string,
-  attr2Value: string,
+  attrValue: string,
   pattern?: string
 ): string {
   if (pattern) {
     return pattern
       .replace('{product}', productSlug.toUpperCase())
-      .replace('{attr1}', attr1Value.toUpperCase())
-      .replace('{attr2}', attr2Value.toUpperCase());
+      .replace('{attr}', attrValue.toUpperCase());
   }
   
-  // Pattern par défaut: PRODUCTSLUG-ATTR1-ATTR2
-  return `${productSlug.toUpperCase()}-${attr1Value.toUpperCase()}-${attr2Value.toUpperCase()}`;
+  // Pattern par défaut: PRODUCTSLUG-ATTR
+  return `${productSlug.toUpperCase()}-${attrValue.toUpperCase()}`;
 }
 
 /**
- * Valide qu'une variante a exactement 2 attributs
+ * Valide qu'une variante a exactement 1 attribut
  */
 function validateVariantAttributes(attributeValueIds: string[]): void {
-  if (attributeValueIds.length !== 2) {
+  if (attributeValueIds.length !== 1) {
     throw new Error(
-      `Une variante doit avoir exactement 2 attributs (reçu ${attributeValueIds.length})`
+      `Une variante doit avoir exactement 1 attribut (reçu ${attributeValueIds.length})`
     );
   }
 }
@@ -91,7 +165,7 @@ function validateVariantAttributes(attributeValueIds: string[]): void {
 // ============================================
 
 /**
- * Génère toutes les combinaisons possibles de 2 attributs
+ * Génère toutes les variantes possibles pour 1 attribut
  */
 export async function generateVariantCombinations(
   productId: string,
@@ -100,10 +174,9 @@ export async function generateVariantCombinations(
   logger.info(
     {
       productId,
-      attribute1Id: config.attribute1Id,
-      attribute2Id: config.attribute2Id,
+      attributeId: config.attributeId,
     },
-    'Génération des combinaisons de variantes'
+    'Génération des variantes'
   );
 
   // Récupérer le produit avec son slug
@@ -116,64 +189,158 @@ export async function generateVariantCombinations(
     throw new Error(`Produit non trouvé: ${productId}`);
   }
 
-  // Récupérer les valeurs du premier attribut
-  const attr1Values = await prisma.productAttributeValue.findMany({
-    where: { attributeId: config.attribute1Id },
+  // Récupérer les valeurs de l'attribut
+  const attrValues = await prisma.productAttributeValue.findMany({
+    where: { attributeId: config.attributeId },
     select: { id: true, value: true },
   });
 
-  // Récupérer les valeurs du second attribut
-  const attr2Values = await prisma.productAttributeValue.findMany({
-    where: { attributeId: config.attribute2Id },
-    select: { id: true, value: true },
-  });
-
-  if (attr1Values.length === 0) {
+  if (attrValues.length === 0) {
     throw new Error(
-      `Aucune valeur trouvée pour l'attribut ${config.attribute1Id}`
+      `Aucune valeur trouvée pour l'attribut ${config.attributeId}`
     );
   }
 
-  if (attr2Values.length === 0) {
-    throw new Error(
-      `Aucune valeur trouvée pour l'attribut ${config.attribute2Id}`
-    );
-  }
-
-  // Générer toutes les combinaisons
+  // Générer une variante pour chaque valeur
   const variants: CreateVariantData[] = [];
 
-  for (const attr1 of attr1Values) {
-    for (const attr2 of attr2Values) {
-      const sku = generateSku(
-        product.slug,
-        attr1.value,
-        attr2.value,
-        config.skuPattern
-      );
+  for (const attrValue of attrValues) {
+    const sku = generateSku(
+      product.slug,
+      attrValue.value,
+      config.skuPattern
+    );
 
-      variants.push({
-        sku,
-        attributeValueIds: [attr1.id, attr2.id],
-        pricing: { ...config.defaultPricing },
-        inventory: config.defaultInventory
-          ? { ...config.defaultInventory }
-          : { stock: 0, trackInventory: true },
-      });
-    }
+    variants.push({
+      sku,
+      attributeValueIds: [attrValue.id],
+      pricing: { ...config.defaultPricing },
+      inventory: config.defaultInventory
+        ? { ...config.defaultInventory }
+        : { stock: 0, trackInventory: true },
+    });
   }
 
   logger.info(
     {
       productId,
-      combinationsGenerated: variants.length,
-      attr1Count: attr1Values.length,
-      attr2Count: attr2Values.length,
+      variantsGenerated: variants.length,
+      attrValuesCount: attrValues.length,
     },
-    `${variants.length} combinaisons générées (${attr1Values.length} × ${attr2Values.length})`
+    `${variants.length} variante(s) générée(s)`
   );
 
   return variants;
+}
+
+// ============================================
+// API SIMPLIFIÉE POUR VARIANTES MANUELLES
+// ============================================
+
+/**
+ * Créer des variantes simples avec noms EN/FR
+ */
+export async function createSimpleVariants(
+  productId: string,
+  variants: SimpleVariantData[]
+) {
+  logger.info(
+    {
+      productId,
+      variantCount: variants.length,
+    },
+    'Création de variantes simples'
+  );
+
+  if (variants.length === 0) {
+    throw new Error('Au moins 1 variante est requise');
+  }
+
+  // Assurer que l'attribut générique existe
+  const attribute = await ensureGenericVariantAttribute();
+
+  // Récupérer le produit pour générer les SKU
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: { slug: true },
+  });
+
+  if (!product) {
+    throw new Error(`Produit non trouvé: ${productId}`);
+  }
+
+  const createdVariants = [];
+
+  for (const variantData of variants) {
+    // Générer une clé unique pour la valeur d'attribut
+    const valueKey = variantData.nameEN.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+    
+    // Créer ou récupérer la valeur d'attribut
+    const attributeValue = await ensureAttributeValue(
+      attribute.id,
+      valueKey,
+      variantData.nameEN,
+      variantData.nameFR
+    );
+
+    // Générer le SKU
+    const sku = `${product.slug.toUpperCase()}-${valueKey.toUpperCase()}`;
+
+    // Créer la variante
+    const variant = await prisma.productVariant.create({
+      data: {
+        productId,
+        sku,
+        attributeValues: {
+          create: {
+            attributeValueId: attributeValue.id,
+          },
+        },
+        pricing: {
+          create: {
+            price: new Prisma.Decimal(variantData.price),
+            currency: variantData.currency ?? 'CAD',
+            priceType: 'base',
+            isActive: true,
+          },
+        },
+        inventory: {
+          create: {
+            stock: variantData.stock,
+            trackInventory: true,
+            allowBackorder: false,
+            lowStockThreshold: 10,
+          },
+        },
+      },
+      include: {
+        attributeValues: {
+          include: {
+            attributeValue: {
+              include: {
+                attribute: true,
+                translations: true,
+              },
+            },
+          },
+        },
+        pricing: true,
+        inventory: true,
+      },
+    });
+
+    createdVariants.push(variant);
+  }
+
+  logger.info(
+    {
+      productId,
+      createdCount: createdVariants.length,
+    },
+    `${createdVariants.length} variante(s) simple(s) créée(s)`
+  );
+
+  return createdVariants;
 }
 
 // ============================================

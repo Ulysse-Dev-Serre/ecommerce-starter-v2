@@ -223,7 +223,7 @@ async function main() {
     // ==========================================
     console.log('\n📝 ÉTAPE 6: Génération automatique de toutes les variantes');
     console.log(
-      `   → 2 couleurs (vert, blanc) × 3 quantités (1, 3, 3+hub) = 6 variantes`
+      `   → 2 couleurs (vert, blanc) = 2 variantes`
     );
 
     const variants = await request(
@@ -232,8 +232,7 @@ async function main() {
       {
         generate: true,
         config: {
-          attribute1Id: colorAttributeId,
-          attribute2Id: quantityAttributeId,
+          attributeId: colorAttributeId,
           defaultPricing: {
             price: 49.99,
             currency: 'CAD',
@@ -245,7 +244,7 @@ async function main() {
             allowBackorder: false,
             lowStockThreshold: 10,
           },
-          skuPattern: `SOIL-{attr1}-{attr2}-${timestamp}`,
+          skuPattern: `SOIL-{attr}-${timestamp}`,
         },
       }
     );
@@ -255,6 +254,11 @@ async function main() {
     variants.data.forEach((v) => {
       console.log(`   - ${v.sku}`);
     });
+
+    // Vérifier qu'on a bien 2 variantes (et non 6)
+    if (variants.count !== 2) {
+      throw new Error(`Expected 2 variants, got ${variants.count}`);
+    }
 
     // ==========================================
     // 7. RÉCUPÉRER TOUTES LES VARIANTES
@@ -317,13 +321,13 @@ async function main() {
     );
     console.log(`✅ Variante supprimée définitivement`);
 
-    // Vérifier qu'il reste 5 variantes
+    // Vérifier qu'il reste 1 variante
     const remainingVariants = await request(
       'GET',
       `/api/admin/products/${productId}/variants`
     );
     console.log(
-      `✅ Vérification: ${remainingVariants.count} variantes restantes (au lieu de 6)`
+      `✅ Vérification: ${remainingVariants.count} variante restante (au lieu de 2)`
     );
 
     // ==========================================
@@ -335,10 +339,10 @@ async function main() {
     console.log(`Produit créé: ${productId}`);
     console.log(`Attributs créés: 2 (couleur, quantité)`);
     console.log(`Valeurs d'attributs créées: 5 (2 couleurs + 3 quantités)`);
-    console.log(`Variantes générées: 6 (2×3)`);
+    console.log(`Variantes générées: 2 (1 attribut couleur avec 2 valeurs)`);
     console.log(`Variantes mises à jour: 1`);
     console.log(`Variantes supprimées: 1`);
-    console.log(`Variantes finales: 5`);
+    console.log(`Variantes finales: 1`);
     console.log('\n🎉 Tous les endpoints fonctionnent correctement !');
 
   } catch (error) {

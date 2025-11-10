@@ -96,11 +96,10 @@ async function getVariantsHandler(
  * Body: {
  *   generate: true,
  *   config: {
- *     attribute1Id: "color-attr-id",
- *     attribute2Id: "quantity-attr-id",
+ *     attributeId: "color-attr-id",
  *     defaultPricing: { price: 49.99, currency: "CAD" },
  *     defaultInventory: { stock: 0 },
- *     skuPattern: "{product}-{attr1}-{attr2}"  // optionnel
+ *     skuPattern: "{product}-{attr}"  // optionnel
  *   }
  * }
  */
@@ -132,14 +131,14 @@ async function createVariantsHandler(
       // Mode auto-génération
       const config: GenerateVariantsConfig = body.config;
 
-      if (!config || !config.attribute1Id || !config.attribute2Id) {
+      if (!config || !config.attributeId) {
         return NextResponse.json(
           {
             success: false,
             requestId,
             error: 'Configuration invalide',
             message:
-              'attribute1Id, attribute2Id et defaultPricing sont requis pour la génération automatique',
+              'attributeId et defaultPricing sont requis pour la génération automatique',
             timestamp: new Date().toISOString(),
           },
           { status: 400 }

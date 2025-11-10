@@ -1,390 +1,399 @@
 # API Products - Gestion des produits
 
-## Vue d'ensemble
-
-Endpoints pour lister et récupérer les produits du catalogue avec pagination, filtres, tri et gestion des états d'indisponibilité.
+Documentation complète des endpoints API pour la gestion des produits, attributs et variantes.
 
 ---
 
-## GET /api/products
+## 📦 Produits
 
-Liste les produits avec pagination, filtres et tri.
+### GET /api/products
+**Fichier**: `src/app/api/products/route.ts`  
+**Accès**: Public  
+**Utilité**: Liste les produits actifs avec pagination et filtres  
 
-### Paramètres
+**Query params**:
+- `status`: DRAFT | ACTIVE | INACTIVE | ARCHIVED
+- `isFeatured`: boolean
+- `categorySlug`: string
+- `language`: EN | FR
+- `search`: string
+- `page`: number (défaut: 1)
+- `limit`: number (défaut: 20)
+- `sortBy`: createdAt | updatedAt | name | price
+- `sortOrder`: asc | desc
 
-| Paramètre | Type | Défaut | Description |
-|-----------|------|--------|-------------|
-| `page` | number | `1` | Numéro de page |
-| `limit` | number | `20` | Max 100 produits/page |
-| `status` | string | `ACTIVE` | `DRAFT`, `ACTIVE`, `INACTIVE`, `ARCHIVED` |
-| `featured` | boolean | - | Produits mis en avant |
-| `category` | string | - | Slug de catégorie |
-| `search` | string | - | Recherche (requiert `language`) |
-| `language` | string | - | `FR`, `EN` |
-| `sortBy` | string | `createdAt` | `createdAt`, `updatedAt`, `name`, `price` |
-| `sortOrder` | string | `desc` | `asc`, `desc` |
-
-### Requête
-
-```bash
-# Liste basique
-curl http://localhost:3000/api/products
-
-# Avec pagination et filtres
-curl "http://localhost:3000/api/products?page=1&limit=10&featured=true&language=FR"
-
-# Par catégorie
-curl "http://localhost:3000/api/products?category=smartphones&sortBy=price&sortOrder=asc"
-
-# Recherche
-curl "http://localhost:3000/api/products?search=iPhone&language=FR"
-```
-
-### Réponse (200 OK)
-
-```json
-{
-  "success": true,
-  "requestId": "7eaac2d9-056d-40a6-b77b-f0c7b93ca1d1",
-  "data": [
-    {
-      "id": "cmgbhqta8002xkspro4e68y1l",
-      "slug": "iphone-15-pro",
-      "status": "ACTIVE",
-      "isFeatured": true,
-      "translations": [
-        {
-          "language": "FR",
-          "name": "iPhone 15 Pro",
-          "description": "Le dernier iPhone avec puce A17 Pro...",
-          "shortDescription": "Smartphone Apple dernière génération"
-        }
-      ],
-      "variants": [
-        {
-          "id": "cmgbhqtdk0033ksprcli2w698",
-          "sku": "IPH15PRO-128-BLACK",
-          "pricing": [{ "price": "1299.99", "currency": "CAD", "priceType": "base" }],
-          "inventory": { "stock": 50, "lowStockThreshold": 10 },
-          "attributeValues": [
-            {
-              "attributeValue": {
-                "value": "black",
-                "attribute": { "key": "color" },
-                "translations": [{ "language": "FR", "displayName": "Noir" }]
-              }
-            }
-          ],
-          "media": [{ "url": "https://...", "alt": "...", "isPrimary": true }]
-        }
-      ],
-      "categories": [
-        { "category": { "slug": "smartphones", "translations": [...] } }
-      ]
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 9,
-    "totalPages": 1
-  },
-  "timestamp": "2025-10-03T23:45:32.123Z"
-}
-```
-
-### Utilisation
-
-- **Storefront** : `GET /api/products?status=ACTIVE&page=1&limit=12&language=FR`
-- **Admin** : `GET /api/products?sortBy=updatedAt&sortOrder=desc`
-- **Featured** : `GET /api/products?featured=true&limit=4`
-- **Catégorie** : `GET /api/products?category=smartphones&language=FR`
+**Usage front**: Page boutique, recherche produits, filtres
 
 ---
 
-## GET /api/products/[slug]
+### GET /api/products/[slug]
+**Fichier**: `src/app/api/products/[slug]/route.ts`  
+**Accès**: Public  
+**Utilité**: Récupère un produit par son slug avec toutes les variantes
 
-Récupère un produit par son slug avec tous les détails.
-
-### Paramètres
-
-- `slug` (path, required) - Slug unique du produit
-- `language` (query, optional) - Filtrer traductions (`FR`, `EN`)
-
-### Requête
-
-```bash
-# Toutes les langues
-curl http://localhost:3000/api/products/iphone-15-pro
-
-# Français uniquement
-curl "http://localhost:3000/api/products/iphone-15-pro?language=FR"
-```
-
-### Réponse (200 OK)
-
-```json
-{
-  "success": true,
-  "requestId": "a3f8c1d2-4b6e-4a9c-8d2e-1f7a9b3c5e8d",
-  "data": {
-    "id": "cmgbhqta8002xkspro4e68y1l",
-    "slug": "iphone-15-pro",
-    "status": "ACTIVE",
-    "isFeatured": true,
-    "translations": [
-      { "language": "FR", "name": "iPhone 15 Pro", "description": "..." }
-    ],
-    "variants": [
-      {
-        "sku": "IPH15PRO-128-BLACK",
-        "pricing": [{ "price": "1299.99", "currency": "CAD" }],
-        "inventory": { "stock": 50 },
-        "attributeValues": [...],
-        "media": [...]
-      }
-    ],
-    "categories": [...]
-  },
-  "meta": {
-    "isAvailable": true,
-    "isDraft": false,
-    "hasStock": true,
-    "variantsCount": 3
-  },
-  "timestamp": "2025-10-03T23:50:15.789Z"
-}
-```
-
-### Réponse d'erreur (404 Not Found)
-
-```json
-{
-  "success": false,
-  "requestId": "b7d9e2f3-5c8a-4b1d-9e3f-2a6b8c4d7e9f",
-  "error": "Product not found",
-  "timestamp": "2025-10-03T23:51:20.456Z"
-}
-```
-
-### Métadonnées
-
-- `isAvailable`: Disponible à l'achat (ACTIVE + stock ou backorder)
-- `isDraft`: Produit en brouillon (→ noindex SEO)
-- `hasStock`: Au moins une variante en stock
-- `variantsCount`: Nombre de variantes
-- `stockStatus`: `out_of_stock` si aucun stock
+**Usage front**: Page détail produit, affichage variantes, sélection options
 
 ---
-
-## Tester avec Postman
-
-### Collection recommandée
-
-**1. Liste produits actifs**
-```
-GET http://localhost:3000/api/products?status=ACTIVE&language=FR
-```
-
-**2. Produits paginés**
-```
-GET http://localhost:3000/api/products?page=1&limit=5
-```
-
-**3. Produits featured**
-```
-GET http://localhost:3000/api/products?featured=true
-```
-
-**4. Recherche par catégorie**
-```
-GET http://localhost:3000/api/products?category=smartphones
-```
-
-**5. Détail produit**
-```
-GET http://localhost:3000/api/products/iphone-15-pro?language=FR
-```
-
-**6. Produit inexistant (404)**
-```
-GET http://localhost:3000/api/products/slug-invalide
-```
-
----
-
-## Notes techniques
-
-### Headers de réponse
-
-- `X-Request-ID`: UUID unique pour traçabilité
-
-### Journalisation
-
-Toutes les requêtes sont loggées avec `requestId` pour debug.
-
-### Projection optimisée
-
-- ✅ Inclus: id, slug, status, translations, variants actifs, prix actifs, stock
-- ❌ Exclus: deletedAt, metadata internes
-
-### Filtres automatiques
-
-- Statut par défaut: `ACTIVE` (si non spécifié)
-- Soft delete: exclusion automatique des `deletedAt != null`
-- Prix: uniquement `isActive: true`
-
-### Limites
-
-- Max pagination: 100 produits/page
-- Recommandé: 12-24 (storefront), 50 (admin)
-
----
-
-## Routes Admin
-
-Les endpoints de création, modification et suppression sont déplacés vers `/api/admin/products` pour une meilleure séparation des responsabilités.
 
 ### POST /api/admin/products
+**Fichier**: `src/app/api/admin/products/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Crée un nouveau produit
 
-**Protection**: ADMIN uniquement
-
-Crée un nouveau produit.
-
-#### Requête
-
-```bash
-curl -X POST http://localhost:3000/api/admin/products \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
-  -d '{
-    "slug": "nouveau-produit",
-    "status": "DRAFT",
-    "isFeatured": false,
-    "sortOrder": 0,
-    "translations": [
-      {
-        "language": "FR",
-        "name": "Nouveau Produit",
-        "description": "Description complète",
-        "shortDescription": "Description courte"
-      }
-    ]
-  }'
-```
-
-#### Réponse (201 Created)
-
+**Body**:
 ```json
 {
-  "success": true,
-  "requestId": "...",
-  "product": {
-    "id": "...",
-    "slug": "nouveau-produit",
-    "status": "DRAFT",
-    "translations": [...]
-  },
-  "message": "Product created successfully",
-  "timestamp": "2025-10-03T23:55:00.000Z"
+  "slug": "soil-sensor",
+  "status": "DRAFT",
+  "isFeatured": false,
+  "sortOrder": 0,
+  "translations": [
+    { "language": "EN", "name": "...", "description": "..." },
+    { "language": "FR", "name": "...", "description": "..." }
+  ]
 }
 ```
+
+**Usage front**: Formulaire création produit
 
 ---
 
 ### GET /api/admin/products/[id]
+**Fichier**: `src/app/api/admin/products/[id]/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Récupère un produit par ID (tous statuts)
 
-**Protection**: ADMIN uniquement
-
-Récupère un produit par ID pour l'administration (inclut tous les statuts, même DRAFT et ARCHIVED).
-
-#### Requête
-
-```bash
-curl http://localhost:3000/api/admin/products/cmgbhqta8002xkspro4e68y1l \
-  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
-```
-
-#### Réponse (200 OK)
-
-```json
-{
-  "success": true,
-  "requestId": "...",
-  "data": {
-    "id": "cmgbhqta8002xkspro4e68y1l",
-    "slug": "nouveau-produit",
-    "status": "DRAFT",
-    "translations": [...]
-  },
-  "timestamp": "2025-10-03T23:56:00.000Z"
-}
-```
+**Usage front**: Page édition produit
 
 ---
 
 ### PUT /api/admin/products/[id]
+**Fichier**: `src/app/api/admin/products/[id]/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Met à jour un produit
 
-**Protection**: ADMIN uniquement
-
-Modifie un produit existant.
-
-#### Requête
-
-```bash
-curl -X PUT http://localhost:3000/api/admin/products/cmgbhqta8002xkspro4e68y1l \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
-  -d '{
-    "status": "ACTIVE",
-    "isFeatured": true
-  }'
-```
-
-#### Réponse (200 OK)
-
+**Body**:
 ```json
 {
-  "success": true,
-  "requestId": "...",
-  "data": {
-    "id": "cmgbhqta8002xkspro4e68y1l",
-    "slug": "nouveau-produit",
-    "status": "ACTIVE",
-    "isFeatured": true
+  "slug": "new-slug",
+  "status": "ACTIVE",
+  "isFeatured": true,
+  "sortOrder": 10
+}
+```
+
+**Usage front**: Formulaire édition produit
+
+---
+
+### DELETE /api/admin/products/[id]
+**Fichier**: `src/app/api/admin/products/[id]/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Supprime définitivement un produit (hard delete)
+
+**Usage front**: Bouton supprimer dans liste produits
+
+---
+
+## 🎨 Attributs
+
+### GET /api/admin/attributes
+**Fichier**: `src/app/api/admin/attributes/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Liste tous les attributs avec leurs valeurs
+
+**Query params**:
+- `language`: EN | FR (filtre les traductions)
+
+**Usage front**: Sélecteur d'attributs pour variantes
+
+---
+
+### POST /api/admin/attributes
+**Fichier**: `src/app/api/admin/attributes/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Crée un nouvel attribut
+
+**Body**:
+```json
+{
+  "key": "color",
+  "inputType": "select",
+  "isRequired": true,
+  "sortOrder": 1,
+  "translations": [
+    { "language": "EN", "name": "Color" },
+    { "language": "FR", "name": "Couleur" }
+  ]
+}
+```
+
+**Usage front**: Formulaire création attribut
+
+---
+
+### POST /api/admin/attributes/[id]/values
+**Fichier**: `src/app/api/admin/attributes/[id]/values/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Ajoute une valeur à un attribut
+
+**Body**:
+```json
+{
+  "value": "green",
+  "translations": [
+    { "language": "EN", "displayName": "Green" },
+    { "language": "FR", "displayName": "Vert" }
+  ]
+}
+```
+
+**Usage front**: Formulaire gestion valeurs d'attributs
+
+---
+
+## 🔀 Variantes
+
+### GET /api/admin/products/[id]/variants
+**Fichier**: `src/app/api/admin/products/[id]/variants/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Liste toutes les variantes d'un produit
+
+**Usage front**: Page édition produit, tableau des variantes
+
+---
+
+### POST /api/admin/products/[id]/variants
+**Fichier**: `src/app/api/admin/products/[id]/variants/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Crée des variantes (mode manuel OU auto-génération)
+
+**Mode auto-génération**:
+```json
+{
+  "generate": true,
+  "config": {
+    "attributeId": "attr-color-id",
+    "defaultPricing": {
+      "price": 49.99,
+      "currency": "CAD"
+    },
+    "defaultInventory": {
+      "stock": 0,
+      "trackInventory": true
+    },
+    "skuPattern": "PROD-{attr}"
+  }
+}
+```
+
+**Mode manuel**:
+```json
+{
+  "variants": [
+    {
+      "sku": "PROD-GREEN",
+      "attributeValueIds": ["color-green-id"],
+      "pricing": { "price": 49.99 },
+      "inventory": { "stock": 100 }
+    }
+  ]
+}
+```
+
+**Usage front**: 
+- Formulaire création produit (auto-génération)
+- Ajout manuel de variantes
+
+---
+
+### GET /api/admin/products/[id]/variants/[variantId]
+**Fichier**: `src/app/api/admin/products/[id]/variants/[variantId]/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Récupère une variante spécifique
+
+**Usage front**: Détails d'une variante
+
+---
+
+### PUT /api/admin/products/[id]/variants/[variantId]
+**Fichier**: `src/app/api/admin/products/[id]/variants/[variantId]/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Met à jour une variante
+
+**Body**:
+```json
+{
+  "sku": "NEW-SKU",
+  "pricing": {
+    "price": 59.99,
+    "currency": "CAD"
   },
-  "message": "Product updated successfully",
-  "timestamp": "2025-10-03T23:56:00.000Z"
+  "inventory": {
+    "stock": 50,
+    "trackInventory": true,
+    "allowBackorder": false
+  }
+}
+```
+
+**Usage front**: Formulaire édition variante, tableau variantes
+
+---
+
+### DELETE /api/admin/products/[id]/variants/[variantId]
+**Fichier**: `src/app/api/admin/products/[id]/variants/[variantId]/route.ts`  
+**Accès**: Admin uniquement  
+**Utilité**: Supprime définitivement une variante
+
+**Usage front**: Bouton supprimer dans tableau variantes
+
+---
+
+## 🔄 Workflow typique
+
+### Création d'un produit avec variantes
+
+1. **Créer les attributs** (une fois)
+   ```
+   POST /api/admin/attributes → Couleur
+   POST /api/admin/attributes/[id]/values → Vert, Blanc, Noir
+   ```
+
+2. **Créer le produit**
+   ```
+   POST /api/admin/products → Produit "Soil Sensor - Single"
+   ```
+
+3. **Générer les variantes automatiquement**
+   ```
+   POST /api/admin/products/[id]/variants
+   {
+     "generate": true,
+     "config": {
+       "attributeId": "couleur-id",
+       ...
+     }
+   }
+   → Génère 3 variantes (1 par couleur : vert, blanc, noir)
+   ```
+
+4. **Ajuster les prix/stocks individuellement**
+   ```
+   PUT /api/admin/products/[id]/variants/[variantId]
+   → Modifier le prix ou le stock d'une couleur spécifique
+   ```
+
+5. **Pour les packs/configurations différentes** : créer de nouveaux produits
+   ```
+   POST /api/admin/products → Produit "Soil Sensor - 3 Pack"
+   POST /api/admin/products/[id]/variants → Générer variantes couleur
+   ```
+
+---
+
+## 📊 Structure des données
+
+### ProductProjection (retourné par GET /api/products)
+```typescript
+{
+  id: string
+  slug: string
+  status: ProductStatus
+  isFeatured: boolean
+  translations: [
+    { language: "EN", name: "...", description: "..." }
+  ]
+  variants: [
+    {
+      id: string
+      sku: string
+      pricing: [{ price: Decimal, currency: string }]
+      inventory: { stock: number, trackInventory: boolean }
+      attributeValues: [
+        {
+          attributeValue: {
+            value: "green",
+            attribute: { key: "color" },
+            translations: [{ language: "EN", displayName: "Green" }]
+          }
+        }
+      ]
+    }
+  ]
+  categories: [...]
+  media: [...]
 }
 ```
 
 ---
 
-### DELETE /api/admin/products/[id]
+## 🎯 Cas d'usage front-end
 
-**Protection**: ADMIN uniquement
+### Page boutique publique
+```typescript
+// Lister les produits actifs
+GET /api/products?status=ACTIVE&language=FR&page=1
 
-Supprime un produit (soft delete).
-
-#### Requête
-
-```bash
-curl -X DELETE http://localhost:3000/api/admin/products/cmgbhqta8002xkspro4e68y1l \
-  -H "Authorization: Bearer YOUR_ADMIN_TOKEN"
+// Afficher un produit avec ses variantes
+GET /api/products/soil-sensor
+// → Affiche couleurs et quantités disponibles
+// → Calcule le prix selon la sélection
 ```
 
-#### Réponse (200 OK)
+### Page admin - Création produit
+```typescript
+// 1. Charger les attributs disponibles
+GET /api/admin/attributes?language=FR
 
-```json
+// 2. Créer le produit
+POST /api/admin/products
+
+// 3. Générer toutes les variantes
+POST /api/admin/products/[id]/variants
 {
-  "success": true,
-  "requestId": "...",
-  "product": {
-    "id": "cmgbhqta8002xkspro4e68y1l",
-    "slug": "nouveau-produit",
-    "deletedAt": "2025-10-03T23:57:00.000Z"
-  },
-  "message": "Product deleted successfully",
-  "timestamp": "2025-10-03T23:57:00.000Z"
+  generate: true,
+  config: { attribute1Id, attribute2Id, ... }
 }
+
+// 4. Ajuster certaines variantes
+PUT /api/admin/products/[id]/variants/[variantId]
 ```
+
+### Page admin - Édition produit
+```typescript
+// 1. Charger le produit
+GET /api/admin/products/[id]
+
+// 2. Charger les variantes
+GET /api/admin/products/[id]/variants
+
+// 3. Modifier le produit
+PUT /api/admin/products/[id]
+
+// 4. Modifier une variante
+PUT /api/admin/products/[id]/variants/[variantId]
+
+// 5. Supprimer une variante
+DELETE /api/admin/products/[id]/variants/[variantId]
+```
+
+---
+
+## ⚠️ Notes importantes
+
+1. **SKU unique**: Chaque variante doit avoir un SKU unique dans toute la base
+2. **1 attribut par variante**: Chaque variante a exactement 1 attribut (généralement couleur)
+3. **Configurations = produits séparés**: Les packs/quantités différentes sont des produits distincts
+4. **Hard delete**: Les suppressions sont définitives (pas de soft delete)
+5. **Cascade**: Supprimer un produit supprime toutes ses variantes
+6. **Pricing actif**: Seuls les pricing avec `isActive: true` sont retournés
+7. **Inventory tracking**: Si `trackInventory: false`, le stock est illimité
+
+---
+
+## 🔐 Authentification
+
+- Routes `/api/products/*`: Public (lecture seule)
+- Routes `/api/admin/*`: Nécessite rôle ADMIN
+- Auth bypass pour tests: header `x-test-api-key` (dev uniquement)
