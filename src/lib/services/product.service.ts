@@ -586,24 +586,20 @@ export async function updateProduct(
 }
 
 /**
- * Soft delete product
+ * Delete product (HARD DELETE - permanent)
  */
 export async function deleteProduct(id: string): Promise<Product> {
-  const deletedProduct = await prisma.product.update({
+  const deletedProduct = await prisma.product.delete({
     where: { id },
-    data: {
-      deletedAt: new Date(),
-      updatedAt: new Date(),
-    },
   });
 
   logger.info(
     {
-      action: 'product_deleted',
+      action: 'product_hard_deleted',
       productId: id,
       slug: deletedProduct.slug,
     },
-    'Product soft deleted successfully'
+    'Product permanently deleted'
   );
 
   return deletedProduct;

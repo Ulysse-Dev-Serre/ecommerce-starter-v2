@@ -88,6 +88,26 @@ async function createProductHandler(
       },
       'Failed to create product'
     );
+
+    // Handle Prisma unique constraint errors
+    if (error instanceof Error && error.message.includes('Unique constraint failed on the fields: (`slug`)')) {
+      return NextResponse.json(
+        {
+          success: false,
+          requestId,
+          error: 'Duplicate slug',
+          message: 'A product with this slug already exists. Please choose a different slug.',
+          timestamp: new Date().toISOString(),
+        },
+        { 
+          status: 400,
+          headers: {
+            'X-Request-ID': requestId,
+          },
+        }
+      );
+    }
+
     throw error;
   }
 }

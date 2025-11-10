@@ -84,8 +84,8 @@ export default function NewProductPage() {
         throw new Error(data.message || 'Failed to create product');
       }
 
-      // Redirect to product edit page
-      router.push(`/admin/products/${data.product.id}/edit`);
+      // Redirect to products list
+      router.push('/admin/products');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
