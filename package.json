@@ -22,6 +22,7 @@
     "test:webhook": "node tests/scripts/webhook-debug.js",
     "test:webhook:client": "node tests/scripts/test-webhook-client.js",
     "test:deps": "node tests/scripts/install-test-deps.js",
+    "test:stripe": "node tests/scripts/test-stripe-checkout.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
@@ -38,6 +39,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@faker-js/faker": "^10.0.0",
     "@prisma/client": "^6.15.0",
+    "@stripe/stripe-js": "^8.4.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.2",
@@ -47,6 +49,7 @@
     "pino": "^9.9.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "stripe": "^19.3.0",
     "svix": "^1.76.1",
     "tsx": "^4.20.5"
   },

@@ -75,9 +75,11 @@ export function withAuth(handler: ApiHandler) {
         testApiKey === process.env.TEST_API_KEY &&
         process.env.NODE_ENV !== 'production'
       ) {
-        // Utilise le compte admin réel pour les tests
+        // Utilise le compte de test configuré dans .env
+        const clerkTestUserId =
+          process.env.CLERK_TEST_USER_ID || 'user_35FXh55upbdX9L0zj1bjnrFCAde';
         const testUser = await prisma.user.findUnique({
-          where: { clerkId: 'user_35FXh55upbdX9L0zj1bjnrFCAde' }, // Admin réel: ulyssebo255@gmail.com
+          where: { clerkId: clerkTestUserId },
           select: {
             id: true,
             clerkId: true,
