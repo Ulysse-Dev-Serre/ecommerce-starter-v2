@@ -1,3 +1,5 @@
+import { AddToCartButton } from '@/components/cart/add-to-cart-button';
+
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ page?: string; category?: string }>;
@@ -36,19 +38,28 @@ export default async function ShopPage({
           const translation = product.translations[0];
           const firstVariant = product.variants[0];
           const price = firstVariant?.pricing[0]?.price ?? '0';
-          const image = firstVariant?.media[0]?.url ?? '/placeholder.png';
+          const primaryImage = product.media?.find((m: any) => m.isPrimary);
+          const variantImage = firstVariant?.media?.[0];
+          const image = primaryImage?.url || variantImage?.url;
 
           return (
             <div
               key={product.id}
               className="border border-[var(--border)] rounded-lg p-4 hover:shadow-lg transition"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={image}
-                alt={translation?.name ?? product.slug}
-                className="w-full h-48 object-cover rounded-md mb-3"
-              />
+              <div className="w-full h-48 bg-gray-200 rounded-md mb-3 overflow-hidden">
+                {image ? (
+                  <img
+                    src={image}
+                    alt={primaryImage?.alt || translation?.name || product.slug}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    {locale === 'fr' ? "Pas d'image" : 'No image'}
+                  </div>
+                )}
+              </div>
               <h3 className="font-semibold text-lg mb-1">
                 {translation?.name ?? product.slug}
               </h3>
@@ -57,9 +68,11 @@ export default async function ShopPage({
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-xl font-bold">{price} CAD</span>
-                <button className="bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white px-4 py-2 rounded text-sm">
-                  {locale === 'fr' ? 'Ajouter' : 'Add'}
-                </button>
+                <AddToCartButton
+                  variantId={firstVariant?.id}
+                  locale={locale}
+                  disabled={!firstVariant?.id}
+                />
               </div>
             </div>
           );
