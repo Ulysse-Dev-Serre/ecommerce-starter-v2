@@ -7,20 +7,41 @@ import { logger } from '../../../lib/logger';
 import { withError } from '../../../lib/middleware/withError';
 import { getOrCreateCart } from '../../../lib/services/cart.service';
 
-async function getCartHandler(_request: NextRequest): Promise<NextResponse> {
+async function getCartHandler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
-  const { userId: clerkId } = await auth();
-  const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
-
+  // Check for test bypass
+  const testApiKey = request.headers.get('x-test-api-key');
   let userId: string | undefined;
-  if (clerkId) {
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
+  let anonymousId: string | undefined;
+
+  if (
+    testApiKey &&
+    process.env.TEST_API_KEY &&
+    testApiKey === process.env.TEST_API_KEY &&
+    process.env.NODE_ENV !== 'production'
+  ) {
+    // Test mode: use test user
+    const clerkTestUserId =
+      process.env.CLERK_TEST_USER_ID || 'user_35FXh55upbdX9L0zj1bjnrFCAde';
+    const testUser = await prisma.user.findUnique({
+      where: { clerkId: clerkTestUserId },
       select: { id: true },
     });
-    userId = user?.id;
+    userId = testUser?.id;
+  } else {
+    // Normal mode: use Clerk auth
+    const { userId: clerkId } = await auth();
+    const cookieStore = await cookies();
+    anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+
+    if (clerkId) {
+      const user = await prisma.user.findUnique({
+        where: { clerkId },
+        select: { id: true },
+      });
+      userId = user?.id;
+    }
   }
 
   logger.info(

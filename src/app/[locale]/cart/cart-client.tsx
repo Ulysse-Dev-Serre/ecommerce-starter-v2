@@ -81,6 +81,33 @@ export function CartClient({ cart, locale }: CartClientProps) {
     }
   };
 
+  const handleCheckout = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          successUrl: `${window.location.origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/${locale}/cart`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert('Failed to start checkout');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!cart || cart.items.length === 0) {
     return (
       <div className="text-center py-16">
@@ -166,10 +193,11 @@ export function CartClient({ cart, locale }: CartClientProps) {
               </span>
             </div>
             <button
-              className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors"
+              onClick={handleCheckout}
               disabled={isLoading}
+              className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t.checkout}
+              {isLoading ? 'Loading...' : t.checkout}
             </button>
           </div>
         </div>
