@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { Language, ProductStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/db/prisma';
 
+import { ProductClient } from './product-client';
+
 // Disable static generation (requires DB)
 export const dynamic = 'force-dynamic';
 
@@ -88,7 +90,9 @@ export default async function ProductPage({
               <div className="text-sm text-gray-600">
                 {defaultVariant.inventory.stock > 0 ? (
                   <span className="text-green-600">
-                    {locale === 'fr' ? 'En stock' : 'In stock'}
+                    {locale === 'fr'
+                      ? `En stock (${defaultVariant.inventory.stock} disponibles)`
+                      : `In stock (${defaultVariant.inventory.stock} available)`}
                   </span>
                 ) : (
                   <span className="text-red-600">
@@ -98,15 +102,16 @@ export default async function ProductPage({
               </div>
             )}
 
-            <button
-              className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            <ProductClient
+              variantId={defaultVariant?.id || ''}
+              locale={locale}
               disabled={
+                !defaultVariant?.id ||
                 !defaultVariant?.inventory ||
                 defaultVariant.inventory.stock <= 0
               }
-            >
-              {locale === 'fr' ? 'Ajouter au panier' : 'Add to cart'}
-            </button>
+              stock={defaultVariant?.inventory?.stock || 0}
+            />
           </div>
         </div>
       </div>
