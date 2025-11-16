@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { Language, ProductStatus } from '@/generated/prisma';
-import { AddToCartButton } from '@/components/cart/add-to-cart-button';
+import { ProductActions } from '@/components/cart/product-actions';
 import { getProducts } from '@/lib/services/product.service';
 
 // Disable static generation for this page (requires DB)
@@ -93,20 +93,23 @@ export default async function Home({
                           {translation.shortDescription}
                         </p>
                       )}
-                      <div className="flex items-center justify-between">
+                      <div className="mb-3">
                         {price && (
                           <span className="text-lg font-bold">
                             {price.price.toString()} {price.currency}
                           </span>
                         )}
-                        {firstVariant && (
-                          <AddToCartButton
-                            variantId={firstVariant.id}
-                            locale={locale}
-                            disabled={!firstVariant.id}
-                          />
-                        )}
                       </div>
+                      {firstVariant && (
+                        <ProductActions
+                          variantId={firstVariant.id}
+                          locale={locale}
+                          disabled={!firstVariant.id}
+                          compact={true}
+                          showQuantitySelector={true}
+                          maxQuantity={firstVariant.inventory?.stock || 99}
+                        />
+                      )}
                     </div>
                   </div>
                 );
