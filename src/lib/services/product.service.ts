@@ -20,6 +20,7 @@ export interface ProductListOptions {
   limit?: number;
   sortBy?: 'createdAt' | 'updatedAt' | 'name' | 'price';
   sortOrder?: 'asc' | 'desc';
+  includeAttributes?: boolean; // false = mode LIST (accueil/shop), true = mode DETAIL
 }
 
 export interface ProductVariantProjection {
@@ -140,18 +141,26 @@ export async function getProducts(
     };
   }
 
+  // Tri: fallback sur createdAt pour name/price (tris relationnels coûteux)
   const orderBy: any = {};
-  if (options.sortBy === 'name' && filters.language) {
-    orderBy.translations = {
-      _count: 'desc',
-    };
-  } else if (options.sortBy === 'price') {
-    orderBy.variants = {
-      _count: 'desc',
-    };
+  const sortBy = options.sortBy ?? 'createdAt';
+
+  if (sortBy === 'name' || sortBy === 'price') {
+    logger.warn(
+      {
+        action: 'unsupported_sort',
+        sortBy,
+        fallback: 'createdAt',
+      },
+      `Tri par ${sortBy} non supporté, fallback sur createdAt`
+    );
+    orderBy.createdAt = options.sortOrder ?? 'desc';
   } else {
-    orderBy[options.sortBy ?? 'sortOrder'] = options.sortOrder ?? 'asc';
+    orderBy[sortBy] = options.sortOrder ?? 'desc';
   }
+
+  // Mode LIST (par défaut) vs mode DETAIL
+  const includeAttributes = options.includeAttributes ?? false;
 
   const [products, total] = await Promise.all([
     prisma.product.findMany({
@@ -167,6 +176,7 @@ export async function getProducts(
         createdAt: true,
         updatedAt: true,
         translations: {
+          where: filters.language ? { language: filters.language } : undefined,
           select: {
             language: true,
             name: true,
@@ -181,6 +191,8 @@ export async function getProducts(
             sku: true,
             pricing: {
               where: { isActive: true },
+              orderBy: { price: 'asc' },
+              take: 1,
               select: {
                 price: true,
                 currency: true,
@@ -195,35 +207,36 @@ export async function getProducts(
                 allowBackorder: true,
               },
             },
-            attributeValues: {
-              select: {
-                attributeValue: {
-                  select: {
-                    value: true,
-                    attribute: {
-                      select: {
-                        key: true,
+            ...(includeAttributes && {
+              attributeValues: {
+                select: {
+                  attributeValue: {
+                    select: {
+                      value: true,
+                      attribute: {
+                        select: {
+                          key: true,
+                        },
                       },
-                    },
-                    translations: {
-                      select: {
-                        language: true,
-                        displayName: true,
+                      translations: {
+                        select: {
+                          language: true,
+                          displayName: true,
+                        },
                       },
                     },
                   },
                 },
               },
-            },
+            }),
             media: {
+              where: { isPrimary: true },
+              take: 1,
               select: {
                 url: true,
                 alt: true,
                 isPrimary: true,
                 sortOrder: true,
-              },
-              orderBy: {
-                sortOrder: 'asc',
               },
             },
           },
@@ -234,6 +247,9 @@ export async function getProducts(
               select: {
                 slug: true,
                 translations: {
+                  where: filters.language
+                    ? { language: filters.language }
+                    : undefined,
                   select: {
                     language: true,
                     name: true,
@@ -244,17 +260,13 @@ export async function getProducts(
           },
         },
         media: {
-          where: {
-            productId: { not: null },
-          },
+          where: { isPrimary: true },
+          take: 1,
           select: {
             url: true,
             alt: true,
             isPrimary: true,
             sortOrder: true,
-          },
-          orderBy: {
-            sortOrder: 'asc',
           },
         },
       },
@@ -324,6 +336,8 @@ export async function getProductBySlug(
           sku: true,
           pricing: {
             where: { isActive: true },
+            orderBy: { price: 'asc' },
+            take: 1,
             select: {
               price: true,
               currency: true,

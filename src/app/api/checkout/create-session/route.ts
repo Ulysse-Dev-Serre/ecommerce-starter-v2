@@ -5,6 +5,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../lib/middleware/withRateLimit';
 import { getOrCreateCart } from '../../../../lib/services/cart.service';
 import { reserveStock } from '../../../../lib/services/inventory.service';
 import { createCheckoutSession } from '../../../../lib/stripe/checkout';
@@ -18,16 +22,23 @@ async function createSessionHandler(
   let userId: string | undefined;
   let anonymousId: string | undefined;
 
-  // Check for test bypass
+  // SECURITY: Test bypass only in development/test environments
   const testApiKey = request.headers.get('x-test-api-key');
+  const isDevelopment =
+    process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
   if (
+    isDevelopment &&
     testApiKey &&
     process.env.TEST_API_KEY &&
-    testApiKey === process.env.TEST_API_KEY &&
-    process.env.NODE_ENV !== 'production'
+    testApiKey === process.env.TEST_API_KEY
   ) {
-    // Test mode: use test user
+    // Test mode: use test user (ONLY in dev/test)
+    logger.warn(
+      { requestId, mode: 'test' },
+      'Using test bypass for checkout session'
+    );
+
     const clerkTestUserId =
       process.env.CLERK_TEST_USER_ID || 'user_35FXh55upbdX9L0zj1bjnrFCAde';
     const testUser = await prisma.user.findUnique({
@@ -48,6 +59,15 @@ async function createSessionHandler(
       });
       userId = user?.id;
     }
+  }
+
+  // SECURITY: Block test bypass in production
+  if (!isDevelopment && testApiKey) {
+    logger.error(
+      { requestId, attempt: 'test_bypass_in_production' },
+      'Security: Attempted test bypass in production'
+    );
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 
   if (!userId && !anonymousId) {
@@ -147,4 +167,6 @@ async function createSessionHandler(
   }
 }
 
-export const POST = withError(createSessionHandler);
+export const POST = withError(
+  withRateLimit(createSessionHandler, RateLimits.CHECKOUT)
+);

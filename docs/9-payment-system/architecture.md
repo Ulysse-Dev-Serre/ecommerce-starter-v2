@@ -24,7 +24,7 @@ src/
     │   ├── webhooks.ts            # Handlers événements
     │   └── payments.ts            # Utilitaires paiements
     ├── services/
-    │   ├── cart.service.ts        # ✅ Existe déjà
+    │   ├── cart.service.ts        # Existe déjà
     │   ├── order.service.ts       # Créer/gérer commandes
     │   └── inventory.service.ts   # Réserver/décrémenter stock
     └── utils/

@@ -184,4 +184,16 @@ export const RateLimits = {
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxRequests: 5, // 5 req/15min
   },
+
+  // Checkout Stripe (protéger contre abus)
+  CHECKOUT: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 5, // 5 checkouts/min max
+  },
+
+  // Order verification (polling)
+  ORDER_VERIFY: {
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 30, // 30 req/min (polling toutes les 2s pendant 60s)
+  },
 } as const;
