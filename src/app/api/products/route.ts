@@ -76,6 +76,10 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
     filters.language = language;
   }
 
+  if (language && !filters.language) {
+    filters.language = language;
+  }
+
   const result = await getProducts(filters, {
     page,
     limit,

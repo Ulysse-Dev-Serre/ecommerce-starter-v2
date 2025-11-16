@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { Language, ProductStatus } from '@/generated/prisma';
+import { ImageGallery } from '@/components/product/image-gallery';
 import { prisma } from '@/lib/db/prisma';
 
 import { ProductClient } from './product-client';
@@ -36,6 +37,15 @@ export default async function ProductPage({
             take: 1,
           },
           inventory: true,
+          attributeValues: {
+            include: {
+              attributeValue: {
+                include: {
+                  attribute: true,
+                },
+              },
+            },
+          },
         },
       },
     },
@@ -46,38 +56,40 @@ export default async function ProductPage({
   }
 
   const translation = product.translations[0];
-  const primaryImage = product.media.find(m => m.isPrimary);
-  const defaultVariant = product.variants[0];
-  const defaultPrice = defaultVariant?.pricing[0];
+
+  const images = product.media.map(m => ({
+    url: m.url,
+    alt: m.alt,
+    isPrimary: m.isPrimary,
+  }));
+
+  const variants = product.variants.map(v => ({
+    id: v.id,
+    sku: v.sku,
+    price: v.pricing[0]?.price.toString() || '0',
+    currency: v.pricing[0]?.currency || 'CAD',
+    stock: v.inventory?.stock || 0,
+    attributes: v.attributeValues.map(av => ({
+      name: av.attributeValue.attribute.name,
+      value: av.attributeValue.value,
+    })),
+  }));
 
   return (
     <div className="flex-1 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
-            {primaryImage ? (
-              <img
-                src={primaryImage.url}
-                alt={primaryImage.alt || translation?.name || ''}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                {locale === 'fr' ? "Pas d'image" : 'No image'}
-              </div>
-            )}
-          </div>
+          <ImageGallery
+            images={images}
+            productName={translation?.name || product.slug}
+            locale={locale}
+          />
 
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold mb-2">
                 {translation?.name || product.slug}
               </h1>
-              {defaultPrice && (
-                <p className="text-2xl font-semibold text-primary">
-                  {defaultPrice.price.toString()} {defaultPrice.currency}
-                </p>
-              )}
             </div>
 
             {translation?.description && (
@@ -86,32 +98,7 @@ export default async function ProductPage({
               </div>
             )}
 
-            {defaultVariant?.inventory && (
-              <div className="text-sm text-gray-600">
-                {defaultVariant.inventory.stock > 0 ? (
-                  <span className="text-green-600">
-                    {locale === 'fr'
-                      ? `En stock (${defaultVariant.inventory.stock} disponibles)`
-                      : `In stock (${defaultVariant.inventory.stock} available)`}
-                  </span>
-                ) : (
-                  <span className="text-red-600">
-                    {locale === 'fr' ? 'Rupture de stock' : 'Out of stock'}
-                  </span>
-                )}
-              </div>
-            )}
-
-            <ProductClient
-              variantId={defaultVariant?.id || ''}
-              locale={locale}
-              disabled={
-                !defaultVariant?.id ||
-                !defaultVariant?.inventory ||
-                defaultVariant.inventory.stock <= 0
-              }
-              stock={defaultVariant?.inventory?.stock || 0}
-            />
+            <ProductClient variants={variants} locale={locale} />
           </div>
         </div>
       </div>
