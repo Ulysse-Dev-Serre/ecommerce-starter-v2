@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {
   BarChart3,
   Package,
@@ -7,33 +8,73 @@ import {
   DollarSign,
 } from 'lucide-react';
 
-export default function AdminDashboard() {
+import { prisma } from '@/lib/db/prisma';
+import { StatusBadge } from '@/components/admin/orders/status-badge';
+
+export const dynamic = 'force-dynamic';
+
+export default async function AdminDashboard() {
+  // Fetch real data from DB
+  const [
+    totalRevenue,
+    ordersCount,
+    productsCount,
+    customersCount,
+    recentOrders,
+  ] = await Promise.all([
+    // Total revenue from completed payments
+    prisma.payment.aggregate({
+      where: { status: 'COMPLETED' },
+      _sum: { amount: true },
+    }),
+    // Total orders count
+    prisma.order.count(),
+    // Total active products count
+    prisma.product.count({
+      where: { status: 'ACTIVE', deletedAt: null },
+    }),
+    // Total customers count
+    prisma.user.count(),
+    // Recent orders
+    prisma.order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    }),
+  ]);
+
   const stats = [
     {
       title: 'Total Revenue',
-      value: '$45,231.89',
-      change: '+20.1%',
+      value: `$${(totalRevenue._sum.amount || 0).toFixed(2)}`,
+      change: 'CAD',
       trend: 'up',
       icon: DollarSign,
     },
     {
       title: 'Orders',
-      value: '2,350',
-      change: '+180.1%',
+      value: ordersCount.toString(),
+      change: 'Total orders',
       trend: 'up',
       icon: ShoppingCart,
     },
     {
       title: 'Products',
-      value: '145',
-      change: '+12.5%',
+      value: productsCount.toString(),
+      change: 'Active products',
       trend: 'up',
       icon: Package,
     },
     {
       title: 'Customers',
-      value: '1,234',
-      change: '+19%',
+      value: customersCount.toString(),
+      change: 'Registered users',
       trend: 'up',
       icon: Users,
     },
@@ -98,31 +139,60 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent orders placeholder */}
+        {/* Recent orders */}
         <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               Recent Orders
             </h3>
-            <TrendingUp className="h-5 w-5 text-gray-400" />
+            <Link
+              href="/admin/orders"
+              className="text-sm text-primary hover:text-primary/80"
+            >
+              View all
+            </Link>
           </div>
           <div className="space-y-4">
-            {[1, 2, 3, 4].map(i => (
-              <div
-                key={i}
-                className="flex items-center justify-between border-b border-gray-100 pb-3"
-              >
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    Order #{1000 + i}
-                  </p>
-                  <p className="text-xs text-gray-500">2 minutes ago</p>
-                </div>
-                <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                  Completed
-                </span>
-              </div>
-            ))}
+            {recentOrders.length === 0 ? (
+              <p className="text-center text-sm text-gray-500 py-8">
+                No orders yet
+              </p>
+            ) : (
+              recentOrders.map(order => {
+                const timeAgo = Math.floor(
+                  (Date.now() - new Date(order.createdAt).getTime()) / 60000
+                );
+                const displayTime =
+                  timeAgo < 60
+                    ? `${timeAgo} minute${timeAgo !== 1 ? 's' : ''} ago`
+                    : timeAgo < 1440
+                      ? `${Math.floor(timeAgo / 60)} hour${Math.floor(timeAgo / 60) !== 1 ? 's' : ''} ago`
+                      : `${Math.floor(timeAgo / 1440)} day${Math.floor(timeAgo / 1440) !== 1 ? 's' : ''} ago`;
+
+                return (
+                  <Link
+                    key={order.id}
+                    href={`/admin/orders/${order.id}`}
+                    className="flex items-center justify-between border-b border-gray-100 pb-3 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {order.orderNumber}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {order.user?.email} • {displayTime}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-gray-900">
+                        ${order.totalAmount.toString()}
+                      </span>
+                      <StatusBadge status={order.status} />
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
