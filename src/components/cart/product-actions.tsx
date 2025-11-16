@@ -84,42 +84,14 @@ export function ProductActions({
   const handleBuyNow = async () => {
     setIsBuyingNow(true);
     try {
-      // Add to cart first
-      const response = await fetch('/api/cart/lines', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          variantId,
-          quantity,
-        }),
-      });
-
-      if (response.ok) {
-        // Redirect to checkout
-        const checkoutResponse = await fetch('/api/checkout/create-session', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            successUrl: `${window.location.origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancelUrl: `${window.location.origin}/${locale}/cart`,
-          }),
-        });
-
-        const data = await checkoutResponse.json();
-
-        if (data.success && data.url) {
-          window.location.href = data.url;
-        } else {
-          alert(data.error || 'Failed to create checkout session');
-          setIsBuyingNow(false);
-        }
-      } else {
-        setIsBuyingNow(false);
-      }
+      const { checkout } = await import('@/lib/utils/checkout');
+      await checkout([{ variantId, quantity }], locale);
     } catch (error) {
       console.error('Failed to buy now:', error);
+      showToast(
+        locale === 'fr' ? "Erreur lors de l'achat" : 'Purchase failed',
+        'error'
+      );
       setIsBuyingNow(false);
     }
   };

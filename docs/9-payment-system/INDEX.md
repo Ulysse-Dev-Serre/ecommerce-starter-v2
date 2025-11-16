@@ -1,68 +1,30 @@
-# 💳 Système de Paiement Stripe
+#  Système de Paiement Stripe
 
-## 📋 Vue d'ensemble
 
-Ce module gère l'intégration complète de Stripe pour le paiement des commandes e-commerce.
+## Les 4 fichiers de documentation
 
-## 🎯 Objectifs
+1. **INDEX.md** (ce fichier) - Vue d'ensemble
+2. **ARCHITECTURE.md** - Comment ça fonctionne (workflow + fichiers utilisés)
+3. **SECURITY.md** - Comment c'est sécurisé + webhooks
+4. **TESTING.md** - Comment tester avec des cartes de test
 
-- **Backend-first** : Toute la logique métier côté serveur
-- **Sécurité maximale** : Validation signatures webhooks, rate limiting, logging
-- **Idempotence** : Éviter les doublons de commandes via `WebhookEvent.payloadHash`
-- **Multi-devises** : Support CAD/USD (extensible)
-- **Gestion stock** : Réservation pendant paiement, décrémentation après confirmation
-
-## 🗂️ Documentation
-
-- [**architecture.md**](./architecture.md) - Architecture technique et flux de données
-- [**endpoints.md**](./endpoints.md) - Documentation des API endpoints
-- [**webhooks.md**](./webhooks.md) - Gestion des événements Stripe
-- [**testing.md**](./testing.md) - Guide de test avec Stripe CLI
-
-## 🔑 Variables d'environnement
+## Variables d'environnement requises
 
 ```bash
-# Stripe API Keys (Test mode)
-STRIPE_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-
-# Webhooks
-STRIPE_WEBHOOK_SECRET=whsec_...
-
-# Production (à configurer plus tard)
-# STRIPE_SECRET_KEY=sk_live_...
-# NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+# Dans votre fichier .env
+STRIPE_SECRET_KEY=sk_test_...                      # Clé secrète Stripe (côté serveur)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...    # Clé publique (côté client)
+STRIPE_WEBHOOK_SECRET=whsec_...                    # Pour vérifier les webhooks
 ```
 
-## 🚀 Flow principal
+Récupérez ces clés sur [Stripe Dashboard](https://dashboard.stripe.com/test/apikeys) (mode test).
 
-```
-1. Client ajoute produits au panier
-2. Client clique "Checkout"
-3. Backend crée Stripe Checkout Session
-4. Client est redirigé vers Stripe
-5. Client paie avec carte
-6. Stripe envoie webhook payment_intent.succeeded
-7. Backend crée Order dans DB
-8. Backend décrémente stock
-9. Client est redirigé vers /checkout/success
-10. Client voit sa commande dans /orders/[orderId]
-```
+## Le flow en 1 phrase
 
-## 📊 Schémas DB utilisés
+Le client clique sur "Passer commande" →  backend crée une session Stripe → le client paie sur Stripe → Stripe envoie un webhook → créez la commande dans la base de données.
 
-- `Order` - Commande client
-- `OrderItem` - Items de la commande
-- `Payment` - Enregistrement des paiements (avec `externalId` = Stripe payment_intent_id)
-- `WebhookEvent` - Traçage des événements webhooks
-- `ProductVariantInventory` - Gestion du stock (`stock`, `reservedStock`)
-- `AuditLog` - Logs de toutes les actions
+## Prochaines étapes
 
-## 🛠️ Prochaines étapes
-
-- [ ] Setup initial avec clés test Stripe
-- [ ] Créer endpoint `/api/checkout/create-session`
-- [ ] Créer endpoint `/api/webhooks/stripe`
-- [ ] Tester paiement avec cartes de test
-- [ ] Implémenter gestion stock
-- [ ] Ajouter gestion des erreurs/refunds
+1. Lire [ARCHITECTURE.md](./ARCHITECTURE.md) pour comprendre comment ça marche
+2. Lire [SECURITY.md](./SECURITY.md) pour comprendre la sécurité
+3. Lire [TESTING.md](./TESTING.md) pour tester avec des cartes fictives
