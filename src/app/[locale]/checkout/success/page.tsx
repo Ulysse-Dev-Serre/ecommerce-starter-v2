@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation';
 export default function CheckoutSuccessPage({
   params,
 }: {
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }): React.ReactElement {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
@@ -40,7 +40,8 @@ export default function CheckoutSuccessPage({
     },
   };
 
-  const locale = params.locale || 'en';
+  const { locale: localeParam } = use(params);
+  const locale = localeParam || 'en';
   const t =
     translations[locale as keyof typeof translations] || translations.en;
 

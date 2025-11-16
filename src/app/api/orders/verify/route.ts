@@ -1,8 +1,13 @@
+import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../lib/middleware/withRateLimit';
 
 async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
@@ -16,17 +21,51 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  // SECURITY: Require authentication
+  const { userId: clerkId } = await auth();
+
+  if (!clerkId) {
+    logger.warn(
+      {
+        requestId,
+        sessionId,
+        reason: 'Unauthorized - no auth',
+      },
+      'Security: Unauthorized order verification attempt'
+    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // Get user from database
+  const user = await prisma.user.findUnique({
+    where: { clerkId },
+    select: { id: true },
+  });
+
+  if (!user) {
+    logger.warn(
+      {
+        requestId,
+        sessionId,
+        clerkId,
+        reason: 'User not found',
+      },
+      'Security: User not found for order verification'
+    );
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
   logger.info(
     {
       requestId,
       sessionId,
+      userId: user.id,
     },
     'Verifying order for session'
   );
 
   try {
-    // Rechercher un paiement avec cet externalId (Stripe session → payment_intent)
-    // On cherche via les metadata de la session stockées dans payment
+    // SECURITY: Search payment with ownership check
     const payment = await prisma.payment.findFirst({
       where: {
         OR: [
@@ -34,6 +73,10 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
           { transactionData: { path: ['id'], equals: sessionId } },
         ],
         status: 'COMPLETED',
+        // CRITICAL: Verify ownership
+        order: {
+          userId: user.id,
+        },
       },
       include: {
         order: {
@@ -41,17 +84,34 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
             orderNumber: true,
             id: true,
             createdAt: true,
+            userId: true,
           },
         },
       },
     });
 
     if (payment?.order) {
+      // SECURITY: Double-check ownership (defense in depth)
+      if (payment.order.userId !== user.id) {
+        logger.warn(
+          {
+            requestId,
+            sessionId,
+            orderUserId: payment.order.userId,
+            requestUserId: user.id,
+            reason: 'Ownership mismatch',
+          },
+          'Security: Attempted unauthorized order access'
+        );
+        return NextResponse.json({ exists: false }, { status: 403 });
+      }
+
       logger.info(
         {
           requestId,
           sessionId,
           orderNumber: payment.order.orderNumber,
+          userId: user.id,
         },
         'Order found for session'
       );
@@ -138,4 +198,6 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-export const GET = withError(verifyOrderHandler);
+export const GET = withError(
+  withRateLimit(verifyOrderHandler, RateLimits.ORDER_VERIFY)
+);
