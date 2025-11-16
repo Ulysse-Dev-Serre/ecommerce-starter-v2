@@ -1,0 +1,60 @@
+'use client';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search } from 'lucide-react';
+
+export function OrderFilters({ locale }: { locale: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentStatus = searchParams.get('status') || '';
+  const currentSearch = searchParams.get('search') || '';
+
+  const handleStatusChange = (status: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (status) {
+      params.set('status', status);
+    } else {
+      params.delete('status');
+    }
+    params.delete('page'); // Reset to page 1
+    router.push(`/${locale}/admin/orders?${params.toString()}`);
+  };
+
+  return (
+    <div className="flex gap-4">
+      <div className="flex-1">
+        <form
+          action={`/${locale}/admin/orders`}
+          method="get"
+          className="relative"
+        >
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            name="search"
+            defaultValue={currentSearch}
+            placeholder="Search by order number or email..."
+            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          {currentStatus && (
+            <input type="hidden" name="status" value={currentStatus} />
+          )}
+        </form>
+      </div>
+      <select
+        name="status"
+        value={currentStatus}
+        onChange={e => handleStatusChange(e.target.value)}
+        className="rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      >
+        <option value="">All statuses</option>
+        <option value="PENDING">Pending</option>
+        <option value="PAID">Paid</option>
+        <option value="SHIPPED">Shipped</option>
+        <option value="DELIVERED">Delivered</option>
+        <option value="CANCELLED">Cancelled</option>
+        <option value="REFUNDED">Refunded</option>
+      </select>
+    </div>
+  );
+}

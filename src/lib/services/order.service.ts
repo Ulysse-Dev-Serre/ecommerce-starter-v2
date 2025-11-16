@@ -158,3 +158,184 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
 
   return order;
 }
+
+/**
+ * Get all orders for admin (with pagination and filters)
+ */
+export async function getAllOrders({
+  page = 1,
+  limit = 20,
+  status,
+  search,
+}: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  search?: string;
+} = {}) {
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+
+  if (status) {
+    where.status = status;
+  }
+
+  if (search) {
+    where.OR = [
+      { orderNumber: { contains: search, mode: 'insensitive' } },
+      { user: { email: { contains: search, mode: 'insensitive' } } },
+    ];
+  }
+
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        items: {
+          include: {
+            product: {
+              select: {
+                slug: true,
+                translations: {
+                  take: 1,
+                },
+              },
+            },
+            variant: {
+              select: {
+                sku: true,
+              },
+            },
+          },
+        },
+        payments: {
+          select: {
+            id: true,
+            amount: true,
+            currency: true,
+            method: true,
+            status: true,
+            externalId: true,
+            processedAt: true,
+          },
+        },
+      },
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  return {
+    orders,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+/**
+ * Get order by ID for admin (no user restriction)
+ */
+export async function getOrderByIdAdmin(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          clerkId: true,
+        },
+      },
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              slug: true,
+              translations: true,
+              media: {
+                where: { isPrimary: true },
+                take: 1,
+              },
+            },
+          },
+          variant: {
+            select: {
+              id: true,
+              sku: true,
+            },
+          },
+        },
+      },
+      payments: true,
+      shipments: true,
+      statusHistory: {
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new Error('Order not found');
+  }
+
+  return order;
+}
+
+/**
+ * Update order status
+ */
+export async function updateOrderStatus(
+  orderId: string,
+  status: string,
+  comment?: string,
+  userId?: string
+) {
+  const order = await prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status,
+      statusHistory: {
+        create: {
+          status,
+          comment,
+          createdBy: userId,
+        },
+      },
+    },
+    include: {
+      statusHistory: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+    },
+  });
+
+  logger.info(
+    {
+      orderId,
+      newStatus: status,
+      updatedBy: userId,
+    },
+    'Order status updated'
+  );
+
+  return order;
+}
