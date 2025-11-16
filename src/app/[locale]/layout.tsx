@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 
 import { Navbar } from '../../components/layout/navbar';
 import { ConditionalFooter } from '../../components/layout/conditional-footer';
+import { ToastProvider } from '../../components/ui/toast-provider';
 import { prisma } from '@/lib/db/prisma';
 import '../globals.css';
 
@@ -58,8 +59,10 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         >
-          {children}
-          <ConditionalFooter />
+          <ToastProvider>
+            {children}
+            <ConditionalFooter />
+          </ToastProvider>
         </body>
       </html>
     );
@@ -88,9 +91,11 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         >
-          <Navbar locale={locale} userRole={userRole} />
-          {children}
-          <ConditionalFooter />
+          <ToastProvider>
+            <Navbar locale={locale} userRole={userRole} />
+            {children}
+            <ConditionalFooter />
+          </ToastProvider>
         </body>
       </html>
     </ClerkProvider>

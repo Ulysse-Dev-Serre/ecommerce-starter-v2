@@ -66,7 +66,7 @@ export async function createOrderFromCart({
 
           return {
             variantId: item.variant.id,
-            productId: item.variant.product.slug,
+            productId: item.variant.product.id,
             productSnapshot: {
               name: item.variant.product.translations[0]?.name || 'Product',
               sku: item.variant.sku,

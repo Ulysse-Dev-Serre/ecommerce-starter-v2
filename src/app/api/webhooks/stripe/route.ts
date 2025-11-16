@@ -3,7 +3,10 @@ import Stripe from 'stripe';
 
 import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
-import { getOrCreateCart } from '../../../../lib/services/cart.service';
+import {
+  clearCart,
+  getOrCreateCart,
+} from '../../../../lib/services/cart.service';
 import { releaseStock } from '../../../../lib/services/inventory.service';
 import { createOrderFromCart } from '../../../../lib/services/order.service';
 import {
@@ -177,11 +180,11 @@ async function handleCheckoutSessionCompleted(
   const cart = await getOrCreateCart(userId, session.metadata?.anonymousId);
 
   const paymentIntentId = session.payment_intent as string;
-  const paymentIntent = await prisma.$queryRaw<any>`
-    SELECT * FROM payments WHERE external_id = ${paymentIntentId} LIMIT 1
-  `;
+  const existingPayment = await prisma.payment.findFirst({
+    where: { externalId: paymentIntentId },
+  });
 
-  if (paymentIntent.length > 0) {
+  if (existingPayment) {
     logger.info(
       { requestId, sessionId: session.id },
       'Order already created for this payment intent'
@@ -192,6 +195,21 @@ async function handleCheckoutSessionCompleted(
   logger.info(
     { requestId, cartId, userId },
     'Creating order from checkout session'
+  );
+
+  await createOrderFromCart({
+    cart,
+    userId,
+    paymentIntent: {
+      id: paymentIntentId,
+      amount: session.amount_total || 0,
+      currency: session.currency || 'eur',
+    } as Stripe.PaymentIntent,
+  });
+
+  logger.info(
+    { requestId, sessionId: session.id, cartId },
+    'Order created successfully from checkout session'
   );
 }
 
@@ -239,13 +257,16 @@ async function handlePaymentIntentSucceeded(
     paymentIntent,
   });
 
+  // Clear cart after successful order creation
+  await clearCart(cartId);
+
   logger.info(
     {
       requestId,
       paymentIntentId: paymentIntent.id,
       cartId,
     },
-    'Order created successfully'
+    'Order created successfully and cart cleared'
   );
 }
 

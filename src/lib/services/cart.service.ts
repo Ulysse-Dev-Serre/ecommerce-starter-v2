@@ -638,3 +638,20 @@ export async function cleanInvalidCartItems(cartId: string): Promise<number> {
 
   return invalidItems.length;
 }
+
+/**
+ * Clear all items from a cart after successful purchase
+ */
+export async function clearCart(cartId: string): Promise<void> {
+  await prisma.cartItem.deleteMany({
+    where: { cartId },
+  });
+
+  logger.info(
+    {
+      action: 'cart_cleared',
+      cartId,
+    },
+    'Cart cleared after successful payment'
+  );
+}

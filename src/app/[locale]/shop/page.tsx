@@ -1,4 +1,6 @@
-import { AddToCartButton } from '@/components/cart/add-to-cart-button';
+import Link from 'next/link';
+
+import { ProductActions } from '@/components/cart/product-actions';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -45,35 +47,44 @@ export default async function ShopPage({
           return (
             <div
               key={product.id}
-              className="border border-[var(--border)] rounded-lg p-4 hover:shadow-lg transition"
+              className="group border border-border rounded-lg p-4 hover:shadow-lg transition"
             >
-              <div className="w-full h-48 bg-gray-200 rounded-md mb-3 overflow-hidden">
-                {image ? (
-                  <img
-                    src={image}
-                    alt={primaryImage?.alt || translation?.name || product.slug}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    {locale === 'fr' ? "Pas d'image" : 'No image'}
-                  </div>
-                )}
-              </div>
-              <h3 className="font-semibold text-lg mb-1">
-                {translation?.name ?? product.slug}
-              </h3>
-              <p className="text-sm text-[var(--muted-foreground)] mb-3">
+              <Link href={`/${locale}/product/${product.slug}`}>
+                <div className="w-full h-48 bg-gray-200 rounded-md mb-3 overflow-hidden">
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={
+                        primaryImage?.alt || translation?.name || product.slug
+                      }
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      {locale === 'fr' ? "Pas d'image" : 'No image'}
+                    </div>
+                  )}
+                </div>
+              </Link>
+              <Link href={`/${locale}/product/${product.slug}`}>
+                <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
+                  {translation?.name ?? product.slug}
+                </h3>
+              </Link>
+              <p className="text-sm text-muted-foreground mb-3">
                 {translation?.shortDescription}
               </p>
-              <div className="flex items-center justify-between">
+              <div className="mb-3">
                 <span className="text-xl font-bold">{price} CAD</span>
-                <AddToCartButton
-                  variantId={firstVariant?.id}
-                  locale={locale}
-                  disabled={!firstVariant?.id}
-                />
               </div>
+              <ProductActions
+                variantId={firstVariant?.id}
+                locale={locale}
+                disabled={!firstVariant?.id}
+                compact={true}
+                showQuantitySelector={true}
+                maxQuantity={firstVariant?.inventory?.stock || 99}
+              />
             </div>
           );
         })}
@@ -88,8 +99,8 @@ export default async function ShopPage({
                 href={`/shop?page=${p}${category ? `&category=${category}` : ''}`}
                 className={`px-4 py-2 rounded ${
                   p === pagination.page
-                    ? 'bg-[var(--primary)] text-white'
-                    : 'bg-[var(--muted)] hover:bg-[var(--border)]'
+                    ? 'bg-primary text-white'
+                    : 'bg-muted hover:bg-border'
                 }`}
               >
                 {p}
