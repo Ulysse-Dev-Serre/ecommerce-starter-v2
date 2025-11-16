@@ -95,36 +95,53 @@ async function createSessionHandler(
     );
   }
 
-  const cart = await getOrCreateCart(userId, anonymousId);
+  // Support 2 modes: items directs OU panier
+  let cartItems: Array<{ variantId: string; quantity: number }>;
 
-  if (cart.items.length === 0) {
-    return NextResponse.json(
-      { error: 'Cart is empty. Add items before checkout.' },
-      { status: 400 }
-    );
+  if (body.items && Array.isArray(body.items)) {
+    // Mode 1: Items directs (checkout sans panier)
+    cartItems = body.items;
+
+    if (cartItems.length === 0) {
+      return NextResponse.json(
+        { error: 'No items provided for checkout.' },
+        { status: 400 }
+      );
+    }
+  } else {
+    // Mode 2: Utiliser le panier existant
+    const cart = await getOrCreateCart(userId, anonymousId);
+
+    if (cart.items.length === 0) {
+      return NextResponse.json(
+        { error: 'Cart is empty. Add items before checkout.' },
+        { status: 400 }
+      );
+    }
+
+    cartItems = cart.items.map(item => ({
+      variantId: item.variant.id,
+      quantity: item.quantity,
+    }));
   }
 
   logger.info(
     {
       requestId,
-      cartId: cart.id,
       userId: userId ?? null,
-      itemsCount: cart.items.length,
+      itemsCount: cartItems.length,
     },
     'Creating checkout session'
   );
 
   try {
-    await reserveStock(
-      cart.items.map(item => ({
-        variantId: item.variant.id,
-        quantity: item.quantity,
-      }))
-    );
+    await reserveStock(cartItems);
 
     const baseUrl = request.headers.get('origin') || 'http://localhost:3000';
+
+    // Créer une session Stripe avec les items
     const session = await createCheckoutSession({
-      cart,
+      items: cartItems,
       userId,
       successUrl:
         successUrl ||
@@ -136,7 +153,6 @@ async function createSessionHandler(
       {
         requestId,
         sessionId: session.id,
-        cartId: cart.id,
       },
       'Checkout session created successfully'
     );

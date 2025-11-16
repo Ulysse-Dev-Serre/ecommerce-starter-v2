@@ -82,28 +82,24 @@ export function CartClient({ cart, locale }: CartClientProps) {
   };
 
   const handleCheckout = async () => {
+    if (!cart || cart.items.length === 0) return;
+
     setIsLoading(true);
     try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          successUrl: `${window.location.origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/${locale}/cart`,
-        }),
-      });
+      const { checkout } = await import('@/lib/utils/checkout');
 
-      const data = await response.json();
+      // Convertir les items du panier au format attendu
+      const items = cart.items.map(item => ({
+        variantId: item.variant.id,
+        quantity: item.quantity,
+      }));
 
-      if (data.success && data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || 'Failed to create checkout session');
-      }
+      await checkout(items, locale);
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Failed to start checkout');
-    } finally {
+      alert(
+        locale === 'fr' ? 'Échec de la commande' : 'Failed to start checkout'
+      );
       setIsLoading(false);
     }
   };
