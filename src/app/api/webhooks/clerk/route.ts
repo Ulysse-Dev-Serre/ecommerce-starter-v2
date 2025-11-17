@@ -35,8 +35,8 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // 2. Get headers
-  const headerPayload = await headers();
+  // 2. Get headers (synchronous in Next.js App Router)
+  const headerPayload = headers();
   const svixId = headerPayload.get('svix-id');
   const svixTimestamp = headerPayload.get('svix-timestamp');
   const svixSignature = headerPayload.get('svix-signature');
@@ -59,35 +59,23 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // 3. Get and parse body
-  let payload: unknown;
+  // 3. Get RAW body (CRITICAL: Svix requires raw body for signature verification)
   let body: string;
 
   try {
-    payload = await req.json();
-    body = JSON.stringify(payload);
-
-    logger.info(
-      {
-        action: 'webhook_payload_parsed',
-        eventType: (payload as any)?.type,
-        userId: (payload as any)?.data?.id,
-        email: (payload as any)?.data?.email_addresses?.[0]?.email_address,
-      },
-      'Webhook payload parsed'
-    );
+    body = await req.text();
   } catch (error) {
     logger.error(
       { error: error instanceof Error ? error.message : 'Unknown error' },
-      'Failed to parse webhook payload'
+      'Failed to read request body'
     );
     return NextResponse.json(
-      { error: 'Invalid JSON payload' },
+      { error: 'Failed to read request body' },
       { status: 400 }
     );
   }
 
-  // 4. Verify signature
+  // 4. Verify signature BEFORE parsing
   const webhook = new Webhook(webhookSecret);
   let evt: unknown;
 
@@ -98,8 +86,12 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
       'svix-signature': svixSignature,
     });
     logger.info(
-      { action: 'webhook_signature_verified' },
-      'Webhook signature verified'
+      {
+        action: 'webhook_signature_verified',
+        eventType: (evt as any)?.type,
+        userId: (evt as any)?.data?.id,
+      },
+      'Webhook signature verified and parsed'
     );
   } catch (error) {
     logger.error(

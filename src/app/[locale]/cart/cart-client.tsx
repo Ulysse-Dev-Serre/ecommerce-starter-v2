@@ -86,15 +86,27 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
     setIsLoading(true);
     try {
-      const { checkout } = await import('@/lib/utils/checkout');
+      const response = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          successUrl: `${window.location.origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/${locale}/cart`,
+        }),
+      });
 
-      // Convertir les items du panier au format attendu
-      const items = cart.items.map(item => ({
-        variantId: item.variant.id,
-        quantity: item.quantity,
-      }));
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create checkout');
+      }
 
-      await checkout(items, locale);
+      const data = await response.json();
+
+      if (data.success && data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
     } catch (error) {
       console.error('Checkout error:', error);
       alert(

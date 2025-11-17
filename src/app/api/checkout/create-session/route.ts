@@ -97,6 +97,7 @@ async function createSessionHandler(
 
   // Support 2 modes: items directs OU panier
   let cartItems: Array<{ variantId: string; quantity: number }>;
+  let cartId: string | undefined;
 
   if (body.items && Array.isArray(body.items)) {
     // Mode 1: Items directs (checkout sans panier)
@@ -119,6 +120,7 @@ async function createSessionHandler(
       );
     }
 
+    cartId = cart.id; // Sauvegarder le cartId pour les métadonnées Stripe
     cartItems = cart.items.map(item => ({
       variantId: item.variant.id,
       quantity: item.quantity,
@@ -129,6 +131,7 @@ async function createSessionHandler(
     {
       requestId,
       userId: userId ?? null,
+      cartId: cartId ?? null,
       itemsCount: cartItems.length,
     },
     'Creating checkout session'
@@ -143,6 +146,8 @@ async function createSessionHandler(
     const session = await createCheckoutSession({
       items: cartItems,
       userId,
+      cartId, // Passer le cartId pour les métadonnées
+      anonymousId,
       successUrl:
         successUrl ||
         `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
