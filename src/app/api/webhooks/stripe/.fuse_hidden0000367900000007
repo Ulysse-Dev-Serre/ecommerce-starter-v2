@@ -47,36 +47,53 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     const payloadHash = generatePayloadHash(body);
-    const existingEvent = await prisma.webhookEvent.findUnique({
-      where: {
-        source_eventId: {
-          source: 'stripe',
-          eventId: event.id,
+
+    // Atomic idempotency: claim the event for processing
+    const claimed = await prisma.$transaction(async (tx) => {
+      // Upsert the event if it doesn't exist
+      await tx.webhookEvent.upsert({
+        where: {
+          source_eventId: {
+            source: 'stripe',
+            eventId: event.id,
+          },
         },
-      },
-    });
-
-    if (existingEvent?.processed) {
-      logger.info(
-        { requestId, eventId: event.id },
-        'Webhook already processed, skipping'
-      );
-      return NextResponse.json({ received: true });
-    }
-
-    if (!existingEvent) {
-      await prisma.webhookEvent.create({
-        data: {
+        create: {
           source: 'stripe',
           eventId: event.id,
           eventType: event.type,
           payloadHash,
           processed: false,
         },
+        update: {},
       });
+
+      // Try to claim it (only succeeds if not already processing/processed)
+      const result = await tx.webhookEvent.updateMany({
+        where: {
+          source: 'stripe',
+          eventId: event.id,
+          processed: false,
+          processingStartedAt: null,
+        },
+        data: {
+          processingStartedAt: new Date(),
+        },
+      });
+
+      return result.count > 0;
+    });
+
+    if (!claimed) {
+      logger.info(
+        { requestId, eventId: event.id },
+        'Webhook already processed or currently processing, skipping'
+      );
+      return NextResponse.json({ received: true });
     }
 
-    switch (event.type) {
+    try {
+      switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         await handleCheckoutSessionCompleted(session, requestId);
@@ -106,22 +123,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { requestId, eventType: event.type },
           'Unhandled webhook event type'
         );
-    }
+      }
 
-    await prisma.webhookEvent.update({
-      where: {
-        source_eventId: {
-          source: 'stripe',
-          eventId: event.id,
+      // Mark as processed
+      await prisma.webhookEvent.update({
+        where: {
+          source_eventId: {
+            source: 'stripe',
+            eventId: event.id,
+          },
         },
-      },
-      data: {
-        processed: true,
-        processedAt: new Date(),
-      },
-    });
+        data: {
+          processed: true,
+          processedAt: new Date(),
+        },
+      });
 
-    return NextResponse.json({ received: true });
+      return NextResponse.json({ received: true });
+    } catch (processingError) {
+      // Processing failed, update error and allow retry
+      await prisma.webhookEvent.update({
+        where: {
+          source_eventId: {
+            source: 'stripe',
+            eventId: event.id,
+          },
+        },
+        data: {
+          processingStartedAt: null, // Reset to allow retry
+          retryCount: { increment: 1 },
+          lastError:
+            processingError instanceof Error
+              ? processingError.message
+              : 'Unknown error',
+        },
+      });
+
+      throw processingError;
+    }
   } catch (error) {
     logger.error(
       {
@@ -166,16 +205,18 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
+  const cartId = session.metadata?.cartId;
   const userId = session.metadata?.userId;
-  const itemsMetadata = session.metadata?.items;
 
-  if (!userId || !itemsMetadata) {
+  if (!cartId || !userId) {
     logger.error(
       { requestId, sessionId: session.id },
-      'Missing userId or items in session metadata'
+      'Missing cartId or userId in session metadata'
     );
     return;
   }
+
+  const cart = await getOrCreateCart(userId, session.metadata?.anonymousId);
 
   const paymentIntentId = session.payment_intent as string;
   const existingPayment = await prisma.payment.findFirst({
@@ -190,62 +231,13 @@ async function handleCheckoutSessionCompleted(
     return;
   }
 
-  // Créer la commande depuis les items dans metadata (toujours)
-  const items = JSON.parse(itemsMetadata) as Array<{
-    variantId: string;
-    quantity: number;
-  }>;
-
   logger.info(
-    { requestId, userId, itemsCount: items.length },
-    'Creating order from purchased items'
+    { requestId, cartId, userId },
+    'Creating order from checkout session'
   );
 
-  // Récupérer les variants depuis la DB
-  const variants = await prisma.productVariant.findMany({
-    where: { id: { in: items.map(i => i.variantId) } },
-    include: {
-      pricing: {
-        where: { isActive: true },
-        orderBy: { validFrom: 'desc' },
-        take: 1,
-      },
-      media: true,
-      product: {
-        include: {
-          translations: { take: 1 },
-        },
-      },
-    },
-  });
-
-  // Construire un "cart virtuel" pour réutiliser createOrderFromCart
-  const virtualCart = {
-    id: 'virtual_' + session.id,
-    userId,
-    currency: (session.currency || 'eur').toUpperCase(),
-    anonymousId: session.metadata?.anonymousId || null,
-    status: 'ACTIVE' as const,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    items: items.map(item => {
-      const variant = variants.find(v => v.id === item.variantId);
-      if (!variant) throw new Error(`Variant ${item.variantId} not found`);
-
-      return {
-        id: 'temp_' + item.variantId,
-        cartId: 'virtual',
-        variantId: item.variantId,
-        quantity: item.quantity,
-        variant,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-    }),
-  };
-
   await createOrderFromCart({
-    cart: virtualCart as any,
+    cart,
     userId,
     paymentIntent: {
       id: paymentIntentId,
@@ -254,16 +246,9 @@ async function handleCheckoutSessionCompleted(
     } as Stripe.PaymentIntent,
   });
 
-  // Si un cartId existe, vider le panier (optionnel)
-  const cartId = session.metadata?.cartId;
-  if (cartId) {
-    await clearCart(cartId);
-    logger.info({ requestId, cartId }, 'Cart cleared after order creation');
-  }
-
   logger.info(
-    { requestId, sessionId: session.id, itemsCount: items.length },
-    'Order created successfully'
+    { requestId, sessionId: session.id, cartId },
+    'Order created successfully from checkout session'
   );
 }
 
@@ -280,10 +265,10 @@ async function handlePaymentIntentSucceeded(
     'Payment intent succeeded'
   );
 
+  const cartId = paymentIntent.metadata?.cartId;
   const userId = paymentIntent.metadata?.userId;
-  const itemsMetadata = paymentIntent.metadata?.items;
 
-  if (!userId || !itemsMetadata) {
+  if (!cartId || !userId) {
     logger.warn(
       { requestId, paymentIntentId: paymentIntent.id },
       'Missing metadata in payment intent'
@@ -303,75 +288,24 @@ async function handlePaymentIntentSucceeded(
     return;
   }
 
-  const items = JSON.parse(itemsMetadata) as Array<{
-    variantId: string;
-    quantity: number;
-  }>;
-
-  logger.info(
-    { requestId, userId, itemsCount: items.length },
-    'Creating order from purchased items'
-  );
-
-  // Récupérer les variants depuis la DB
-  const variants = await prisma.productVariant.findMany({
-    where: { id: { in: items.map(i => i.variantId) } },
-    include: {
-      pricing: {
-        where: { isActive: true },
-        orderBy: { validFrom: 'desc' },
-        take: 1,
-      },
-      media: true,
-      product: {
-        include: {
-          translations: { take: 1 },
-        },
-      },
-    },
-  });
-
-  // Construire un "cart virtuel" pour réutiliser createOrderFromCart
-  const virtualCart = {
-    id: 'virtual_' + paymentIntent.id,
-    userId,
-    currency: paymentIntent.currency.toUpperCase(),
-    anonymousId: paymentIntent.metadata?.anonymousId || null,
-    status: 'ACTIVE' as const,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    items: items.map(item => {
-      const variant = variants.find(v => v.id === item.variantId);
-      if (!variant) throw new Error(`Variant ${item.variantId} not found`);
-
-      return {
-        id: 'temp_' + item.variantId,
-        cartId: 'virtual',
-        variantId: item.variantId,
-        quantity: item.quantity,
-        variant,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-    }),
-  };
+  const cart = await getOrCreateCart(userId);
 
   await createOrderFromCart({
-    cart: virtualCart as any,
+    cart,
     userId,
     paymentIntent,
   });
 
-  // Si un cartId existe, vider le panier (optionnel)
-  const cartId = paymentIntent.metadata?.cartId;
-  if (cartId) {
-    await clearCart(cartId);
-    logger.info({ requestId, cartId }, 'Cart cleared after order creation');
-  }
+  // Clear cart after successful order creation
+  await clearCart(cartId);
 
   logger.info(
-    { requestId, paymentIntentId: paymentIntent.id, itemsCount: items.length },
-    'Order created successfully'
+    {
+      requestId,
+      paymentIntentId: paymentIntent.id,
+      cartId,
+    },
+    'Order created successfully and cart cleared'
   );
 }
 

@@ -7,6 +7,8 @@ import { stripe } from './client';
 export interface CreateCheckoutSessionParams {
   items: Array<{ variantId: string; quantity: number }>;
   userId?: string;
+  cartId?: string;
+  anonymousId?: string;
   successUrl: string;
   cancelUrl: string;
 }
@@ -14,6 +16,8 @@ export interface CreateCheckoutSessionParams {
 export async function createCheckoutSession({
   items,
   userId,
+  cartId,
+  anonymousId,
   successUrl,
   cancelUrl,
 }: CreateCheckoutSessionParams): Promise<Stripe.Checkout.Session> {
@@ -84,11 +88,15 @@ export async function createCheckoutSession({
     cancel_url: cancelUrl,
     metadata: {
       userId: userId || '',
+      cartId: cartId || '',
+      anonymousId: anonymousId || '',
       items: JSON.stringify(items),
     },
     payment_intent_data: {
       metadata: {
         userId: userId || '',
+        cartId: cartId || '',
+        anonymousId: anonymousId || '',
         items: JSON.stringify(items),
       },
     },
