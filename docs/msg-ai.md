@@ -7,3 +7,44 @@ Ici, on a déjà configuré plusieurs endpoints liés à l’authentification av
 On utilise i18n, donc tout est traduit en français et en anglais.
 
 Notre objectif principal est de travailler sur le backend (API, etc.). Le front-end est très minimal, uniquement pour tester le backend via une interface.
+
+---
+
+## 📋 Accès aux Issues GitHub via CLI
+
+Pour analyser les issues du projet depuis le terminal, tu peux utiliser **GitHub CLI (`gh`)** :
+
+### Vérifier que gh est installé
+```bash
+gh --version
+```
+
+### Lister toutes les issues
+```bash
+gh issue list --repo Ulysse-Dev-Serre/ecommerce-starter-v2 --limit 100 --state all --json number,title,state,labels,milestone
+```
+
+### Filtrer par milestone (P0, P1, P2, etc.)
+```bash
+gh issue list --repo Ulysse-Dev-Serre/ecommerce-starter-v2 --milestone "P1 – E-commerce core" --state all --json number,title,state
+```
+
+### Voir le détail d'une issue
+```bash
+gh issue view 23 --repo Ulysse-Dev-Serre/ecommerce-starter-v2 --json title,body,state
+```
+
+### Voir uniquement le body (checklist) d'une issue
+```bash
+gh issue view 23 --repo Ulysse-Dev-Serre/ecommerce-starter-v2 --json body | jq -r '.body'
+```
+
+### Boucle pour analyser plusieurs issues
+```bash
+for issue in 17 18 19 20; do 
+  echo "=== Issue #$issue ===" 
+  gh issue view $issue --repo Ulysse-Dev-Serre/ecommerce-starter-v2 --json title,body | jq -r '"\(.title)\n\(.body)\n"'
+done
+```
+
+**Note** : Ces commandes permettent d'analyser l'état réel des issues sans avoir besoin d'accéder au kanban web.
