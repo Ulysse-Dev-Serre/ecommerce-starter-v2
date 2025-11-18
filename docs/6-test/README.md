@@ -2,6 +2,11 @@
 
 Cette section regroupe tous les scripts, tests et utilitaires du projet.
 
+## Architecture de Tests
+
+### 0. [Testing Architecture](./testing-architecture.md)
+⚠️ **Important** : Architecture de tests et **checklist pré-production** (code de test à retirer)
+
 ## Scripts de gestion
 
 ### 1. [Base de données et Seeds](./database-seeds.md)
