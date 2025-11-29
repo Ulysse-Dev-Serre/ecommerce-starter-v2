@@ -8,6 +8,10 @@ import {
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import {
+  CreateProductSchema,
+  formatZodErrors,
+} from '../../../../lib/schemas/product.schema';
+import {
   createProduct,
   CreateProductData,
 } from '../../../../lib/services/product.service';
@@ -37,22 +41,52 @@ async function createProductHandler(
   try {
     const body = await request.json();
 
+    // Validate input with Zod
+    const validation = CreateProductSchema.safeParse(body);
+    if (!validation.success) {
+      logger.warn(
+        {
+          requestId,
+          action: 'create_product_validation_failed',
+          userId: authContext.userId,
+          errors: formatZodErrors(validation.error),
+        },
+        'Product validation failed'
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          requestId,
+          error: 'Validation failed',
+          details: formatZodErrors(validation.error),
+          timestamp: new Date().toISOString(),
+        },
+        {
+          status: 400,
+          headers: { 'X-Request-ID': requestId },
+        }
+      );
+    }
+
+    const validatedData = validation.data;
+
     logger.info(
       {
         requestId,
         action: 'create_product_admin',
         userId: authContext.userId,
-        slug: body.slug,
+        slug: validatedData.slug,
       },
       'Admin creating product'
     );
 
     const productData: CreateProductData = {
-      slug: body.slug,
-      status: body.status,
-      isFeatured: body.isFeatured,
-      sortOrder: body.sortOrder,
-      translations: body.translations,
+      slug: validatedData.slug,
+      status: validatedData.status,
+      isFeatured: validatedData.isFeatured,
+      sortOrder: validatedData.sortOrder,
+      translations: validatedData.translations,
     };
 
     const product = await createProduct(productData);

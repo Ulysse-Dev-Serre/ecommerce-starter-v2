@@ -57,6 +57,7 @@ export function withAuth(handler: ApiHandler) {
       // Cela permet aux tests d'intégration de contourner l'authentification Clerk
       const request = args[0] as Request;
       const testApiKey = request.headers.get('x-test-api-key');
+      const testUserId = request.headers.get('x-test-user-id');
 
       logger.info(
         {
@@ -65,6 +66,7 @@ export function withAuth(handler: ApiHandler) {
           hasEnvKey: !!process.env.TEST_API_KEY,
           keysMatch: testApiKey === process.env.TEST_API_KEY,
           nodeEnv: process.env.NODE_ENV,
+          testUserId: testUserId || 'default',
         },
         '🧪 Checking test bypass conditions'
       );
@@ -75,9 +77,11 @@ export function withAuth(handler: ApiHandler) {
         testApiKey === process.env.TEST_API_KEY &&
         process.env.NODE_ENV !== 'production'
       ) {
-        // Utilise le compte de test configuré dans .env
+        // Priorité au header x-test-user-id, sinon config .env
         const clerkTestUserId =
-          process.env.CLERK_TEST_USER_ID || 'user_35FXh55upbdX9L0zj1bjnrFCAde';
+          testUserId ||
+          process.env.CLERK_TEST_USER_ID ||
+          'user_35FXh55upbdX9L0zj1bjnrFCAde';
         const testUser = await prisma.user.findUnique({
           where: { clerkId: clerkTestUserId },
           select: {

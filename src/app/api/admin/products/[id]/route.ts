@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ProductStatus } from '../../../../../generated/prisma';
 import { logger } from '../../../../../lib/logger';
 import { AuthContext, withAdmin } from '../../../../../lib/middleware/withAuth';
 import { withError } from '../../../../../lib/middleware/withError';
@@ -8,6 +7,10 @@ import {
   withRateLimit,
   RateLimits,
 } from '../../../../../lib/middleware/withRateLimit';
+import {
+  UpdateProductSchema,
+  formatZodErrors,
+} from '../../../../../lib/schemas/product.schema';
 import {
   getProductByIdSimple,
   updateProduct,
@@ -126,6 +129,37 @@ async function updateProductHandler(
   try {
     const body = await request.json();
 
+    // Validate input with Zod
+    const validation = UpdateProductSchema.safeParse(body);
+    if (!validation.success) {
+      logger.warn(
+        {
+          requestId,
+          action: 'update_product_validation_failed',
+          userId: authContext.userId,
+          productId: id,
+          errors: formatZodErrors(validation.error),
+        },
+        'Product update validation failed'
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          requestId,
+          error: 'Validation failed',
+          details: formatZodErrors(validation.error),
+          timestamp: new Date().toISOString(),
+        },
+        {
+          status: 400,
+          headers: { 'X-Request-ID': requestId },
+        }
+      );
+    }
+
+    const validatedData = validation.data;
+
     logger.info(
       {
         requestId,
@@ -164,25 +198,13 @@ async function updateProductHandler(
 
     const updateData: UpdateProductData = {};
 
-    if (body.slug !== undefined) updateData.slug = body.slug;
-    if (body.status !== undefined) {
-      if (Object.values(ProductStatus).includes(body.status)) {
-        updateData.status = body.status;
-      } else {
-        return NextResponse.json(
-          {
-            success: false,
-            requestId,
-            error: 'Invalid status',
-            message: `Status must be one of: ${Object.values(ProductStatus).join(', ')}`,
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
-    }
-    if (body.isFeatured !== undefined) updateData.isFeatured = body.isFeatured;
-    if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder;
+    if (validatedData.slug !== undefined) updateData.slug = validatedData.slug;
+    if (validatedData.status !== undefined)
+      updateData.status = validatedData.status;
+    if (validatedData.isFeatured !== undefined)
+      updateData.isFeatured = validatedData.isFeatured;
+    if (validatedData.sortOrder !== undefined)
+      updateData.sortOrder = validatedData.sortOrder;
 
     const updatedProduct = await updateProduct(id, updateData);
 
