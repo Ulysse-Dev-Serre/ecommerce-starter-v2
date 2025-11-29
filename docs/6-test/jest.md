@@ -14,6 +14,12 @@ npm test -- tests/integration/api/health.test.js
 ```
 Teste l'endpoint de health check de l'API.
 
+### admin-access.test.js
+```bash
+npm test -- admin-access
+```
+Teste le contrôle d'accès aux routes API admin. Vérifie que les utilisateurs non-admin reçoivent une erreur **403 Forbidden** et que les requêtes non authentifiées reçoivent **401 Unauthorized**. Le serveur (`npm run dev`) doit être démarré avant d'exécuter ce test.
+
 ## Commandes globales
 
 ### Tous les tests

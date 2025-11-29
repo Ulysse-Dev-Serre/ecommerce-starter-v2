@@ -51,7 +51,8 @@
     "react-dom": "19.1.0",
     "stripe": "^19.3.0",
     "svix": "^1.76.1",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

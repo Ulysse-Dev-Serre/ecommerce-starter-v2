@@ -5,6 +5,10 @@ import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import {
+  CreateVariantsSchema,
+  formatZodErrors,
+} from '@/lib/schemas/product.schema';
+import {
   getProductVariants,
   createVariants,
   generateVariantCombinations,
@@ -114,36 +118,56 @@ async function createVariantsHandler(
   try {
     const body = await request.json();
 
+    // Validate input with Zod
+    const validation = CreateVariantsSchema.safeParse(body);
+    if (!validation.success) {
+      logger.warn(
+        {
+          requestId,
+          action: 'create_variants_validation_failed',
+          userId: authContext.userId,
+          productId,
+          errors: formatZodErrors(validation.error),
+        },
+        'Variant creation validation failed'
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          requestId,
+          error: 'Validation failed',
+          details: formatZodErrors(validation.error),
+          timestamp: new Date().toISOString(),
+        },
+        {
+          status: 400,
+          headers: { 'X-Request-ID': requestId },
+        }
+      );
+    }
+
+    const validatedData = validation.data;
+
     logger.info(
       {
         requestId,
         action: 'create_variants',
         userId: authContext.userId,
         productId,
-        mode: body.generate ? 'auto-generation' : 'manual',
+        mode:
+          'generate' in validatedData && validatedData.generate
+            ? 'auto-generation'
+            : 'manual',
       },
       `Création de variantes pour le produit: ${productId}`
     );
 
     let variantsToCreate: CreateVariantData[];
 
-    if (body.generate) {
+    if ('generate' in validatedData && validatedData.generate) {
       // Mode auto-génération
-      const config: GenerateVariantsConfig = body.config;
-
-      if (!config || !config.attributeId) {
-        return NextResponse.json(
-          {
-            success: false,
-            requestId,
-            error: 'Configuration invalide',
-            message:
-              'attributeId et defaultPricing sont requis pour la génération automatique',
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
+      const config: GenerateVariantsConfig = validatedData.config;
 
       // Générer toutes les combinaisons
       variantsToCreate = await generateVariantCombinations(productId, config);
@@ -157,21 +181,10 @@ async function createVariantsHandler(
         `${variantsToCreate.length} combinaisons générées`
       );
     } else {
-      // Mode manuel
-      variantsToCreate = body.variants;
-
-      if (!Array.isArray(variantsToCreate) || variantsToCreate.length === 0) {
-        return NextResponse.json(
-          {
-            success: false,
-            requestId,
-            error: 'Données invalides',
-            message: 'Le champ "variants" doit être un tableau non vide',
-            timestamp: new Date().toISOString(),
-          },
-          { status: 400 }
-        );
-      }
+      // Mode manuel - validatedData.variants est déjà validé par Zod
+      variantsToCreate = (
+        'variants' in validatedData ? validatedData.variants : []
+      ) as CreateVariantData[];
     }
 
     // Créer toutes les variantes

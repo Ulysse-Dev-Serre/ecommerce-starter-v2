@@ -32,18 +32,44 @@ async function createAdminUser(overrides = {}) {
 }
 
 /**
- * Create a test regular user
+ * Create a test regular user (CLIENT role)
  */
 async function createRegularUser(overrides = {}) {
   return prisma.user.create({
     data: {
       email: `user-${Date.now()}@test.com`,
+      clerkId: `test_client_${Date.now()}`,
       firstName: 'Test',
       lastName: 'User',
-      role: 'USER',
+      role: 'CLIENT',
       ...overrides,
     },
   });
+}
+
+/**
+ * Get or create a persistent test client user for 403 tests
+ */
+async function getOrCreateTestClientUser() {
+  const testClerkId = 'test_client_user_for_403_tests';
+  
+  let user = await prisma.user.findUnique({
+    where: { clerkId: testClerkId },
+  });
+  
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: 'test-client@test.com',
+        clerkId: testClerkId,
+        firstName: 'Test',
+        lastName: 'Client',
+        role: 'CLIENT',
+      },
+    });
+  }
+  
+  return user;
 }
 
 /**
@@ -78,6 +104,26 @@ function getAdminAuthHeaders() {
 }
 
 /**
+ * Generate test auth headers for a CLIENT user (non-admin)
+ * Used for testing 403 Forbidden responses on admin routes
+ * 
+ * @param {string} clerkId - The clerkId of the client user to simulate
+ */
+function getClientAuthHeaders(clerkId = 'test_client_user_for_403_tests') {
+  if (!process.env.TEST_API_KEY) {
+    throw new Error(
+      '❌ TEST_API_KEY non définie.\n' +
+      'Ajoutez TEST_API_KEY=votre-clé-secrète dans .env.local'
+    );
+  }
+  
+  return {
+    'x-test-api-key': process.env.TEST_API_KEY,
+    'x-test-user-id': clerkId,
+  };
+}
+
+/**
  * Get real admin info
  */
 function getRealAdmin() {
@@ -87,7 +133,9 @@ function getRealAdmin() {
 module.exports = {
   createAdminUser,
   createRegularUser,
+  getOrCreateTestClientUser,
   getTestAuthHeaders,
+  getClientAuthHeaders,
   getAdminAuthHeaders, // deprecated
   getRealAdmin,
   REAL_ADMIN,
