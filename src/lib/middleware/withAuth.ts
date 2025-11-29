@@ -48,14 +48,17 @@ export interface AuthContext {
  * Middleware pour protéger les routes API - utilisateur authentifié requis
  */
 export function withAuth(handler: ApiHandler) {
-  return async (...args: any[]) => {
+  return async (
+    request: Request,
+    routeContext?: { params?: Promise<unknown> }
+  ) => {
     try {
+      // Pour les routes dynamiques, on doit passer routeContext entre request et authContext
       // ============================================
       // 🧪 BYPASS POUR LES TESTS (NON-PRODUCTION SEULEMENT)
       // ============================================
       // Vérifie si une API key de test est fournie dans les headers
       // Cela permet aux tests d'intégration de contourner l'authentification Clerk
-      const request = args[0] as Request;
       const testApiKey = request.headers.get('x-test-api-key');
       const testUserId = request.headers.get('x-test-user-id');
 
@@ -109,7 +112,9 @@ export function withAuth(handler: ApiHandler) {
             '🧪 Test API key authentication used'
           );
 
-          return handler(...args, authContext);
+          return routeContext?.params
+            ? handler(request, routeContext, authContext)
+            : handler(request, authContext);
         }
       }
       // ============================================
@@ -122,7 +127,7 @@ export function withAuth(handler: ApiHandler) {
         logger.warn(
           {
             action: 'unauthorized_access_attempt',
-            path: args[0]?.url,
+            path: (request as Request & { url?: string })?.url,
           },
           'Unauthorized: No Clerk user ID'
         );
@@ -184,7 +189,9 @@ export function withAuth(handler: ApiHandler) {
         'Authenticated request'
       );
 
-      return await handler(...args, authContext);
+      return routeContext?.params
+        ? await handler(request, routeContext, authContext)
+        : await handler(request, authContext);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
@@ -218,8 +225,11 @@ export function withAuth(handler: ApiHandler) {
  * Middleware pour protéger les routes admin - rôle ADMIN requis
  */
 export function withAdmin(handler: ApiHandler): ApiHandler {
-  return withAuth(async (...args: any[]) => {
+  return withAuth(async (request: Request, ...args: unknown[]) => {
+    // authContext est toujours le DERNIER argument (après routeContext pour routes dynamiques)
     const authContext = args[args.length - 1] as AuthContext;
+    const routeContext =
+      args.length > 1 ? (args[0] as { params?: Promise<unknown> }) : undefined;
 
     if (authContext.role !== UserRole.ADMIN) {
       logger.warn(
@@ -251,7 +261,10 @@ export function withAdmin(handler: ApiHandler): ApiHandler {
       'Admin access granted'
     );
 
-    return await handler(...args);
+    // Passer routeContext si présent (pour routes dynamiques [id])
+    return routeContext
+      ? await handler(request, routeContext, authContext)
+      : await handler(request, authContext);
   });
 }
 
@@ -273,9 +286,12 @@ export interface OptionalAuthContext {
  * Utilisé pour: panier, checkout (invités autorisés)
  */
 export function withOptionalAuth(handler: ApiHandler) {
-  return async (...args: any[]) => {
+  return async (
+    request: Request,
+    routeContext?: { params?: Promise<unknown> }
+  ) => {
     try {
-      const request = args[0] as Request;
+      // Pour les routes dynamiques, on doit passer routeContext entre request et authContext
       const testApiKey = request.headers.get('x-test-api-key');
       const testUserId = request.headers.get('x-test-user-id');
       const testAnonymousId = request.headers.get('x-test-anonymous-id');
@@ -305,7 +321,10 @@ export function withOptionalAuth(handler: ApiHandler) {
             '🧪 Test anonymous ID used'
           );
 
-          return handler(...args, authContext);
+          // Pour routes dynamiques: passer routeContext, sinon juste authContext
+          return routeContext?.params
+            ? handler(request, routeContext, authContext)
+            : handler(request, authContext);
         }
 
         // Simuler un utilisateur authentifié
@@ -341,7 +360,9 @@ export function withOptionalAuth(handler: ApiHandler) {
             '🧪 Test API key authentication used (optional auth)'
           );
 
-          return handler(...args, authContext);
+          return routeContext?.params
+            ? handler(request, routeContext, authContext)
+            : handler(request, authContext);
         }
       }
       // ============================================
@@ -379,7 +400,9 @@ export function withOptionalAuth(handler: ApiHandler) {
             'Authenticated request (optional auth)'
           );
 
-          return await handler(...args, authContext);
+          return routeContext?.params
+            ? await handler(request, routeContext, authContext)
+            : await handler(request, authContext);
         }
       }
 
@@ -395,7 +418,9 @@ export function withOptionalAuth(handler: ApiHandler) {
         'Anonymous request (optional auth)'
       );
 
-      return await handler(...args, authContext);
+      return routeContext?.params
+        ? await handler(request, routeContext, authContext)
+        : await handler(request, authContext);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
