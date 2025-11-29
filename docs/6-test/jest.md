@@ -20,6 +20,12 @@ npm test -- admin-access
 ```
 Teste le contrôle d'accès aux routes API admin. Vérifie que les utilisateurs non-admin reçoivent une erreur **403 Forbidden** et que les requêtes non authentifiées reçoivent **401 Unauthorized**. Le serveur (`npm run dev`) doit être démarré avant d'exécuter ce test.
 
+### cart-merge.test.js
+```bash
+npm test -- cart-merge
+```
+Teste la fusion du panier invité vers le panier utilisateur connecté (Issue #16). Vérifie que l'endpoint `/api/cart/merge` fonctionne avec le bypass de test, que le panier anonyme est correctement géré, et documente la logique de fusion (somme des quantités, cap stock, idempotence). Le serveur doit être démarré.
+
 ## Commandes globales
 
 ### Tous les tests

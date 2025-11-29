@@ -25,7 +25,7 @@ async function createSessionHandler(
   let userId: string | undefined;
   let anonymousId: string | undefined;
 
-  if (authContext.isAuthenticated) {
+  if (authContext?.isAuthenticated) {
     userId = authContext.userId;
   } else {
     const cookieStore = await cookies();
