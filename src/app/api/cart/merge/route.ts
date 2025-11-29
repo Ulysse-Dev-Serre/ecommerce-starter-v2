@@ -1,47 +1,16 @@
-import { auth } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
+import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
 import { mergeAnonymousCartToUser } from '../../../../lib/services/cart.service';
 
-async function mergeCartHandler(_request: NextRequest): Promise<NextResponse> {
+async function mergeCartHandler(
+  _request: NextRequest,
+  authContext: AuthContext
+): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-
-  const { userId: clerkId } = await auth();
-
-  if (!clerkId) {
-    return NextResponse.json(
-      {
-        success: false,
-        requestId,
-        error: 'Unauthorized',
-        message: 'Authentication required',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 401 }
-    );
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true, email: true },
-  });
-
-  if (!user) {
-    return NextResponse.json(
-      {
-        success: false,
-        requestId,
-        error: 'User not found',
-        message: 'User account not synchronized',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 403 }
-    );
-  }
 
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
@@ -51,7 +20,7 @@ async function mergeCartHandler(_request: NextRequest): Promise<NextResponse> {
       {
         requestId,
         action: 'merge_cart_skipped',
-        userId: user.id,
+        userId: authContext.userId,
         reason: 'no_anonymous_id',
       },
       'No anonymous cart to merge'
@@ -76,19 +45,19 @@ async function mergeCartHandler(_request: NextRequest): Promise<NextResponse> {
     {
       requestId,
       action: 'merge_cart_request',
-      userId: user.id,
+      userId: authContext.userId,
       anonymousId,
     },
     'Merging anonymous cart to user cart'
   );
 
-  const cart = await mergeAnonymousCartToUser(user.id, anonymousId);
+  const cart = await mergeAnonymousCartToUser(authContext.userId, anonymousId);
 
   logger.info(
     {
       requestId,
       action: 'merge_cart_success',
-      userId: user.id,
+      userId: authContext.userId,
       cartId: cart.id,
       itemsCount: cart.items.length,
     },
@@ -115,4 +84,4 @@ async function mergeCartHandler(_request: NextRequest): Promise<NextResponse> {
   return response;
 }
 
-export const POST = withError(mergeCartHandler);
+export const POST = withError(withAuth(mergeCartHandler));

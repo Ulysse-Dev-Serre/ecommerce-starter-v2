@@ -1,15 +1,18 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
+import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
 import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 
-async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
+async function verifyOrderHandler(
+  request: NextRequest,
+  authContext: AuthContext
+): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get('session_id');
@@ -21,45 +24,11 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  // SECURITY: Require authentication
-  const { userId: clerkId } = await auth();
-
-  if (!clerkId) {
-    logger.warn(
-      {
-        requestId,
-        sessionId,
-        reason: 'Unauthorized - no auth',
-      },
-      'Security: Unauthorized order verification attempt'
-    );
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Get user from database
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
-
-  if (!user) {
-    logger.warn(
-      {
-        requestId,
-        sessionId,
-        clerkId,
-        reason: 'User not found',
-      },
-      'Security: User not found for order verification'
-    );
-    return NextResponse.json({ error: 'User not found' }, { status: 404 });
-  }
-
   logger.info(
     {
       requestId,
       sessionId,
-      userId: user.id,
+      userId: authContext.userId,
     },
     'Verifying order for session'
   );
@@ -75,7 +44,7 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
         status: 'COMPLETED',
         // CRITICAL: Verify ownership
         order: {
-          userId: user.id,
+          userId: authContext.userId,
         },
       },
       include: {
@@ -92,13 +61,13 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
 
     if (payment?.order) {
       // SECURITY: Double-check ownership (defense in depth)
-      if (payment.order.userId !== user.id) {
+      if (payment.order.userId !== authContext.userId) {
         logger.warn(
           {
             requestId,
             sessionId,
             orderUserId: payment.order.userId,
-            requestUserId: user.id,
+            requestUserId: authContext.userId,
             reason: 'Ownership mismatch',
           },
           'Security: Attempted unauthorized order access'
@@ -111,7 +80,7 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
           requestId,
           sessionId,
           orderNumber: payment.order.orderNumber,
-          userId: user.id,
+          userId: authContext.userId,
         },
         'Order found for session'
       );
@@ -199,5 +168,5 @@ async function verifyOrderHandler(request: NextRequest): Promise<NextResponse> {
 }
 
 export const GET = withError(
-  withRateLimit(verifyOrderHandler, RateLimits.ORDER_VERIFY)
+  withRateLimit(withAuth(verifyOrderHandler), RateLimits.ORDER_VERIFY)
 );
