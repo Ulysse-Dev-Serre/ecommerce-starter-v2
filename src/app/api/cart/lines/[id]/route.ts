@@ -1,10 +1,12 @@
-import { auth } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '../../../../../lib/db/prisma';
 import { logger } from '../../../../../lib/logger';
 import { withError } from '../../../../../lib/middleware/withError';
+import {
+  OptionalAuthContext,
+  withOptionalAuth,
+} from '../../../../../lib/middleware/withAuth';
 import {
   updateCartLine,
   removeCartLine,
@@ -12,10 +14,11 @@ import {
 
 async function updateCartLineHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
+  authContext: OptionalAuthContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: cartItemId } = await params;
+  const { id: cartItemId } = await context.params;
   const body = await request.json();
 
   const { quantity } = body;
@@ -33,18 +36,9 @@ async function updateCartLineHandler(
     );
   }
 
-  const { userId: clerkId } = await auth();
+  const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
-
-  let userId: string | undefined;
-  if (clerkId) {
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
-      select: { id: true },
-    });
-    userId = user?.id;
-  }
 
   logger.info(
     {
@@ -141,23 +135,15 @@ async function updateCartLineHandler(
 
 async function removeCartLineHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
+  authContext: OptionalAuthContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: cartItemId } = await params;
+  const { id: cartItemId } = await context.params;
 
-  const { userId: clerkId } = await auth();
+  const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
-
-  let userId: string | undefined;
-  if (clerkId) {
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
-      select: { id: true },
-    });
-    userId = user?.id;
-  }
 
   logger.info(
     {
@@ -233,5 +219,5 @@ async function removeCartLineHandler(
   }
 }
 
-export const PUT = withError(updateCartLineHandler);
-export const DELETE = withError(removeCartLineHandler);
+export const PUT = withError(withOptionalAuth(updateCartLineHandler));
+export const DELETE = withError(withOptionalAuth(removeCartLineHandler));

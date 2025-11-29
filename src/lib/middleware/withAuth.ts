@@ -254,3 +254,173 @@ export function withAdmin(handler: ApiHandler): ApiHandler {
     return await handler(...args);
   });
 }
+
+/**
+ * Context pour authentification optionnelle (utilisateurs anonymes acceptés)
+ */
+export interface OptionalAuthContext {
+  userId?: string;
+  clerkId?: string;
+  email?: string;
+  role?: UserRole;
+  anonymousId?: string;
+  isAuthenticated: boolean;
+}
+
+/**
+ * Middleware pour routes avec authentification optionnelle
+ * Accepte les utilisateurs anonymes ET authentifiés
+ * Utilisé pour: panier, checkout (invités autorisés)
+ */
+export function withOptionalAuth(handler: ApiHandler) {
+  return async (...args: any[]) => {
+    try {
+      const request = args[0] as Request;
+      const testApiKey = request.headers.get('x-test-api-key');
+      const testUserId = request.headers.get('x-test-user-id');
+      const testAnonymousId = request.headers.get('x-test-anonymous-id');
+
+      // ============================================
+      // 🧪 BYPASS POUR LES TESTS (NON-PRODUCTION SEULEMENT)
+      // ============================================
+      if (
+        testApiKey &&
+        process.env.TEST_API_KEY &&
+        testApiKey === process.env.TEST_API_KEY &&
+        process.env.NODE_ENV !== 'production'
+      ) {
+        // Test mode: simuler utilisateur OU anonyme
+        if (testAnonymousId) {
+          // Simuler un utilisateur anonyme
+          const authContext: OptionalAuthContext = {
+            anonymousId: testAnonymousId,
+            isAuthenticated: false,
+          };
+
+          logger.info(
+            {
+              action: 'test_anonymous_used',
+              anonymousId: testAnonymousId,
+            },
+            '🧪 Test anonymous ID used'
+          );
+
+          return handler(...args, authContext);
+        }
+
+        // Simuler un utilisateur authentifié
+        const clerkTestUserId =
+          testUserId ||
+          process.env.CLERK_TEST_USER_ID ||
+          'user_35FXh55upbdX9L0zj1bjnrFCAde';
+
+        const testUser = await prisma.user.findUnique({
+          where: { clerkId: clerkTestUserId },
+          select: {
+            id: true,
+            clerkId: true,
+            email: true,
+            role: true,
+          },
+        });
+
+        if (testUser) {
+          const authContext: OptionalAuthContext = {
+            userId: testUser.id,
+            clerkId: testUser.clerkId,
+            email: testUser.email,
+            role: testUser.role,
+            isAuthenticated: true,
+          };
+
+          logger.info(
+            {
+              action: 'test_api_key_used',
+              userId: testUser.id,
+            },
+            '🧪 Test API key authentication used (optional auth)'
+          );
+
+          return handler(...args, authContext);
+        }
+      }
+      // ============================================
+      // FIN DU BYPASS DE TEST
+      // ============================================
+
+      const { userId: clerkId } = await auth();
+
+      if (clerkId) {
+        // Utilisateur authentifié
+        const user = await prisma.user.findUnique({
+          where: { clerkId },
+          select: {
+            id: true,
+            clerkId: true,
+            email: true,
+            role: true,
+          },
+        });
+
+        if (user) {
+          const authContext: OptionalAuthContext = {
+            userId: user.id,
+            clerkId: user.clerkId,
+            email: user.email,
+            role: user.role,
+            isAuthenticated: true,
+          };
+
+          logger.info(
+            {
+              action: 'authenticated_optional_request',
+              userId: user.id,
+            },
+            'Authenticated request (optional auth)'
+          );
+
+          return await handler(...args, authContext);
+        }
+      }
+
+      // Utilisateur anonyme - OK pour cette route
+      const authContext: OptionalAuthContext = {
+        isAuthenticated: false,
+      };
+
+      logger.info(
+        {
+          action: 'anonymous_request',
+        },
+        'Anonymous request (optional auth)'
+      );
+
+      return await handler(...args, authContext);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
+      logger.error(
+        {
+          error: errorMessage,
+          stack: error instanceof Error ? error.stack : undefined,
+          timestamp: new Date().toISOString(),
+        },
+        'Optional auth middleware error'
+      );
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Internal server error',
+          message:
+            process.env.NODE_ENV === 'development'
+              ? errorMessage
+              : 'Something went wrong',
+          timestamp: new Date().toISOString(),
+        },
+        { status: 500 }
+      );
+    }
+  };
+}

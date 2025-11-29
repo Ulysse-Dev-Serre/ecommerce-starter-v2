@@ -1,10 +1,12 @@
-import { auth } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '../../../../lib/db/prisma';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
+import {
+  OptionalAuthContext,
+  withOptionalAuth,
+} from '../../../../lib/middleware/withAuth';
 import {
   withRateLimit,
   RateLimits,
@@ -15,59 +17,19 @@ import { createCheckoutSession } from '../../../../lib/stripe/checkout';
 import { validateCreateCheckoutSession } from '../../../../lib/utils/validation';
 
 async function createSessionHandler(
-  request: NextRequest
+  request: NextRequest,
+  authContext: OptionalAuthContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
   let userId: string | undefined;
   let anonymousId: string | undefined;
 
-  // SECURITY: Test bypass only in development/test environments
-  const testApiKey = request.headers.get('x-test-api-key');
-  const isDevelopment =
-    process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
-
-  if (
-    isDevelopment &&
-    testApiKey &&
-    process.env.TEST_API_KEY &&
-    testApiKey === process.env.TEST_API_KEY
-  ) {
-    // Test mode: use test user (ONLY in dev/test)
-    logger.warn(
-      { requestId, mode: 'test' },
-      'Using test bypass for checkout session'
-    );
-
-    const clerkTestUserId =
-      process.env.CLERK_TEST_USER_ID || 'user_35FXh55upbdX9L0zj1bjnrFCAde';
-    const testUser = await prisma.user.findUnique({
-      where: { clerkId: clerkTestUserId },
-      select: { id: true },
-    });
-    userId = testUser?.id;
+  if (authContext.isAuthenticated) {
+    userId = authContext.userId;
   } else {
-    // Normal mode: use Clerk auth
-    const { userId: clerkId } = await auth();
     const cookieStore = await cookies();
     anonymousId = cookieStore.get('cart_anonymous_id')?.value;
-
-    if (clerkId) {
-      const user = await prisma.user.findUnique({
-        where: { clerkId },
-        select: { id: true },
-      });
-      userId = user?.id;
-    }
-  }
-
-  // SECURITY: Block test bypass in production
-  if (!isDevelopment && testApiKey) {
-    logger.error(
-      { requestId, attempt: 'test_bypass_in_production' },
-      'Security: Attempted test bypass in production'
-    );
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 
   if (!userId && !anonymousId) {
@@ -189,5 +151,5 @@ async function createSessionHandler(
 }
 
 export const POST = withError(
-  withRateLimit(createSessionHandler, RateLimits.CHECKOUT)
+  withOptionalAuth(withRateLimit(createSessionHandler, RateLimits.CHECKOUT))
 );

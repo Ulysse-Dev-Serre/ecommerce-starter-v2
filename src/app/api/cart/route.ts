@@ -1,46 +1,34 @@
-import { auth } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '../../../lib/db/prisma';
 import { logger } from '../../../lib/logger';
 import { withError } from '../../../lib/middleware/withError';
+import {
+  OptionalAuthContext,
+  withOptionalAuth,
+} from '../../../lib/middleware/withAuth';
 import { getOrCreateCart } from '../../../lib/services/cart.service';
 
-async function getCartHandler(request: NextRequest): Promise<NextResponse> {
+async function getCartHandler(
+  request: NextRequest,
+  authContext: OptionalAuthContext
+): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
-  // Check for test bypass
-  const testApiKey = request.headers.get('x-test-api-key');
   let userId: string | undefined;
   let anonymousId: string | undefined;
+  let newAnonymousId: string | undefined;
 
-  if (
-    testApiKey &&
-    process.env.TEST_API_KEY &&
-    testApiKey === process.env.TEST_API_KEY &&
-    process.env.NODE_ENV !== 'production'
-  ) {
-    // Test mode: use test user
-    const clerkTestUserId =
-      process.env.CLERK_TEST_USER_ID || 'user_35FXh55upbdX9L0zj1bjnrFCAde';
-    const testUser = await prisma.user.findUnique({
-      where: { clerkId: clerkTestUserId },
-      select: { id: true },
-    });
-    userId = testUser?.id;
+  if (authContext.isAuthenticated) {
+    userId = authContext.userId;
   } else {
-    // Normal mode: use Clerk auth
-    const { userId: clerkId } = await auth();
     const cookieStore = await cookies();
     anonymousId = cookieStore.get('cart_anonymous_id')?.value;
 
-    if (clerkId) {
-      const user = await prisma.user.findUnique({
-        where: { clerkId },
-        select: { id: true },
-      });
-      userId = user?.id;
+    // Créer un nouvel ID anonyme si nécessaire
+    if (!anonymousId) {
+      newAnonymousId = crypto.randomUUID();
+      anonymousId = newAnonymousId;
     }
   }
 
@@ -80,8 +68,8 @@ async function getCartHandler(request: NextRequest): Promise<NextResponse> {
     }
   );
 
-  if (!userId && !anonymousId) {
-    const newAnonymousId = crypto.randomUUID();
+  // Set cookie si nouvel ID anonyme créé
+  if (newAnonymousId) {
     response.cookies.set('cart_anonymous_id', newAnonymousId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -102,4 +90,4 @@ async function getCartHandler(request: NextRequest): Promise<NextResponse> {
   return response;
 }
 
-export const GET = withError(getCartHandler);
+export const GET = withError(withOptionalAuth(getCartHandler));
