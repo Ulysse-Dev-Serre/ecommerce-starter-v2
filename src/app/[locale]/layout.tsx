@@ -7,6 +7,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { Navbar } from '../../components/layout/navbar';
 import { ConditionalFooter } from '../../components/layout/conditional-footer';
 import { ToastProvider } from '../../components/ui/toast-provider';
+import { CartMergeHandler } from '../../components/cart/cart-merge-handler';
 import { prisma } from '@/lib/db/prisma';
 import '../globals.css';
 
@@ -92,6 +93,7 @@ export default async function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         >
           <ToastProvider>
+            <CartMergeHandler />
             <Navbar locale={locale} userRole={userRole} />
             {children}
             <ConditionalFooter />

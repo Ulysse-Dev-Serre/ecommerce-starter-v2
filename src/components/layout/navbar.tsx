@@ -190,6 +190,14 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
           {/* Right side - Auth & Cart */}
           <div className="flex items-center space-x-4">
             <SignedOut>
+              <Link
+                href={`/${locale}/cart`}
+                className="text-foreground hover:text-muted-foreground p-2"
+                title={messages.navbar.cart}
+                onClick={() => handleNavigationClick(`/${locale}/cart`)}
+              >
+                🛒
+              </Link>
               <SignInButton>
                 <button
                   className="bg-primary text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"

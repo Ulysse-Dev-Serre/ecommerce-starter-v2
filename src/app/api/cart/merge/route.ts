@@ -79,7 +79,14 @@ async function mergeCartHandler(
     }
   );
 
-  response.cookies.delete('cart_anonymous_id');
+  response.cookies.set('cart_anonymous_id', '', {
+    path: '/',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0,
+    expires: new Date(0),
+  });
 
   return response;
 }

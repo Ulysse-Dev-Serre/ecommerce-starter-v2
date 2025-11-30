@@ -1,12 +1,8 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
-import {
-  OptionalAuthContext,
-  withOptionalAuth,
-} from '../../../../lib/middleware/withAuth';
+import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
 import {
   withRateLimit,
   RateLimits,
@@ -18,26 +14,11 @@ import { validateCreateCheckoutSession } from '../../../../lib/utils/validation'
 
 async function createSessionHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext
+  authContext: AuthContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
-  let userId: string | undefined;
-  let anonymousId: string | undefined;
-
-  if (authContext?.isAuthenticated) {
-    userId = authContext.userId;
-  } else {
-    const cookieStore = await cookies();
-    anonymousId = cookieStore.get('cart_anonymous_id')?.value;
-  }
-
-  if (!userId && !anonymousId) {
-    return NextResponse.json(
-      { error: 'No cart found. Please add items to cart first.' },
-      { status: 400 }
-    );
-  }
+  const userId = authContext.userId;
 
   const body = await request.json();
 
@@ -73,7 +54,7 @@ async function createSessionHandler(
     }
   } else {
     // Mode 2: Utiliser le panier existant
-    const cart = await getOrCreateCart(userId, anonymousId);
+    const cart = await getOrCreateCart(userId, undefined);
 
     if (cart.items.length === 0) {
       return NextResponse.json(
@@ -109,7 +90,6 @@ async function createSessionHandler(
       items: cartItems,
       userId,
       cartId, // Passer le cartId pour les métadonnées
-      anonymousId,
       successUrl:
         successUrl ||
         `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -151,5 +131,5 @@ async function createSessionHandler(
 }
 
 export const POST = withError(
-  withOptionalAuth(withRateLimit(createSessionHandler, RateLimits.CHECKOUT))
+  withAuth(withRateLimit(createSessionHandler, RateLimits.CHECKOUT))
 );

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useUser, SignInButton } from '@clerk/nextjs';
 
 import { QuantitySelector } from '@/components/cart/quantity-selector';
 
@@ -41,6 +42,7 @@ interface CartClientProps {
 export function CartClient({ cart, locale }: CartClientProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { isSignedIn } = useUser();
 
   const translations = {
     fr: {
@@ -50,6 +52,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
       remove: 'Supprimer',
       total: 'Total',
       checkout: 'Passer commande',
+      signInToCheckout: 'Connectez-vous pour passer commande',
     },
     en: {
       emptyCart: 'Your cart is empty',
@@ -58,6 +61,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
       remove: 'Remove',
       total: 'Total',
       checkout: 'Checkout',
+      signInToCheckout: 'Sign in to checkout',
     },
   };
 
@@ -200,13 +204,21 @@ export function CartClient({ cart, locale }: CartClientProps) {
                 {calculateTotal().toFixed(2)} CAD
               </span>
             </div>
-            <button
-              onClick={handleCheckout}
-              disabled={isLoading}
-              className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Loading...' : t.checkout}
-            </button>
+            {isSignedIn ? (
+              <button
+                onClick={handleCheckout}
+                disabled={isLoading}
+                className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Loading...' : t.checkout}
+              </button>
+            ) : (
+              <SignInButton mode="modal">
+                <button className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors">
+                  {t.signInToCheckout}
+                </button>
+              </SignInButton>
+            )}
           </div>
         </div>
       </div>

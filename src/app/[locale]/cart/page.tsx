@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 
 import { Language } from '@/generated/prisma';
 import { prisma } from '@/lib/db/prisma';
+import { logger } from '@/lib/logger';
 
 import { CartClient } from './cart-client';
 
@@ -23,6 +24,15 @@ export default async function CartPage({
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
 
+  logger.info(
+    {
+      action: 'cart_page_load',
+      clerkId: clerkId ?? null,
+      anonymousId: anonymousId ?? null,
+    },
+    'Loading cart page'
+  );
+
   let userId: string | undefined;
   if (clerkId) {
     const user = await prisma.user.findUnique({
@@ -32,37 +42,50 @@ export default async function CartPage({
     userId = user?.id;
   }
 
-  const cart = await prisma.cart.findFirst({
-    where: userId
-      ? { userId, status: 'ACTIVE' }
-      : { anonymousId, status: 'ACTIVE' },
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: {
-              pricing: {
-                where: { isActive: true, priceType: 'base' },
-                orderBy: { validFrom: 'desc' },
-                take: 1,
-              },
-              product: {
-                include: {
-                  translations: {
-                    where: { language },
-                  },
-                  media: {
-                    where: { isPrimary: true },
-                    take: 1,
+  const cart =
+    userId || anonymousId
+      ? await prisma.cart.findFirst({
+          where: userId
+            ? { userId, status: 'ACTIVE' }
+            : { anonymousId, status: 'ACTIVE' },
+          include: {
+            items: {
+              include: {
+                variant: {
+                  include: {
+                    pricing: {
+                      where: { isActive: true, priceType: 'base' },
+                      orderBy: { validFrom: 'desc' },
+                      take: 1,
+                    },
+                    product: {
+                      include: {
+                        translations: {
+                          where: { language },
+                        },
+                        media: {
+                          where: { isPrimary: true },
+                          take: 1,
+                        },
+                      },
+                    },
                   },
                 },
               },
             },
           },
-        },
-      },
+        })
+      : null;
+
+  logger.info(
+    {
+      action: 'cart_query_result',
+      cartId: cart?.id ?? null,
+      cartStatus: cart?.status ?? null,
+      itemsCount: cart?.items?.length ?? 0,
     },
-  });
+    'Cart query completed'
+  );
 
   const serializedCart = cart
     ? {
