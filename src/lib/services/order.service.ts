@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { OrderStatus } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
+import { calculateCart, type Currency } from './calculation.service';
 import { CartProjection } from './cart.service';
 import { decrementStock } from './inventory.service';
 
@@ -30,15 +31,12 @@ export async function createOrderFromCart({
 }: CreateOrderFromCartInput) {
   const orderNumber = await generateOrderNumber();
 
-  const subtotalAmount = cart.items.reduce((sum, item) => {
-    const pricing = item.variant.pricing.find(
-      p => p.currency === cart.currency
-    );
-    const price = pricing ? parseFloat(pricing.price.toString()) : 0;
-    return sum + price * item.quantity;
-  }, 0);
+  // Utiliser le service de calcul centralisé
+  const currency = cart.currency as Currency;
+  const calculation = calculateCart(cart, currency);
 
-  const taxAmount = 0;
+  const subtotalAmount = parseFloat(calculation.subtotal.toString());
+  const taxAmount = 0; // Géré par Stripe Tax
   const shippingAmount = 0;
   const discountAmount = 0;
   const totalAmount =
@@ -58,24 +56,20 @@ export async function createOrderFromCart({
       shippingAddress: shippingAddress || {},
       billingAddress: billingAddress || {},
       items: {
-        create: cart.items.map(item => {
-          const pricing = item.variant.pricing.find(
-            p => p.currency === cart.currency
-          );
-          const unitPrice = pricing ? parseFloat(pricing.price.toString()) : 0;
-
+        create: calculation.items.map(item => {
+          const cartItem = cart.items.find(i => i.variantId === item.variantId);
           return {
-            variantId: item.variant.id,
-            productId: item.variant.product.id,
+            variantId: item.variantId,
+            productId: cartItem?.variant.product.id || '',
             productSnapshot: {
-              name: item.variant.product.translations[0]?.name || 'Product',
-              sku: item.variant.sku,
-              image: item.variant.media.find(m => m.isPrimary)?.url,
+              name: item.productName,
+              sku: item.sku,
+              image: cartItem?.variant.media.find(m => m.isPrimary)?.url,
             },
             quantity: item.quantity,
-            unitPrice,
-            totalPrice: unitPrice * item.quantity,
-            currency: cart.currency,
+            unitPrice: parseFloat(item.unitPrice.toString()),
+            totalPrice: parseFloat(item.lineTotal.toString()),
+            currency: item.currency,
           };
         }),
       },
@@ -157,6 +151,27 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
   }
 
   return order;
+}
+
+/**
+ * Get all orders for a specific user
+ */
+export async function getUserOrders(userId: string) {
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      items: true,
+      payments: {
+        select: {
+          status: true,
+          method: true,
+        },
+      },
+    },
+  });
+
+  return orders;
 }
 
 /**

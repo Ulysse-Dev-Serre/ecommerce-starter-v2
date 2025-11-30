@@ -9,9 +9,9 @@ import { logger } from '../logger';
 export interface SimpleVariantData {
   nameEN: string;
   nameFR: string;
-  price: number;
+  priceCAD?: number | null;
+  priceUSD?: number | null;
   stock: number;
-  currency?: string;
 }
 
 const GENERIC_ATTRIBUTE_KEY = 'variant_type';
@@ -50,6 +50,8 @@ export interface UpdateVariantData {
   weight?: number;
   dimensions?: { length?: number; width?: number; height?: number };
   pricing?: VariantPricing;
+  pricingCAD?: VariantPricing;
+  pricingUSD?: VariantPricing;
   inventory?: VariantInventory;
 }
 
@@ -290,6 +292,38 @@ export async function createSimpleVariants(
     // Générer le SKU
     const sku = `${product.slug.toUpperCase()}-${valueKey.toUpperCase()}`;
 
+    // Préparer les prix (CAD et/ou USD)
+    const pricingData: Array<{
+      price: Prisma.Decimal;
+      currency: string;
+      priceType: string;
+      isActive: boolean;
+    }> = [];
+
+    if (variantData.priceCAD != null && variantData.priceCAD >= 0) {
+      pricingData.push({
+        price: new Prisma.Decimal(variantData.priceCAD),
+        currency: 'CAD',
+        priceType: 'base',
+        isActive: true,
+      });
+    }
+
+    if (variantData.priceUSD != null && variantData.priceUSD >= 0) {
+      pricingData.push({
+        price: new Prisma.Decimal(variantData.priceUSD),
+        currency: 'USD',
+        priceType: 'base',
+        isActive: true,
+      });
+    }
+
+    if (pricingData.length === 0) {
+      throw new Error(
+        `Variante "${variantData.nameEN}": au moins un prix (CAD ou USD) est requis`
+      );
+    }
+
     // Créer la variante
     const variant = await prisma.productVariant.create({
       data: {
@@ -301,12 +335,7 @@ export async function createSimpleVariants(
           },
         },
         pricing: {
-          create: {
-            price: new Prisma.Decimal(variantData.price),
-            currency: variantData.currency ?? 'CAD',
-            priceType: 'base',
-            isActive: true,
-          },
+          create: pricingData,
         },
         inventory: {
           create: {
@@ -578,7 +607,7 @@ export async function updateVariant(
       },
     });
 
-    // Mise à jour du pricing si fourni
+    // Mise à jour du pricing si fourni (ancien format)
     if (updateData.pricing && variant.pricing.length > 0) {
       const currentPricing = variant.pricing[0];
 
@@ -594,6 +623,61 @@ export async function updateVariant(
           isActive: updateData.pricing.isActive,
         },
       });
+    }
+
+    // Mise à jour du pricing CAD
+    if (updateData.pricingCAD) {
+      const cadPricing = variant.pricing.find(p => p.currency === 'CAD');
+      if (cadPricing) {
+        await tx.productVariantPricing.update({
+          where: { id: cadPricing.id },
+          data: {
+            price: new Prisma.Decimal(updateData.pricingCAD.price),
+          },
+        });
+      } else {
+        await tx.productVariantPricing.create({
+          data: {
+            variantId,
+            price: new Prisma.Decimal(updateData.pricingCAD.price),
+            currency: 'CAD',
+            priceType: 'base',
+            isActive: true,
+          },
+        });
+      }
+    }
+
+    // Mise à jour du pricing USD
+    if (updateData.pricingUSD) {
+      const usdPricing = variant.pricing.find(p => p.currency === 'USD');
+      logger.info(
+        {
+          variantId,
+          usdPricing: !!usdPricing,
+          price: updateData.pricingUSD.price,
+        },
+        'Updating USD pricing'
+      );
+      if (usdPricing) {
+        await tx.productVariantPricing.update({
+          where: { id: usdPricing.id },
+          data: {
+            price: new Prisma.Decimal(updateData.pricingUSD.price),
+          },
+        });
+      } else {
+        await tx.productVariantPricing.create({
+          data: {
+            variantId,
+            price: new Prisma.Decimal(updateData.pricingUSD.price),
+            currency: 'USD',
+            priceType: 'base',
+            isActive: true,
+          },
+        });
+        logger.info({ variantId }, 'Created new USD pricing entry');
+      }
     }
 
     // Mise à jour de l'inventaire si fourni

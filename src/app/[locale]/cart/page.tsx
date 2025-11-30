@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { Metadata } from 'next';
 
 import { auth } from '@clerk/nextjs/server';
 
@@ -9,6 +10,13 @@ import { logger } from '@/lib/logger';
 import { CartClient } from './cart-client';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 interface CartPageProps {
   params: Promise<{ locale: string }>;
@@ -55,8 +63,6 @@ export default async function CartPage({
                   include: {
                     pricing: {
                       where: { isActive: true, priceType: 'base' },
-                      orderBy: { validFrom: 'desc' },
-                      take: 1,
                     },
                     product: {
                       include: {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
@@ -9,7 +10,10 @@ import {
 } from '../../../../lib/middleware/withRateLimit';
 import { getOrCreateCart } from '../../../../lib/services/cart.service';
 import { reserveStock } from '../../../../lib/services/inventory.service';
-import { createCheckoutSession } from '../../../../lib/stripe/checkout';
+import {
+  createCheckoutSession,
+  type CheckoutCurrency,
+} from '../../../../lib/stripe/checkout';
 import { validateCreateCheckoutSession } from '../../../../lib/utils/validation';
 
 async function createSessionHandler(
@@ -34,6 +38,21 @@ async function createSessionHandler(
       {
         error: error instanceof Error ? error.message : 'Invalid request data',
       },
+      { status: 400 }
+    );
+  }
+
+  // Récupérer la devise depuis le body, cookie, ou défaut
+  const cookieStore = await cookies();
+  const currencyCookie = cookieStore.get('currency')?.value;
+  const currency: CheckoutCurrency =
+    (body.currency as CheckoutCurrency) ||
+    (currencyCookie as CheckoutCurrency) ||
+    'CAD';
+
+  if (currency !== 'CAD' && currency !== 'USD') {
+    return NextResponse.json(
+      { error: 'Invalid currency. Must be CAD or USD.' },
       { status: 400 }
     );
   }
@@ -76,6 +95,7 @@ async function createSessionHandler(
       userId: userId ?? null,
       cartId: cartId ?? null,
       itemsCount: cartItems.length,
+      currency,
     },
     'Creating checkout session'
   );
@@ -85,11 +105,12 @@ async function createSessionHandler(
 
     const baseUrl = request.headers.get('origin') || 'http://localhost:3000';
 
-    // Créer une session Stripe avec les items
+    // Créer une session Stripe avec les items et la devise
     const session = await createCheckoutSession({
       items: cartItems,
+      currency,
       userId,
-      cartId, // Passer le cartId pour les métadonnées
+      cartId,
       successUrl:
         successUrl ||
         `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,

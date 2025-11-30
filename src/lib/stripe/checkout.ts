@@ -1,11 +1,15 @@
 import Stripe from 'stripe';
 
 import { prisma } from '../db/prisma';
+import { logger } from '../logger';
 import { toStripeAmount } from '../utils/currency';
 import { stripe } from './client';
 
+export type CheckoutCurrency = 'CAD' | 'USD';
+
 export interface CreateCheckoutSessionParams {
   items: Array<{ variantId: string; quantity: number }>;
+  currency: CheckoutCurrency;
   userId?: string;
   cartId?: string;
   anonymousId?: string;
@@ -15,6 +19,7 @@ export interface CreateCheckoutSessionParams {
 
 export async function createCheckoutSession({
   items,
+  currency,
   userId,
   cartId,
   anonymousId,
@@ -30,8 +35,6 @@ export async function createCheckoutSession({
     include: {
       pricing: {
         where: { isActive: true, priceType: 'base' },
-        orderBy: { validFrom: 'desc' },
-        take: 1,
       },
       media: {
         where: { isPrimary: true },
@@ -56,9 +59,33 @@ export async function createCheckoutSession({
       const variant = variants.find(v => v.id === item.variantId);
       if (!variant) throw new Error(`Variant ${item.variantId} not found`);
 
-      const pricing = variant.pricing[0];
+      // Chercher le prix pour la devise demandée, avec fallback
+      let pricing = variant.pricing.find(p => p.currency === currency);
+      let usedCurrency = currency;
+
       if (!pricing) {
-        throw new Error(`No active pricing found for variant ${variant.sku}`);
+        // Fallback sur l'autre devise
+        const fallbackCurrency = currency === 'CAD' ? 'USD' : 'CAD';
+        pricing = variant.pricing.find(p => p.currency === fallbackCurrency);
+        if (pricing) {
+          usedCurrency = fallbackCurrency;
+          logger.warn(
+            {
+              action: 'checkout_price_fallback',
+              variantId: variant.id,
+              sku: variant.sku,
+              requestedCurrency: currency,
+              fallbackCurrency,
+            },
+            `Price not found for ${currency}, using ${fallbackCurrency}`
+          );
+        }
+      }
+
+      if (!pricing) {
+        throw new Error(
+          `No active pricing found for variant ${variant.sku} in ${currency} or fallback currency`
+        );
       }
 
       const productName = variant.product.translations[0]?.name || 'Product';
@@ -66,30 +93,46 @@ export async function createCheckoutSession({
 
       return {
         price_data: {
-          currency: pricing.currency.toLowerCase(),
+          currency: usedCurrency.toLowerCase(),
           product_data: {
             name: `${productName} (${variant.sku})`,
             images: imageUrl ? [imageUrl] : undefined,
           },
-          unit_amount: toStripeAmount(
-            pricing.price.toString(),
-            pricing.currency as 'CAD' | 'USD' | 'EUR'
-          ),
+          unit_amount: toStripeAmount(pricing.price.toString(), usedCurrency),
         },
         quantity: item.quantity,
       };
     }
   );
 
+  logger.info(
+    {
+      action: 'checkout_session_create',
+      currency,
+      itemCount: items.length,
+      userId: userId || 'anonymous',
+    },
+    'Creating Stripe checkout session'
+  );
+
+  // Stripe Tax nécessite une adresse d'origine configurée dans le dashboard
+  // https://dashboard.stripe.com/settings/tax
+  const enableAutomaticTax = process.env.STRIPE_AUTOMATIC_TAX === 'true';
+
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: lineItems,
     success_url: successUrl,
     cancel_url: cancelUrl,
+    // Activer Stripe Tax pour calcul automatique des taxes (si configuré)
+    ...(enableAutomaticTax && { automatic_tax: { enabled: true } }),
+    // Collecter l'adresse pour le calcul des taxes
+    billing_address_collection: enableAutomaticTax ? 'required' : 'auto',
     metadata: {
       userId: userId || '',
       cartId: cartId || '',
       anonymousId: anonymousId || '',
+      currency,
       items: JSON.stringify(items),
     },
     payment_intent_data: {
@@ -97,11 +140,22 @@ export async function createCheckoutSession({
         userId: userId || '',
         cartId: cartId || '',
         anonymousId: anonymousId || '',
+        currency,
         items: JSON.stringify(items),
       },
     },
     expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
   });
+
+  logger.info(
+    {
+      action: 'checkout_session_created',
+      sessionId: session.id,
+      currency,
+      automaticTax: enableAutomaticTax,
+    },
+    'Stripe checkout session created successfully'
+  );
 
   return session;
 }

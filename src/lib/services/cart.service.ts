@@ -25,6 +25,7 @@ export interface CartProjection {
       id: string;
       sku: string;
       product: {
+        id: string;
         slug: string;
         translations: {
           language: string;
@@ -80,7 +81,9 @@ export async function getOrCreateCart(
           variant: {
             include: {
               product: {
-                include: {
+                select: {
+                  id: true,
+                  slug: true,
                   translations: {
                     select: {
                       language: true,
@@ -136,7 +139,9 @@ export async function getOrCreateCart(
             variant: {
               include: {
                 product: {
-                  include: {
+                  select: {
+                    id: true,
+                    slug: true,
                     translations: {
                       select: {
                         language: true,

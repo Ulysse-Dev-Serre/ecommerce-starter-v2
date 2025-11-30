@@ -16,7 +16,8 @@ interface SimpleVariant {
   id: string;
   nameEN: string;
   nameFR: string;
-  price: string;
+  priceCAD: string;
+  priceUSD: string;
   stock: string;
 }
 
@@ -105,7 +106,8 @@ export default function NewProductPage() {
       id: crypto.randomUUID(),
       nameEN: '',
       nameFR: '',
-      price: '49.99',
+      priceCAD: '',
+      priceUSD: '',
       stock: '0',
     };
     setVariants([...variants, newVariant]);
@@ -113,7 +115,7 @@ export default function NewProductPage() {
 
   const handleVariantChange = (
     id: string,
-    field: 'nameEN' | 'nameFR' | 'price' | 'stock',
+    field: 'nameEN' | 'nameFR' | 'priceCAD' | 'priceUSD' | 'stock',
     value: string
   ) => {
     setVariants(
@@ -157,8 +159,12 @@ export default function NewProductPage() {
         if (!v.nameEN || !v.nameFR) {
           throw new Error(`Variante ${i + 1}: nom EN et FR requis`);
         }
-        if (!v.price || parseFloat(v.price) < 0) {
-          throw new Error(`Variante ${i + 1}: prix invalide`);
+        const hasCAD = v.priceCAD && parseFloat(v.priceCAD) >= 0;
+        const hasUSD = v.priceUSD && parseFloat(v.priceUSD) >= 0;
+        if (!hasCAD && !hasUSD) {
+          throw new Error(
+            `Variante ${i + 1}: au moins un prix (CAD ou USD) est requis`
+          );
         }
       }
 
@@ -184,9 +190,9 @@ export default function NewProductPage() {
         variants: variants.map(v => ({
           nameEN: v.nameEN,
           nameFR: v.nameFR,
-          price: parseFloat(v.price),
+          priceCAD: v.priceCAD ? parseFloat(v.priceCAD) : null,
+          priceUSD: v.priceUSD ? parseFloat(v.priceUSD) : null,
           stock: parseInt(v.stock) || 0,
-          currency: 'CAD',
         })),
       };
 
@@ -562,23 +568,43 @@ export default function NewProductPage() {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            {t.price} (CAD){' '}
-                            <span className="text-red-500">*</span>
+                            {t.price} ($ CAD)
                           </label>
                           <input
                             type="number"
                             step="0.01"
-                            value={variant.price}
+                            min="0"
+                            value={variant.priceCAD}
                             onChange={e =>
                               handleVariantChange(
                                 variant.id,
-                                'price',
+                                'priceCAD',
                                 e.target.value
                               )
                             }
                             placeholder="49.99"
                             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            {t.price} ($ USD)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={variant.priceUSD}
+                            onChange={e =>
+                              handleVariantChange(
+                                variant.id,
+                                'priceUSD',
+                                e.target.value
+                              )
+                            }
+                            placeholder="36.99"
+                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                           />
                         </div>
 
@@ -599,6 +625,12 @@ export default function NewProductPage() {
                             placeholder="0"
                             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                           />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <p className="text-xs text-gray-500">
+                            💡 Au moins un prix (CAD ou USD) est requis
+                          </p>
                         </div>
                       </div>
                     </div>

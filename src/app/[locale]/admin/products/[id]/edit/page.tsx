@@ -71,7 +71,8 @@ interface NewVariant {
   id: string;
   nameEN: string;
   nameFR: string;
-  price: string;
+  priceCAD: string;
+  priceUSD: string;
   stock: string;
 }
 
@@ -482,17 +483,24 @@ export default function EditProductPage({
 
   const handleUpdateVariant = async (
     variantId: string,
-    updates: { price?: string; stock?: number }
+    updates: { priceCAD?: string; priceUSD?: string; stock?: number }
   ) => {
     if (!productId) return;
 
     try {
       const payload: any = {};
 
-      if (updates.price !== undefined) {
-        payload.pricing = {
-          price: parseFloat(updates.price),
+      if (updates.priceCAD !== undefined) {
+        payload.pricingCAD = {
+          price: parseFloat(updates.priceCAD),
           currency: 'CAD',
+        };
+      }
+
+      if (updates.priceUSD !== undefined) {
+        payload.pricingUSD = {
+          price: parseFloat(updates.priceUSD),
+          currency: 'USD',
         };
       }
 
@@ -562,7 +570,8 @@ export default function EditProductPage({
       id: crypto.randomUUID(),
       nameEN: '',
       nameFR: '',
-      price: '49.99',
+      priceCAD: '',
+      priceUSD: '',
       stock: '0',
     };
     setNewVariants([...newVariants, newVariant]);
@@ -570,7 +579,7 @@ export default function EditProductPage({
 
   const handleNewVariantChange = (
     id: string,
-    field: 'nameEN' | 'nameFR' | 'price' | 'stock',
+    field: 'nameEN' | 'nameFR' | 'priceCAD' | 'priceUSD' | 'stock',
     value: string
   ) => {
     setNewVariants(
@@ -590,9 +599,9 @@ export default function EditProductPage({
         variants: newVariants.map(v => ({
           nameEN: v.nameEN,
           nameFR: v.nameFR,
-          price: parseFloat(v.price),
+          priceCAD: v.priceCAD ? parseFloat(v.priceCAD) : null,
+          priceUSD: v.priceUSD ? parseFloat(v.priceUSD) : null,
           stock: parseInt(v.stock) || 0,
-          currency: 'CAD',
         })),
       };
 
@@ -1053,7 +1062,10 @@ export default function EditProductPage({
                     {t.sku}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.price}
+                    {t.price} CAD
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                    {t.price} USD
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     {t.stock}
@@ -1073,20 +1085,40 @@ export default function EditProductPage({
                       {variant.sku}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          step="0.01"
-                          defaultValue={variant.pricing[0]?.price || '0.00'}
-                          onBlur={e =>
-                            handleUpdateVariant(variant.id, {
-                              price: e.target.value,
-                            })
-                          }
-                          className="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-                        />
-                        <span className="text-sm text-gray-600">CAD</span>
-                      </div>
+                      <input
+                        type="number"
+                        step="0.01"
+                        defaultValue={
+                          variant.pricing.find(p => p.currency === 'CAD')
+                            ?.price || ''
+                        }
+                        placeholder="—"
+                        onBlur={e =>
+                          e.target.value &&
+                          handleUpdateVariant(variant.id, {
+                            priceCAD: e.target.value,
+                          })
+                        }
+                        className="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      />
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <input
+                        type="number"
+                        step="0.01"
+                        defaultValue={
+                          variant.pricing.find(p => p.currency === 'USD')
+                            ?.price || ''
+                        }
+                        placeholder="—"
+                        onBlur={e =>
+                          e.target.value &&
+                          handleUpdateVariant(variant.id, {
+                            priceUSD: e.target.value,
+                          })
+                        }
+                        className="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <input
@@ -1204,20 +1236,42 @@ export default function EditProductPage({
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
-                        {t.price} (CAD) <span className="text-red-500">*</span>
+                        {t.price} ($ CAD)
                       </label>
                       <input
                         type="number"
                         step="0.01"
-                        value={variant.price}
+                        min="0"
+                        value={variant.priceCAD}
                         onChange={e =>
                           handleNewVariantChange(
                             variant.id,
-                            'price',
+                            'priceCAD',
                             e.target.value
                           )
                         }
                         placeholder="49.99"
+                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        {t.price} ($ USD)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={variant.priceUSD}
+                        onChange={e =>
+                          handleNewVariantChange(
+                            variant.id,
+                            'priceUSD',
+                            e.target.value
+                          )
+                        }
+                        placeholder="36.99"
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                       />
                     </div>
@@ -1239,6 +1293,12 @@ export default function EditProductPage({
                         placeholder="0"
                         className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                       />
+                    </div>
+
+                    <div className="lg:col-span-4">
+                      <p className="text-xs text-gray-500">
+                        💡 Au moins un prix (CAD ou USD) est requis
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -36,7 +36,8 @@
     "shop": "Boutique",
     "cart": "Panier",
     "wishlist": "Liste d'envies",
-    "account": "Mon compte"
+    "account": "Mon compte",
+    "orders": "Mes commandes"
   },
   "products": {
     "title": "Produits",
