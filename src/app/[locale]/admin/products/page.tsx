@@ -277,20 +277,42 @@ export default function ProductsPage() {
   const getBasePrice = (variants: ProductVariant[]) => {
     if (variants.length === 0) return null;
 
-    const prices = variants
+    const allPricing = variants
       .flatMap(v => v.pricing)
-      .filter(p => p.priceType === 'base')
+      .filter(p => p.priceType === 'base');
+
+    if (allPricing.length === 0) return null;
+
+    const cadPrices = allPricing
+      .filter(p => p.currency === 'CAD')
+      .map(p => p.price);
+    const usdPrices = allPricing
+      .filter(p => p.currency === 'USD')
       .map(p => p.price);
 
-    if (prices.length === 0) return null;
+    const parts: string[] = [];
 
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-
-    if (minPrice === maxPrice) {
-      return `$${minPrice.toFixed(2)}`;
+    if (cadPrices.length > 0) {
+      const min = Math.min(...cadPrices);
+      const max = Math.max(...cadPrices);
+      parts.push(
+        min === max
+          ? `$${min.toFixed(2)} CAD`
+          : `$${min.toFixed(2)}-${max.toFixed(2)} CAD`
+      );
     }
-    return `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+
+    if (usdPrices.length > 0) {
+      const min = Math.min(...usdPrices);
+      const max = Math.max(...usdPrices);
+      parts.push(
+        min === max
+          ? `$${min.toFixed(2)} USD`
+          : `$${min.toFixed(2)}-${max.toFixed(2)} USD`
+      );
+    }
+
+    return parts.length > 0 ? parts.join(' / ') : null;
   };
 
   const getTotalStock = (variants: ProductVariant[]) => {

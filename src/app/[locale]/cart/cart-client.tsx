@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUser, SignInButton } from '@clerk/nextjs';
 
 import { QuantitySelector } from '@/components/cart/quantity-selector';
+import { PriceDisplay, PriceTotal } from '@/components/price-display';
 
 interface CartItem {
   id: string;
@@ -134,12 +135,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
     );
   }
 
-  const calculateTotal = () => {
-    return cart.items.reduce((total, item) => {
-      const price = parseFloat(item.variant.pricing[0]?.price || '0');
-      return total + price * item.quantity;
-    }, 0);
-  };
+  const itemsForTotal = cart.items.map(item => ({
+    quantity: item.quantity,
+    pricing: item.variant.pricing,
+  }));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -147,7 +146,6 @@ export function CartClient({ cart, locale }: CartClientProps) {
         {cart.items.map(item => {
           const translation = item.variant.product.translations[0];
           const image = item.variant.product.media[0]?.url;
-          const price = item.variant.pricing[0];
 
           return (
             <div
@@ -168,9 +166,11 @@ export function CartClient({ cart, locale }: CartClientProps) {
                 <p className="text-sm text-gray-600 mb-2">
                   SKU: {item.variant.sku}
                 </p>
-                <p className="text-lg font-bold mb-3">
-                  {price?.price || '0'} {price?.currency || 'CAD'}
-                </p>
+                <PriceDisplay
+                  pricing={item.variant.pricing}
+                  className="text-lg font-bold mb-3 block"
+                  locale={locale}
+                />
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-gray-600">{t.quantity}:</span>
                   <QuantitySelector
@@ -200,9 +200,11 @@ export function CartClient({ cart, locale }: CartClientProps) {
           <div className="border-t pt-4">
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold">Total</span>
-              <span className="text-2xl font-bold">
-                {calculateTotal().toFixed(2)} CAD
-              </span>
+              <PriceTotal
+                items={itemsForTotal}
+                className="text-2xl font-bold"
+                locale={locale}
+              />
             </div>
             {isSignedIn ? (
               <button

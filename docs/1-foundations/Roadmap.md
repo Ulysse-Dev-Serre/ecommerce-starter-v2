@@ -25,10 +25,10 @@
 
 1. ✅ Finaliser le modèle Utilisateur & Rôles (user/admin) et synchroniser Clerk avec la base de données
 2. ✅ API Produits (liste, détail par slug) - GET public + CRUD admin
-3. ⚠️ Dashboard admin minimal (à vérifier)
-4. ⚠️ CRUD Produits et Catégories (admin) (à vérifier)
-5. ⚠️ Panier invité (ajout/mise à jour/suppression) (à vérifier)
-6. ⚠️ Fusion panier invité → utilisateur à la connexion (à vérifier)
+3. ✅ Dashboard admin minimal 
+4. ✅ CRUD Produits et Catégories (admin)
+5. ✅ Panier invité (ajout/mise à jour/suppression) 
+6. ✅  Fusion panier invité → utilisateur à la connexion (à vérifier)
 7. ⚠️ Calcul totaux panier (prix, taxes placeholder, remises simples) (partiellement - checkbox logging manquant)
 8. ⚠️ Pages publiques : Accueil, Catégorie, Produit, Panier, Checkout (à vérifier)
 9. ⚠️ Intégration Stripe Payment Element (client) & Intent serveur (à vérifier)

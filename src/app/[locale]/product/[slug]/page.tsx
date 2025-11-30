@@ -33,8 +33,6 @@ export default async function ProductPage({
         include: {
           pricing: {
             where: { isActive: true, priceType: 'base' },
-            orderBy: { validFrom: 'desc' },
-            take: 1,
           },
           inventory: true,
           attributeValues: {
@@ -66,8 +64,10 @@ export default async function ProductPage({
   const variants = product.variants.map(v => ({
     id: v.id,
     sku: v.sku,
-    price: v.pricing[0]?.price.toString() || '0',
-    currency: v.pricing[0]?.currency || 'CAD',
+    pricing: v.pricing.map(p => ({
+      price: p.price.toString(),
+      currency: p.currency,
+    })),
     stock: v.inventory?.stock || 0,
     attributes: v.attributeValues.map(av => ({
       name: av.attributeValue.attribute.name,

@@ -6,6 +6,23 @@ import type { NextRequest } from 'next/server';
 const locales = ['fr', 'en'];
 const defaultLocale = 'fr';
 
+const CURRENCY_COOKIE_NAME = 'currency';
+const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;
+type Currency = (typeof SUPPORTED_CURRENCIES)[number];
+const DEFAULT_CURRENCY: Currency = 'CAD';
+
+function detectCurrencyFromCountry(countryCode: string | null): Currency {
+  if (!countryCode) return DEFAULT_CURRENCY;
+
+  switch (countryCode.toUpperCase()) {
+    case 'US':
+      return 'USD';
+    case 'CA':
+    default:
+      return 'CAD';
+  }
+}
+
 // Fonction simple pour générer un ID unique compatible Edge Runtime
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -86,6 +103,43 @@ export default clerkMiddleware((auth, req: NextRequest) => {
   // Ajouter requestId à toutes les réponses sans logger
   const response = NextResponse.next();
   response.headers.set('x-request-id', requestId);
+
+  // Gestion du cookie currency (géolocalisation → devise)
+  const existingCurrency = req.cookies.get(CURRENCY_COOKIE_NAME)?.value;
+
+  if (
+    !existingCurrency ||
+    !SUPPORTED_CURRENCIES.includes(existingCurrency as Currency)
+  ) {
+    // Détecter le pays via headers (Vercel, Cloudflare, ou autre CDN)
+    const countryCode =
+      req.headers.get('x-vercel-ip-country') ??
+      req.headers.get('cf-ipcountry') ??
+      req.headers.get('x-country-code') ??
+      null;
+
+    const detectedCurrency = detectCurrencyFromCountry(countryCode);
+
+    response.cookies.set(CURRENCY_COOKIE_NAME, detectedCurrency, {
+      httpOnly: false, // Accessible côté client pour le sélecteur
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365, // 1 an
+      path: '/',
+    });
+
+    logMiddleware(
+      'INFO',
+      {
+        requestId,
+        action: 'currency_detected',
+        countryCode: countryCode ?? 'unknown',
+        currency: detectedCurrency,
+      },
+      'Currency detected from geolocation'
+    );
+  }
+
   return response;
 });
 

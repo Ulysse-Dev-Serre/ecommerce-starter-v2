@@ -36,7 +36,8 @@
     "shop": "Shop",
     "cart": "Cart",
     "wishlist": "Wishlist",
-    "account": "My account"
+    "account": "My account",
+    "orders": "My orders"
   },
   "products": {
     "title": "Products",

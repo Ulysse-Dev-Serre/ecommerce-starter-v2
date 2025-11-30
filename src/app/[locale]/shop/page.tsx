@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { ProductActions } from '@/components/cart/product-actions';
+import { PriceDisplay } from '@/components/price-display';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -39,7 +40,7 @@ export default async function ShopPage({
         {products.map((product: any) => {
           const translation = product.translations[0];
           const firstVariant = product.variants[0];
-          const price = firstVariant?.pricing[0]?.price ?? '0';
+          const pricing = firstVariant?.pricing ?? [];
           const primaryImage = product.media?.find((m: any) => m.isPrimary);
           const variantImage = firstVariant?.media?.[0];
           const image = primaryImage?.url || variantImage?.url;
@@ -75,16 +76,29 @@ export default async function ShopPage({
                 {translation?.shortDescription}
               </p>
               <div className="mb-3">
-                <span className="text-xl font-bold">{price} CAD</span>
+                <PriceDisplay
+                  pricing={pricing}
+                  className="text-xl font-bold"
+                  locale={locale}
+                />
               </div>
-              <ProductActions
-                variantId={firstVariant?.id}
-                locale={locale}
-                disabled={!firstVariant?.id}
-                compact={true}
-                showQuantitySelector={true}
-                maxQuantity={firstVariant?.inventory?.stock || 99}
-              />
+              {product.variants.length > 1 ? (
+                <Link
+                  href={`/${locale}/product/${product.slug}`}
+                  className="w-full inline-block text-center bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  {locale === 'fr' ? 'Voir les options' : 'View options'}
+                </Link>
+              ) : (
+                <ProductActions
+                  variantId={firstVariant?.id}
+                  locale={locale}
+                  disabled={!firstVariant?.id}
+                  compact={true}
+                  showQuantitySelector={true}
+                  maxQuantity={firstVariant?.inventory?.stock || 99}
+                />
+              )}
             </div>
           );
         })}

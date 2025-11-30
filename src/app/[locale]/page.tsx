@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { Language, ProductStatus } from '@/generated/prisma';
 import { ProductActions } from '@/components/cart/product-actions';
+import { PriceDisplay } from '@/components/price-display';
 import { getProducts } from '@/lib/services/product.service';
 
 // Disable static generation for this page (requires DB)
@@ -60,7 +61,7 @@ export default async function Home({
                 );
                 const primaryImage = product.media?.find(m => m.isPrimary);
                 const firstVariant = product.variants?.[0];
-                const price = firstVariant?.pricing?.[0];
+                const pricing = firstVariant?.pricing ?? [];
 
                 return (
                   <div
@@ -94,22 +95,37 @@ export default async function Home({
                         </p>
                       )}
                       <div className="mb-3">
-                        {price && (
-                          <span className="text-lg font-bold">
-                            {price.price.toString()} {price.currency}
-                          </span>
+                        {pricing.length > 0 && (
+                          <PriceDisplay
+                            pricing={pricing.map(p => ({
+                              price: p.price.toString(),
+                              currency: p.currency,
+                            }))}
+                            className="text-lg font-bold"
+                            locale={locale}
+                          />
                         )}
                       </div>
-                      {firstVariant && (
-                        <ProductActions
-                          variantId={firstVariant.id}
-                          locale={locale}
-                          disabled={!firstVariant.id}
-                          compact={true}
-                          showQuantitySelector={true}
-                          maxQuantity={firstVariant.inventory?.stock || 99}
-                        />
-                      )}
+                      {firstVariant &&
+                        (product.variants.length > 1 ? (
+                          <Link
+                            href={`/${locale}/product/${product.slug}`}
+                            className="w-full inline-block text-center bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
+                          >
+                            {locale === 'fr'
+                              ? 'Voir les options'
+                              : 'View options'}
+                          </Link>
+                        ) : (
+                          <ProductActions
+                            variantId={firstVariant.id}
+                            locale={locale}
+                            disabled={!firstVariant.id}
+                            compact={true}
+                            showQuantitySelector={true}
+                            maxQuantity={firstVariant.inventory?.stock || 99}
+                          />
+                        ))}
                     </div>
                   </div>
                 );

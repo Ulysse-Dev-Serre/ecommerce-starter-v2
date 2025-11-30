@@ -190,9 +190,7 @@ export async function getProducts(
             id: true,
             sku: true,
             pricing: {
-              where: { isActive: true },
-              orderBy: { price: 'asc' },
-              take: 1,
+              where: { isActive: true, priceType: 'base' },
               select: {
                 price: true,
                 currency: true,
@@ -335,9 +333,7 @@ export async function getProductBySlug(
           id: true,
           sku: true,
           pricing: {
-            where: { isActive: true },
-            orderBy: { price: 'asc' },
-            take: 1,
+            where: { isActive: true, priceType: 'base' },
             select: {
               price: true,
               currency: true,

@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation';
 import React, { useEffect, useState, type MouseEvent } from 'react';
 
 import { logger } from '../../lib/logger';
+import { useCurrency, type Currency } from '../../hooks/use-currency';
 
 interface NavbarProps {
   locale: string;
@@ -21,6 +22,7 @@ interface NavbarProps {
 
 export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   const [messages, setMessages] = useState<any | null>(null);
+  const { currency, setCurrency } = useCurrency();
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 
@@ -94,6 +96,22 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
     );
   };
 
+  // Fonction pour changer de devise
+  const handleCurrencyChange = (newCurrency: Currency): void => {
+    logger.info(
+      {
+        action: 'currency_change',
+        from: currency,
+        to: newCurrency,
+        locale,
+        component: 'navbar',
+      },
+      'User changed currency'
+    );
+
+    setCurrency(newCurrency);
+  };
+
   // Afficher un loading si les messages ne sont pas encore chargés
   if (!messages) {
     return (
@@ -151,6 +169,18 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               {messages.common.contact}
             </Link>
 
+            {/* Mes commandes - Visible pour les utilisateurs connectés */}
+            {isSignedIn && (
+              <Link
+                href={`/${locale}/orders`}
+                className="text-foreground hover:text-primary transition-colors"
+                onClick={() => handleNavigationClick(`/${locale}/orders`)}
+              >
+                {messages.navbar?.orders ||
+                  (locale === 'fr' ? 'Mes commandes' : 'My orders')}
+              </Link>
+            )}
+
             {/* Admin Dashboard - Visible uniquement pour les admins */}
             {isSignedIn && userRole === 'ADMIN' && (
               <Link
@@ -183,6 +213,30 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 }`}
               >
                 EN
+              </button>
+            </div>
+
+            {/* Sélecteur de devise */}
+            <div className="flex items-center space-x-2 border-l pl-4 ml-2">
+              <button
+                onClick={() => handleCurrencyChange('CAD')}
+                className={`px-2 py-1 text-sm rounded transition-colors ${
+                  currency === 'CAD'
+                    ? 'bg-green-600 text-white'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                $ CAD
+              </button>
+              <button
+                onClick={() => handleCurrencyChange('USD')}
+                className={`px-2 py-1 text-sm rounded transition-colors ${
+                  currency === 'USD'
+                    ? 'bg-green-600 text-white'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                $ USD
               </button>
             </div>
           </nav>
