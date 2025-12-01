@@ -413,16 +413,19 @@ if (process.env.DISABLE_TEST_BYPASS === 'true') {
 
 ## ✅ Points Forts Actuels
 
-1. **Webhook Stripe** - Excellente implémentation
-   - Signature validation ✅
-   - Idempotence ✅
-   - Replay protection ✅
+1. **Webhook Stripe** - Excellente implémentation (Issue #49)
+    - Signature validation HMAC-SHA256 ✅
+    - Idempotence avec payloadHash ✅
+    - Replay protection via table WebhookEvent ✅
+    - Retry logic avec tracking (retryCount, lastError) ✅
+    - Alertes Slack automatiques en cas d'erreur ✅
+    - Monitoring endpoint `/api/webhooks/stripe/status` ✅
 
 2. **Metadata sécurisés** - cartId, userId dans sessions Stripe
 
 3. **Expiration sessions** - 30 minutes (bonne pratique)
 
-4. **Logging complet** - Traçabilité des événements
+4. **Logging complet** - Traçabilité des événements et alertes sécurité
 
 ---
 

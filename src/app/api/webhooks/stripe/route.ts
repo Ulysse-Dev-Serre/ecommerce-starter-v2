@@ -10,6 +10,10 @@ import {
 import { releaseStock } from '../../../../lib/services/inventory.service';
 import { createOrderFromCart } from '../../../../lib/services/order.service';
 import {
+  alertInvalidSignature,
+  alertWebhookFailure,
+} from '../../../../lib/services/webhook-alert.service';
+import {
   generatePayloadHash,
   validateWebhookSignature,
 } from '../../../../lib/stripe/webhooks';
@@ -23,6 +27,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!signature) {
       logger.error({ requestId }, 'Missing stripe-signature header');
+      await alertInvalidSignature({
+        source: 'stripe',
+        signature: 'MISSING',
+        error: 'stripe-signature header not provided',
+        timestamp: new Date(),
+      });
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
@@ -35,7 +45,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const event = validateWebhookSignature(body, signature, webhookSecret);
+    let event: Stripe.Event;
+    try {
+      event = validateWebhookSignature(body, signature, webhookSecret);
+    } catch (error) {
+      await alertInvalidSignature({
+        source: 'stripe',
+        signature: signature.substring(0, 20),
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date(),
+      });
+      return NextResponse.json(
+        { error: 'Invalid webhook signature' },
+        { status: 400 }
+      );
+    }
 
     logger.info(
       {
@@ -123,18 +147,81 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+
     logger.error(
       {
         requestId,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMsg,
+        eventId: event?.id,
+        eventType: event?.type,
       },
       'Webhook processing failed'
     );
 
+    // Update webhook event with error details if event exists
+    if (event?.id) {
+      const webhookEvent = await prisma.webhookEvent.findUnique({
+        where: {
+          source_eventId: {
+            source: 'stripe',
+            eventId: event.id,
+          },
+        },
+      });
+
+      if (webhookEvent) {
+        const updatedEvent = await prisma.webhookEvent.update({
+          where: {
+            source_eventId: {
+              source: 'stripe',
+              eventId: event.id,
+            },
+          },
+          data: {
+            retryCount: { increment: 1 },
+            lastError: errorMsg,
+          },
+        });
+
+        // Check if max retries reached
+        if (updatedEvent.retryCount >= updatedEvent.maxRetries) {
+          logger.error(
+            {
+              requestId,
+              eventId: event.id,
+              retryCount: updatedEvent.retryCount,
+              maxRetries: updatedEvent.maxRetries,
+            },
+            'Webhook max retries reached, alerting'
+          );
+
+          await alertWebhookFailure({
+            webhookId: webhookEvent.id,
+            source: 'stripe',
+            eventId: event.id,
+            eventType: event.type,
+            error: errorMsg,
+            retryCount: updatedEvent.retryCount,
+            maxRetries: updatedEvent.maxRetries,
+            timestamp: new Date(),
+          });
+
+          // Return 200 to stop Stripe from retrying
+          return NextResponse.json({ received: true });
+        }
+
+        // Return 500 to trigger Stripe retry
+        return NextResponse.json(
+          { error: errorMsg, retryCount: updatedEvent.retryCount },
+          { status: 500 }
+        );
+      }
+    }
+
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Webhook processing failed',
+        error: errorMsg,
       },
       { status: 400 }
     );
