@@ -3,7 +3,6 @@ import { Eye } from 'lucide-react';
 
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { OrderFilters } from '@/components/admin/orders/filters';
-import { getAllOrders } from '@/lib/services/order.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,12 +22,28 @@ export default async function OrdersPage({
   const { locale } = await params;
   const { page = '1', status, search } = await searchParams;
 
-  const { orders, pagination } = await getAllOrders({
-    page: parseInt(page, 10),
-    limit: 20,
-    status,
-    search,
+  // Appeler l'endpoint API pour récupérer les commandes
+  const apiUrl = new URL(
+    '/api/admin/orders',
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+  );
+  apiUrl.searchParams.set('page', page);
+  apiUrl.searchParams.set('limit', '20');
+  if (status) apiUrl.searchParams.set('status', status);
+  if (search) apiUrl.searchParams.set('search', search);
+
+  const response = await fetch(apiUrl.toString(), {
+    headers: {
+      'x-test-api-key': process.env.TEST_API_KEY || '',
+    },
   });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  const { orders, pagination } = data.data;
 
   return (
     <div className="space-y-6">

@@ -32,6 +32,12 @@ npm test -- webhooks-stripe
 ```
 Teste les webhooks Stripe (Issue #49 - Webhooks Stripe sécurisés). Vérifie que l'endpoint `/api/webhooks/stripe` rejette les requêtes sans signature valide et que l'endpoint de monitoring `/api/webhooks/stripe/status` retourne les statistiques des webhooks (total, processed, successRate, event breakdown, recent failures).
 
+### orders-status.test.js
+```bash
+npm test -- orders-status
+```
+Teste le changement de statut des commandes (Issue #45). Vérifie que l'endpoint `/api/admin/orders/[id]/status` valide le workflow (PAID → SHIPPED → DELIVERED), rejette les transitions invalides, et enregistre l'historique avec audit trail.
+
 ## Commandes globales
 
 ### Tous les tests

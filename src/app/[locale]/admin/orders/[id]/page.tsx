@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowLeft, Package, CreditCard, User, MapPin } from 'lucide-react';
 
 import { StatusBadge } from '@/components/admin/orders/status-badge';
+import { OrderDetailClient } from '@/components/admin/orders/order-detail-client';
 import { getOrderByIdAdmin } from '@/lib/services/order.service';
 
 export const dynamic = 'force-dynamic';
@@ -236,6 +237,9 @@ export default async function OrderDetailPage({
               )}
             </div>
           </div>
+
+          {/* Status actions */}
+          <OrderDetailClient orderId={order.id} currentStatus={order.status} />
 
           {/* Status history */}
           {order.statusHistory && order.statusHistory.length > 0 && (
