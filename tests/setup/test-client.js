@@ -32,6 +32,13 @@ class TestClient {
   }
 
   /**
+   * PATCH request
+   */
+  async patch(endpoint, data = {}, config = {}) {
+    return this._makeRequest(endpoint, 'PATCH', data, config);
+  }
+
+  /**
    * DELETE request
    */
   async delete(endpoint, config = {}) {
@@ -53,7 +60,7 @@ class TestClient {
       signal: AbortSignal.timeout(this.timeout),
     };
 
-    if (data && (method === 'POST' || method === 'PUT')) {
+    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
       options.body = JSON.stringify(data);
     }
 
