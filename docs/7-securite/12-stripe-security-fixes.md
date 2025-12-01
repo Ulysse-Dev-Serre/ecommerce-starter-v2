@@ -217,6 +217,13 @@ export const GET = withError(
 - ✅ Logging tentatives bypass en production
 - ✅ Traçabilité complète
 
+### 6. Webhook Security (Issue #49)
+- ✅ Signature validation Stripe (HMAC-SHA256)
+- ✅ Idempotence (pas de double traitement)
+- ✅ Retry logic avec tracking
+- ✅ Alertes Slack en cas d'erreur
+- ✅ Monitoring endpoint `/api/webhooks/stripe/status`
+
 ---
 
 ## 📝 Fichiers Modifiés
