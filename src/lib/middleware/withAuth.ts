@@ -81,10 +81,16 @@ export function withAuth(handler: ApiHandler) {
         process.env.NODE_ENV !== 'production'
       ) {
         // Priorité au header x-test-user-id, sinon config .env
-        const clerkTestUserId =
-          testUserId ||
-          process.env.CLERK_TEST_USER_ID ||
-          'user_35FXh55upbdX9L0zj1bjnrFCAde';
+        const clerkTestUserId = testUserId || process.env.CLERK_TEST_USER_ID;
+
+        if (!clerkTestUserId) {
+          logger.error({}, 'CLERK_TEST_USER_ID not configured');
+          return NextResponse.json(
+            { success: false, error: 'Test configuration error' },
+            { status: 500 }
+          );
+        }
+
         const testUser = await prisma.user.findUnique({
           where: { clerkId: clerkTestUserId },
           select: {
@@ -328,10 +334,15 @@ export function withOptionalAuth(handler: ApiHandler) {
         }
 
         // Simuler un utilisateur authentifié
-        const clerkTestUserId =
-          testUserId ||
-          process.env.CLERK_TEST_USER_ID ||
-          'user_35FXh55upbdX9L0zj1bjnrFCAde';
+        const clerkTestUserId = testUserId || process.env.CLERK_TEST_USER_ID;
+
+        if (!clerkTestUserId) {
+          logger.error({}, 'CLERK_TEST_USER_ID not configured');
+          return NextResponse.json(
+            { success: false, error: 'Test configuration error' },
+            { status: 500 }
+          );
+        }
 
         const testUser = await prisma.user.findUnique({
           where: { clerkId: clerkTestUserId },
