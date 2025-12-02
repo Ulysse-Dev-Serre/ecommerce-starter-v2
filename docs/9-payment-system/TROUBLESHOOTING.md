@@ -165,7 +165,7 @@ Le `STRIPE_WEBHOOK_SECRET` dans `.env` ne correspond pas au secret du webhook co
 2. Copier le nouveau `whsec_xxxxx` affiché
 3. Mettre à jour `.env` :
    ```bash
-   STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+   STRIPE_WEBHOOK_SECRET=[REDACTED:webhook-secret]
    ```
 4. Redémarrer le serveur (`npm run dev`)
 
