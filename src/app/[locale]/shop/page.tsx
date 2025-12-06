@@ -51,7 +51,7 @@ export default async function ShopPage({
               className="group border border-border rounded-lg p-4 hover:shadow-lg transition"
             >
               <Link href={`/${locale}/product/${product.slug}`}>
-                <div className="w-full h-48 bg-gray-200 rounded-md mb-3 overflow-hidden">
+                <div className="w-full h-48 bg-muted rounded-md mb-3 overflow-hidden">
                   {image ? (
                     <img
                       src={image}
@@ -61,7 +61,7 @@ export default async function ShopPage({
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       {locale === 'fr' ? "Pas d'image" : 'No image'}
                     </div>
                   )}

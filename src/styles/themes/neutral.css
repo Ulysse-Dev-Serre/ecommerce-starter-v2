@@ -1,27 +1,27 @@
 /**
- * Thème Neutral - Boutique générique
- * Palette équilibrée pour n'importe quel type de produit
+ * Thème Japandi & Natural Earthborn Elegance
+ * Style minimaliste rappelant le bambou, blanc et simplicité
  */
 
 :root {
-  /* Brand Colors */
-  --primary: #3b82f6; /* blue-500 */
-  --primary-hover: #2563eb; /* blue-600 */
-  --secondary: #64748b; /* slate-500 */
-  --accent: #f1f5f9; /* slate-100 */
+  /* Brand Colors - Bambou et nature */
+  --primary: #7d9d5c; /* Bamboo green */
+  --primary-hover: #6b8b4f; /* Darker bamboo */
+  --secondary: #a0a0a0; /* Soft gray */
+  --accent: #fafafa; /* Off-white */
 
   /* UI States */
-  --success: #10b981; /* green-500 */
-  --error: #ef4444; /* red-500 */
-  --warning: #f59e0b; /* orange-500 */
-  --info: #3b82f6; /* blue-500 */
+  --success: #81c784; /* Soft green */
+  --error: #e57373; /* Soft red */
+  --warning: #ffb74d; /* Soft orange */
+  --info: #90caf9; /* Soft blue */
 
-  /* Neutrals */
-  --background: #ffffff;
-  --foreground: #0f172a; /* slate-900 */
-  --muted: #f8fafc; /* slate-50 */
-  --muted-foreground: #64748b; /* slate-500 */
-  --border: #e2e8f0; /* slate-200 */
+  /* Neutrals - Blanc et simplicité */
+  --background: #fefefe; /* Pure white */
+  --foreground: #333333; /* Dark charcoal */
+  --muted: #f0f0f0; /* Light gray */
+  --muted-foreground: #888888; /* Medium gray */
+  --border: #dddddd; /* Soft border */
 
   /* Typography */
   --font-heading: 'Inter', sans-serif;

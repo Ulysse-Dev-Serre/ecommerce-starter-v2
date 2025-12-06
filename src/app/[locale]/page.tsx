@@ -35,9 +35,9 @@ export default async function Home({
 
   return (
     <div className="flex-1">
-      <section className="bg-gradient-to-r from-gray-100 to-gray-200 py-20">
+      <section className="bg-gradient-to-r from-muted to-accent py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold">Hero</h1>
+          <h1 className="text-4xl font-bold text-foreground">Hero</h1>
         </div>
       </section>
 
@@ -48,7 +48,7 @@ export default async function Home({
           </h2>
 
           {featuredProducts.length === 0 ? (
-            <p className="text-center text-gray-500">
+            <p className="text-center text-muted-foreground">
               {locale === 'fr'
                 ? 'Aucun produit en vedette pour le moment.'
                 : 'No featured products at the moment.'}
@@ -69,7 +69,7 @@ export default async function Home({
                     className="group border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                   >
                     <Link href={`/${locale}/product/${product.slug}`}>
-                      <div className="aspect-square bg-gray-200 relative overflow-hidden">
+                      <div className="aspect-square bg-muted relative overflow-hidden">
                         {primaryImage ? (
                           <img
                             src={primaryImage.url}
@@ -77,7 +77,7 @@ export default async function Home({
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                             {locale === 'fr' ? "Pas d'image" : 'No image'}
                           </div>
                         )}
@@ -90,7 +90,7 @@ export default async function Home({
                         </h3>
                       </Link>
                       {translation?.shortDescription && (
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                           {translation.shortDescription}
                         </p>
                       )}
