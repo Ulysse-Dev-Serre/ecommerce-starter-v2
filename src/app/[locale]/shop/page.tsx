@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
 
 interface ShopPageProps {
@@ -82,23 +81,6 @@ export default async function ShopPage({
                   locale={locale}
                 />
               </div>
-              {product.variants.length > 1 ? (
-                <Link
-                  href={`/${locale}/product/${product.slug}`}
-                  className="w-full inline-block text-center bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  {locale === 'fr' ? 'Voir les options' : 'View options'}
-                </Link>
-              ) : (
-                <ProductActions
-                  variantId={firstVariant?.id}
-                  locale={locale}
-                  disabled={!firstVariant?.id}
-                  compact={true}
-                  showQuantitySelector={true}
-                  maxQuantity={firstVariant?.inventory?.stock || 99}
-                />
-              )}
             </div>
           );
         })}

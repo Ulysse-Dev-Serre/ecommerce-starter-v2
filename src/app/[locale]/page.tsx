@@ -1,11 +1,10 @@
 import Link from 'next/link';
 
 import { Language, ProductStatus } from '@/generated/prisma';
-import { ProductActions } from '@/components/cart/product-actions';
-import { PriceDisplay } from '@/components/price-display';
 import { getProducts } from '@/lib/services/product.service';
 import fr from '@/lib/i18n/dictionaries/fr.json';
 import en from '@/lib/i18n/dictionaries/en.json';
+import { FeaturedProductsCarousel } from '@/components/FeaturedProductsCarousel';
 
 // Disable static generation for this page (requires DB)
 export const dynamic = 'force-dynamic';
@@ -60,83 +59,11 @@ export default async function Home({
                 : 'No featured products at the moment.'}
             </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {featuredProducts.map(product => {
-                const translation = product.translations.find(
-                  t => t.language === language
-                );
-                const primaryImage = product.media?.find(m => m.isPrimary);
-                const firstVariant = product.variants?.[0];
-                const pricing = firstVariant?.pricing ?? [];
-
-                return (
-                  <div
-                    key={product.id}
-                    className="group border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <Link href={`/${locale}/product/${product.slug}`}>
-                      <div className="aspect-square bg-muted relative overflow-hidden">
-                        {primaryImage ? (
-                          <img
-                            src={primaryImage.url}
-                            alt={primaryImage.alt || translation?.name || ''}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                            {locale === 'fr' ? "Pas d'image" : 'No image'}
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                    <div className="p-4">
-                      <Link href={`/${locale}/product/${product.slug}`}>
-                        <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                          {translation?.name || product.slug}
-                        </h3>
-                      </Link>
-                      {translation?.shortDescription && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {translation.shortDescription}
-                        </p>
-                      )}
-                      <div className="mb-3">
-                        {pricing.length > 0 && (
-                          <PriceDisplay
-                            pricing={pricing.map(p => ({
-                              price: p.price.toString(),
-                              currency: p.currency,
-                            }))}
-                            className="text-lg font-bold"
-                            locale={locale}
-                          />
-                        )}
-                      </div>
-                      {firstVariant &&
-                        (product.variants.length > 1 ? (
-                          <Link
-                            href={`/${locale}/product/${product.slug}`}
-                            className="w-full inline-block text-center bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
-                          >
-                            {locale === 'fr'
-                              ? 'Voir les options'
-                              : 'View options'}
-                          </Link>
-                        ) : (
-                          <ProductActions
-                            variantId={firstVariant.id}
-                            locale={locale}
-                            disabled={!firstVariant.id}
-                            compact={true}
-                            showQuantitySelector={true}
-                            maxQuantity={firstVariant.inventory?.stock || 99}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <FeaturedProductsCarousel
+              products={featuredProducts}
+              locale={locale}
+              messages={messages}
+            />
           )}
         </div>
       </section>
