@@ -37,8 +37,8 @@ export interface ProductVariantProjection {
     trackInventory: boolean;
     allowBackorder: boolean;
   } | null;
-  attributeValues: {
-    attributeValue: {
+  attributeValues: Array<{
+    attributeValue?: {
       value: string;
       attribute: {
         key: string;
@@ -48,7 +48,9 @@ export interface ProductVariantProjection {
         displayName: string;
       }[];
     };
-  }[];
+    variantId?: string;
+    attributeValueId?: string;
+  }>;
   media: {
     url: string;
     alt: string | null;
@@ -208,22 +210,8 @@ export async function getProducts(
             ...(includeAttributes && {
               attributeValues: {
                 select: {
-                  attributeValue: {
-                    select: {
-                      value: true,
-                      attribute: {
-                        select: {
-                          key: true,
-                        },
-                      },
-                      translations: {
-                        select: {
-                          language: true,
-                          displayName: true,
-                        },
-                      },
-                    },
-                  },
+                  variantId: true,
+                  attributeValueId: true,
                 },
               },
             }),
@@ -258,13 +246,14 @@ export async function getProducts(
           },
         },
         media: {
-          where: { isPrimary: true },
-          take: 1,
           select: {
             url: true,
             alt: true,
             isPrimary: true,
             sortOrder: true,
+          },
+          orderBy: {
+            sortOrder: 'asc',
           },
         },
       },
