@@ -114,12 +114,14 @@ body {
 }
 
 .bamboo-gradient {
-  /* Dégradé allant de la couleur claire (à gauche) vers la couleur foncée (à droite) */
   background: linear-gradient(
-    to right,
-    #dbc58f 0%,
-    /* Jaune Paille au début */ #b79354 50%,
-    /* Ocre Doré au milieu */ #8a673e 100% /* Brun Terreux à la fin */
+    90deg,
+    #c2b078 0%,
+    #d7c58b 10%,
+    #c2b078 20%,
+    #d7c58b 30%,
+    #c2b078 40%,
+    #d7c58b 50%
   );
 }
 

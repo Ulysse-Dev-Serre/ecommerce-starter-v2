@@ -136,12 +136,33 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             <Link
               href={`/${locale}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
+              className="flex items-end gap-3"
             >
               <img
                 src="/ManorLeaf_transparent.png"
                 alt="ManorLeaf Logo"
                 className="h-16 w-auto cursor-pointer"
               />
+              <span className="text-3xl font-serif font-bold tracking-wide animate-pulse -ml-8 mb-1">
+                <span
+                  className="text-[#3a2415]"
+                  style={{
+                    textShadow:
+                      '1px 1px 0 #c49a6c, 2px 2px 0 #c49a6c, 3px 3px 0 #c49a6c, 4px 4px 0 #8f7250, 6px 8px 15px rgba(0,0,0,0.45)',
+                  }}
+                >
+                  ANOR
+                </span>
+                <span
+                  className="text-[#1E3812] ml-1"
+                  style={{
+                    textShadow:
+                      '1px 1px 0 #8CB852, 2px 2px 0 #8CB852, 3px 3px 0 #8CB852, 4px 4px 0 #6e9440, 5px 5px 0 #4E7F2A, 8px 10px 20px rgba(0,0,0,0.4)',
+                  }}
+                >
+                  LEAF
+                </span>
+              </span>
             </Link>
           </div>
 

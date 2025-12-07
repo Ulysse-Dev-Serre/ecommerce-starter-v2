@@ -38,18 +38,13 @@ export default async function Home({
 
   return (
     <div className="flex-1">
-      <section className="bg-gradient-to-r from-muted to-accent bamboo-texture -mt-4 relative">
+      <section className="bg-gradient-to-r from-muted to-accent bamboo-texture -mt-4 relative overflow-hidden">
         <img
           src="/hero22.png"
           alt="Hero Image"
-          className="w-full h-[28rem] object-cover opacity-80"
+          className="w-full h-[28rem] object-cover opacity-70"
         />
-        <div className="absolute inset-0 flex items-start justify-start pt-8 pl-8">
-          <h1 className="text-6xl font-bold drop-shadow-2xl animate-pulse">
-            <span className="text-amber-900 drop-shadow-lg">Manor</span>
-            <span className="text-green-800 drop-shadow-lg">Leaf</span>
-          </h1>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20"></div>
       </section>
 
       <section className="py-16">
