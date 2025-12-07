@@ -97,12 +97,12 @@ function CarouselProductCard({ product, locale }: CarouselProductCardProps) {
             <div className="flex gap-2 mt-3">
               {allImages.map((image, index) => (
                 <button
-                  key={image.id}
+                  key={image.id || `image-${index}`}
                   onClick={e => {
                     e.preventDefault();
                     setCurrentImageIndex(index);
                   }}
-                  className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all ${
+                  className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all cursor-pointer ${
                     index === currentImageIndex
                       ? 'border-primary ring-2 ring-primary/20'
                       : 'border-gray-300 hover:border-gray-400'
@@ -170,7 +170,7 @@ export function FeaturedProductsCarousel({
       {/* Navigation buttons */}
       <button
         onClick={scrollPrev}
-        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow z-10"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow z-10 cursor-pointer"
         aria-label="Previous products"
       >
         <ChevronLeft className="h-5 w-5 text-gray-700" />
@@ -178,7 +178,7 @@ export function FeaturedProductsCarousel({
 
       <button
         onClick={scrollNext}
-        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow z-10"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white rounded-full p-2 shadow-lg hover:shadow-xl transition-shadow z-10 cursor-pointer"
         aria-label="Next products"
       >
         <ChevronRight className="h-5 w-5 text-gray-700" />

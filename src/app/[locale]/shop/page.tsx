@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { PriceDisplay } from '@/components/price-display';
 import { ProductCard } from '@/components/ProductCard';
+import { prismaToJson } from '@/lib/utils/prisma-to-json';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -30,6 +31,9 @@ export default async function ShopPage({
 
   const { data: products, pagination } = await response.json();
 
+  // Convertir les objets Prisma pour les composants client
+  const transformedProducts = prismaToJson(products);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">
@@ -37,7 +41,7 @@ export default async function ShopPage({
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product: any) => (
+        {transformedProducts.map((product: any) => (
           <ProductCard key={product.id} product={product} locale={locale} />
         ))}
       </div>

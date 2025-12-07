@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Language, ProductStatus } from '@/generated/prisma';
 import { ImageGallery } from '@/components/product/image-gallery';
 import { prisma } from '@/lib/db/prisma';
+import { prismaToJson } from '@/lib/utils/prisma-to-json';
 
 import { ProductClient } from './product-client';
 
@@ -61,19 +62,21 @@ export default async function ProductPage({
     isPrimary: m.isPrimary,
   }));
 
-  const variants = product.variants.map(v => ({
-    id: v.id,
-    sku: v.sku,
-    pricing: v.pricing.map(p => ({
-      price: p.price.toString(),
-      currency: p.currency,
-    })),
-    stock: v.inventory?.stock || 0,
-    attributes: v.attributeValues.map(av => ({
-      name: av.attributeValue.attribute.name,
-      value: av.attributeValue.value,
-    })),
-  }));
+  const variants = prismaToJson(
+    product.variants.map(v => ({
+      id: v.id,
+      sku: v.sku,
+      pricing: v.pricing.map(p => ({
+        price: p.price.toString(),
+        currency: p.currency,
+      })),
+      stock: v.inventory?.stock || 0,
+      attributes: v.attributeValues.map((av: any) => ({
+        name: av.attributeValue?.attribute?.name || '',
+        value: av.attributeValue?.value || '',
+      })),
+    }))
+  );
 
   return (
     <div className="flex-1 py-8">
@@ -92,13 +95,24 @@ export default async function ProductPage({
               </h1>
             </div>
 
-            {translation?.description && (
+            {translation?.shortDescription && (
               <div className="prose max-w-none">
-                <p className="text-gray-700">{translation.description}</p>
+                <p className="text-gray-700">{translation.shortDescription}</p>
               </div>
             )}
 
-            <ProductClient variants={variants} locale={locale} />
+            <ProductClient
+              variants={variants}
+              locale={locale}
+              product={{
+                translations: product.translations.map(t => ({
+                  language: t.language,
+                  name: t.name,
+                  description: t.description,
+                  shortDescription: t.shortDescription,
+                })),
+              }}
+            />
           </div>
         </div>
       </div>

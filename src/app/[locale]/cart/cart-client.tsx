@@ -137,7 +137,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
   const itemsForTotal = cart.items.map(item => ({
     quantity: item.quantity,
-    pricing: item.variant.pricing,
+    pricing: item.variant.pricing.map(p => ({
+      price: p.price.toString(),
+      currency: p.currency,
+    })),
   }));
 
   return (
@@ -167,7 +170,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
                   SKU: {item.variant.sku}
                 </p>
                 <PriceDisplay
-                  pricing={item.variant.pricing}
+                  pricing={item.variant.pricing.map(p => ({
+                    price: p.price.toString(),
+                    currency: p.currency,
+                  }))}
                   className="text-lg font-bold mb-3 block"
                   locale={locale}
                 />

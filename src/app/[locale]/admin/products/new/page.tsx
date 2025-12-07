@@ -390,8 +390,8 @@ export default function NewProductPage() {
                 >
                   <h2 className="mb-4 text-lg font-semibold text-gray-900">
                     {translation.language === 'EN'
-                      ? `🇬🇧 ${t.english}`
-                      : `🇫🇷 ${t.french}`}
+                      ? `${t.english}`
+                      : `${t.french}`}
                     {translation.language === 'EN' && (
                       <span className="ml-2 text-sm font-normal text-red-500">
                         *

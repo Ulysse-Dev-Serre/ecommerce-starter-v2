@@ -145,7 +145,7 @@ export function ProductActions({
         <button
           onClick={handleAddToCart}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className={`flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
+          className={`flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
         >
           {!compact && <ShoppingCart className="w-5 h-5" />}
           {isAddingToCart ? t.adding : t.addToCart}
@@ -154,9 +154,8 @@ export function ProductActions({
         <button
           onClick={handleBuyNow}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className={`flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
+          className={`flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
         >
-          {!compact && <Zap className="w-5 h-5" />}
           {isBuyingNow ? t.buying : t.buyNow}
         </button>
       </div>

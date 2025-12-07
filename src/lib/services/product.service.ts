@@ -476,6 +476,14 @@ export interface UpdateProductData {
   status?: ProductStatus;
   isFeatured?: boolean;
   sortOrder?: number;
+  translations?: {
+    language: Language;
+    name: string;
+    description?: string | null;
+    shortDescription?: string | null;
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+  }[];
 }
 
 type ProductWithTranslations = Product & {
@@ -566,11 +574,40 @@ export async function updateProduct(
   id: string,
   productData: UpdateProductData
 ): Promise<ProductWithTranslations> {
+  const { translations, ...productFields } = productData;
+
   const updatedProduct = await prisma.product.update({
     where: { id },
     data: {
-      ...productData,
+      ...productFields,
       updatedAt: new Date(),
+      ...(translations && {
+        translations: {
+          upsert: translations.map(t => ({
+            where: {
+              productId_language: {
+                productId: id,
+                language: t.language,
+              },
+            },
+            update: {
+              name: t.name,
+              description: t.description,
+              shortDescription: t.shortDescription,
+              metaTitle: t.metaTitle,
+              metaDescription: t.metaDescription,
+            },
+            create: {
+              language: t.language,
+              name: t.name,
+              description: t.description,
+              shortDescription: t.shortDescription,
+              metaTitle: t.metaTitle,
+              metaDescription: t.metaDescription,
+            },
+          })),
+        },
+      }),
     },
     include: {
       translations: true,

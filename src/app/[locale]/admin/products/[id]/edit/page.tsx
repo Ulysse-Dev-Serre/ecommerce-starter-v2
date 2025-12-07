@@ -918,7 +918,7 @@ export default function EditProductPage({
           {/* English Translation */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              🇬🇧 {t.english}
+              {t.english}
             </h2>
             <div className="space-y-4">
               <div>
@@ -982,7 +982,7 @@ export default function EditProductPage({
           {/* French Translation */}
           <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              🇫🇷 {t.french}
+              {t.french}
             </h2>
             <div className="space-y-4">
               <div>

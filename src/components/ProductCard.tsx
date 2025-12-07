@@ -94,7 +94,7 @@ export function ProductCard({ product, locale }: ProductCardProps) {
                 e.preventDefault();
                 setCurrentImageIndex(index);
               }}
-              className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all ${
+              className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all cursor-pointer ${
                 index === currentImageIndex
                   ? 'border-primary ring-2 ring-primary/20'
                   : 'border-gray-300 hover:border-gray-400'

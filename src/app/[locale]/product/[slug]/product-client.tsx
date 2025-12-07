@@ -19,9 +19,21 @@ interface Variant {
 interface ProductClientProps {
   variants: Variant[];
   locale: string;
+  product: {
+    translations: Array<{
+      language: string;
+      name: string;
+      description: string | null;
+      shortDescription: string | null;
+    }>;
+  };
 }
 
-export function ProductClient({ variants, locale }: ProductClientProps) {
+export function ProductClient({
+  variants,
+  locale,
+  product,
+}: ProductClientProps) {
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants[0]?.id || ''
   );
@@ -81,7 +93,10 @@ export function ProductClient({ variants, locale }: ProductClientProps) {
   return (
     <div className="space-y-6">
       <PriceDisplay
-        pricing={selectedVariant.pricing}
+        pricing={selectedVariant.pricing.map(p => ({
+          price: p.price.toString(),
+          currency: p.currency,
+        }))}
         className="text-2xl font-semibold text-primary"
         locale={locale}
       />
@@ -180,6 +195,20 @@ export function ProductClient({ variants, locale }: ProductClientProps) {
         maxQuantity={selectedVariant.stock}
         showQuantitySelector={true}
       />
+
+      {/* Description longue */}
+      {(() => {
+        const translation = product.translations.find(
+          t => t.language === locale.toUpperCase()
+        );
+        return translation?.description ? (
+          <div className="prose prose-sm max-w-none">
+            <div
+              dangerouslySetInnerHTML={{ __html: translation.description }}
+            />
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }
