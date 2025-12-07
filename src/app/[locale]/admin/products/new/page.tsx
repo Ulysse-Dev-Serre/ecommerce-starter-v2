@@ -31,11 +31,13 @@ export default function NewProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1);
 
+  // Validation du slug en temps réel
+  const [isSlugValid, setIsSlugValid] = useState(false);
+
   const [formData, setFormData] = useState({
     slug: '',
     status: 'DRAFT' as 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED',
     isFeatured: false,
-    sortOrder: 0,
     translations: [
       {
         language: 'EN' as const,
@@ -72,6 +74,11 @@ export default function NewProductPage() {
     void loadMessages();
   }, [locale]);
 
+  // Validation du slug en temps réel
+  useEffect(() => {
+    setIsSlugValid(validateSlug(formData.slug));
+  }, [formData.slug]);
+
   const handleTranslationChange = (
     index: number,
     field: keyof Translation,
@@ -80,6 +87,12 @@ export default function NewProductPage() {
     const newTranslations = [...formData.translations];
     newTranslations[index] = { ...newTranslations[index], [field]: value };
     setFormData({ ...formData, translations: newTranslations });
+  };
+
+  // Validation du slug selon les mêmes règles que le backend
+  const validateSlug = (slug: string): boolean => {
+    const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+    return slugRegex.test(slug) && slug.length > 0;
   };
 
   const generateSlug = (name: string) => {
@@ -130,6 +143,13 @@ export default function NewProductPage() {
   const handleNextStep = () => {
     if (!formData.slug) {
       setError('Product slug is required');
+      return;
+    }
+
+    if (!isSlugValid) {
+      setError(
+        'Le slug doit être valide pour continuer (minuscules, chiffres et tirets uniquement)'
+      );
       return;
     }
 
@@ -311,6 +331,13 @@ export default function NewProductPage() {
                     className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
                     required
                   />
+                  {formData.slug && (
+                    <p
+                      className={`mt-1 text-xs ${isSlugValid ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      {isSlugValid ? '✓ Slug valide' : '✗ Slug invalide'}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-gray-500">{t.slugHelp}</p>
                 </div>
 
@@ -351,23 +378,6 @@ export default function NewProductPage() {
                   >
                     {t.featured}
                   </label>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    {t.sortOrder}
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.sortOrder}
-                    onChange={e =>
-                      setFormData({
-                        ...formData,
-                        sortOrder: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-                  />
                 </div>
               </div>
             </div>
@@ -467,7 +477,8 @@ export default function NewProductPage() {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                disabled={!isSlugValid}
+                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t.nextStep}
               </button>
