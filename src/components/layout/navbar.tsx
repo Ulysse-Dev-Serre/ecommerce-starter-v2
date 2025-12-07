@@ -143,25 +143,9 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 alt="ManorLeaf Logo"
                 className="h-16 w-auto cursor-pointer"
               />
-              <span className="text-3xl font-serif font-bold tracking-wide animate-pulse -ml-8 mb-1">
-                <span
-                  className="text-[#3a2415]"
-                  style={{
-                    textShadow:
-                      '1px 1px 0 #c49a6c, 2px 2px 0 #c49a6c, 3px 3px 0 #c49a6c, 4px 4px 0 #8f7250, 6px 8px 15px rgba(0,0,0,0.45)',
-                  }}
-                >
-                  ANOR
-                </span>
-                <span
-                  className="text-[#1E3812] ml-1"
-                  style={{
-                    textShadow:
-                      '1px 1px 0 #8CB852, 2px 2px 0 #8CB852, 3px 3px 0 #8CB852, 4px 4px 0 #6e9440, 5px 5px 0 #4E7F2A, 8px 10px 20px rgba(0,0,0,0.4)',
-                  }}
-                >
-                  LEAF
-                </span>
+              <span className="manor-leaf-text">
+                <span className="manor-text-3d">ANOR</span>
+                <span className="leaf-text-3d ml-1">LEAF</span>
               </span>
             </Link>
           </div>
@@ -204,17 +188,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               </Link>
             )}
 
-            {/* Admin Dashboard - Visible uniquement pour les admins */}
-            {isSignedIn && userRole === 'ADMIN' && (
-              <Link
-                href={`/${locale}/admin`}
-                className="bg-gradient-to-r from-yellow-700 via-yellow-400 to-yellow-700 text-white px-3 py-1.5 rounded-md text-sm font-bold hover:from-yellow-800 hover:via-yellow-300 hover:to-yellow-800 transition-colors"
-                onClick={() => handleNavigationClick(`/${locale}/admin`)}
-              >
-                Dashboard
-              </Link>
-            )}
-
             {/* Sélecteur de langue */}
             <div className="flex items-center space-x-2 border-l pl-4 ml-4">
               <button
@@ -236,30 +209,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 }`}
               >
                 EN
-              </button>
-            </div>
-
-            {/* Sélecteur de devise */}
-            <div className="flex items-center space-x-2 border-l pl-4 ml-2">
-              <button
-                onClick={() => handleCurrencyChange('CAD')}
-                className={`px-2 py-1 text-sm rounded transition-colors ${
-                  currency === 'CAD'
-                    ? 'bg-primary text-white'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                $ CAD
-              </button>
-              <button
-                onClick={() => handleCurrencyChange('USD')}
-                className={`px-2 py-1 text-sm rounded transition-colors ${
-                  currency === 'USD'
-                    ? 'bg-primary text-white'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                $ USD
               </button>
             </div>
           </nav>
@@ -306,6 +255,16 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                   {messages.common.signIn} / {messages.common.signUp}
                 </button>
               </SignInButton>
+              {/* Admin Dashboard - Visible uniquement pour les admins */}
+              {userRole === 'ADMIN' && (
+                <Link
+                  href={`/${locale}/admin`}
+                  className="dashboard-extreme-right"
+                  onClick={() => handleNavigationClick(`/${locale}/admin`)}
+                >
+                  Dashboard
+                </Link>
+              )}
             </SignedOut>
             <SignedIn>
               <div className="flex items-center space-x-2">
@@ -331,6 +290,16 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                   </svg>
                 </Link>
                 <UserButton />
+                {/* Admin Dashboard - Visible uniquement pour les admins */}
+                {userRole === 'ADMIN' && (
+                  <Link
+                    href={`/${locale}/admin`}
+                    className="dashboard-extreme-right"
+                    onClick={() => handleNavigationClick(`/${locale}/admin`)}
+                  >
+                    Dashboard
+                  </Link>
+                )}
               </div>
             </SignedIn>
           </div>

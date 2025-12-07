@@ -152,3 +152,50 @@ body {
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
 }
+
+/* Navbar styling classes - centralized for easy maintenance */
+.manor-leaf-text {
+  font-size: 1.875rem;
+  font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  margin-left: -2rem;
+  margin-bottom: 0.25rem;
+}
+
+.manor-text-3d {
+  color: #3a2415;
+  text-shadow:
+    1px 1px 0 #c49a6c,
+    2px 2px 0 #c49a6c,
+    3px 3px 0 #c49a6c,
+    4px 4px 0 #8f7250,
+    6px 8px 15px rgba(0, 0, 0, 0.45);
+}
+
+.leaf-text-3d {
+  color: #1e3812;
+  text-shadow:
+    1px 1px 0 #8cb852,
+    2px 2px 0 #8cb852,
+    3px 3px 0 #8cb852,
+    4px 4px 0 #6e9440,
+    5px 5px 0 #4e7f2a,
+    8px 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.dashboard-extreme-right {
+  background: linear-gradient(to right, #b45309, #facc15, #b45309);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-left: auto;
+  transition: all 0.15s ease-in-out;
+}
+
+.dashboard-extreme-right:hover {
+  background: linear-gradient(to right, #92400e, #fde047, #92400e);
+}
