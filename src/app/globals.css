@@ -98,6 +98,43 @@ body {
   --primary-hover: #059669;
 }
 
+/* Bamboo theme elements */
+.bamboo-texture {
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 15px,
+    rgba(183, 147, 84, 0.03) 15px,
+    rgba(183, 147, 84, 0.03) 16px,
+    transparent 16px,
+    transparent 30px,
+    rgba(183, 147, 84, 0.02) 30px,
+    rgba(183, 147, 84, 0.02) 31px
+  );
+}
+
+.bamboo-gradient {
+  /* Dégradé allant de la couleur claire (à gauche) vers la couleur foncée (à droite) */
+  background: linear-gradient(
+    to right,
+    #dbc58f 0%,
+    /* Jaune Paille au début */ #b79354 50%,
+    /* Ocre Doré au milieu */ #8a673e 100% /* Brun Terreux à la fin */
+  );
+}
+
+.bamboo-lines {
+  background-image: linear-gradient(
+    90deg,
+    transparent 49%,
+    rgba(139, 154, 70, 0.1) 49%,
+    rgba(139, 154, 70, 0.1) 51%,
+    transparent 51%
+  );
+  background-size: 60px 100%;
+  background-repeat: repeat-x;
+}
+
 /* Toast animations */
 @keyframes slide-in-right {
   from {

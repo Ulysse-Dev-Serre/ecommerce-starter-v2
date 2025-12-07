@@ -18,7 +18,8 @@
     "previous": "Previous",
     "home": "Home",
     "contact": "Contact",
-    "backToSite": "Back to site"
+    "backToSite": "Back to site",
+    "bestsellers": "Bestsellers"
   },
   "auth": {
     "signedInAs": "Signed in as",

@@ -18,7 +18,8 @@
     "previous": "Précédent",
     "home": "Accueil",
     "contact": "Contact",
-    "backToSite": "Retour au site"
+    "backToSite": "Retour au site",
+    "bestsellers": "Meilleurs ventes"
   },
   "auth": {
     "signedInAs": "Connecté en tant que",

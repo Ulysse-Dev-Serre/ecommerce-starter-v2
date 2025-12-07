@@ -4,6 +4,8 @@ import { Language, ProductStatus } from '@/generated/prisma';
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
 import { getProducts } from '@/lib/services/product.service';
+import fr from '@/lib/i18n/dictionaries/fr.json';
+import en from '@/lib/i18n/dictionaries/en.json';
 
 // Disable static generation for this page (requires DB)
 export const dynamic = 'force-dynamic';
@@ -18,6 +20,7 @@ export default async function Home({
   const { locale } = await params;
 
   const language = locale.toUpperCase() as Language;
+  const messages = locale === 'fr' ? fr : en;
 
   const { products: featuredProducts } = await getProducts(
     {
@@ -35,16 +38,24 @@ export default async function Home({
 
   return (
     <div className="flex-1">
-      <section className="bg-gradient-to-r from-muted to-accent py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold text-foreground">Hero</h1>
+      <section className="bg-gradient-to-r from-muted to-accent bamboo-texture -mt-4 relative">
+        <img
+          src="/hero22.png"
+          alt="Hero Image"
+          className="w-full h-[28rem] object-cover opacity-80"
+        />
+        <div className="absolute inset-0 flex items-start justify-start pt-8 pl-8">
+          <h1 className="text-6xl font-bold drop-shadow-2xl animate-pulse">
+            <span className="text-amber-900 drop-shadow-lg">Manor</span>
+            <span className="text-green-800 drop-shadow-lg">Leaf</span>
+          </h1>
         </div>
       </section>
 
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-8 text-center">
-            {locale === 'fr' ? 'Produits en vedette' : 'Featured Products'}
+          <h2 className="text-3xl font-bold mb-8 text-left">
+            {messages.common.bestsellers}
           </h2>
 
           {featuredProducts.length === 0 ? (
