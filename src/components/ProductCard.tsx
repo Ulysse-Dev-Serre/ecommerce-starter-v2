@@ -97,7 +97,7 @@ export function ProductCard({ product, locale }: ProductCardProps) {
               className={`w-6 h-6 rounded-full border-2 overflow-hidden transition-all cursor-pointer ${
                 index === currentImageIndex
                   ? 'border-primary ring-2 ring-primary/20'
-                  : 'border-gray-300 hover:border-gray-400'
+                  : 'border-[#c4b5a0] hover:border-[#9d8e7e]'
               }`}
               title={`Image ${index + 1}`}
             >

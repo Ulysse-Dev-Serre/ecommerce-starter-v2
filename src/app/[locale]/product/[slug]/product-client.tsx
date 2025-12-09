@@ -97,7 +97,7 @@ export function ProductClient({
           price: p.price.toString(),
           currency: p.currency,
         }))}
-        className="text-2xl font-semibold text-primary"
+        className="text-2xl font-semibold text-black"
         locale={locale}
       />
 
@@ -128,7 +128,7 @@ export function ProductClient({
                     disabled={false}
                     className={`px-4 py-2 rounded-md border-2 transition cursor-pointer ${
                       isSelected
-                        ? 'border-primary bg-primary text-white'
+                        ? 'border-[#7a7a7a] bg-[#7a7a7a] text-white'
                         : isAvailable
                           ? 'border-gray-300 hover:border-gray-400'
                           : 'border-gray-200 text-gray-400 cursor-not-allowed'
@@ -160,7 +160,7 @@ export function ProductClient({
                   disabled={!isAvailable}
                   className={`px-4 py-2 rounded-md border-2 transition cursor-pointer ${
                     isSelected
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-[#7a7a7a] bg-[#7a7a7a] text-white'
                       : isAvailable
                         ? 'border-gray-300 hover:border-gray-400'
                         : 'border-gray-200 text-gray-400 cursor-not-allowed'

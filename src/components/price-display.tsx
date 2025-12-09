@@ -35,16 +35,18 @@ export function PriceDisplay({
   const formattedPrice = formatPrice(
     parseFloat(price),
     displayCurrency as 'CAD' | 'USD',
-    locale === 'fr' ? 'fr-CA' : 'en-CA'
+    locale === 'fr' ? 'fr-CA' : 'en-CA',
+    false
   );
 
   return (
     <span className={className}>
       {formattedPrice}
+      <span className="text-xs italic font-light text-gray-600 ml-1">
+        {displayCurrency}
+      </span>
       {showFallbackIndicator && isFallback && (
-        <span className="text-xs text-muted-foreground ml-1">
-          ({displayCurrency})
-        </span>
+        <span className="text-xs text-muted-foreground ml-1">(fallback)</span>
       )}
     </span>
   );
@@ -78,7 +80,8 @@ export function PriceTotal({
   const formattedTotal = formatPrice(
     total,
     currency,
-    locale === 'fr' ? 'fr-CA' : 'en-CA'
+    locale === 'fr' ? 'fr-CA' : 'en-CA',
+    false
   );
 
   return <span className={className}>{formattedTotal}</span>;

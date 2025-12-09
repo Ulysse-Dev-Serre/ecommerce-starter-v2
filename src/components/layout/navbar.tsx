@@ -22,7 +22,7 @@ interface NavbarProps {
 
 export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   const [messages, setMessages] = useState<any | null>(null);
-  const { currency, setCurrency } = useCurrency();
+  const { currency } = useCurrency();
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 
@@ -96,22 +96,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
     );
   };
 
-  // Fonction pour changer de devise
-  const handleCurrencyChange = (newCurrency: Currency): void => {
-    logger.info(
-      {
-        action: 'currency_change',
-        from: currency,
-        to: newCurrency,
-        locale,
-        component: 'navbar',
-      },
-      'User changed currency'
-    );
-
-    setCurrency(newCurrency);
-  };
-
   // Afficher un loading si les messages ne sont pas encore chargés
   if (!messages) {
     return (
@@ -128,7 +112,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   }
 
   return (
-    <header className="bamboo-gradient theme-border relative z-10">
+    <header className="navbar-footer-style theme-border relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo/Brand */}
@@ -136,17 +120,13 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             <Link
               href={`/${locale}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
-              className="flex items-end gap-3"
+              className="flex items-center"
             >
               <img
                 src="/ManorLeaf_transparent.png"
                 alt="ManorLeaf Logo"
                 className="h-16 w-auto cursor-pointer"
               />
-              <span className="manor-leaf-text">
-                <span className="manor-text-3d">ANOR</span>
-                <span className="leaf-text-3d ml-1">LEAF</span>
-              </span>
             </Link>
           </div>
 
@@ -154,7 +134,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
           <nav className="hidden md:flex items-center space-x-8">
             <Link
               href={`/${locale}`}
-              className="text-foreground hover:text-primary transition-colors"
+              className="text-foreground hover:text-[#9d8e7e] transition-colors"
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
               {messages.common.home}
@@ -162,7 +142,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             <Link
               href={`/${locale}/shop`}
-              className="text-foreground hover:text-primary transition-colors"
+              className="text-foreground hover:text-[#9d8e7e] transition-colors"
               onClick={() => handleNavigationClick(`/${locale}/shop`)}
             >
               {messages.navbar.shop}
@@ -170,7 +150,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             <Link
               href={`/${locale}/contact`}
-              className="text-foreground hover:text-primary transition-colors"
+              className="text-foreground hover:text-[#9d8e7e] transition-colors"
               onClick={() => handleNavigationClick(`/${locale}/contact`)}
             >
               {messages.common.contact}
@@ -180,7 +160,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             {isSignedIn && (
               <Link
                 href={`/${locale}/orders`}
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground hover:text-[#9d8e7e] transition-colors"
                 onClick={() => handleNavigationClick(`/${locale}/orders`)}
               >
                 {messages.navbar?.orders ||
@@ -194,8 +174,8 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 onClick={e => handleLanguageChange('fr', e)}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
                   locale === 'fr'
-                    ? 'bg-primary text-white'
-                    : 'text-foreground hover:bg-muted'
+                    ? 'bg-[#7a7a7a] text-white hover:bg-[#696969]'
+                    : 'text-foreground hover:bg-[#7a7a7a]/30'
                 }`}
               >
                 FR
@@ -204,8 +184,8 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 onClick={e => handleLanguageChange('en', e)}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
                   locale === 'en'
-                    ? 'bg-primary text-white'
-                    : 'text-foreground hover:bg-muted'
+                    ? 'bg-[#7a7a7a] text-white hover:bg-[#696969]'
+                    : 'text-foreground hover:bg-[#7a7a7a]/30'
                 }`}
               >
                 EN
@@ -218,7 +198,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             <SignedOut>
               <Link
                 href={`/${locale}/cart`}
-                className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-hover transition-colors"
+                className="bg-[#7a7a7a] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#696969] transition-colors"
                 title={messages.navbar.cart}
                 onClick={() => handleNavigationClick(`/${locale}/cart`)}
               >
@@ -239,7 +219,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               </Link>
               <SignInButton>
                 <button
-                  className="bg-primary text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"
+                  className="bg-[#7a7a7a] text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-[#696969] transition-colors"
                   onClick={() => {
                     logger.info(
                       {
@@ -270,7 +250,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               <div className="flex items-center space-x-2">
                 <Link
                   href={`/${locale}/cart`}
-                  className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary-hover transition-colors"
+                  className="bg-[#7a7a7a] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#696969] transition-colors"
                   title={messages.navbar.cart}
                   onClick={() => handleNavigationClick(`/${locale}/cart`)}
                 >

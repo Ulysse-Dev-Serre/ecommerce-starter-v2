@@ -1,50 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-
 export type Currency = 'CAD' | 'USD';
 
-const CURRENCY_COOKIE_NAME = 'currency';
 const DEFAULT_CURRENCY: Currency = 'CAD';
 
-function getCurrencyFromCookie(): Currency {
-  if (typeof document === 'undefined') return DEFAULT_CURRENCY;
-  const match = document.cookie.match(
-    new RegExp(`(^| )${CURRENCY_COOKIE_NAME}=([^;]+)`)
-  );
-  const value = match?.[2];
-  return value === 'CAD' || value === 'USD' ? value : DEFAULT_CURRENCY;
-}
-
-function setCurrencyCookie(currency: Currency): void {
-  const maxAge = 60 * 60 * 24 * 365;
-  document.cookie = `${CURRENCY_COOKIE_NAME}=${currency}; path=/; max-age=${maxAge}; SameSite=Lax`;
+function getCurrencyFromEnv(): Currency {
+  const envCurrency = process.env.NEXT_PUBLIC_CURRENCY;
+  return envCurrency === 'CAD' || envCurrency === 'USD'
+    ? envCurrency
+    : DEFAULT_CURRENCY;
 }
 
 export function useCurrency() {
-  const [currency, setCurrencyState] = useState<Currency>(DEFAULT_CURRENCY);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const currency = getCurrencyFromEnv();
 
-  useEffect(() => {
-    setCurrencyState(getCurrencyFromCookie());
-    setIsLoaded(true);
-
-    const handleStorageChange = () => {
-      setCurrencyState(getCurrencyFromCookie());
-    };
-
-    window.addEventListener('currency-change', handleStorageChange);
-    return () =>
-      window.removeEventListener('currency-change', handleStorageChange);
-  }, []);
-
-  const setCurrency = useCallback((newCurrency: Currency) => {
-    setCurrencyCookie(newCurrency);
-    setCurrencyState(newCurrency);
-    window.dispatchEvent(new CustomEvent('currency-change'));
-  }, []);
-
-  return { currency, setCurrency, isLoaded };
+  return { currency, isLoaded: true };
 }
 
 export interface PriceData {

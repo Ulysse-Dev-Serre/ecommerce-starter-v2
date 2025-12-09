@@ -21,6 +21,12 @@
     "backToSite": "Retour au site",
     "bestsellers": "Meilleurs ventes"
   },
+  "hero": {
+    "description": "Découvrez nos produits de qualité conçus pour les jardiniers amateurs et professionnels.",
+    "exploreProducts": "Explorez Nos Produits",
+    "companyTagline": "Entreprise canadienne spécialisée dans les produits pour jardiniers amateurs et professionnels",
+    "mobileCompatible": "Compatible avec les appareils mobiles"
+  },
   "auth": {
     "signedInAs": "Connecté en tant que",
     "userProfile": "Profil utilisateur",

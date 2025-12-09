@@ -50,7 +50,7 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={disabled || isLoading}
-      className={`bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${fullWidth ? 'w-full py-3 px-6 rounded-lg text-base' : ''}`}
+      className={`bg-[#7a7a7a] hover:bg-[#696969] text-white px-4 py-2 rounded text-sm disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${fullWidth ? 'w-full py-3 px-6 rounded-lg text-base' : ''}`}
     >
       {isLoading
         ? locale === 'fr'

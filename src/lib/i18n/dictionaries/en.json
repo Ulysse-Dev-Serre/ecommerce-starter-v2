@@ -21,6 +21,12 @@
     "backToSite": "Back to site",
     "bestsellers": "Bestsellers"
   },
+  "hero": {
+    "description": "Discover our quality products designed for amateur and professional gardeners.",
+    "exploreProducts": "Explore Our Products",
+    "companyTagline": "Canadian company specializing in products for amateur and professional gardeners",
+    "mobileCompatible": "Compatible with mobile devices"
+  },
   "auth": {
     "signedInAs": "Signed in as",
     "userProfile": "User profile",

@@ -113,15 +113,27 @@ body {
   );
 }
 
+.navbar-footer-style {
+  background: linear-gradient(
+    90deg,
+    #9ca89c 0%,
+    #a8a79a 10%,
+    #9ca89c 20%,
+    #a8a79a 30%,
+    #9ca89c 40%,
+    #a8a79a 50%
+  );
+}
+
 .bamboo-gradient {
   background: linear-gradient(
     90deg,
-    #c2b078 0%,
-    #d7c58b 10%,
-    #c2b078 20%,
-    #d7c58b 30%,
-    #c2b078 40%,
-    #d7c58b 50%
+    #f5f1eb 0%,
+    #c4b5a0 10%,
+    #f5f1eb 20%,
+    #c4b5a0 30%,
+    #f5f1eb 40%,
+    #c4b5a0 50%
   );
 }
 
@@ -186,16 +198,18 @@ body {
 }
 
 .dashboard-extreme-right {
-  background: linear-gradient(to right, #b45309, #facc15, #b45309);
-  color: white;
+  background: white;
+  color: black;
   padding: 0.375rem 0.75rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
   font-weight: 700;
   margin-left: auto;
   transition: all 0.15s ease-in-out;
+  border: 1px solid #e5e7eb;
 }
 
 .dashboard-extreme-right:hover {
-  background: linear-gradient(to right, #92400e, #fde047, #92400e);
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
