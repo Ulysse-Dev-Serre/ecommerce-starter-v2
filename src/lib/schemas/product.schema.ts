@@ -73,6 +73,7 @@ export const UpdateProductSchema = z.object({
   status: z.enum(PRODUCT_STATUSES).optional(),
   isFeatured: z.boolean().optional(),
   sortOrder: z.number().int().min(0, 'Sort order must be >= 0').optional(),
+  translations: z.array(ProductTranslationSchema).optional(),
 });
 
 export const VariantPricingSchema = z.object({
@@ -159,7 +160,7 @@ export type UpdateVariantInput = z.infer<typeof UpdateVariantSchema>;
 export function formatZodErrors(
   error: z.ZodError
 ): { field: string; message: string }[] {
-  const issues = error.issues || error.errors || [];
+  const issues = error.issues || [];
   return issues.map(err => ({
     field: err.path?.join('.') || '',
     message: err.message,

@@ -206,6 +206,18 @@ async function updateProductHandler(
     if (validatedData.sortOrder !== undefined)
       updateData.sortOrder = validatedData.sortOrder;
 
+    // Handle translations update
+    if (validatedData.translations && validatedData.translations.length > 0) {
+      updateData.translations = validatedData.translations.map(t => ({
+        language: t.language,
+        name: t.name,
+        description: t.description || null,
+        shortDescription: t.shortDescription || null,
+        metaTitle: t.metaTitle || null,
+        metaDescription: t.metaDescription || null,
+      }));
+    }
+
     const updatedProduct = await updateProduct(id, updateData);
 
     logger.info(
