@@ -37,8 +37,8 @@ export interface ProductVariantProjection {
     trackInventory: boolean;
     allowBackorder: boolean;
   } | null;
-  attributeValues: {
-    attributeValue: {
+  attributeValues: Array<{
+    attributeValue?: {
       value: string;
       attribute: {
         key: string;
@@ -48,7 +48,9 @@ export interface ProductVariantProjection {
         displayName: string;
       }[];
     };
-  }[];
+    variantId?: string;
+    attributeValueId?: string;
+  }>;
   media: {
     url: string;
     alt: string | null;
@@ -208,22 +210,8 @@ export async function getProducts(
             ...(includeAttributes && {
               attributeValues: {
                 select: {
-                  attributeValue: {
-                    select: {
-                      value: true,
-                      attribute: {
-                        select: {
-                          key: true,
-                        },
-                      },
-                      translations: {
-                        select: {
-                          language: true,
-                          displayName: true,
-                        },
-                      },
-                    },
-                  },
+                  variantId: true,
+                  attributeValueId: true,
                 },
               },
             }),
@@ -258,13 +246,14 @@ export async function getProducts(
           },
         },
         media: {
-          where: { isPrimary: true },
-          take: 1,
           select: {
             url: true,
             alt: true,
             isPrimary: true,
             sortOrder: true,
+          },
+          orderBy: {
+            sortOrder: 'asc',
           },
         },
       },
@@ -487,6 +476,14 @@ export interface UpdateProductData {
   status?: ProductStatus;
   isFeatured?: boolean;
   sortOrder?: number;
+  translations?: {
+    language: Language;
+    name: string;
+    description?: string | null;
+    shortDescription?: string | null;
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+  }[];
 }
 
 type ProductWithTranslations = Product & {
@@ -577,11 +574,40 @@ export async function updateProduct(
   id: string,
   productData: UpdateProductData
 ): Promise<ProductWithTranslations> {
+  const { translations, ...productFields } = productData;
+
   const updatedProduct = await prisma.product.update({
     where: { id },
     data: {
-      ...productData,
+      ...productFields,
       updatedAt: new Date(),
+      ...(translations && {
+        translations: {
+          upsert: translations.map(t => ({
+            where: {
+              productId_language: {
+                productId: id,
+                language: t.language,
+              },
+            },
+            update: {
+              name: t.name,
+              description: t.description,
+              shortDescription: t.shortDescription,
+              metaTitle: t.metaTitle,
+              metaDescription: t.metaDescription,
+            },
+            create: {
+              language: t.language,
+              name: t.name,
+              description: t.description,
+              shortDescription: t.shortDescription,
+              metaTitle: t.metaTitle,
+              metaDescription: t.metaDescription,
+            },
+          })),
+        },
+      }),
     },
     include: {
       translations: true,

@@ -1,3 +1,16 @@
+# AI Context & Instructions
+
+## 🧠 Business Context (CRITICAL)
+This project is an **"Universal IoT E-commerce Starter"** for AgTechNest.
+**Goal:** Rapidly deploy independent shops for niche IoT products (1-10 items max per shop).
+**Strategy:**
+- **Codebase:** One robust "Super-Starter" used as a template.
+- **Database:** Full schema (Categories, Reviews...) is standard, even if unused for a mono-product shop. **DO NOT REMOVE unused tables**.
+- **Dev Flow:** Clone repo -> New .env -> Skin Frontend -> Deploy.
+- **Priority:** Stability & Launch Speed > Over-optimization.
+
+## 🛠 Project Rules
+
 Ceci est un **starter e-commerce universel** conçu pour être cloné et déployé rapidement dans différentes niches (plantes, électronique, jouets...) et différents pays. L'objectif est de pouvoir lancer une boutique en quelques jours plutôt qu'en plusieurs mois.
 
 **Architecture multi-région** : Une même codebase peut être déployée plusieurs fois (ex: boutique Canada FR/EN + CAD, boutique USA EN + USD) avec la même base de données pour synchroniser les stocks. En développement, on travaille en mode unifié (toutes langues/devises activées) ; la configuration régionale se fait au moment du déploiement.
