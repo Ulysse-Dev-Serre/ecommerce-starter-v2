@@ -90,6 +90,33 @@ async function reorderMediaHandler(
       )
     );
 
+    // Récupérer le productId depuis le premier média
+    const firstMedia = await prisma.productMedia.findUnique({
+      where: { id: body.media[0].id },
+      select: { productId: true },
+    });
+
+    if (firstMedia?.productId) {
+      // Mettre à jour automatiquement l'image principale
+      // La première image (sortOrder = 0) devient principale
+      await prisma.productMedia.updateMany({
+        where: {
+          productId: firstMedia.productId,
+          sortOrder: 0,
+        },
+        data: { isPrimary: true },
+      });
+
+      // Toutes les autres images ne sont plus principales
+      await prisma.productMedia.updateMany({
+        where: {
+          productId: firstMedia.productId,
+          sortOrder: { not: 0 },
+        },
+        data: { isPrimary: false },
+      });
+    }
+
     logger.info(
       {
         requestId,
