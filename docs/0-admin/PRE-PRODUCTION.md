@@ -320,6 +320,14 @@ Aller dans : [Stripe Dashboard > Settings > Emails](https://dashboard.stripe.com
 - [ ] Stock décrémenté après paiement confirmé (`stock--`, `reservedStock--`)
 - [ ] Stock libéré si paiement échoué ou session expirée (`reservedStock--`)
 
+### ⚠️ Suppression de produits
+
+**À implémenter** : Passer à un **soft delete** pour les produits au lieu du hard delete actuel. Cela préserve l'intégrité historique des commandes et factures des clients. Les articles dans les anciennes commandes resteront accessibles avec leurs données.
+
+- [ ] Implémenter le soft delete (`deletedAt` au lieu de `DELETE`)
+- [ ] Masquer les produits supprimés des affichages publics
+- [ ] Garder les références historiques dans les commandes
+
 ### ⚠️ Vérification
 
 ```sql
