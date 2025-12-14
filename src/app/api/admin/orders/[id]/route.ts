@@ -93,5 +93,5 @@ async function getOrderAdminHandler(
 }
 
 export const GET = withError(
-  withAdminAuth(withRateLimit(getOrderAdminHandler, RateLimits.ADMIN))
+  withAdmin(withRateLimit(getOrderAdminHandler, RateLimits.ADMIN))
 );
