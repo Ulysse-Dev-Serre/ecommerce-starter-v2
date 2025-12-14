@@ -11,6 +11,8 @@ This project is an **"Universal IoT E-commerce Starter"** for AgTechNest.
 
 ## 🛠 Project Rules
 
+🚨 **CRITICAL: ALWAYS START by reading `docs/1-foundations/Roadmap.md` to understand the current Active Milestone and Priorities.**
+
 Ceci est un **starter e-commerce universel** conçu pour être cloné et déployé rapidement dans différentes niches (plantes, électronique, jouets...) et différents pays. L'objectif est de pouvoir lancer une boutique en quelques jours plutôt qu'en plusieurs mois.
 
 **Architecture multi-région** : Une même codebase peut être déployée plusieurs fois (ex: boutique Canada FR/EN + CAD, boutique USA EN + USD) avec la même base de données pour synchroniser les stocks. En développement, on travaille en mode unifié (toutes langues/devises activées) ; la configuration régionale se fait au moment du déploiement.
