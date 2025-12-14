@@ -4,109 +4,94 @@
 
 ## 📌 P0 – Fondations & CI/CD — 100% ✅
 
-**Ordre chronologique réel d'implémentation :**
-
-1. ✅ Définir la vision MVP & règles de contribution
-2. ✅ Gestion des environnements & secrets (local/dev/prod)
-3. ✅ Schéma base de données v2 (catalogue, variantes, prix, stock)
-4. ✅ Pipeline Prisma (migrations & seed minimal)
-5. ✅ Choix Clerk & politique de sessions
-6. ✅ Navbar avec authentification Clerk
-7. ✅ Headers de sécurité HTTP & CORS basiques
-8. ✅ i18n structurel : schéma d'URL & locales (FR/EN)
-9. ✅ Observabilité de base : logging structuré
-10. ✅ Qualité & CI/CD minimale (lint, typecheck, build) 
-
----
-
-## 📌 P1 – E-commerce Core (Backend API + Admin) — 85% ✅
-
-**Ordre chronologique réel d'implémentation :**
-
-1. ✅ Finaliser le modèle Utilisateur & Rôles (user/admin) et synchroniser Clerk avec la base de données
-2. ✅ API Produits (liste, détail par slug) - GET public + CRUD admin
-3. ✅ Dashboard admin minimal 
-4. ✅ CRUD Produits et Catégories (admin)
-5. ✅ Panier invité (ajout/mise à jour/suppression) 
-6. ✅  Fusion panier invité → utilisateur à la connexion (à vérifier)
-7. ⚠️ Calcul totaux panier (prix, taxes placeholder, remises simples) (partiellement - checkbox logging manquant)
-8. ⚠️ Pages publiques : Accueil, Catégorie, Produit, Panier, Checkout (à vérifier)
-9. ⚠️ Intégration Stripe Payment Element (client) & Intent serveur (à vérifier)
-10. ⚠️ Webhook Stripe (signature + idempotence) & création de commande (à vérifier)
-11. ⚠️ Modèle Commande & états (créée, payée, annulée) (à vérifier)
-12. ⚠️ Webhooks Stripe sécurisés (à vérifier)
-13. ⚠️ Gestion des Commandes (admin) (à vérifier)
-14. ⚠️ Admin minimal : lecture Commandes + CRUD Catégories/Produits (à vérifier)
-
-### ❌ Non complété en P1
-- [ ] Envoyer emails transactionnels (confirmation commande) → **Reporté P3**
+**Issues Réalisées :**
+- [x] **Issue 1** : Définir la vision MVP & règles de contribution
+- [x] **Issue 2** : Gestion des environnements & secrets (local/dev/prod)
+- [x] **Issue 3** : Schéma base de données v2 (catalogue, variantes, prix, stock)
+- [x] **Issue 4** : Pipeline Prisma (migrations & seed minimal)
+- [x] **Issue 5** : Choix Clerk & politique de sessions
+- [x] **Issue 6** : Navbar avec authentification Clerk
+- [x] **Issue 7** : Headers de sécurité HTTP & CORS basiques
+- [x] **Issue 8** : i18n structurel : schéma d'URL & locales (FR/EN)
+- [x] **Issue 9** : Observabilité de base : logging structuré
+- [x] **Issue 10** : Qualité & CI/CD minimale (lint, typecheck, build)
 
 ---
 
-## 📌 P2 – i18n & SEO
+## 📌 P1 – E-commerce Core (Backend API + Admin) — 100% ✅
 
-**Note** : Tables de traduction déjà créées en base (ProductTranslation, CategoryTranslation).
-
-51. ✅ Créer tables de traduction pour produits & catégories (fait en P1.5)
-52. Gérer slugs localisés par langue
-53. Ajouter balises `<html lang>` et `hreflang` SEO
-54. Générer sitemap bilingue dynamique
-55. Localiser metadata (title, description) et données structurées
-56. Localiser formats (prix, devises, dates)
-57. Traduire emails transactionnels FR/EN
-58. Traduire pages d'erreur (404, 500)
-59. Mettre en place redirections et canonical pour migration SEO
-60. Configurer Google Search Console FR/EN
-
----
-
-## 📌 P3 – Admin & Sécurité avancée
-
-**Note** : Dashboard admin et CRUD déjà créés en P1.5. Focus sur sécurité avancée.
-
-### ✅ Déjà fait (P1.5)
-- ✅ Dashboard admin UI complet
-- ✅ CRUD produits, catégories, commandes
-- ✅ RBAC sur toutes routes admin (`withAdmin()`)
-- ✅ Sécuriser webhooks Stripe (signatures vérifiées)
-- ✅ Upload médias sécurisé (RBAC admin)
-
-### À faire
-61. Ajouter journaux d'activité admin (AuditLog dans schema, à implémenter)
-62. Mettre en place 2FA pour les comptes admin
-63. Activer headers HTTP stricts (CSP, HSTS, etc.)
-64. Implémenter rate limiting avancé + WAF simple
-65. Chiffrer données sensibles (ex: adresses)
-66. Mettre en place sauvegardes et restaurations automatiques
-67. Faire tests de pénétration internes (checklist OWASP)
-68. Politique de gestion des secrets (rotation, vault)
-69. Envoyer emails transactionnels (reporté de P1)
-70. API CRUD Catégories complète (actuellement GET seulement)
+**Issues Réalisées :**
+- [x] **Issue 11** : Finaliser le modèle Utilisateur & Rôles
+- [x] **Issue 12** : API Produits (liste, détail par slug)
+- [x] **Issue 13** : Dashboard admin minimal
+- [x] **Issue 14** : CRUD Produits et Catégories (admin)
+- [x] **Issue 15** : Panier invité (ajout/mise à jour/suppression invité)
+- [x] **Issue 16** : Fusion panier invité → utilisateur à la connexion
+- [x] **Issue 17** : Calcul totaux panier (prix, taxes placeholder, remises simples)
+- [x] **Issue 18** : Pages publiques : Accueil, Catégorie, Produit, Panier, Checkout
+- [x] **Issue 19** : Intégration Stripe Payment Element (client) & Intent serveur
+- [x] **Issue 20** : Webhook Stripe (signature + idempotence) & création de commande
+- [x] **Issue 21** : Modèle Commande & états (créée, payée, annulée)
+- [x] **Issue 22** : Webhooks Stripe sécurisés (Order status update)
+- [x] **Issue 23** : Gestion des Commandes (admin) : Liste & Détail
 
 ---
 
-## 📌 P4 – Qualité, Observabilité & Légal
+## 🚀 P2 – Launch Readiness (Logistics & Legal) — CRITIQUE
 
-### ✅ Déjà fait
-- ✅ Health checks API (`/api/internal/health`)
-- ✅ Documentation développeurs (docs/ structure complète)
+**Objectif :** Rendre le site opérationnel pour une vraie vente et une vraie livraison (MVP Launch).
 
-### À faire
-71. Écrire tests unitaires (Jest) pour modèles et services
-72. Écrire tests E2E (Playwright) pour parcours d'achat  
-    → Tests automatisés 401/403 pour routes protégées
-73. Audit accessibilité (WCAG 2.2 AA)
-74. Optimiser Core Web Vitals (LCP, CLS, FID)
-75. Mettre en place monitoring erreurs (Sentry/Logtail)
-76. Documenter l'API (OpenAPI/Swagger)
-77. Intégrer analytics (GA4 ou Plausible) + events e-commerce
-78. Rédiger politique de confidentialité (Québec + RGPD)
-79. Rédiger conditions d'utilisation et mentions légales
-80. Mettre en place gestion des retours (RMA process)
-81. Créer process post-mortem et qualité continue avant release
+**Issues à faire :**
+- [ ] **Issue 24** : Intégration Shippo (Calcul & Labels)
+- [ ] **Issue 25** : Emails Transactionnels (Resend/React-Email)
+- [ ] **Issue 26** : Marketing Pixels (GA4, FB, TikTok) & Cookie Consent
+- [ ] **Issue 27** : Pages Légales & Contenu Statique
+- [ ] **Issue 28** : Stripe Tax Configuration
+- [ ] **Issue 29** : Pages d'erreur Custom (404/500)
+- [ ] **Issue 30** : Premier Déploiement Vercel (Production)
+- [ ] **Issue 31** : Gestion des retours et remboursements
+
+---
+
+## 📌 P3 – Post-Launch (Admin, SEO & Sécurité)
+
+**Objectif :** Améliorer l'administration, le référencement et durcir la sécurité.
+
+**Issues à faire :**
+- [ ] **Issue 32** : Admin Panel Avancé (Catégories, Customers, Analytics)
+- [ ] **Issue 33** : Admin : Gestion complète des Catégories (CRUD)
+- [ ] **Issue 34** : SEO international : hreflang et x-default
+- [ ] **Issue 35** : Canonical & facettes : éviter la duplication
+- [ ] **Issue 36** : Sitemap(s) multilingues & robots.txt
+- [ ] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues
+- [ ] **Issue 38** : Données structurées (Schema.org) bilingues
+- [ ] **Issue 39** : Formats localisés (monnaies, dates, unités)
+- [ ] **Issue 40** : Migration & redirections 301
+- [ ] **Issue 41** : Politique d’indexation & Liens internes
+- [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
+- [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
+
+---
+
+## 📌 P4 – Qualité & Futur (Backlog)
+
+**Issues de Suivi (Long terme) :**
+- [ ] **Suivi Continu** : Sécurité Applicative & Rate Limiting (Issue #5)
+- [ ] **Suivi Continu** : Documentation développeur & contributeurs (Issue #64)
+- [ ] **Suivi Continu** : Implémentation RBAC (Issue #73)
+
+**Backlog Profond :**
+- [ ] Test de pénétration
+- [ ] Tests Unitaires & E2E
+- [ ] Audit Accessibilité (WCAG)
+- [ ] Documentation API (OpenAPI)
+- [ ] Monitoring Sentry/Logtail
 
 ---
 
 ## 📌 P5 – Gestionnaire de Fournisseurs Externe
 
-[Suite du roadmap P5 inchangée...]
+### Module de Gestion Avancée (Futur)
+- [ ] **Modèle :** Table `Supplier` et `PurchaseOrder`
+- [ ] **Stock :** Réception de marchandise et mise à jour
+- [ ] **Dashboards :** Alertes stock bas et performance fournisseur

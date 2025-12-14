@@ -15,17 +15,33 @@ export const CURRENCY_DECIMALS: Record<SupportedCurrency, number> = {
 export function formatPrice(
   amount: number | string,
   currency: SupportedCurrency = 'CAD',
-  locale: string = 'en-CA'
+  locale: string = 'en-CA',
+  showCurrencyCode: boolean = false
 ): string {
   const numericAmount =
     typeof amount === 'string' ? parseFloat(amount) : amount;
 
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: CURRENCY_DECIMALS[currency],
-    maximumFractionDigits: CURRENCY_DECIMALS[currency],
-  }).format(numericAmount);
+  if (showCurrencyCode) {
+    // Format with currency code (default Intl behavior)
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: CURRENCY_DECIMALS[currency],
+      maximumFractionDigits: CURRENCY_DECIMALS[currency],
+    }).format(numericAmount);
+  } else {
+    // Format without currency code (just symbol and amount)
+    const formatted = new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: CURRENCY_DECIMALS[currency],
+      maximumFractionDigits: CURRENCY_DECIMALS[currency],
+      currencyDisplay: 'symbol',
+    }).format(numericAmount);
+
+    // Remove all currency codes/identifiers: "USD", "CAD", "EUR", "US", "CA", "EU"
+    return formatted.replace(/\s?(USD|CAD|EUR|US|CA|EU)\s?/g, '').trim();
+  }
 }
 
 export function toStripeAmount(
