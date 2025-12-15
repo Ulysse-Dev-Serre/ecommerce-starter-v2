@@ -16,10 +16,13 @@ async function verifyOrderHandler(
   const requestId = crypto.randomUUID();
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get('session_id');
+  const paymentIntentId = searchParams.get('payment_intent_id');
 
-  if (!sessionId) {
+  const identifier = sessionId || paymentIntentId;
+
+  if (!identifier) {
     return NextResponse.json(
-      { error: 'session_id is required' },
+      { error: 'session_id or payment_intent_id is required' },
       { status: 400 }
     );
   }
@@ -27,7 +30,7 @@ async function verifyOrderHandler(
   logger.info(
     {
       requestId,
-      sessionId,
+      identifier,
       userId: authContext.userId,
     },
     'Verifying order for session'
@@ -38,8 +41,8 @@ async function verifyOrderHandler(
     const payment = await prisma.payment.findFirst({
       where: {
         OR: [
-          { externalId: { contains: sessionId } },
-          { transactionData: { path: ['id'], equals: sessionId } },
+          { externalId: { contains: identifier } },
+          { transactionData: { path: ['id'], equals: identifier } },
         ],
         status: 'COMPLETED',
         // CRITICAL: Verify ownership

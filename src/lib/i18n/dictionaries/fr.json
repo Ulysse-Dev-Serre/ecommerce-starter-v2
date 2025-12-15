@@ -150,5 +150,14 @@
       "deleteMediaConfirm": "Êtes-vous sûr de vouloir supprimer cette image ?",
       "dragToReorderMedia": "Glissez-déposez les images pour les réorganiser"
     }
+  },
+  "Checkout": {
+    "title": "Expédition & Paiement",
+    "shippingAddress": "Adresse de livraison",
+    "shippingMethod": "Mode de livraison",
+    "payment": "Paiement",
+    "payNow": "Payer maintenant",
+    "loading": "Chargement...",
+    "error": "Erreur d'initialisation"
   }
 }

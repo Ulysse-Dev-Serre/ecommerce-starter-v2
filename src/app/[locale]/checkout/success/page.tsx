@@ -12,6 +12,7 @@ export default function CheckoutSuccessPage({
 }): React.ReactElement {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
+  const paymentIntentId = searchParams.get('payment_intent'); // Nouveau flow: payment_intent
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export default function CheckoutSuccessPage({
       title: 'Paiement réussi !',
       message: 'Votre commande a été confirmée et est en cours de traitement.',
       orderNumber: 'Numéro de commande',
-      sessionId: 'ID de session',
+      sessionId: 'ID de transaction', // Updated label to be more generic
       waitMessage:
         'Veuillez patienter pendant que nous confirmons votre commande...',
       backToShop: 'Retour à la boutique',
@@ -33,7 +34,7 @@ export default function CheckoutSuccessPage({
       title: 'Payment Successful!',
       message: 'Your order has been confirmed and is being processed.',
       orderNumber: 'Order Number',
-      sessionId: 'Session ID',
+      sessionId: 'Transaction ID', // Updated label
       waitMessage: 'Please wait while we confirm your order...',
       backToShop: 'Back to shop',
       error: 'An error occurred while verifying the order.',
@@ -46,8 +47,11 @@ export default function CheckoutSuccessPage({
     translations[locale as keyof typeof translations] || translations.en;
 
   useEffect(() => {
-    if (!sessionId) {
-      setError('No session ID provided');
+    // On accepte soit un session_id (ancien flow), soit un payment_intent (nouveau flow)
+    const identifier = sessionId || paymentIntentId;
+
+    if (!identifier) {
+      setError('No session or payment ID provided');
       return;
     }
 
@@ -56,9 +60,16 @@ export default function CheckoutSuccessPage({
 
     const checkOrder = async () => {
       try {
-        const response = await fetch(
-          `/api/orders/verify?session_id=${sessionId}`
-        );
+        // L'API verify doit être mise à jour pour accepter payment_intent_id aussi
+        // ou on passe tout dans "session_id" si l'API est flexible, mais mieux vaut être explicite.
+        // On va assumer que l'API peut chercher par PI si on lui passe le bon param.
+
+        let url = `/api/orders/verify?session_id=${identifier}`;
+        if (paymentIntentId) {
+          url = `/api/orders/verify?payment_intent_id=${paymentIntentId}`;
+        }
+
+        const response = await fetch(url);
         const data = await response.json();
 
         if (data.exists && data.orderNumber) {
@@ -98,7 +109,7 @@ export default function CheckoutSuccessPage({
       // Cleanup
       return () => clearInterval(interval);
     });
-  }, [sessionId]);
+  }, [sessionId, paymentIntentId]);
 
   if (error) {
     return (
