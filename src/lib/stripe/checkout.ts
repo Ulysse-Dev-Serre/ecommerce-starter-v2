@@ -159,3 +159,96 @@ export async function createCheckoutSession({
 
   return session;
 }
+
+export interface CreatePaymentIntentParams {
+  items: Array<{ variantId: string; quantity: number }>;
+  currency: CheckoutCurrency;
+  userId?: string;
+  cartId?: string;
+  anonymousId?: string;
+}
+
+export async function createPaymentIntent({
+  items,
+  currency,
+  userId,
+  cartId,
+  anonymousId,
+}: CreatePaymentIntentParams): Promise<Stripe.PaymentIntent> {
+  // 1. Récupérer et valider les variants (similaire à createCheckoutSession)
+  const variants = await prisma.productVariant.findMany({
+    where: {
+      id: { in: items.map(i => i.variantId) },
+      deletedAt: null,
+    },
+    include: {
+      pricing: {
+        where: { isActive: true, priceType: 'base' },
+      },
+      product: {
+        include: {
+          translations: {
+            take: 1,
+          },
+        },
+      },
+    },
+  });
+
+  if (variants.length !== items.length) {
+    throw new Error('Some variants not found');
+  }
+
+  // 2. Calculer le montant total
+  let totalAmount = 0;
+
+  // Calcul du sous-total des items
+  items.forEach(item => {
+    const variant = variants.find(v => v.id === item.variantId);
+    if (!variant) throw new Error(`Variant ${item.variantId} not found`);
+
+    let pricing = variant.pricing.find(p => p.currency === currency);
+    // Fallback simple si devise non trouvée (devrait être mieux géré en prod)
+    if (!pricing) {
+      pricing = variant.pricing.find(
+        p => p.currency === (currency === 'CAD' ? 'USD' : 'CAD')
+      );
+    }
+
+    if (!pricing) throw new Error(`Price not found for variant ${variant.sku}`);
+
+    totalAmount += Number(pricing.price) * item.quantity;
+  });
+
+  // Convertir en centimes pour Stripe
+  const amountInCents = toStripeAmount(totalAmount.toString(), currency);
+
+  logger.info(
+    {
+      action: 'payment_intent_create',
+      currency,
+      amount: totalAmount,
+      userId: userId || 'anonymous',
+    },
+    'Creating Stripe Payment Intent'
+  );
+
+  // 3. Créer le PaymentIntent
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: amountInCents,
+    currency: currency.toLowerCase(),
+    automatic_payment_methods: {
+      enabled: true,
+    },
+    metadata: {
+      userId: userId || '',
+      cartId: cartId || '',
+      anonymousId: anonymousId || '',
+      items: JSON.stringify(items),
+      integration_check: 'accept_a_payment',
+      subtotal: amountInCents.toString(), // CRUCIAL pour l'update du shipping
+    },
+  });
+
+  return paymentIntent;
+}

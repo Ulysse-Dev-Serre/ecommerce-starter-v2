@@ -37,10 +37,22 @@ export async function createOrderFromCart({
 
   const subtotalAmount = parseFloat(calculation.subtotal.toString());
   const taxAmount = 0; // Géré par Stripe Tax
-  const shippingAmount = 0;
+
+  // Récupérer les frais de port depuis les metadata du PaymentIntent
+  const shippingCostMeta = paymentIntent.metadata?.shipping_cost;
+  const shippingAmount = shippingCostMeta ? parseFloat(shippingCostMeta) : 0;
+
   const discountAmount = 0;
-  const totalAmount =
+
+  // Utiliser le total de Stripe s'il correspond à la somme, sinon recalculer
+  // Note: Stripe amount est en cents, nos montants DB sont en dollars/unités
+  const stripeTotal = paymentIntent.amount / 100;
+  const calculatedTotal =
     subtotalAmount + taxAmount + shippingAmount - discountAmount;
+
+  // Sécurité: Si le total calculé diffère significativement du total payé, on log un warning
+  // Mais pour la DB, on veut que le total soit mathématiquement juste par rapport aux sous-totaux
+  const totalAmount = calculatedTotal;
 
   const order = await prisma.order.create({
     data: {

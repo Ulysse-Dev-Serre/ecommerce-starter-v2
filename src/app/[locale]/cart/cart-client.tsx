@@ -86,40 +86,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
     }
   };
 
-  const handleCheckout = async () => {
-    if (!cart || cart.items.length === 0) return;
-
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/checkout/create-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          successUrl: `${window.location.origin}/${locale}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${window.location.origin}/${locale}/cart`,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create checkout');
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert(
-        locale === 'fr' ? 'Échec de la commande' : 'Failed to start checkout'
-      );
-      setIsLoading(false);
-    }
-  };
+  /* handleCheckout removed */
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -207,13 +174,12 @@ export function CartClient({ cart, locale }: CartClientProps) {
               />
             </div>
             {isSignedIn ? (
-              <button
-                onClick={handleCheckout}
-                disabled={isLoading}
-                className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <a
+                href={`/${locale}/checkout`}
+                className="w-full block text-center bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors"
               >
-                {isLoading ? 'Loading...' : t.checkout}
-              </button>
+                {t.checkout}
+              </a>
             ) : (
               <SignInButton mode="modal">
                 <button className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors">

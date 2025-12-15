@@ -150,5 +150,14 @@
       "deleteMediaConfirm": "Are you sure you want to delete this image?",
       "dragToReorderMedia": "Drag and drop images to reorder them"
     }
+  },
+  "Checkout": {
+    "title": "Shipping & Payment",
+    "shippingAddress": "Shipping Address",
+    "shippingMethod": "Shipping Method",
+    "payment": "Payment",
+    "payNow": "Pay Now",
+    "loading": "Loading checkout...",
+    "error": "Error initializing checkout"
   }
 }
