@@ -28,6 +28,12 @@ interface CheckoutClientProps {
     payNow: string;
     loading: string;
     error: string;
+    orderSummary: string;
+    subtotal: string;
+    shipping: string;
+    totalToPay: string;
+    confirmAddress: string;
+    calculating: string;
   };
 }
 
@@ -121,6 +127,12 @@ interface CheckoutFormProps {
     payNow: string;
     loading: string;
     error: string;
+    orderSummary: string;
+    subtotal: string;
+    shipping: string;
+    totalToPay: string;
+    confirmAddress: string;
+    calculating: string;
   };
 }
 
@@ -290,9 +302,7 @@ function CheckoutForm({
                                         : 'bg-gray-300 cursor-not-allowed'
                                     }`}
               >
-                {isLoading
-                  ? 'Calcul en cours...'
-                  : "Confirmer l'adresse et voir la livraison"}
+                {isLoading ? t.calculating : t.confirmAddress}
               </button>
             </div>
           </section>
@@ -392,65 +402,65 @@ function CheckoutForm({
             {/* Summary Card */}
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
               <h2 className="text-xl font-bold mb-6 text-gray-900 border-b pb-4">
-                Résumé de la commande
+                {t.orderSummary}
               </h2>
 
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between text-gray-600">
-                  <span>Sous-total</span>
+                  <span>{t.subtotal}</span>
                   <span className="font-medium text-gray-900">
                     {initialTotal.toFixed(2)} {currency}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Livraison</span>
-                  <span className="font-medium text-gray-900">
-                    {selectedRate
-                      ? `${selectedRate.amount} ${selectedRate.currency}`
-                      : '--'}
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>{t.shipping}</span>
+                <span className="font-medium text-gray-900">
+                  {selectedRate
+                    ? `${selectedRate.amount} ${selectedRate.currency}`
+                    : '--'}
+                </span>
+              </div>
+              <div className="border-t pt-4 mt-4">
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                  <span className="font-bold text-lg text-gray-900">
+                    {t.totalToPay}
+                  </span>
+                  <span className="font-extrabold text-xl text-gray-900">
+                    {total.toFixed(2)} {currency}
                   </span>
                 </div>
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                    <span className="font-bold text-lg text-gray-900">
-                      Total à payer
-                    </span>
-                    <span className="font-extrabold text-xl text-gray-900">
-                      {total.toFixed(2)} {currency}
-                    </span>
-                  </div>
-                </div>
               </div>
+            </div>
 
-              {/* Payment Section moved inside Summary or just below */}
-              <div className="mt-8 pt-6 border-t">
-                <h3 className="text-lg font-bold mb-4 text-gray-900">
-                  {t.payment}
-                </h3>
-                <PaymentElement />
-                <button
-                  className={`w-full mt-6 py-4 px-6 rounded-xl font-bold text-white text-lg shadow-md transition-all transform active:scale-[0.98]
+            {/* Payment Section moved inside Summary or just below */}
+            <div className="mt-8 pt-6 border-t">
+              <h3 className="text-lg font-bold mb-4 text-gray-900">
+                {t.payment}
+              </h3>
+              <PaymentElement />
+              <button
+                className={`w-full mt-6 py-4 px-6 rounded-xl font-bold text-white text-lg shadow-md transition-all transform active:scale-[0.98]
                                         ${
                                           !stripe || !elements || !selectedRate
                                             ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                                             : 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl'
                                         }`}
-                  disabled={!stripe || !elements || !selectedRate}
-                  onClick={handlePay}
+                disabled={!stripe || !elements || !selectedRate}
+                onClick={handlePay}
+              >
+                {t.payNow}
+              </button>
+              <p className="text-xs text-center text-gray-400 mt-4 flex items-center justify-center gap-1">
+                <svg
+                  className="w-3 h-3"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  {t.payNow}
-                </button>
-                <p className="text-xs text-center text-gray-400 mt-4 flex items-center justify-center gap-1">
-                  <svg
-                    className="w-3 h-3"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
-                  </svg>
-                  Paiement sécurisé par Stripe
-                </p>
-              </div>
+                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                </svg>
+                Paiement sécurisé par Stripe
+              </p>
             </div>
           </div>
         </div>

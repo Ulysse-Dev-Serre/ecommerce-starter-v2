@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { OrderStatus } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
+import { createTransaction } from './shippo';
 import { calculateCart, type Currency } from './calculation.service';
 import { CartProjection } from './cart.service';
 import { decrementStock } from './inventory.service';
@@ -42,6 +43,13 @@ export async function createOrderFromCart({
   const shippingCostMeta = paymentIntent.metadata?.shipping_cost;
   const shippingAmount = shippingCostMeta ? parseFloat(shippingCostMeta) : 0;
 
+  // Récupérer l'ID du tarif Shippo (si le client a choisi une livraison)
+  const shippingRateId = paymentIntent.metadata?.shipping_rate_id;
+  let shipmentCreateData;
+
+  // L'achat de l'étiquette est manuel via le dashboard Admin pour éviter les frais automatiques.
+  // On ne fait RIEN ici avec shippingRateId pour l'instant, sauf peut-être le stocker si besoin plus tard.
+
   const discountAmount = 0;
 
   // Utiliser le total de Stripe s'il correspond à la somme, sinon recalculer
@@ -67,6 +75,12 @@ export async function createOrderFromCart({
       totalAmount,
       shippingAddress: shippingAddress || {},
       billingAddress: billingAddress || {},
+      // Création automatique de l'expédition si l'étiquette a été achetée
+      shipments: shipmentCreateData
+        ? {
+            create: shipmentCreateData,
+          }
+        : undefined,
       items: {
         create: calculation.items.map(item => {
           const cartItem = cart.items.find(i => i.variantId === item.variantId);
@@ -100,6 +114,7 @@ export async function createOrderFromCart({
     include: {
       items: true,
       payments: true,
+      shipments: true, // Inclure les shipments dans la réponse
     },
   });
 
@@ -115,7 +130,7 @@ export async function createOrderFromCart({
       orderId: order.id,
       orderNumber: order.orderNumber,
       totalAmount: order.totalAmount,
-      itemsCount: order.items.length,
+      itemsCount: calculation.items.length,
     },
     'Order created from cart'
   );

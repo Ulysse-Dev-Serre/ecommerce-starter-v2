@@ -158,6 +158,12 @@
     "payment": "Paiement",
     "payNow": "Payer maintenant",
     "loading": "Chargement...",
-    "error": "Erreur d'initialisation"
+    "error": "Erreur d'initialisation",
+    "orderSummary": "Résumé de la commande",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "totalToPay": "Total à payer",
+    "confirmAddress": "Confirmer l'adresse et voir la livraison",
+    "calculating": "Calcul en cours..."
   }
 }

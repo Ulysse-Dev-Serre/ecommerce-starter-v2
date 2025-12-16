@@ -37,10 +37,15 @@ export async function getShippingRates(
   parcels: Parcel[]
 ) {
   try {
+    const carrierAccounts = process.env.SHIPPO_UPS_ACCOUNT_ID
+      ? [process.env.SHIPPO_UPS_ACCOUNT_ID]
+      : undefined;
+
     const shipment = await shippo.shipments.create({
       addressFrom: addressFrom,
       addressTo: addressTo,
       parcels: parcels,
+      carrierAccounts: carrierAccounts,
       async: false,
     });
 

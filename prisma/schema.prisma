@@ -501,6 +501,7 @@ model Shipment {
   trackingCode String?
   carrier      String?
   carrierService String?
+  labelUrl       String?       // URL du PDF de l'étiquette (ex: Shippo) pour réimpression
   shippedAt    DateTime?
   deliveredAt  DateTime?
   createdAt    DateTime       @default(now())

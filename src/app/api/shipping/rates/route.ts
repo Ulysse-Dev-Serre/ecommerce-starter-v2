@@ -38,7 +38,10 @@ const DEFAULT_PARCEL: Parcel = {
   massUnit: 'kg',
 };
 
-export async function POST(req: NextRequest) {
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { withError } from '@/lib/middleware/withError';
+
+async function handler(req: NextRequest) {
   try {
     const body = await req.json();
 
@@ -88,10 +91,9 @@ export async function POST(req: NextRequest) {
       rates: shipment.rates,
     });
   } catch (error) {
-    logger.error({ error }, 'API Error /shipping/rates');
-    return NextResponse.json(
-      { error: 'Failed to fetch shipping rates' },
-      { status: 500 }
-    );
+    logger.error({ error }, 'API Error /shipping/rates'); // Note: withError will also catch this but we keep specific logging
+    throw error; // Let withError handle the response
   }
 }
+
+export const POST = withError(withRateLimit(handler, RateLimits.PUBLIC));
