@@ -1,13 +1,6 @@
 # AI Context & Instructions
 
-## 🧠 Business Context (CRITICAL)
-This project is an **"Universal IoT E-commerce Starter"** for AgTechNest.
-**Goal:** Rapidly deploy independent shops for niche IoT products (1-10 items max per shop).
-**Strategy:**
-- **Codebase:** One robust "Super-Starter" used as a template.
-- **Database:** Full schema (Categories, Reviews...) is standard, even if unused for a mono-product shop. **DO NOT REMOVE unused tables**.
-- **Dev Flow:** Clone repo -> New .env -> Skin Frontend -> Deploy.
-- **Priority:** Stability & Launch Speed > Over-optimization.
+
 
 ## 🛠 Project Rules
 
@@ -31,7 +24,8 @@ Notre objectif principal est de travailler sur le backend (API, etc.). Le front-
 
 ## 📋 Accès aux Issues GitHub via CLI
 
-Pour analyser les issues du projet depuis le terminal, tu peux utiliser **GitHub CLI (`gh`)** :
+Pour analyser les issues du projet depuis le terminal, tu peux utiliser **GitHub CLI (`gh`)**.
+> **Note** : Tu disposes des droits d'écriture. Tu PEUX modifier les issues (edit, create) directement depuis le terminal.
 
 ### Vérifier que gh est installé
 ```bash

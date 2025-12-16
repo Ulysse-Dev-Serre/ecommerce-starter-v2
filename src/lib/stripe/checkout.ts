@@ -248,6 +248,10 @@ export async function createPaymentIntent({
       integration_check: 'accept_a_payment',
       subtotal: amountInCents.toString(), // CRUCIAL pour l'update du shipping
     },
+    // Activer Stripe Tax si configuré
+    ...(process.env.STRIPE_AUTOMATIC_TAX === 'true' && {
+      automatic_tax: { enabled: true },
+    }),
   });
 
   return paymentIntent;

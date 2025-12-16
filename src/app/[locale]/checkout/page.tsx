@@ -64,6 +64,12 @@ export default async function CheckoutPage({
     payNow: t('payNow'),
     loading: t('loading'),
     error: t('error'),
+    orderSummary: t('orderSummary'),
+    subtotal: t('subtotal'),
+    shipping: t('shipping'),
+    totalToPay: t('totalToPay'),
+    confirmAddress: t('confirmAddress'),
+    calculating: t('calculating'),
   };
 
   return (

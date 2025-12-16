@@ -158,6 +158,12 @@
     "payment": "Payment",
     "payNow": "Pay Now",
     "loading": "Loading checkout...",
-    "error": "Error initializing checkout"
+    "error": "Error initializing checkout",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "totalToPay": "Total to pay",
+    "confirmAddress": "Confirm address & see shipping options",
+    "calculating": "Calculating..."
   }
 }

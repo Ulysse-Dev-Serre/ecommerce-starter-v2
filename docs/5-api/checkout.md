@@ -3,28 +3,42 @@
 ## Endpoints
 
 ### Client
-- `POST /api/checkout/create-session` - Crée session Stripe
-  - **Auth**: User connecté
-  - **Body**: successUrl, cancelUrl, currency (CAD|USD), items[] (optionnel)
-  - **Modes**: Mode panier existant OU items directs
-  - **Actions**: Réserve stock, crée session Stripe, retourne url
-  - **Fichier**: `src/app/api/checkout/create-session/route.ts`
+- `POST /api/checkout/create-intent` - Initialise paiement (Stripe Elements)
+  - **Auth**: Aucune (Session panier ou User connecté)
+  - **Body**: cartId (optionnel), currency (CAD|USD)
+  - **Actions**:
+    1. Récupère panier
+    2. Réserve stock
+    3. Crée Stripe PaymentIntent (Montant = Sous-total produits)
+  - **Retourne**: clientSecret, amount, currency
+  - **Fichier**: `src/app/api/checkout/create-intent/route.ts`
 
-- `GET /api/checkout/success` - Récupère détails session après paiement
+- `POST /api/checkout/update-intent` - Met à jour montant total (Livraison)
   - **Auth**: Aucune
-  - **Query**: session_id (depuis Stripe redirect)
-  - **Fichier**: `src/app/api/checkout/success/route.ts`
+  - **Body**: paymentIntentId, shippingRate { amount, object_id }, currency
+  - **Actions**:
+    1. Récupère PaymentIntent existant
+    2. Calcule Nouveau Total = (Sous-total initial + Frais livraison)
+    3. Met à jour metadata Stripe (shipping_rate_id, shipping_cost)
+  - **Retourne**: success: true, amount (nouveau total)
+  - **Fichier**: `src/app/api/checkout/update-intent/route.ts`
 
-## Workflow
-1. User POST /api/checkout/create-session → récupère session.url
-2. Frontend redirige vers Stripe Checkout
-3. User paie et Stripe envoie webhook
-4. Webhook crée commande + vide panier
-5. Stripe redirige vers successUrl + session_id
-6. Frontend GET /api/checkout/success pour confirmation
+### Webhook (Interne)
+- `POST /api/webhooks/stripe` - Confirmation paiement
+  - **Voir**: [Documentation Webhooks](./webhooks.md)
+
+## Workflow Checkout Personnalisé
+
+1. **Page Load** : Frontend appelle `create-intent` → Reçoit `clientSecret`.
+2. **User** : Remplit adresse (Stripe Address Element).
+3. **Frontend** : Appelle shipping API pour tarifs.
+4. **User** : Choisit tarif (ex: 15$).
+5. **Frontend** : Appelle `update-intent` → Stripe met à jour le montant à prélever.
+6. **User** : Paie via Stripe Payment Element.
+7. **Stripe** : Valide paiement -> Redirige user vers `/checkout/success`.
+8. **Async** : Webhook `payment_intent.succeeded` -> Backend crée commande + Achète label (Option B: label manuel).
 
 ## Notes
-- Stock réservé immédiatement (libéré si paiement échoue)
-- Webhook Stripe crée commande (source unique de vérité)
-- Session valide 24h
-- Métadonnées: cartId + userId stockées dans session Stripe
+- **Stock** : Réservé dès le `create-intent`.
+- **Total** : Dynamique (Produits + Livraison choisie).
+- **Sécurité** : Le backend vérifie toujours les montants avant update.

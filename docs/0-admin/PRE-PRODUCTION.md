@@ -108,6 +108,19 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_xxx
 STRIPE_WEBHOOK_SECRET=[REDACTED:webhook-secret]
 ```
 
+### 5. Configurer Shippo (Livraison)
+
+1. Aller sur [Shippo Dashboard > Settings > API](https://apps.goshippo.com/settings/api)
+2. Générer un **Live Token** (commence par `shippo_live_`)
+3. Mettre à jour `.env` :
+
+```env
+SHIPPO_API_KEY=shippo_live_xxx
+```
+
+**Note importante :** En développement, nous utilisons la clé de test (`shippo_test_xxx`). N'oubliez pas de passer à la clé de production pour générer de vraies étiquettes valides chez les transporteurs (UPS, Canada Post, etc.).
+
+
 #### Activer Stripe Tax (optionnel mais recommandé)
 
 Pour que Stripe calcule automatiquement TPS/TVQ, HST, US sales tax :
