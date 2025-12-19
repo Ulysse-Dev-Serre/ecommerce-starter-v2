@@ -247,10 +247,34 @@ export default async function OrderDetailPage({
               {typeof order.shippingAddress === 'object' &&
               order.shippingAddress !== null ? (
                 <div className="space-y-1">
-                  <p>{(order.shippingAddress as any).street || 'N/A'}</p>
                   <p>
-                    {(order.shippingAddress as any).city || ''}{' '}
-                    {(order.shippingAddress as any).zipCode || ''}
+                    {(order.shippingAddress as any).name ||
+                      (order.shippingAddress as any).fullName ||
+                      ''}
+                  </p>
+                  <p>
+                    {(order.shippingAddress as any).street1 ||
+                      (order.shippingAddress as any).line1 ||
+                      (order.shippingAddress as any).street ||
+                      'N/A'}
+                  </p>
+                  {(order.shippingAddress as any).street2 ||
+                  (order.shippingAddress as any).line2 ? (
+                    <p>
+                      {(order.shippingAddress as any).street2 ||
+                        (order.shippingAddress as any).line2}
+                    </p>
+                  ) : null}
+                  <p>
+                    {(order.shippingAddress as any).city || ''},{' '}
+                    {(order.shippingAddress as any).state ||
+                      (order.shippingAddress as any).province ||
+                      (order.shippingAddress as any).region ||
+                      ''}{' '}
+                    {(order.shippingAddress as any).postalCode ||
+                      (order.shippingAddress as any).zipCode ||
+                      (order.shippingAddress as any).zip ||
+                      ''}
                   </p>
                   <p>{(order.shippingAddress as any).country || ''}</p>
                 </div>
@@ -259,39 +283,39 @@ export default async function OrderDetailPage({
               )}
             </div>
           </div>
-
-          {/* Status actions */}
-          <OrderDetailClient orderId={order.id} currentStatus={order.status} />
-
-          {/* Status history */}
-          {order.statusHistory && order.statusHistory.length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6">
-              <h2 className="mb-4 text-lg font-semibold">Status History</h2>
-              <div className="space-y-3">
-                {order.statusHistory.map((history, index) => (
-                  <div
-                    key={history.id}
-                    className={`border-l-2 pl-4 ${
-                      index === 0 ? 'border-primary' : 'border-gray-300'
-                    }`}
-                  >
-                    <p className="text-sm font-medium">
-                      <StatusBadge status={history.status as any} />
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {new Date(history.createdAt).toLocaleString()}
-                    </p>
-                    {history.comment && (
-                      <p className="mt-1 text-sm text-gray-600">
-                        {history.comment}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Status actions */}
+        <OrderDetailClient orderId={order.id} currentStatus={order.status} />
+
+        {/* Status history */}
+        {order.statusHistory && order.statusHistory.length > 0 && (
+          <div className="rounded-lg border border-gray-200 bg-white p-6">
+            <h2 className="mb-4 text-lg font-semibold">Status History</h2>
+            <div className="space-y-3">
+              {order.statusHistory.map((history, index) => (
+                <div
+                  key={history.id}
+                  className={`border-l-2 pl-4 ${
+                    index === 0 ? 'border-primary' : 'border-gray-300'
+                  }`}
+                >
+                  <p className="text-sm font-medium">
+                    <StatusBadge status={history.status as any} />
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {new Date(history.createdAt).toLocaleString()}
+                  </p>
+                  {history.comment && (
+                    <p className="mt-1 text-sm text-gray-600">
+                      {history.comment}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

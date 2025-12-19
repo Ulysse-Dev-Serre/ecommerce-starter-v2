@@ -25,9 +25,17 @@ export default async function CheckoutPage({
   if (clerkId) {
     const user = await prisma.user.findUnique({
       where: { clerkId },
-      select: { id: true },
+      select: { id: true, email: true },
     });
     userId = user?.id;
+  }
+  let userEmail: string | undefined;
+  if (userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    userEmail = user?.email || undefined;
   }
 
   const cookieStore = await cookies();
@@ -91,6 +99,7 @@ export default async function CheckoutPage({
         )}
         currency={cart.currency}
         translations={clientTranslations}
+        userEmail={userEmail}
       />
     </div>
   );

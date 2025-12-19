@@ -42,7 +42,7 @@
 **Objectif :** Rendre le site opérationnel pour une vraie vente et une vraie livraison (MVP Launch).
 
 **Issues à faire :**
-- [] **Issue 24** : Intégration Shippo (Calcul & Labels)
+- [x] **Issue 24** : Intégration Shippo (Calcul & Labels)
 - [ ] **Issue 25** : Emails Transactionnels (Resend/React-Email)
 - [ ] **Issue 26** : Marketing Pixels (GA4, FB, TikTok) & Cookie Consent
 - [ ] **Issue 27** : Pages Légales & Contenu Statique
@@ -50,6 +50,7 @@
 - [ ] **Issue 29** : Pages d'erreur Custom (404/500)
 - [ ] **Issue 30** : Premier Déploiement Vercel (Production)
 - [ ] **Issue 31** : Gestion des retours et remboursements
+- [ ] **Issue 32** : Améliorations Logistiques (Tracking Client, Dimensions Colis, Warehouses)
 
 ---
 
