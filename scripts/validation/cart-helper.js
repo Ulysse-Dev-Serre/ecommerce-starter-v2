@@ -26,10 +26,10 @@ async function addProductToCart(variantId, quantity = 1, testApiKey) {
       },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let responseData = '';
 
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         responseData += chunk;
       });
 
@@ -49,7 +49,7 @@ async function addProductToCart(variantId, quantity = 1, testApiKey) {
       });
     });
 
-    req.on('error', (error) => {
+    req.on('error', error => {
       reject(error);
     });
 
@@ -76,17 +76,17 @@ async function getFirstAvailableVariantId(testApiKey) {
       },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let responseData = '';
 
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         responseData += chunk;
       });
 
       res.on('end', () => {
         try {
           const parsed = JSON.parse(responseData);
-          
+
           if (parsed.success && parsed.products && parsed.products.length > 0) {
             const product = parsed.products[0];
             if (product.variants && product.variants.length > 0) {
@@ -94,7 +94,7 @@ async function getFirstAvailableVariantId(testApiKey) {
               return;
             }
           }
-          
+
           resolve(null);
         } catch (error) {
           resolve(null);
@@ -102,7 +102,7 @@ async function getFirstAvailableVariantId(testApiKey) {
       });
     });
 
-    req.on('error', (error) => {
+    req.on('error', error => {
       reject(error);
     });
 

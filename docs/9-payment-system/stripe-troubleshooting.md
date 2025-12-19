@@ -1,5 +1,7 @@
 # 🔧 Dépannage Stripe
 
+> Avant de dépanner, assurez-vous de bien comprendre le fonctionnement normal : [🔄 Flux de Paiement (Workflow)](stripe-payment-flow.md).
+
 ## Problème 1 : Le paiement réussit mais pas de commande créée
 
 ### Symptôme

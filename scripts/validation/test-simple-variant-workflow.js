@@ -1,11 +1,11 @@
 /**
  * Script de test du workflow simplifié de création de produit avec variantes
- * 
+ *
  * Ce script teste :
  * 1. Création d'un produit
  * 2. Ajout de variantes simples (nom EN/FR, prix, stock)
  * 3. Validation : minimum 1 variante
- * 
+ *
  * Usage:
  *   node tests/scripts/test-simple-variant-workflow.js
  */
@@ -116,7 +116,10 @@ async function main() {
     // 3. RÉCUPÉRER LES VARIANTES
     // ==========================================
     console.log('\n📝 ÉTAPE 3: Récupération des variantes');
-    const allVariants = await request('GET', `/api/admin/products/${productId}/variants`);
+    const allVariants = await request(
+      'GET',
+      `/api/admin/products/${productId}/variants`
+    );
     console.log(`✅ ${allVariants.count} variantes récupérées`);
 
     // ==========================================

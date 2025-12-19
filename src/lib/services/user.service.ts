@@ -93,45 +93,6 @@ export async function getUserByClerkId(clerkId: string): Promise<User | null> {
 }
 
 /**
- * Promote/demote user role (CLIENT ↔ ADMIN)
- */
-export async function promoteUser(
-  id: string,
-  newRole: UserRole
-): Promise<UserWithBasicInfo> {
-  const updatedUser = await prisma.user.update({
-    where: { id },
-    data: {
-      role: newRole,
-      updatedAt: new Date(),
-    },
-    select: {
-      id: true,
-      clerkId: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      imageUrl: true,
-      role: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
-
-  logger.info(
-    {
-      action: 'user_role_updated',
-      userId: id,
-      newRole,
-      email: updatedUser.email,
-    },
-    `User role updated to ${newRole}`
-  );
-
-  return updatedUser;
-}
-
-/**
  * Create user from Clerk webhook data
  */
 export async function createUserFromClerk(

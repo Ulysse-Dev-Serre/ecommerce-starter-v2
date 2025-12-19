@@ -1,4 +1,6 @@
-# 🔒 Sécurité Stripe
+# 🔄 Flux de Paiement & Sécurité Stripe
+
+> Pour un audit approfondi et technique (RBAC, analyse de vulnérabilités), voir le dossier [7-securite](../7-securite).
 
 ## Comment c'est sécurisé ?
 

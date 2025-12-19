@@ -17,22 +17,23 @@ async function main() {
     "🔄 Réinitialisation complète de l'environnement de développement..."
   );
 
-  // Cette section du code gère la suppression des utilisateurs directement dans le service Clerk.
-  console.log('🗑️ Suppression des utilisateurs de test dans Clerk...');
-  const clerkUsers = await clerkClient.users.getUserList();
+  // Cette section du code gère la suppression de TOUS les utilisateurs dans le service Clerk.
+  console.log('🗑️ Suppression de TOUS les utilisateurs de test dans Clerk...');
+
+  // Pagination : Clerk retourne max 10/100 utilisateurs par défaut, on doit boucler ou augmenter la limit
+  const clerkUsers = await clerkClient.users.getUserList({ limit: 500 });
+
+  if (clerkUsers.length === 0) {
+    console.log('   Aucun utilisateur trouvé dans Clerk.');
+  }
+
   for (const user of clerkUsers) {
-    // La condition vérifie si l'e-mail se termine par '@test.com' OU s'il est dans la liste `testEmails`.
-    if (
-      user.emailAddresses.some(
-        e =>
-          e.emailAddress.endsWith('@test.com') ||
-          testEmails.includes(e.emailAddress)
-      )
-    ) {
+    try {
+      const email = user.emailAddresses[0]?.emailAddress || 'No Email';
       await clerkClient.users.deleteUser(user.id);
-      console.log(
-        `   ✅ Utilisateur Clerk supprimé: ${user.emailAddresses[0].emailAddress}`
-      );
+      console.log(`   ✅ Utilisateur Clerk supprimé: ${email} (${user.id})`);
+    } catch (error) {
+      console.error(`   ❌ Erreur suppression utilisateur ${user.id}:`, error);
     }
   }
 

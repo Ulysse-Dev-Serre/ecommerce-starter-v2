@@ -3,6 +3,7 @@ import { ArrowLeft, Package, CreditCard, User, MapPin } from 'lucide-react';
 
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { OrderDetailClient } from '@/components/admin/orders/order-detail-client';
+import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 import { getOrderByIdAdmin } from '@/lib/services/order.service';
 
 export const dynamic = 'force-dynamic';
@@ -185,6 +186,27 @@ export default async function OrderDetailPage({
               <p className="text-gray-500">No payment information available</p>
             )}
           </div>
+
+          {/* Shipping Management */}
+          {(() => {
+            const payment = order.payments.find(
+              p => p.method === 'STRIPE' && p.status === 'COMPLETED'
+            );
+            const metadata = payment?.transactionData
+              ? (payment.transactionData as any).metadata
+              : null;
+
+            return (
+              <ShippingManagement
+                orderId={order.id}
+                shipment={order.shipments[0]}
+                shippingRateId={metadata?.shipping_rate_id}
+                shippingCost={metadata?.shipping_cost}
+                currency={order.currency}
+                debugMetadata={metadata}
+              />
+            );
+          })()}
         </div>
 
         {/* Sidebar */}

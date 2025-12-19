@@ -1,49 +1,114 @@
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Eye } from 'lucide-react';
+import { Eye, Loader2, AlertCircle } from 'lucide-react';
+import { useParams, useSearchParams } from 'next/navigation';
 
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { OrderFilters } from '@/components/admin/orders/filters';
 
-export const dynamic = 'force-dynamic';
-
-interface OrdersPageProps {
-  searchParams: Promise<{
-    page?: string;
-    status?: string;
-    search?: string;
-  }>;
-  params: Promise<{ locale: string }>;
+interface Order {
+  id: string;
+  orderNumber: string;
+  items: any[];
+  user: {
+    firstName: string | null;
+    lastName: string | null;
+    email: string;
+  };
+  createdAt: string;
+  totalAmount: number;
+  currency: string;
+  status: string;
+  payments: any[];
 }
 
-export default async function OrdersPage({
-  searchParams,
-  params,
-}: OrdersPageProps) {
-  const { locale } = await params;
-  const { page = '1', status, search } = await searchParams;
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
-  // Appeler l'endpoint API pour récupérer les commandes
-  const apiUrl = new URL(
-    '/api/admin/orders',
-    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
-  );
-  apiUrl.searchParams.set('page', page);
-  apiUrl.searchParams.set('limit', '20');
-  if (status) apiUrl.searchParams.set('status', status);
-  if (search) apiUrl.searchParams.set('search', search);
+function OrdersContent() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const locale = params?.locale as string;
 
-  const response = await fetch(apiUrl.toString(), {
-    headers: {
-      'x-test-api-key': process.env.TEST_API_KEY || '',
-    },
-  });
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  // Params state
+  const page = searchParams.get('page') || '1';
+  const status = searchParams.get('status') || '';
+  const search = searchParams.get('search') || '';
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const apiUrl = new URL(
+          '/api/admin/orders',
+          window.location.origin // Use window.location.origin for client-side fetch
+        );
+        apiUrl.searchParams.set('page', page);
+        apiUrl.searchParams.set('limit', '20');
+        if (status) apiUrl.searchParams.set('status', status);
+        if (search) apiUrl.searchParams.set('search', search);
+
+        const response = await fetch(apiUrl.toString());
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch orders: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setOrders(data.data.orders);
+        setPagination(data.data.pagination);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'An unknown error occurred'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [page, status, search]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+      </div>
+    );
   }
 
-  const data = await response.json();
-  const { orders, pagination } = data.data;
+  if (error) {
+    return (
+      <div className="rounded-md bg-red-50 p-4 border border-red-200">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <AlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">
+              Error loading orders
+            </h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -61,7 +126,7 @@ export default async function OrdersPage({
       <OrderFilters locale={locale} />
 
       {/* Orders table */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden min-h-[400px]">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -89,7 +154,7 @@ export default async function OrdersPage({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {orders.length === 0 ? (
+            {!orders || orders.length === 0 ? (
               <tr>
                 <td
                   colSpan={7}
@@ -100,7 +165,10 @@ export default async function OrdersPage({
               </tr>
             ) : (
               orders.map(order => (
-                <tr key={order.id} className="hover:bg-gray-50">
+                <tr
+                  key={order.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {order.orderNumber}
@@ -164,7 +232,7 @@ export default async function OrdersPage({
       </div>
 
       {/* Pagination */}
-      {pagination.totalPages > 1 && (
+      {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
             Showing{' '}
@@ -197,5 +265,20 @@ export default async function OrdersPage({
         </div>
       )}
     </div>
+  );
+}
+
+// Wrapper avec Suspense pour gérer useSearchParams côté client
+export default function OrdersPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      }
+    >
+      <OrdersContent />
+    </Suspense>
   );
 }

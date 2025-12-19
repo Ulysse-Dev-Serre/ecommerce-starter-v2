@@ -228,10 +228,41 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
 }
 
+// Helper pour extraire l'adresse de Stripe
+function extractShippingAddress(
+  source: Stripe.Checkout.Session | Stripe.PaymentIntent
+): any {
+  let shippingDetails;
+
+  if ('customer_details' in source && source.customer_details) {
+    shippingDetails = source.customer_details; // Checkout Session
+  } else if ('shipping' in source && source.shipping) {
+    shippingDetails = source.shipping; // Payment Intent
+  }
+
+  if (!shippingDetails || !shippingDetails.address) return undefined;
+
+  const addr = shippingDetails.address;
+
+  return {
+    name: shippingDetails.name,
+    street1: addr.line1,
+    street2: addr.line2,
+    city: addr.city,
+    state: addr.state,
+    postalCode: addr.postal_code,
+    country: addr.country,
+    // On essaie de préserver le format
+    firstName: shippingDetails.name?.split(' ')[0] || '',
+    lastName: shippingDetails.name?.split(' ').slice(1).join(' ') || '',
+  };
+}
+
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
   requestId: string
 ): Promise<void> {
+  // ... (logs existants)
   logger.info(
     {
       requestId,
@@ -242,14 +273,7 @@ async function handleCheckoutSessionCompleted(
   );
 
   if (session.payment_status !== 'paid') {
-    logger.warn(
-      {
-        requestId,
-        sessionId: session.id,
-        paymentStatus: session.payment_status,
-      },
-      'Payment not completed yet'
-    );
+    // ...
     return;
   }
 
@@ -257,10 +281,7 @@ async function handleCheckoutSessionCompleted(
   const itemsMetadata = session.metadata?.items;
 
   if (!userId || !itemsMetadata) {
-    logger.error(
-      { requestId, sessionId: session.id },
-      'Missing userId or items in session metadata'
-    );
+    // ...
     return;
   }
 
@@ -270,14 +291,11 @@ async function handleCheckoutSessionCompleted(
   });
 
   if (existingPayment) {
-    logger.info(
-      { requestId, sessionId: session.id },
-      'Order already created for this payment intent'
-    );
+    // ...
     return;
   }
 
-  // Créer la commande depuis les items dans metadata (toujours)
+  // Créer la commande depuis les items dans metadata
   const items = JSON.parse(itemsMetadata) as Array<{
     variantId: string;
     quantity: number;
@@ -288,7 +306,7 @@ async function handleCheckoutSessionCompleted(
     'Creating order from purchased items'
   );
 
-  // Récupérer les variants depuis la DB
+  // ... (récupération variants inchangée)
   const variants = await prisma.productVariant.findMany({
     where: { id: { in: items.map(i => i.variantId) } },
     include: {
@@ -306,7 +324,7 @@ async function handleCheckoutSessionCompleted(
     },
   });
 
-  // Construire un "cart virtuel" pour réutiliser createOrderFromCart
+  // Construire un "cart virtuel"
   const virtualCart = {
     id: 'virtual_' + session.id,
     userId,
@@ -331,6 +349,9 @@ async function handleCheckoutSessionCompleted(
     }),
   };
 
+  // Extraction de l'adresse
+  const shippingAddress = extractShippingAddress(session);
+
   await createOrderFromCart({
     cart: virtualCart as any,
     userId,
@@ -338,10 +359,12 @@ async function handleCheckoutSessionCompleted(
       id: paymentIntentId,
       amount: session.amount_total || 0,
       currency: session.currency || 'eur',
+      // On mock le reste pour satisfaire le type si besoin, ou on fait confiance au cast
     } as Stripe.PaymentIntent,
+    shippingAddress, // <--- AJOUT IMPORTANT
   });
 
-  // Si un cartId existe, vider le panier (optionnel)
+  // ... (reste de la fonction)
   const cartId = session.metadata?.cartId;
   if (cartId) {
     await clearCart(cartId);
@@ -358,6 +381,7 @@ async function handlePaymentIntentSucceeded(
   paymentIntent: Stripe.PaymentIntent,
   requestId: string
 ): Promise<void> {
+  // ... (logs)
   logger.info(
     {
       requestId,
@@ -371,22 +395,16 @@ async function handlePaymentIntentSucceeded(
   const itemsMetadata = paymentIntent.metadata?.items;
 
   if (!userId || !itemsMetadata) {
-    logger.warn(
-      { requestId, paymentIntentId: paymentIntent.id },
-      'Missing metadata in payment intent'
-    );
+    // ...
     return;
   }
 
+  // ... (check existing payment)
   const existingPayment = await prisma.payment.findFirst({
     where: { externalId: paymentIntent.id },
   });
 
   if (existingPayment) {
-    logger.info(
-      { requestId, paymentIntentId: paymentIntent.id },
-      'Order already created for this payment'
-    );
     return;
   }
 
@@ -395,12 +413,7 @@ async function handlePaymentIntentSucceeded(
     quantity: number;
   }>;
 
-  logger.info(
-    { requestId, userId, itemsCount: items.length },
-    'Creating order from purchased items'
-  );
-
-  // Récupérer les variants depuis la DB
+  // ... (récupération variants)
   const variants = await prisma.productVariant.findMany({
     where: { id: { in: items.map(i => i.variantId) } },
     include: {
@@ -418,7 +431,7 @@ async function handlePaymentIntentSucceeded(
     },
   });
 
-  // Construire un "cart virtuel" pour réutiliser createOrderFromCart
+  // Virtual Cart
   const virtualCart = {
     id: 'virtual_' + paymentIntent.id,
     userId,
@@ -443,13 +456,17 @@ async function handlePaymentIntentSucceeded(
     }),
   };
 
+  // Extraction de l'adresse
+  const shippingAddress = extractShippingAddress(paymentIntent);
+
   await createOrderFromCart({
     cart: virtualCart as any,
     userId,
     paymentIntent,
+    shippingAddress, // <--- AJOUT IMPORTANT
   });
 
-  // Si un cartId existe, vider le panier (optionnel)
+  // ... (reste)
   const cartId = paymentIntent.metadata?.cartId;
   if (cartId) {
     await clearCart(cartId);
