@@ -2,34 +2,11 @@
 
 ## 🔧 **Configuration Webhook (Prod & Développement)**
 
-### **Installation de ngrok sur Linux**
+### **Prérequis : Ngrok**
 
-**phase A : Installation via Snap**
+Pour recevoir les webhooks en local, votre serveur doit être accessible depuis internet.
 
-```bash
-sudo snap install ngrok
-```
-
-**Phase B : Créer un compte gratuit**
-
-- Rendez-vous sur [https://ngrok.com/](https://ngrok.com/)
-- Créez un compte gratuit
-
-**Phase C: Configuration du token d'authentification**
-
-```bash
-# Remplacez YOUR_TOKEN par le token fourni dans votre dashboard ngrok
-ngrok config add-authtoken YOUR_TOKEN
-```
-
-**Phase D : Exposition du serveur local**
-
-```bash
-# Expose le port 3000 de votre application Next.js
-ngrok http 3000
-```
-
-**Résultat :** ngrok génère une URL publique (ex: `https://abc123.ngrok.io`) que vous pouvez utiliser dans l'onglet webhooks de Clerk.
+👉 **[Voir le guide d'installation et configuration Ngrok](../3-development-tools/ngrok-setup.md)**
 
 ## <br>
 
@@ -96,13 +73,7 @@ curl http://localhost:3000/api/users
 curl http://localhost:3000/api/internal/health
 ```
 
-## 📊 **Points de Validation**
-
-### **✅ Synchronisation Fonctionnelle**
-
-- Connexion via frontend → Utilisateur créé en PostgreSQL
-- Modification profil Clerk → Mise à jour base automatique
-- Suppression Clerk Dashboard → Supprimé de PostgreSQL
+##  **Points de Validation**
 
 ### **✅ APIs Opérationnelles**
 
@@ -112,51 +83,47 @@ curl http://localhost:3000/api/internal/health
 
 ---
 
-## 🧪 **Scripts de Test Rapides et ## 📋 **Outils de Debug Avancés\*\*\*\*
+## 🧪 **Scripts de Validation**
 
-### **Comptes de Test**
+### **Tests Base de Données**
 
 ```bash
-# Créer comptes test Clerk (admin@test.com, client@test.com, marie@test.com)
-npm run sync-clerk create
-# Mot de passe : A_dmin_P@ssw0rd!123
-
-# Reset complet si nécessaire
+# Reset complet de la DB (Schema + Seed)
 npm run db:reset
+
+# Validation des opérations CRUD (User, etc.)
+npm run test:db
 ```
 
-### **Tests Manuels APIs**
+### **Outils de Debug Webhook**
 
 ```bash
-# Test rapide tous endpoints
-npm run test:manual
+# Lancer un serveur de réception de webhooks localement
+npm run test:webhook
 
-# Test base de données
-npm run test:db
+# Exposer ce serveur via ngrok
+ngrok http 3000
+# URL à configurer dans Clerk: https://...ngrok.io/test-webhook
 ```
 
 ---
 
-_Ces outils sont utiles pour le développement mais ne remplacent pas les interfaces Clerk et Neon._
+## 🔐 **Gestion des Rôles (Admin)**
 
-### **Serveur webhook debug local**
+La synchronisation Clerk ↔ PostgreSQL attribue par défaut le rôle **CLIENT** à tous les nouveaux utilisateurs.
 
-```bash
-# Terminal 3 : Serveur de debug
-npm run test:webhook  # → http://localhost:3001
+👉 **Pour créer votre premier Administrateur, suivez le guide :**
+**[🚀 Initialisation Complète (Day 1 Protocol)](../1-foundations/setup-initial.md)**
 
-# Terminal 4 : Exposer serveur debug
-ngrok http 3001
+### **Scripts de Synchronisation Manuelle**
 
-# Configurer Clerk avec : https://debug-url.ngrok.io/test-webhook
-# Permet de voir les détails bruts des webhooks
-```
-
-### **Tests clients webhook**
+Si les webhooks ne fonctionnent pas (ex: pas de ngrok), vous pouvez forcer la synchronisation :
 
 ```bash
-# Tester le serveur debug
-npm run test:webhook:client
+# 1. Créer des utilisateurs de test dans Clerk (Dev)
+npm run sync-clerk create
+
+# 2. Forcer la synchronisation Clerk -> DB Locale
+npm run sync-clerk sync
 ```
 
-**✅ Synchronisation 100% automatique - Prête pour production !**

@@ -1,11 +1,11 @@
 /**
  * Script de test pour valider les endpoints admin de gestion des produits
- * 
+ *
  * Tests:
  * - POST /api/admin/products - Créer un produit
  * - PUT /api/admin/products/[id] - Modifier un produit
  * - DELETE /api/admin/products/[id] - Supprimer un produit
- * 
+ *
  * Usage: node tests/scripts/test-product-crud.js
  */
 
@@ -38,10 +38,10 @@ async function request(method, path, data = null) {
       },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let responseData = '';
 
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         responseData += chunk;
       });
 
@@ -86,7 +86,7 @@ async function runTests() {
     // Test 1: POST - Créer un produit
     // ========================================
     console.log('1️⃣  POST /api/admin/products - Créer un produit');
-    
+
     const createPayload = {
       slug: testSlug,
       status: 'DRAFT',
@@ -102,13 +102,18 @@ async function runTests() {
         {
           language: 'FR',
           name: 'Produit de Test',
-          description: 'Ceci est un produit de test créé par un script automatisé',
+          description:
+            'Ceci est un produit de test créé par un script automatisé',
           shortDescription: 'Produit test',
         },
       ],
     };
 
-    const createResponse = await request('POST', '/api/admin/products', createPayload);
+    const createResponse = await request(
+      'POST',
+      '/api/admin/products',
+      createPayload
+    );
 
     if (createResponse.status === 201 && createResponse.data.success) {
       productId = createResponse.data.product.id;
@@ -159,7 +164,10 @@ async function runTests() {
     // ========================================
     console.log('3️⃣  GET /api/admin/products/[id] - Vérifier le produit');
 
-    const getResponse = await request('GET', `/api/admin/products/${productId}`);
+    const getResponse = await request(
+      'GET',
+      `/api/admin/products/${productId}`
+    );
 
     if (getResponse.status === 200 && getResponse.data.success) {
       console.log(`   ✅ Produit récupéré avec succès`);
@@ -180,7 +188,10 @@ async function runTests() {
     // ========================================
     console.log('4️⃣  DELETE /api/admin/products/[id] - Supprimer le produit');
 
-    const deleteResponse = await request('DELETE', `/api/admin/products/${productId}`);
+    const deleteResponse = await request(
+      'DELETE',
+      `/api/admin/products/${productId}`
+    );
 
     if (deleteResponse.status === 200 && deleteResponse.data.success) {
       console.log(`   ✅ Produit supprimé avec succès (soft delete)`);
@@ -201,7 +212,6 @@ async function runTests() {
     console.log('  ✓ PUT - Modification de produit');
     console.log('  ✓ GET - Récupération de produit (admin)');
     console.log('  ✓ DELETE - Suppression de produit\n');
-
   } catch (error) {
     console.error('\n❌ Une erreur est survenue:', error.message);
     console.error('\nDétails:', error);
@@ -215,7 +225,7 @@ console.log(`   URL: ${BASE_URL}`);
 console.log(`   Auth: x-test-api-key (${TEST_API_KEY.substring(0, 10)}...)\n`);
 
 // Lancer les tests
-runTests().catch((error) => {
+runTests().catch(error => {
   console.error('❌ Erreur fatale:', error);
   process.exit(1);
 });

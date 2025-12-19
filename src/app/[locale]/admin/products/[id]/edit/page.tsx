@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
@@ -141,6 +141,7 @@ export default function EditProductPage({
 }) {
   const router = useRouter();
   const [productId, setProductId] = useState<string | null>(null);
+  const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Debounce ref
   const [locale, setLocale] = useState('en');
   const [messages, setMessages] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -391,37 +392,45 @@ export default function EditProductPage({
 
     setMedia(updatedMedia);
 
-    // Sauvegarder l'ordre sur le serveur
-    try {
-      setReorderingMedia(true);
-
-      // Endpoint pour réorganiser les médias (à créer)
-      const payload = {
-        media: updatedMedia.map(m => ({
-          id: m.id,
-          sortOrder: m.sortOrder,
-        })),
-      };
-
-      const response = await fetch(`/api/admin/media/reorder`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save media order');
-      }
-    } catch (err) {
-      console.error('Failed to save media order:', err);
-      // Recharger les médias en cas d'erreur
-      void loadMedia(productId);
-      setError('Failed to save media order. Please try again.');
-    } finally {
-      setReorderingMedia(false);
+    // DEBOUNCE: Annuler l'appel précédent s'il y en a un
+    if (reorderTimeoutRef.current) {
+      clearTimeout(reorderTimeoutRef.current);
     }
+
+    // Lancer un nouvel appel différé (1000ms)
+    reorderTimeoutRef.current = setTimeout(async () => {
+      try {
+        setReorderingMedia(true);
+
+        const payload = {
+          media: updatedMedia.map(m => ({
+            id: m.id,
+            sortOrder: m.sortOrder,
+          })),
+        };
+
+        const response = await fetch(`/api/admin/media/reorder`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save media order');
+        }
+        console.log('✅ Media order saved successfully (Debounced)');
+      } catch (err) {
+        console.error('Failed to save media order:', err);
+        // En cas d'erreur serveur, on recharge pour remettre l'UI d'équerre
+        void loadMedia(productId);
+        setError('Failed to save media order. Please try again.');
+      } finally {
+        setReorderingMedia(false);
+        reorderTimeoutRef.current = null;
+      }
+    }, 1000); // 1 seconde de délai
   };
 
   const handleUpdateProduct = async (e: React.FormEvent) => {

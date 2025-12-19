@@ -1,6 +1,6 @@
 /**
  * Script de test du workflow complet de gestion des variantes
- * 
+ *
  * Ce script teste :
  * 1. Création des attributs (couleur, quantité)
  * 2. Création des valeurs d'attributs
@@ -9,7 +9,7 @@
  * 5. Mise à jour d'une variante (prix, stock)
  * 6. Récupération des variantes
  * 7. Suppression d'une variante
- * 
+ *
  * Usage:
  *   node tests/scripts/test-variant-workflow.js
  */
@@ -97,7 +97,7 @@ async function main() {
     // 2. CRÉER LES VALEURS DE COULEUR
     // ==========================================
     console.log('\n📝 ÉTAPE 2: Création des valeurs de couleur');
-    
+
     const greenValue = await request(
       'POST',
       `/api/admin/attributes/${colorAttributeId}/values`,
@@ -209,7 +209,7 @@ async function main() {
         {
           language: 'FR',
           name: 'Capteur de Sol Intelligent',
-          shortDescription: 'Surveillez l\'humidité du sol en temps réel',
+          shortDescription: "Surveillez l'humidité du sol en temps réel",
           description:
             'Capteur de sol avancé avec connectivité Bluetooth et application mobile',
         },
@@ -222,9 +222,7 @@ async function main() {
     // 6. GÉNÉRER TOUTES LES VARIANTES AUTOMATIQUEMENT
     // ==========================================
     console.log('\n📝 ÉTAPE 6: Génération automatique de toutes les variantes');
-    console.log(
-      `   → 2 couleurs (vert, blanc) = 2 variantes`
-    );
+    console.log(`   → 2 couleurs (vert, blanc) = 2 variantes`);
 
     const variants = await request(
       'POST',
@@ -249,9 +247,9 @@ async function main() {
       }
     );
 
-    variantIds = variants.data.map((v) => v.id);
+    variantIds = variants.data.map(v => v.id);
     console.log(`✅ ${variants.count} variantes générées automatiquement`);
-    variants.data.forEach((v) => {
+    variants.data.forEach(v => {
       console.log(`   - ${v.sku}`);
     });
 
@@ -273,7 +271,7 @@ async function main() {
     // ==========================================
     // 8. METTRE À JOUR UNE VARIANTE (prix et stock)
     // ==========================================
-    console.log('\n📝 ÉTAPE 8: Mise à jour d\'une variante (prix et stock)');
+    console.log("\n📝 ÉTAPE 8: Mise à jour d'une variante (prix et stock)");
     const variantToUpdate = allVariants.data[0];
     console.log(`   → Variante: ${variantToUpdate.sku}`);
 
@@ -296,7 +294,7 @@ async function main() {
     // ==========================================
     // 9. RÉCUPÉRER UNE VARIANTE SPÉCIFIQUE
     // ==========================================
-    console.log('\n📝 ÉTAPE 9: Récupération d\'une variante spécifique');
+    console.log("\n📝 ÉTAPE 9: Récupération d'une variante spécifique");
     const singleVariant = await request(
       'GET',
       `/api/admin/products/${productId}/variants/${variantToUpdate.id}`
@@ -304,14 +302,12 @@ async function main() {
     console.log(`✅ Variante récupérée: ${singleVariant.data.sku}`);
     console.log(`   - Prix: ${singleVariant.data.pricing[0].price} CAD`);
     console.log(`   - Stock: ${singleVariant.data.inventory.stock} unités`);
-    console.log(
-      `   - Attributs: ${singleVariant.data.attributeValues.length}`
-    );
+    console.log(`   - Attributs: ${singleVariant.data.attributeValues.length}`);
 
     // ==========================================
     // 10. SUPPRIMER UNE VARIANTE
     // ==========================================
-    console.log('\n📝 ÉTAPE 10: Suppression d\'une variante');
+    console.log("\n📝 ÉTAPE 10: Suppression d'une variante");
     const variantToDelete = allVariants.data[allVariants.data.length - 1];
     console.log(`   → Variante à supprimer: ${variantToDelete.sku}`);
 
@@ -344,7 +340,6 @@ async function main() {
     console.log(`Variantes supprimées: 1`);
     console.log(`Variantes finales: 1`);
     console.log('\n🎉 Tous les endpoints fonctionnent correctement !');
-
   } catch (error) {
     console.error('\n❌ ERREUR:', error.message);
     console.error(error);

@@ -1,10 +1,10 @@
 /**
  * Script de test pour valider l'intégration Stripe Checkout
- * 
+ *
  * Tests:
  * - POST /api/checkout/create-session - Créer une session Stripe
  * - GET /api/checkout/success - Vérifier une session
- * 
+ *
  * Usage: node tests/scripts/test-stripe-checkout.js
  */
 
@@ -43,10 +43,10 @@ async function request(method, path, data = null, headers = {}) {
       },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let responseData = '';
 
-      res.on('data', (chunk) => {
+      res.on('data', chunk => {
         responseData += chunk;
       });
 
@@ -66,7 +66,7 @@ async function request(method, path, data = null, headers = {}) {
       });
     });
 
-    req.on('error', (error) => {
+    req.on('error', error => {
       reject(error);
     });
 
@@ -87,12 +87,15 @@ async function testCreateCheckoutSession() {
 
   try {
     console.log('📋 Prérequis: Panier avec au moins 1 produit');
-    console.log('   (Utilisez vos scripts existants pour ajouter un produit au panier)\n');
+    console.log(
+      '   (Utilisez vos scripts existants pour ajouter un produit au panier)\n'
+    );
 
     // Créer la session checkout
     console.log('💳 Créer la session Stripe Checkout...');
     const response = await request('POST', '/api/checkout/create-session', {
-      successUrl: 'http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+      successUrl:
+        'http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}',
       cancelUrl: 'http://localhost:3000/cart',
     });
 
@@ -104,7 +107,7 @@ async function testCreateCheckoutSession() {
       console.log(`   1. Ouvrir: ${response.data.url}`);
       console.log('   2. Payer avec: 4242 4242 4242 4242');
       console.log('   3. Vérifier la redirection vers /checkout/success');
-      
+
       return response.data.sessionId;
     } else {
       console.error('❌ Échec de création de session');
@@ -128,13 +131,20 @@ async function testCheckoutSuccess(sessionId) {
   console.log('─'.repeat(60));
 
   try {
-    const response = await request('GET', `/api/checkout/success?session_id=${sessionId}`);
+    const response = await request(
+      'GET',
+      `/api/checkout/success?session_id=${sessionId}`
+    );
 
     if (response.status === 200 && response.data.success) {
       console.log('✅ Session récupérée avec succès!');
       console.log(`   Payment Status: ${response.data.session.paymentStatus}`);
-      console.log(`   Amount: ${response.data.session.amountTotal} ${response.data.session.currency.toUpperCase()}`);
-      console.log(`   Customer Email: ${response.data.session.customerEmail || 'N/A'}`);
+      console.log(
+        `   Amount: ${response.data.session.amountTotal} ${response.data.session.currency.toUpperCase()}`
+      );
+      console.log(
+        `   Customer Email: ${response.data.session.customerEmail || 'N/A'}`
+      );
     } else {
       console.error('❌ Échec de récupération de session');
       console.error(JSON.stringify(response.data, null, 2));
@@ -148,7 +158,7 @@ async function testCheckoutSuccess(sessionId) {
  * Test de santé du serveur
  */
 async function checkServerHealth() {
-  console.log('🏥 Vérification de l\'état du serveur...');
+  console.log("🏥 Vérification de l'état du serveur...");
   try {
     const response = await request('GET', '/api/internal/health');
     if (response.status === 200) {
@@ -156,7 +166,9 @@ async function checkServerHealth() {
       return true;
     }
   } catch (error) {
-    console.error('❌ Serveur non accessible. Assurez-vous que `npm run dev` est lancé.');
+    console.error(
+      '❌ Serveur non accessible. Assurez-vous que `npm run dev` est lancé.'
+    );
     return false;
   }
 }
@@ -174,20 +186,22 @@ async function main() {
   }
 
   const sessionId = await testCreateCheckoutSession();
-  
+
   console.log('\n' + '═'.repeat(60));
   console.log('📝 Instructions:');
-  console.log('   1. Ouvrir l\'URL Stripe affichée ci-dessus');
+  console.log("   1. Ouvrir l'URL Stripe affichée ci-dessus");
   console.log('   2. Payer avec la carte test: 4242 4242 4242 4242');
   console.log('   3. Après paiement, exécuter:');
-  console.log(`      node tests/scripts/test-stripe-checkout.js verify ${sessionId || 'SESSION_ID'}`);
+  console.log(
+    `      node tests/scripts/test-stripe-checkout.js verify ${sessionId || 'SESSION_ID'}`
+  );
   console.log('═'.repeat(60));
 }
 
 // Permet de vérifier une session existante
 const args = process.argv.slice(2);
 if (args[0] === 'verify' && args[1]) {
-  checkServerHealth().then((healthy) => {
+  checkServerHealth().then(healthy => {
     if (healthy) {
       testCheckoutSuccess(args[1]);
     }

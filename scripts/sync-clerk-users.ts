@@ -35,19 +35,14 @@ async function syncClerkUsers() {
         continue;
       }
 
-      // Déterminer le rôle basé sur l'email ou les métadonnées
-      let role: UserRole = UserRole.CLIENT;
-      if (email.includes('admin')) {
-        role = UserRole.ADMIN;
-      }
-
       // Vérifier si l'utilisateur existe déjà dans notre DB
       const existingUser = await prisma.user.findUnique({
         where: { clerkId: clerkUser.id },
       });
 
       if (existingUser) {
-        // Mettre à jour les informations
+        // Mettre à jour les informations de base UNIQUEMENT
+        // On ne touche JAMAIS au rôle ici pour des raisons de sécurité
         await prisma.user.update({
           where: { clerkId: clerkUser.id },
           data: {
@@ -55,12 +50,16 @@ async function syncClerkUsers() {
             firstName: clerkUser.firstName,
             lastName: clerkUser.lastName,
             imageUrl: clerkUser.imageUrl,
-            role,
+            // role: ON NE TOUCHE PAS
           },
         });
-        console.log(`✅ Utilisateur mis à jour: ${email}`);
+        console.log(
+          `✅ Utilisateur mis à jour: ${email} (Role: ${existingUser.role})`
+        );
       } else {
         // Créer le nouvel utilisateur
+        // Par défaut, TOUT LE MONDE est CLIENT.
+        // L'élévation au rang d'ADMIN doit être faite manuellement en base de données.
         await prisma.user.create({
           data: {
             clerkId: clerkUser.id,
@@ -68,10 +67,10 @@ async function syncClerkUsers() {
             firstName: clerkUser.firstName,
             lastName: clerkUser.lastName,
             imageUrl: clerkUser.imageUrl,
-            role,
+            role: UserRole.CLIENT, // Sécurité : Toujours CLIENT par défaut
           },
         });
-        console.log(`🆕 Nouvel utilisateur créé: ${email}`);
+        console.log(`🆕 Nouvel utilisateur créé: ${email} (Role: CLIENT)`);
       }
     }
 

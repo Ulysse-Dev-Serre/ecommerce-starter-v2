@@ -47,9 +47,7 @@ async function validateFeatures() {
     console.log('3️⃣  Test GET /api/products (Public)');
     const products = await client.get('/api/products?limit=5');
     if (products.success) {
-      console.log(
-        `   ✅ ${products.data.data.length} produits récupérés\n`
-      );
+      console.log(`   ✅ ${products.data.data.length} produits récupérés\n`);
       passedTests++;
     } else {
       throw new Error('Failed to fetch products');
@@ -206,7 +204,7 @@ async function validateFeatures() {
     console.log('8️⃣  Test endpoint webhook Clerk');
     const webhookResponse = await client.post('/api/webhooks/clerk', {
       type: 'user.created',
-      data: { id: 'test' }
+      data: { id: 'test' },
     });
 
     // Devrait échouer (signature invalide) mais l'endpoint doit exister
@@ -226,11 +224,15 @@ async function validateFeatures() {
   console.log('📊 RÉSULTATS\n');
   console.log(`   ✅ Tests réussis: ${passedTests}`);
   console.log(`   ❌ Tests échoués: ${failedTests}`);
-  console.log(`   📈 Taux de réussite: ${Math.round((passedTests / (passedTests + failedTests)) * 100)}%\n`);
+  console.log(
+    `   📈 Taux de réussite: ${Math.round((passedTests / (passedTests + failedTests)) * 100)}%\n`
+  );
 
   if (failedTests === 0) {
     console.log('🎉 Toutes les fonctionnalités sont opérationnelles !');
-    console.log('✨ Vous pouvez procéder au développement du dashboard admin.\n');
+    console.log(
+      '✨ Vous pouvez procéder au développement du dashboard admin.\n'
+    );
   } else {
     console.log(
       '⚠️  Certains tests ont échoué. Vérifiez les erreurs ci-dessus.\n'
