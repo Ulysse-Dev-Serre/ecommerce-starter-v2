@@ -35,6 +35,7 @@ interface CheckoutClientProps {
     confirmAddress: string;
     calculating: string;
   };
+  userEmail?: string | null | undefined;
 }
 
 export function CheckoutClient({
@@ -43,6 +44,7 @@ export function CheckoutClient({
   initialTotal,
   currency,
   translations: t,
+  userEmail,
 }: CheckoutClientProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +111,7 @@ export function CheckoutClient({
         translations={t}
         locale={locale}
         initialTotal={initialTotal}
+        userEmail={userEmail}
       />
     </Elements>
   );
@@ -134,6 +137,7 @@ interface CheckoutFormProps {
     confirmAddress: string;
     calculating: string;
   };
+  userEmail?: string | null | undefined;
 }
 
 function CheckoutForm({
@@ -142,6 +146,7 @@ function CheckoutForm({
   locale,
   initialTotal,
   translations: t,
+  userEmail,
 }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -161,6 +166,7 @@ function CheckoutForm({
 
   // State pour stocker l'adresse en attente de validation
   const [tempAddress, setTempAddress] = useState<any>(null);
+  const [tempName, setTempName] = useState<string>('');
   const [isAddressReady, setIsAddressReady] = useState(false);
 
   // Initialize initialTotal in state
@@ -206,6 +212,7 @@ function CheckoutForm({
   // Callback quand l'adresse change dans le formulaire (Mise à jour locale UNIQUEMENT)
   const handleAddressChange = (event: any) => {
     setTempAddress(event.value.address);
+    setTempName(event.value.name);
     setIsAddressReady(event.complete);
   };
 
@@ -221,14 +228,14 @@ function CheckoutForm({
       // Prepare address payload matching our API schema
       const addressPayload = {
         addressTo: {
-          name: 'Valued Customer', // Stripe Element nuance
+          name: tempName || 'Valued Customer', // Stripe Element nuance
           street1: address.line1,
           street2: address.line2 || '',
           city: address.city,
           state: address.state,
           zip: address.postal_code,
           country: address.country,
-          email: 'customer@example.com',
+          email: userEmail || 'customer@example.com',
         },
       };
 

@@ -66,7 +66,7 @@ async function updateIntentHandler(
       amount: newTotalCents,
       metadata: {
         ...intent.metadata,
-        shipping_rate_id: shippingRate.object_id, // ID Shippo
+        shipping_rate_id: shippingRate.object_id || shippingRate.objectId, // Support both formats
         shipping_cost: shippingRate.amount,
       },
     });

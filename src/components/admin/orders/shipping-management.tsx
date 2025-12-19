@@ -57,27 +57,23 @@ export function ShippingManagement({
 
   if (!shippingRateId && !hasLabel) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-red-700">
+      <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6">
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-yellow-800">
           <Truck className="h-5 w-5" />
-          Shipping Information Missing
+          Action Required: Shipping Label
         </h2>
         <p className="text-gray-900 font-medium mb-4">
-          No shipping rate ID found in this order.
+          Shipping rate ID not found in metadata. Clicking "Generate" will
+          recalculate the best rate based on the customer's choice.
         </p>
         <div className="flex gap-4">
           <button
             onClick={handlePurchaseLabel}
-            className="rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700 font-medium text-sm"
+            className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800 font-medium text-sm flex items-center gap-2"
           >
-            Generer l'étiquette (Force)
+            <Truck className="h-4 w-4" />
+            Generate Label (Recalculate)
           </button>
-        </div>
-        <div className="mt-4 rounded bg-gray-50 p-3 text-xs font-mono border border-gray-200 overflow-auto max-h-40">
-          <p className="font-bold mb-1 text-gray-700">Debug Metadata:</p>
-          <pre className="text-gray-600">
-            {JSON.stringify(debugMetadata, null, 2)}
-          </pre>
         </div>
       </div>
     );

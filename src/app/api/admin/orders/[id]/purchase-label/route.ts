@@ -240,8 +240,11 @@ async function purchaseLabelHandler(
       );
     }
 
-    const trackingNumber = (transaction as any).tracking_number;
-    const labelUrl = (transaction as any).label_url;
+    const trackingNumber =
+      (transaction as any).tracking_number ||
+      (transaction as any).trackingNumber;
+    const labelUrl =
+      (transaction as any).label_url || (transaction as any).labelUrl;
     const carrier =
       (transaction as any).rate && (transaction as any).rate.provider
         ? (transaction as any).rate.provider
