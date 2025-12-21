@@ -131,7 +131,7 @@ export async function createTransaction(rateId: string) {
   try {
     const transaction = await shippo.transactions.create({
       rate: rateId,
-      labelFileType: 'PDF',
+      labelFileType: 'PDF_4x6',
       async: false,
     });
 

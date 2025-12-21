@@ -39,4 +39,4 @@ Pour des raisons de sécurité, aucun script n'attribue le rôle Admin automatiq
 6.  Changez la valeur de `CLIENT` à **`ADMIN`**.
 7.  Cliquez sur le bouton **"Save 1 change"** (souvent en haut à droite en vert).
 
-🎉 **Félicitations !** Vous êtes maintenant Administrateur. Vous pouvez accéder au Dashboard via `/fr/admin`.
+Ou fait la meme chose directement dans l'interface de Neon Postgress

@@ -255,6 +255,7 @@ function extractShippingAddress(
     // On essaie de préserver le format
     firstName: shippingDetails.name?.split(' ')[0] || '',
     lastName: shippingDetails.name?.split(' ').slice(1).join(' ') || '',
+    phone: shippingDetails.phone,
   };
 }
 
