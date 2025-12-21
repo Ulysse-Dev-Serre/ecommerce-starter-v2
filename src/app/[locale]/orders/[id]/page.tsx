@@ -55,6 +55,8 @@ export default async function OrderDetailPage({
       shippingAddress: 'Adresse de livraison',
       billingAddress: 'Adresse de facturation',
       payment: 'Paiement',
+      tracking: 'Suivi de commande',
+      trackPackage: 'Suivre le colis',
     },
     en: {
       backToOrders: '← Back to orders',
@@ -72,6 +74,8 @@ export default async function OrderDetailPage({
       shippingAddress: 'Shipping address',
       billingAddress: 'Billing address',
       payment: 'Payment',
+      tracking: 'Order Tracking',
+      trackPackage: 'Track package',
     },
   }[locale] || {
     backToOrders: '← Back to orders',
@@ -89,6 +93,8 @@ export default async function OrderDetailPage({
     shippingAddress: 'Shipping address',
     billingAddress: 'Billing address',
     payment: 'Payment',
+    tracking: 'Order Tracking',
+    trackPackage: 'Track package',
   };
 
   const statusLabels: Record<string, Record<string, string>> = {
@@ -229,6 +235,42 @@ export default async function OrderDetailPage({
             </div>
           </div>
         </div>
+
+        {order.shipments && order.shipments.length > 0 && (
+          <div className="bg-white border rounded-lg p-6 mb-6">
+            <h2 className="font-semibold text-lg mb-3">{t.tracking}</h2>
+            <div className="space-y-4">
+              {order.shipments.map(shipment => (
+                <div
+                  key={shipment.id}
+                  className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-gray-50 rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {shipment.carrier || 'Transporteur'}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Code:{' '}
+                      <span className="font-mono select-all">
+                        {shipment.trackingCode}
+                      </span>
+                    </p>
+                  </div>
+                  {shipment.trackingCode && (
+                    <a
+                      href={`https://www.google.com/search?q=${shipment.trackingCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 sm:mt-0 text-primary hover:underline text-sm font-medium"
+                    >
+                      {t.trackPackage} →
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6">
           {shippingAddr && Object.keys(shippingAddr).length > 0 && (

@@ -139,6 +139,7 @@ async function purchaseLabelHandler(
             order.user?.email ||
             shippingAddress.email ||
             'customer@example.com',
+          phone: shippingAddress.phone || '555-555-5555',
         };
 
         // Validation de base avant envoi

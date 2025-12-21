@@ -167,6 +167,7 @@ function CheckoutForm({
   // State pour stocker l'adresse en attente de validation
   const [tempAddress, setTempAddress] = useState<any>(null);
   const [tempName, setTempName] = useState<string>('');
+  const [phone, setPhone] = useState<string>(''); // Nouveau state pour le téléphone
   const [isAddressReady, setIsAddressReady] = useState(false);
 
   // Initialize initialTotal in state
@@ -220,6 +221,12 @@ function CheckoutForm({
   const handleCalculateShipping = async () => {
     if (!isAddressReady || !tempAddress) return;
 
+    // Validation simple du téléphone
+    if (!phone || phone.length < 10) {
+      alert('Veuillez entrer un numéro de téléphone valide pour la livraison.');
+      return;
+    }
+
     setIsLoading(true);
     setHasAttemptedShippingRatesFetch(true);
 
@@ -236,6 +243,7 @@ function CheckoutForm({
           zip: address.postal_code,
           country: address.country,
           email: userEmail || 'customer@example.com',
+          phone: phone, // Envoi du téléphone explicite
         },
       };
 
@@ -297,14 +305,33 @@ function CheckoutForm({
               onChange={handleAddressChange}
             />
 
+            {/* Champ Téléphone Séparé */}
+            <div className="mt-4">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Numéro de téléphone (Requis pour la livraison)
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="+1 555 123 4567"
+                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                required
+              />
+            </div>
+
             {/* BOUTON DE VALIDATION DE L'ADRESSE */}
             <div className="mt-6">
               <button
                 onClick={handleCalculateShipping}
-                disabled={!isAddressReady || isLoading}
+                disabled={!isAddressReady || isLoading || !phone}
                 className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all
                                     ${
-                                      isAddressReady && !isLoading
+                                      isAddressReady && !isLoading && phone
                                         ? 'bg-gray-900 hover:bg-gray-800 shadow-md'
                                         : 'bg-gray-300 cursor-not-allowed'
                                     }`}
