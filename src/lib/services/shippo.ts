@@ -27,13 +27,43 @@ export interface Parcel {
   massUnit: 'g' | 'oz' | 'lb' | 'kg';
 }
 
+export interface CustomsItem {
+  description: string;
+  quantity: number;
+  netWeight: string;
+  massUnit: 'g' | 'oz' | 'lb' | 'kg';
+  valueAmount: string;
+  valueCurrency: string;
+  originCountry: string; // ISO 2 code
+  hsCode?: string;
+}
+
+export interface CustomsDeclaration {
+  contentsType:
+    | 'MERCHANDISE'
+    | 'GIFT'
+    | 'SAMPLE'
+    | 'RETURN'
+    | 'DOCUMENTS'
+    | 'OTHER';
+  contentsExplanation?: string;
+  incoterm?: 'DDP' | 'DDU';
+  eelPfc?: string;
+  b13aFilingOption?: string;
+  nonDeliveryOption: 'RETURN' | 'ABANDON';
+  certify: boolean;
+  certifySigner: string;
+  items: CustomsItem[];
+}
+
 /**
  * Calculate shipping rates for a given shipment
  */
 export async function getShippingRates(
   addressFrom: Address,
   addressTo: Address,
-  parcels: Parcel[]
+  parcels: Parcel[],
+  customsDeclaration?: CustomsDeclaration
 ) {
   // MOCK MODE
   if (process.env.SHIPPO_MOCK_MODE === 'true') {
@@ -84,6 +114,7 @@ export async function getShippingRates(
       addressFrom: addressFrom,
       addressTo: addressTo,
       parcels: parcels,
+      customsDeclaration: customsDeclaration as any,
       carrierAccounts: carrierAccounts,
       async: false,
     });

@@ -112,6 +112,7 @@ export function CheckoutClient({
         locale={locale}
         initialTotal={initialTotal}
         userEmail={userEmail}
+        cartId={cartId}
       />
     </Elements>
   );
@@ -138,6 +139,7 @@ interface CheckoutFormProps {
     calculating: string;
   };
   userEmail?: string | null | undefined;
+  cartId: string;
 }
 
 function CheckoutForm({
@@ -147,6 +149,7 @@ function CheckoutForm({
   initialTotal,
   translations: t,
   userEmail,
+  cartId,
 }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -210,13 +213,6 @@ function CheckoutForm({
     }
   };
 
-  // Callback quand l'adresse change dans le formulaire (Mise à jour locale UNIQUEMENT)
-  const handleAddressChange = (event: any) => {
-    setTempAddress(event.value.address);
-    setTempName(event.value.name);
-    setIsAddressReady(event.complete);
-  };
-
   // NOUVELLE FONCTION: Déclenchée uniquement au clic du bouton "Valider l'adresse"
   const handleCalculateShipping = async () => {
     if (!isAddressReady || !tempAddress) return;
@@ -232,8 +228,8 @@ function CheckoutForm({
 
     try {
       const address = tempAddress;
-      // Prepare address payload matching our API schema
       const addressPayload = {
+        cartId: cartId,
         addressTo: {
           name: tempName || 'Valued Customer', // Stripe Element nuance
           street1: address.line1,
@@ -301,28 +297,39 @@ function CheckoutForm({
               {t.shippingAddress}
             </h2>
             <AddressElement
-              options={{ mode: 'shipping' }}
-              onChange={handleAddressChange}
+              options={{
+                mode: 'shipping',
+                allowedCountries: [
+                  'US',
+                  'CA',
+                  'MX',
+                  'BR',
+                  'AR',
+                  'CO',
+                  'CL',
+                  'PE',
+                ],
+                fields: {
+                  phone: 'always',
+                },
+                validation: {
+                  phone: {
+                    required: 'always',
+                  },
+                },
+                defaultValues: {
+                  // Prefill with any available data if we implemented profile fetch
+                  // For now, we rely on Link's own sticky data or user input
+                  // We could pass phone if we had it
+                },
+              }}
+              onChange={(event: any) => {
+                setTempAddress(event.value.address);
+                setTempName(event.value.name);
+                setPhone(event.value.phone || '');
+                setIsAddressReady(event.complete);
+              }}
             />
-
-            {/* Champ Téléphone Séparé */}
-            <div className="mt-4">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Numéro de téléphone (Requis pour la livraison)
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="+1 555 123 4567"
-                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                required
-              />
-            </div>
 
             {/* BOUTON DE VALIDATION DE L'ADRESSE */}
             <div className="mt-6">
@@ -472,7 +479,15 @@ function CheckoutForm({
               <h3 className="text-lg font-bold mb-4 text-gray-900">
                 {t.payment}
               </h3>
-              <PaymentElement />
+              <PaymentElement
+                options={{
+                  defaultValues: {
+                    billingDetails: {
+                      email: userEmail || undefined,
+                    },
+                  },
+                }}
+              />
               <button
                 className={`w-full mt-6 py-4 px-6 rounded-xl font-bold text-white text-lg shadow-md transition-all transform active:scale-[0.98]
                                         ${

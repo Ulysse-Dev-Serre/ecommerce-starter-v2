@@ -205,6 +205,12 @@ async function updateProductHandler(
       updateData.isFeatured = validatedData.isFeatured;
     if (validatedData.sortOrder !== undefined)
       updateData.sortOrder = validatedData.sortOrder;
+    if (validatedData.originCountry !== undefined)
+      updateData.originCountry = validatedData.originCountry;
+    if (validatedData.hsCode !== undefined)
+      updateData.hsCode = validatedData.hsCode;
+    if (validatedData.shippingOriginId !== undefined)
+      updateData.shippingOriginId = validatedData.shippingOriginId || null;
 
     // Handle translations update
     if (validatedData.translations && validatedData.translations.length > 0) {
