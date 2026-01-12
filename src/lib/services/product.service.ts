@@ -461,6 +461,8 @@ export interface CreateProductData {
   status?: ProductStatus;
   isFeatured?: boolean;
   sortOrder?: number;
+  originCountry?: string;
+  hsCode?: string;
   translations?: {
     language: Language;
     name: string;
@@ -476,6 +478,9 @@ export interface UpdateProductData {
   status?: ProductStatus;
   isFeatured?: boolean;
   sortOrder?: number;
+  originCountry?: string | null;
+  hsCode?: string | null;
+  shippingOriginId?: string | null;
   translations?: {
     language: Language;
     name: string;
@@ -544,6 +549,8 @@ export async function createProduct(
       status: productData.status ?? ProductStatus.DRAFT,
       isFeatured: productData.isFeatured ?? false,
       sortOrder: productData.sortOrder ?? 0,
+      originCountry: productData.originCountry,
+      hsCode: productData.hsCode,
       translations: productData.translations
         ? {
             create: productData.translations,

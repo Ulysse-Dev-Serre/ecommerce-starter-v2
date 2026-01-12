@@ -69,6 +69,7 @@
       "categories": "Catégories",
       "analytics": "Analytiques",
       "content": "Contenu",
+      "logistics": "Logistique",
       "settings": "Paramètres",
       "version": "Tableau de bord Admin v1.0",
       "backToSite": "Retour au site"
@@ -149,6 +150,16 @@
       "primary": "Principale",
       "deleteMediaConfirm": "Êtes-vous sûr de vouloir supprimer cette image ?",
       "dragToReorderMedia": "Glissez-déposez les images pour les réorganiser"
+    },
+    "logistics": {
+      "title": "Logistique",
+      "subtitle": "Gérez vos lieux d'expédition et fournisseurs",
+      "addLocation": "Ajouter un lieu",
+      "noLocations": "Aucun lieu défini",
+      "noLocationsDesc": "Commencez par ajouter votre entrepôt principal ou une adresse de dropshipping.",
+      "createFirst": "Créer mon premier lieu",
+      "edit": "Modifier",
+      "addressUndefined": "Adresse non définie"
     }
   },
   "Checkout": {

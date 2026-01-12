@@ -69,6 +69,7 @@
       "categories": "Categories",
       "analytics": "Analytics",
       "content": "Content",
+      "logistics": "Logistics",
       "settings": "Settings",
       "version": "Admin Dashboard v1.0",
       "backToSite": "Back to site"
@@ -149,6 +150,16 @@
       "primary": "Primary",
       "deleteMediaConfirm": "Are you sure you want to delete this image?",
       "dragToReorderMedia": "Drag and drop images to reorder them"
+    },
+    "logistics": {
+      "title": "Logistics",
+      "subtitle": "Manage your shipping locations and suppliers",
+      "addLocation": "Add Location",
+      "noLocations": "No locations defined",
+      "noLocationsDesc": "Start by adding your main warehouse or a dropshipping address.",
+      "createFirst": "Create my first location",
+      "edit": "Edit",
+      "addressUndefined": "Address undefined"
     }
   },
   "Checkout": {

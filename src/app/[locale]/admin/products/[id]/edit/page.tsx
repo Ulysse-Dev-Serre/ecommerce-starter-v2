@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
+  Truck,
   Save,
   X,
   Plus,
@@ -152,12 +153,16 @@ export default function EditProductPage({
   const [product, setProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<Variant[]>([]);
   const [newVariants, setNewVariants] = useState<NewVariant[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     slug: '',
     status: 'DRAFT' as 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED',
     isFeatured: false,
     sortOrder: 0,
+    originCountry: '',
+    hsCode: '',
+    shippingOriginId: '',
   });
 
   const [enTranslation, setEnTranslation] = useState({
@@ -192,6 +197,7 @@ export default function EditProductPage({
       void loadProduct(p.id);
       void loadVariants(p.id);
       void loadMedia(p.id);
+      void loadSuppliers();
     });
   }, [params]);
 
@@ -230,6 +236,9 @@ export default function EditProductPage({
         status: productData.status,
         isFeatured: productData.isFeatured,
         sortOrder: productData.sortOrder,
+        originCountry: productData.originCountry || '',
+        hsCode: productData.hsCode || '',
+        shippingOriginId: productData.shippingOriginId || '',
       });
 
       const enTrans = productData.translations.find(
@@ -288,6 +297,20 @@ export default function EditProductPage({
       setMedia(data.data || []);
     } catch (err) {
       console.error('Failed to load media:', err);
+    }
+  };
+
+  const loadSuppliers = async () => {
+    try {
+      const response = await fetch('/api/admin/logistics/locations');
+      if (!response.ok) {
+        console.error('Failed to load suppliers');
+        return;
+      }
+      const data = await response.json();
+      setSuppliers(data.data || []);
+    } catch (err) {
+      console.error('Failed to load suppliers:', err);
     }
   };
 
@@ -840,6 +863,103 @@ export default function EditProductPage({
                 >
                   {t.featured}
                 </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Shipping & Customs */}
+          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center gap-2">
+              <Truck className="h-5 w-5 text-gray-400" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Shipping & Customs
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.shippingOrigin || 'Shipping Origin'}
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.shippingOriginId}
+                    onChange={e =>
+                      setFormData({
+                        ...formData,
+                        shippingOriginId: e.target.value,
+                      })
+                    }
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 appearance-none bg-white"
+                  >
+                    <option value="">
+                      {t.selectOrigin || 'Select a location...'}
+                    </option>
+                    {suppliers.map((s: any) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.type})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 pt-1 text-gray-500">
+                    <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                    </svg>
+                  </div>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {t.shippingOriginHelp ||
+                    'Select the warehouse or supplier where this product ships from.'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.originCountry || 'Country of Manufacture (ISO 2-char)'}
+                </label>
+                <input
+                  type="text"
+                  value={formData.originCountry}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      originCountry: e.target.value.toUpperCase().slice(0, 2),
+                    })
+                  }
+                  maxLength={2}
+                  placeholder="e.g. CA, US, CN"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t.originCountryHelp ||
+                    'Required for customs (if different from shipping origin).'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  HS Code
+                </label>
+                <input
+                  type="text"
+                  value={formData.hsCode}
+                  onChange={e =>
+                    setFormData({ ...formData, hsCode: e.target.value })
+                  }
+                  placeholder="e.g. 6109.10"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Harmonized System Code for customs declaration.
+                  <a
+                    href="https://www.hts.usitc.gov/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ml-1 text-blue-600 hover:underline"
+                  >
+                    Search HS Codes
+                  </a>
+                </p>
               </div>
             </div>
           </div>

@@ -13,6 +13,7 @@ import {
   BarChart3,
   Tag,
   Home,
+  Truck,
 } from 'lucide-react';
 
 export function AdminSidebar() {
@@ -78,9 +79,13 @@ export function AdminSidebar() {
       icon: BarChart3,
     },
     {
-      title: t.content,
       href: `/${locale}/admin/content`,
       icon: FileText,
+    },
+    {
+      title: t.logistics,
+      href: `/${locale}/admin/logistics`,
+      icon: Truck,
     },
     {
       title: t.settings,

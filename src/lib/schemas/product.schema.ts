@@ -57,6 +57,13 @@ export const CreateProductSchema = z.object({
     .min(0, 'Sort order must be >= 0')
     .optional()
     .default(0),
+  originCountry: z
+    .string()
+    .length(2, 'Origin country must be a 2-letter ISO code')
+    .toUpperCase()
+    .optional()
+    .nullable(),
+  hsCode: z.string().optional().nullable(),
   translations: z
     .array(ProductTranslationSchema)
     .min(1, 'At least one translation is required')
@@ -73,6 +80,14 @@ export const UpdateProductSchema = z.object({
   status: z.enum(PRODUCT_STATUSES).optional(),
   isFeatured: z.boolean().optional(),
   sortOrder: z.number().int().min(0, 'Sort order must be >= 0').optional(),
+  originCountry: z
+    .string()
+    .length(2, 'Origin country must be a 2-letter ISO code')
+    .toUpperCase()
+    .optional()
+    .nullable(),
+  hsCode: z.string().optional().nullable(),
+  shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
   translations: z.array(ProductTranslationSchema).optional(),
 });
 

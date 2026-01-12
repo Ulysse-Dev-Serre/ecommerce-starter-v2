@@ -183,6 +183,14 @@ model Product {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
+  // Shipping & Customs
+  originCountry   String?   @db.Char(2) // ISO code (ex: CA, CN) - DEPRECATED in favor of shippingOrigin
+  hsCode          String?   // Harmonized System Code for customs
+  shippingOriginId String?  // ID du lieu d'expédition (Supplier)
+  incoterm         String?   // DDP/DDU Override (Si null, utilise celui du Supplier)
+  
+  shippingOrigin  Supplier? @relation("ProductShippingOrigin", fields: [shippingOriginId], references: [id])
+
   translations ProductTranslation[]
   categories   ProductCategory[]
   variants     ProductVariant[]
@@ -195,6 +203,7 @@ model Product {
   @@index([status, deletedAt, createdAt])
   @@index([slug])
   @@index([isFeatured, sortOrder])
+  @@index([shippingOriginId])
   @@map("products")
 }
 
@@ -677,6 +686,7 @@ model Supplier {
   
   // Configuration métier
   defaultCurrency      String  @default("CAD") @db.Char(3)
+  incoterm             String  @default("DDU") // DDP or DDU
   defaultShippingDays  Int     @default(7)
   minimumOrderAmount   Decimal @default(0) @db.Decimal(10, 2)
   
@@ -684,8 +694,9 @@ model Supplier {
   updatedAt DateTime @updatedAt
 
   // Relations
-  products SupplierProduct[]
-  orders   SupplierOrder[]
+  products        SupplierProduct[]
+  shippingOrigins Product[] @relation("ProductShippingOrigin")
+  orders          SupplierOrder[]
 
   @@index([type, isActive])
   @@index([isActive])
