@@ -188,6 +188,7 @@ model Product {
   hsCode          String?   // Harmonized System Code for customs
   shippingOriginId String?  // ID du lieu d'expédition (Supplier)
   incoterm         String?   // DDP/DDU Override (Si null, utilise celui du Supplier)
+  exportExplanation String?  // Description pour la douane (ex: "Vetements", "LED Lights")
   
   shippingOrigin  Supplier? @relation("ProductShippingOrigin", fields: [shippingOriginId], references: [id])
 

@@ -25,7 +25,6 @@ export function AddLocationModal({
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     type: initialData?.type || 'LOCAL_STOCK', // Default
-    incoterm: initialData?.incoterm || 'DDU', // Default
     address: {
       name: initialData?.address?.name || 'Default',
       street1: initialData?.address?.street1 || '',
@@ -139,26 +138,6 @@ export function AddLocationModal({
                 <option value="OTHER">Other</option>
               </select>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Default Incoterm
-              </label>
-              <select
-                required
-                value={formData.incoterm}
-                onChange={e =>
-                  setFormData({ ...formData, incoterm: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black sm:text-sm bg-white"
-              >
-                <option value="DDU">DDU (Customer pays duties)</option>
-                <option value="DDP">DDP (Sender pays duties)</option>
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                Determines who pays customs fees for international shipments.
-              </p>
-            </div>
           </div>
 
           <div className="border-t border-gray-100 pt-6">
@@ -267,7 +246,7 @@ export function AddLocationModal({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
             <button
               type="button"
               onClick={onClose}

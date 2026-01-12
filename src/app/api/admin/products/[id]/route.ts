@@ -211,6 +211,10 @@ async function updateProductHandler(
       updateData.hsCode = validatedData.hsCode;
     if (validatedData.shippingOriginId !== undefined)
       updateData.shippingOriginId = validatedData.shippingOriginId || null;
+    if (validatedData.exportExplanation !== undefined)
+      updateData.exportExplanation = validatedData.exportExplanation;
+    if (validatedData.incoterm !== undefined)
+      updateData.incoterm = validatedData.incoterm;
 
     // Handle translations update
     if (validatedData.translations && validatedData.translations.length > 0) {

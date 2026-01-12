@@ -50,6 +50,7 @@ export interface CustomsDeclaration {
   incoterm?: 'DDP' | 'DDU';
   eelPfc?: string;
   b13aFilingOption?: string;
+  b13aNumber?: string;
   nonDeliveryOption: 'RETURN' | 'ABANDON';
   certify: boolean;
   certifySigner: string;

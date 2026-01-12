@@ -163,6 +163,8 @@ export default function EditProductPage({
     originCountry: '',
     hsCode: '',
     shippingOriginId: '',
+    exportExplanation: '',
+    incoterm: '',
   });
 
   const [enTranslation, setEnTranslation] = useState({
@@ -239,6 +241,8 @@ export default function EditProductPage({
         originCountry: productData.originCountry || '',
         hsCode: productData.hsCode || '',
         shippingOriginId: productData.shippingOriginId || '',
+        exportExplanation: productData.exportExplanation || '',
+        incoterm: productData.incoterm || '',
       });
 
       const enTrans = productData.translations.find(
@@ -959,6 +963,51 @@ export default function EditProductPage({
                   >
                     Search HS Codes
                   </a>
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Export Explanation
+                </label>
+                <input
+                  type="text"
+                  value={formData.exportExplanation}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      exportExplanation: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. LED Grow Lights, T-Shirt"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Brief description of goods for customs (overrides global
+                  default).
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Incoterm Override
+                </label>
+                <select
+                  value={formData.incoterm}
+                  onChange={e =>
+                    setFormData({
+                      ...formData,
+                      incoterm: e.target.value,
+                    })
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white"
+                >
+                  <option value="">Default (Inherit from Warehouse)</option>
+                  <option value="DDU">DDU (Customer pays duties)</option>
+                  <option value="DDP">DDP (Sender pays duties)</option>
+                </select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Force specific Incoterm for this product.
                 </p>
               </div>
             </div>

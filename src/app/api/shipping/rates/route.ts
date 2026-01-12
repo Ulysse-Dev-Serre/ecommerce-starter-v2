@@ -132,7 +132,10 @@ async function handler(req: NextRequest) {
               email: addr.email,
             };
             usedSupplierId = firstProduct.shippingOrigin.id;
-            originIncoterm = firstProduct.shippingOrigin.incoterm || 'DDU';
+            originIncoterm =
+              firstProduct.incoterm ||
+              firstProduct.shippingOrigin.incoterm ||
+              'DDU';
           }
         } else {
           // Try to find a default Local Stock supplier if no specific origin
@@ -179,10 +182,21 @@ async function handler(req: NextRequest) {
         if (calculatedWeight > 0) totalWeight = calculatedWeight;
 
         // Customs Logic
-        if (originAddress.country !== addressTo.country) {
+        if (addressTo.country !== 'CA' && originAddress.country === 'CA') {
           logger.info({
-            msg: 'International shipment detected. Generating customs declaration.',
+            msg: 'International shipment detected. Preparing customs declaration.',
           });
+
+          // Determine Customs Explanation (Product specific > Default)
+          const exportExplanation =
+            firstProduct?.exportExplanation || 'Merchandise';
+
+          // Determine B13A (Env > Default)
+          const b13aOption =
+            process.env.SHIPPO_EXPORT_B13A_OPTION || 'NOT_REQUIRED';
+          const b13aNumber =
+            process.env.SHIPPO_EXPORT_B13A_NUMBER || 'NO B13A REQUIRED';
+          const eelPfc = process.env.SHIPPO_EXPORT_EEL_PFC || 'NOEEI_30_37_a';
 
           const customsItems = cart.items.map((item: any) => {
             const weight = item.variant?.weight
@@ -219,14 +233,14 @@ async function handler(req: NextRequest) {
 
           customsDeclaration = {
             contentsType: 'MERCHANDISE' as const,
-            contentsExplanation:
-              'Hydroponic growth system. Final assembly and testing performed in Canada.',
+            contentsExplanation: exportExplanation,
             nonDeliveryOption: 'RETURN' as const,
             certify: true,
             certifySigner: originAddress.name,
             incoterm: originIncoterm as any,
-            eelPfc: 'NOEEI_30_37_a',
-            b13aFilingOption: 'NOT_REQUIRED',
+            eelPfc: eelPfc,
+            b13aFilingOption: b13aOption,
+            b13aNumber: b13aNumber,
             items: customsItems,
           };
         } else {
