@@ -18,14 +18,19 @@ export default async function LogisticsPage({
   // Fetch messages (inferred from request locale)
   const messages = await getMessages();
 
-  // Fetch Suppliers (Locations)
-  const suppliers = await prisma.supplier.findMany({
+  // Fetch Suppliers (Locations) and serialize Decimals
+  const rawSuppliers = await prisma.supplier.findMany({
     orderBy: { createdAt: 'desc' },
   });
 
+  const suppliers = rawSuppliers.map(s => ({
+    ...s,
+    minimumOrderAmount: s.minimumOrderAmount.toNumber(),
+  }));
+
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <LogisticsClient suppliers={suppliers} locale={locale} />
+      <LogisticsClient suppliers={suppliers as any} locale={locale} />
     </NextIntlClientProvider>
   );
 }

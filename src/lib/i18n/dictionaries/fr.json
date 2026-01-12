@@ -159,7 +159,13 @@
       "noLocationsDesc": "Commencez par ajouter votre entrepôt principal ou une adresse de dropshipping.",
       "createFirst": "Créer mon premier lieu",
       "edit": "Modifier",
-      "addressUndefined": "Adresse non définie"
+      "delete": "Supprimer",
+      "cancel": "Annuler",
+      "create": "Créer",
+      "addressUndefined": "Adresse non définie",
+      "save": "Enregistrer",
+      "loading": "Chargement...",
+      "editLocation": "Modifier le lieu"
     }
   },
   "Checkout": {

@@ -64,6 +64,8 @@ export const CreateProductSchema = z.object({
     .optional()
     .nullable(),
   hsCode: z.string().optional().nullable(),
+  exportExplanation: z.string().optional().nullable(),
+  incoterm: z.string().optional().nullable(),
   translations: z
     .array(ProductTranslationSchema)
     .min(1, 'At least one translation is required')
@@ -88,6 +90,8 @@ export const UpdateProductSchema = z.object({
     .nullable(),
   hsCode: z.string().optional().nullable(),
   shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
+  exportExplanation: z.string().optional().nullable(),
+  incoterm: z.string().optional().nullable(),
   translations: z.array(ProductTranslationSchema).optional(),
 });
 

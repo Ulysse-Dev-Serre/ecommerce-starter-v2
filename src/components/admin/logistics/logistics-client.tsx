@@ -13,6 +13,35 @@ interface LogisticsClientProps {
 export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
   const t = useTranslations('admin.logistics');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingLocation, setEditingLocation] = useState<any>(null);
+
+  const handleEdit = (supplier: any) => {
+    setEditingLocation(supplier);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete ${name}?`)) {
+      try {
+        const res = await fetch(`/api/admin/logistics/locations/${id}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          window.location.reload();
+        } else {
+          alert('Failed to delete location');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error deleting location');
+      }
+    }
+  };
+
+  const closeModal = () => {
+    setEditingLocation(null);
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -89,8 +118,17 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
               </div>
               <div className="border-t border-gray-100 bg-gray-50 px-6 py-3">
                 <div className="flex justify-end gap-2 text-sm">
-                  <button className="font-medium text-gray-900 hover:underline">
+                  <button
+                    onClick={() => handleEdit(supplier)}
+                    className="font-medium text-gray-900 hover:underline"
+                  >
                     {t('edit')}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(supplier.id, supplier.name)}
+                    className="font-medium text-red-600 hover:underline ml-3"
+                  >
+                    {t('delete') || 'Supprimer'}
                   </button>
                 </div>
               </div>
@@ -101,8 +139,9 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
 
       {isModalOpen && (
         <AddLocationModal
-          onClose={() => setIsModalOpen(false)}
+          onClose={closeModal}
           locale={locale}
+          initialData={editingLocation}
         />
       )}
     </div>

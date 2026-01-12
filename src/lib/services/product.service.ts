@@ -463,6 +463,8 @@ export interface CreateProductData {
   sortOrder?: number;
   originCountry?: string;
   hsCode?: string;
+  exportExplanation?: string;
+  incoterm?: string;
   translations?: {
     language: Language;
     name: string;
@@ -481,6 +483,8 @@ export interface UpdateProductData {
   originCountry?: string | null;
   hsCode?: string | null;
   shippingOriginId?: string | null;
+  exportExplanation?: string | null;
+  incoterm?: string | null;
   translations?: {
     language: Language;
     name: string;
@@ -551,6 +555,8 @@ export async function createProduct(
       sortOrder: productData.sortOrder ?? 0,
       originCountry: productData.originCountry,
       hsCode: productData.hsCode,
+      exportExplanation: productData.exportExplanation,
+      incoterm: productData.incoterm,
       translations: productData.translations
         ? {
             create: productData.translations,
