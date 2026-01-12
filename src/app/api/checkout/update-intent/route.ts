@@ -26,48 +26,60 @@ async function updateIntentHandler(
 
   try {
     // 1. Récupérer l'intent courant pour avoir le montant actuel (produits)
+    // 1. Récupérer l'intent courant
     const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    // Simplification: On recalcule le total en ajoutant LE nouveau frais de port au montant initial des produits
-    // Pour faire ça proprement, on devrait idéalement stocker le subtotal quelque part (metadata)
-    // Ici on suppose que le montant actuel de l'intent est (Produits + AncienShipping).
-    // C'est risqué d'ajouter par dessus.
+    logger.info(
+      { metadata: intent.metadata, amount: intent.amount },
+      'DEBUG: Update Intent Metadata Check'
+    );
 
-    // MIEUX : On devrait recalculer le panier complet + shipping.
-    // MAIS pour l'instant, pour faire simple et fonctionner avec le `create-intent` précédent :
-    // On va stocker le "subtotal" (produits scellés) dans les metadata lors du create-intent,
-    // et ici on fait Subtotal + Shipping.
-
-    const subtotalStr = intent.metadata.subtotal; // On va devoir ajouter ça dans create-intent
+    const subtotalStr = intent.metadata.subtotal;
     let subtotal = 0;
+    let shouldSaveSubtotal = false;
 
     if (subtotalStr) {
       subtotal = Number(subtotalStr);
     } else {
-      // Fallback dangereux, ou on re-fetch le panier ici.
-      // Pour ce MVP, supposons qu'on modifie create-intent pour inclure 'subtotal'
-      // Si pas de metadata, on ne peut pas mettre à jour de façon fiable sans re-fetch panier.
+      // Fallback: Si c'est la première fois qu'on ajoute du shipping, le montant actuel EST le subtotal
+      // Si on a déjà du shipping (metadata.shipping_cost), on le soustrait
+      const previousShipping = intent.metadata.shipping_cost
+        ? Number(intent.metadata.shipping_cost)
+        : 0;
 
-      // Pour avancer, je vais supposer qu'on va aller modifier create-intent juste après.
-      // Si subtotal manque, on prend le montant actuel comme subtotal (buggy si on change 2x de shipping)
-      logger.warn(
-        'Missing subtotal metadata, assuming current amount is subtotal (risk of double shipping cost)'
+      // Attention: previousShipping est en dollars (string "15.00"), intent.amount est en cents (number 1500)
+      // Il faut convertir previousShipping en cents pour le soustraire correctes
+      const previousShippingCents = toStripeAmount(
+        previousShipping.toString(),
+        currency
       );
-      subtotal = intent.amount;
+
+      subtotal = intent.amount - previousShippingCents;
+      shouldSaveSubtotal = true; // On va le sauvegarder pour la prochaine fois
+
+      logger.warn(
+        {
+          calculatedSubtotal: subtotal,
+          currentAmount: intent.amount,
+          previousShippingCents,
+        },
+        'Missing subtotal metadata, calculated from current amount'
+      );
     }
 
     // Le shippingRate est reçu du frontend (API Shippo), ex: "15.00"
     const shippingAmountCents = toStripeAmount(shippingRate.amount, currency);
 
-    // Si subtotal est déjà en cents (Stripe amount est tjs en cents)
+    // Nouveau total
     const newTotalCents = subtotal + shippingAmountCents;
 
     const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
       amount: newTotalCents,
       metadata: {
         ...intent.metadata,
-        shipping_rate_id: shippingRate.object_id || shippingRate.objectId, // Support both formats
+        shipping_rate_id: shippingRate.object_id || shippingRate.objectId,
         shipping_cost: shippingRate.amount,
+        subtotal: subtotal.toString(), // Ensure subtotal is saved/persisted
       },
     });
 
