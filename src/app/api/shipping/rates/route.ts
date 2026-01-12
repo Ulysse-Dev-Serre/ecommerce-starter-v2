@@ -192,11 +192,12 @@ async function handler(req: NextRequest) {
             firstProduct?.exportExplanation || 'Merchandise';
 
           // Determine B13A (Env > Default)
-          const b13aOption =
-            process.env.SHIPPO_EXPORT_B13A_OPTION || 'NOT_REQUIRED';
-          const b13aNumber =
-            process.env.SHIPPO_EXPORT_B13A_NUMBER || 'NO B13A REQUIRED';
-          const eelPfc = process.env.SHIPPO_EXPORT_EEL_PFC || 'NOEEI_30_37_a';
+          const b13aOption = process.env.SHIPPO_EXPORT_B13A_OPTION;
+          const b13aNumber = process.env.SHIPPO_EXPORT_B13A_NUMBER;
+          logger.info(
+            { b13aOption, b13aNumber },
+            'DEBUG: B13A Values from Env'
+          );
 
           const customsItems = cart.items.map((item: any) => {
             const weight = item.variant?.weight
@@ -238,9 +239,17 @@ async function handler(req: NextRequest) {
             certify: true,
             certifySigner: originAddress.name,
             incoterm: originIncoterm as any,
-            eelPfc: eelPfc,
-            b13aFilingOption: b13aOption,
-            b13aNumber: b13aNumber,
+            eelPfc: undefined,
+            // Only send B13A info if explicitly required/filed.
+            // For 'NOT_REQUIRED' (low value < 2K), omitting fields lets Shippo/Carrier handle exemption automatically.
+            b13aFilingOption:
+              b13aOption && b13aOption !== 'NOT_REQUIRED'
+                ? b13aOption
+                : undefined,
+            b13aNumber:
+              b13aOption && b13aOption !== 'NOT_REQUIRED'
+                ? b13aNumber
+                : undefined,
             items: customsItems,
           };
         } else {
