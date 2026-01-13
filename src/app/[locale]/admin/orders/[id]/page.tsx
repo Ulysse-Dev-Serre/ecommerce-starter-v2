@@ -243,79 +243,103 @@ export default async function OrderDetailPage({
               <MapPin className="h-5 w-5" />
               Shipping Address
             </h2>
-            <div className="text-sm text-gray-700">
-              {typeof order.shippingAddress === 'object' &&
-              order.shippingAddress !== null ? (
-                <div className="space-y-1">
-                  <p>
-                    {(order.shippingAddress as any).name ||
-                      (order.shippingAddress as any).fullName ||
-                      ''}
-                  </p>
-                  <p>
-                    {(order.shippingAddress as any).street1 ||
-                      (order.shippingAddress as any).line1 ||
-                      (order.shippingAddress as any).street ||
-                      'N/A'}
-                  </p>
-                  {(order.shippingAddress as any).street2 ||
-                  (order.shippingAddress as any).line2 ? (
-                    <p>
-                      {(order.shippingAddress as any).street2 ||
-                        (order.shippingAddress as any).line2}
+            <div className="text-sm">
+              {(() => {
+                const addr = order.shippingAddress as Record<
+                  string,
+                  string
+                > | null;
+                if (!addr)
+                  return (
+                    <p className="text-gray-500 italic">
+                      No shipping address provided
                     </p>
-                  ) : null}
-                  <p>
-                    {(order.shippingAddress as any).city || ''},{' '}
-                    {(order.shippingAddress as any).state ||
-                      (order.shippingAddress as any).province ||
-                      (order.shippingAddress as any).region ||
-                      ''}{' '}
-                    {(order.shippingAddress as any).postalCode ||
-                      (order.shippingAddress as any).zipCode ||
-                      (order.shippingAddress as any).zip ||
-                      ''}
-                  </p>
-                  <p>{(order.shippingAddress as any).country || ''}</p>
-                </div>
-              ) : (
-                <p className="text-gray-500">No shipping address provided</p>
-              )}
+                  );
+
+                // Helper phone
+                const formatPhone = (phone: string) => {
+                  if (!phone) return '';
+                  const cleaned = phone.replace(/\D/g, '');
+                  const match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
+                  if (match) return `+1 (${match[2]}) ${match[3]}-${match[4]}`;
+                  return phone;
+                };
+
+                return (
+                  <div className="flex flex-col gap-4">
+                    {/* CONTENU ADRESSE */}
+                    <div className="text-gray-900 space-y-1">
+                      <p className="font-semibold capitalize text-base border-b border-gray-100 pb-2 mb-2">
+                        {addr.name}
+                      </p>
+
+                      <div className="text-gray-600 leading-relaxed">
+                        <p>{addr.street1 || addr.line1}</p>
+                        {(addr.street2 || addr.line2) && (
+                          <p className="text-gray-500">
+                            Apt / Suite {addr.street2 || addr.line2}
+                          </p>
+                        )}
+                        <p>
+                          {addr.city}, {addr.state}{' '}
+                          <span className="text-gray-400">|</span>{' '}
+                          <span className="font-mono font-medium text-gray-800">
+                            {addr.postalCode || addr.postal_code || addr.zip}
+                          </span>
+                        </p>
+                        <p className="uppercase text-xs font-bold text-gray-400 mt-1 tracking-wider">
+                          {addr.country}
+                        </p>
+                      </div>
+
+                      {/* Contact séparé légèrement */}
+                      {addr.phone && (
+                        <p className="pt-3 text-gray-900 font-medium flex items-center gap-2">
+                          <span className="text-xs text-gray-400 uppercase tracking-widest">
+                            Tel
+                          </span>
+                          {formatPhone(addr.phone)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
+
+          {/* Status actions */}
+          <OrderDetailClient orderId={order.id} currentStatus={order.status} />
+
+          {/* Status history */}
+          {order.statusHistory && order.statusHistory.length > 0 && (
+            <div className="rounded-lg border border-gray-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-semibold">Status History</h2>
+              <div className="space-y-3">
+                {order.statusHistory.map((history, index) => (
+                  <div
+                    key={history.id}
+                    className={`border-l-2 pl-4 ${
+                      index === 0 ? 'border-primary' : 'border-gray-300'
+                    }`}
+                  >
+                    <p className="text-sm font-medium">
+                      <StatusBadge status={history.status as any} />
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {new Date(history.createdAt).toLocaleString()}
+                    </p>
+                    {history.comment && (
+                      <p className="mt-1 text-sm text-gray-600">
+                        {history.comment}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* Status actions */}
-        <OrderDetailClient orderId={order.id} currentStatus={order.status} />
-
-        {/* Status history */}
-        {order.statusHistory && order.statusHistory.length > 0 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-semibold">Status History</h2>
-            <div className="space-y-3">
-              {order.statusHistory.map((history, index) => (
-                <div
-                  key={history.id}
-                  className={`border-l-2 pl-4 ${
-                    index === 0 ? 'border-primary' : 'border-gray-300'
-                  }`}
-                >
-                  <p className="text-sm font-medium">
-                    <StatusBadge status={history.status as any} />
-                  </p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {new Date(history.createdAt).toLocaleString()}
-                  </p>
-                  {history.comment && (
-                    <p className="mt-1 text-sm text-gray-600">
-                      {history.comment}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

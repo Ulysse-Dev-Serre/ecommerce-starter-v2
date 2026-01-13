@@ -12,10 +12,11 @@ interface StatusActionsProps {
 }
 
 // Workflow de transition d'état valide (doit être en sync avec le backend)
+// Workflow de transition d'état valide (doit être en sync avec le backend)
 const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
   [OrderStatus.PAID]: [OrderStatus.SHIPPED, OrderStatus.REFUNDED],
-  [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+  [OrderStatus.SHIPPED]: [], // La livraison est gérée automatiquement par l'API (Webhook)
   [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
   [OrderStatus.CANCELLED]: [],
   [OrderStatus.REFUNDED]: [],

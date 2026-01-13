@@ -181,6 +181,17 @@
     "shipping": "Shipping",
     "totalToPay": "Total to pay",
     "confirmAddress": "Confirm address & see shipping options",
-    "calculating": "Calculating..."
+    "calculating": "Calculating...",
+    "securePayment": "Secure payment by Stripe",
+    "fullName": "Full name",
+    "phone": "Phone",
+    "addressLine1": "Address (Line 1)",
+    "addressLine2": "Apartment, suite, etc. (optional)",
+    "city": "City",
+    "state": "State / Province",
+    "zipCode": "Zip / Postal Code",
+    "country": "Country",
+    "selectState": "Select...",
+    "statePlaceholder": "State / Province"
   }
 }

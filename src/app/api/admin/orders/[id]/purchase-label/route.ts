@@ -262,13 +262,16 @@ async function purchaseLabelHandler(
       },
     });
 
-    // Update Order status
+    // We DO NOT update the order status to SHIPPED automatically here.
+    // The admin will manually set it to SHIPPED when they physically drop the package.
+    /*
     await prisma.order.update({
       where: { id: orderId },
       data: {
         status: 'SHIPPED',
       },
     });
+    */
 
     logger.info(
       { orderId, trackingNumber },

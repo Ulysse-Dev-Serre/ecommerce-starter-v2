@@ -15,7 +15,7 @@ async function updateIntentHandler(
   authContext: AuthContext
 ): Promise<NextResponse> {
   const body = await request.json();
-  const { paymentIntentId, shippingRate, currency } = body;
+  const { paymentIntentId, shippingRate, currency, shippingDetails } = body;
 
   if (!paymentIntentId || !shippingRate) {
     return NextResponse.json(
@@ -25,7 +25,6 @@ async function updateIntentHandler(
   }
 
   try {
-    // 1. Récupérer l'intent courant pour avoir le montant actuel (produits)
     // 1. Récupérer l'intent courant
     const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -36,26 +35,21 @@ async function updateIntentHandler(
 
     const subtotalStr = intent.metadata.subtotal;
     let subtotal = 0;
-    let shouldSaveSubtotal = false;
 
     if (subtotalStr) {
       subtotal = Number(subtotalStr);
     } else {
-      // Fallback: Si c'est la première fois qu'on ajoute du shipping, le montant actuel EST le subtotal
-      // Si on a déjà du shipping (metadata.shipping_cost), on le soustrait
+      // Fallback logic
       const previousShipping = intent.metadata.shipping_cost
         ? Number(intent.metadata.shipping_cost)
         : 0;
 
-      // Attention: previousShipping est en dollars (string "15.00"), intent.amount est en cents (number 1500)
-      // Il faut convertir previousShipping en cents pour le soustraire correctes
       const previousShippingCents = toStripeAmount(
         previousShipping.toString(),
         currency
       );
 
       subtotal = intent.amount - previousShippingCents;
-      shouldSaveSubtotal = true; // On va le sauvegarder pour la prochaine fois
 
       logger.warn(
         {
@@ -67,25 +61,47 @@ async function updateIntentHandler(
       );
     }
 
-    // Le shippingRate est reçu du frontend (API Shippo), ex: "15.00"
+    // Le shippingRate est reçu du frontend (API Shippo)
     const shippingAmountCents = toStripeAmount(shippingRate.amount, currency);
 
     // Nouveau total
     const newTotalCents = subtotal + shippingAmountCents;
 
-    const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
+    // Prepare update payload
+    const updatePayload: any = {
       amount: newTotalCents,
       metadata: {
         ...intent.metadata,
         shipping_rate_id: shippingRate.object_id || shippingRate.objectId,
         shipping_cost: shippingRate.amount,
-        subtotal: subtotal.toString(), // Ensure subtotal is saved/persisted
+        subtotal: subtotal.toString(),
       },
-    });
+    };
+
+    // Add shipping address if provided
+    if (shippingDetails) {
+      updatePayload.shipping = {
+        name: shippingDetails.name,
+        phone: shippingDetails.phone,
+        address: {
+          line1: shippingDetails.street1,
+          line2: shippingDetails.street2,
+          city: shippingDetails.city,
+          state: shippingDetails.state,
+          postal_code: shippingDetails.zip,
+          country: shippingDetails.country,
+        },
+      };
+    }
+
+    const updatedIntent = await stripe.paymentIntents.update(
+      paymentIntentId,
+      updatePayload
+    );
 
     logger.info(
       { paymentIntentId, newTotal: newTotalCents },
-      'PaymentIntent updated with shipping cost'
+      'PaymentIntent updated with shipping cost and address'
     );
 
     return NextResponse.json({
