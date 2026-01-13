@@ -5,7 +5,6 @@ import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
   PaymentElement,
-  AddressElement,
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
@@ -34,6 +33,17 @@ interface CheckoutClientProps {
     totalToPay: string;
     confirmAddress: string;
     calculating: string;
+    securePayment: string;
+    fullName: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    selectState: string;
+    statePlaceholder: string;
   };
   userEmail?: string | null | undefined;
 }
@@ -137,6 +147,17 @@ interface CheckoutFormProps {
     totalToPay: string;
     confirmAddress: string;
     calculating: string;
+    securePayment: string;
+    fullName: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    selectState: string;
+    statePlaceholder: string;
   };
   userEmail?: string | null | undefined;
   cartId: string;
@@ -168,10 +189,30 @@ function CheckoutForm({
   const lastFetchedAddress = useRef<string>('');
 
   // State pour stocker l'adresse en attente de validation
-  const [tempAddress, setTempAddress] = useState<any>(null);
+  const [tempAddress, setTempAddress] = useState<any>({
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: 'CA',
+  });
   const [tempName, setTempName] = useState<string>('');
   const [phone, setPhone] = useState<string>(''); // Nouveau state pour le téléphone
   const [isAddressReady, setIsAddressReady] = useState(false);
+
+  // Effet pour valider le formulaire manuellement
+  useEffect(() => {
+    const isReady =
+      tempName?.trim() !== '' &&
+      phone?.trim().length >= 10 &&
+      tempAddress?.line1?.trim() !== '' &&
+      tempAddress?.city?.trim() !== '' &&
+      tempAddress?.state?.trim() !== '' &&
+      tempAddress?.postal_code?.trim() !== '' &&
+      tempAddress?.country?.trim() !== '';
+    setIsAddressReady(isReady);
+  }, [tempName, phone, tempAddress]);
 
   // Initialize initialTotal in state
   const [total, setTotal] = useState(initialTotal);
@@ -188,7 +229,19 @@ function CheckoutForm({
   }, [selectedRate, initialTotal]);
 
   // Fonction helper pour update l'intent (sera appelée au click)
-  const updatePaymentIntent = async (rate: any) => {
+  const updatePaymentIntent = async (
+    rate: any,
+    shippingDetails?: {
+      name: string;
+      street1: string;
+      street2?: string;
+      city: string;
+      state: string;
+      zip: string;
+      country: string;
+      phone: string;
+    }
+  ) => {
     try {
       setSelectedRate(rate);
 
@@ -202,6 +255,7 @@ function CheckoutForm({
           paymentIntentId,
           shippingRate: rate,
           currency,
+          shippingDetails, // Envoi des détails d'expédition pour mise à jour Stripe
         }),
       });
       const data = await res.json();
@@ -227,6 +281,14 @@ function CheckoutForm({
     setHasAttemptedShippingRatesFetch(true);
 
     try {
+      // Format phone number to ensure it has '1' prefix for North America (NANP standard)
+      // Remove any non-digit characters first to be clean
+      // Avoid '+' which converts to '00' by Shippo and may be rejected by UPS for local routes
+      const cleanPhone = phone.replace(/\D/g, '');
+      const formattedPhone = cleanPhone.startsWith('1')
+        ? cleanPhone
+        : `1${cleanPhone}`;
+
       const address = tempAddress;
       const addressPayload = {
         cartId: cartId,
@@ -239,7 +301,7 @@ function CheckoutForm({
           zip: address.postal_code,
           country: address.country,
           email: userEmail || 'customer@example.com',
-          phone: phone, // Envoi du téléphone explicite
+          phone: formattedPhone, // Envoi du téléphone formaté E.164
         },
       };
 
@@ -296,40 +358,234 @@ function CheckoutForm({
             <h2 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
               {t.shippingAddress}
             </h2>
-            <AddressElement
-              options={{
-                mode: 'shipping',
-                allowedCountries: [
-                  'US',
-                  'CA',
-                  'MX',
-                  'BR',
-                  'AR',
-                  'CO',
-                  'CL',
-                  'PE',
-                ],
-                fields: {
-                  phone: 'always',
-                },
-                validation: {
-                  phone: {
-                    required: 'always',
-                  },
-                },
-                defaultValues: {
-                  // Prefill with any available data if we implemented profile fetch
-                  // For now, we rely on Link's own sticky data or user input
-                  // We could pass phone if we had it
-                },
-              }}
-              onChange={(event: any) => {
-                setTempAddress(event.value.address);
-                setTempName(event.value.name);
-                setPhone(event.value.phone || '');
-                setIsAddressReady(event.complete);
-              }}
-            />
+            <div className="space-y-4">
+              {/* Name & Phone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t.fullName} <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tempName}
+                    onChange={e => setTempName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t.phone} <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                      +1
+                    </span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Line 1 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.addressLine1} <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={tempAddress?.line1 || ''}
+                  onChange={e =>
+                    setTempAddress({ ...tempAddress, line1: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+              </div>
+
+              {/* Address Line 2 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.addressLine2}
+                </label>
+                <input
+                  type="text"
+                  value={tempAddress?.line2 || ''}
+                  onChange={e =>
+                    setTempAddress({ ...tempAddress, line2: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                />
+              </div>
+
+              {/* Country & City Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t.country} <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <select
+                    value={tempAddress?.country || 'CA'}
+                    onChange={e => {
+                      // Reset state when country changes to avoid mismatch
+                      setTempAddress({
+                        ...tempAddress,
+                        country: e.target.value,
+                        state: '',
+                      });
+                    }}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                  >
+                    <option value="CA">Canada (CA)</option>
+                    <option value="US">États-Unis (US)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t.city} <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tempAddress?.city || ''}
+                    onChange={e =>
+                      setTempAddress({ ...tempAddress, city: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* State & Zip Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t.state} <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  {/* Dynamic State Selection */}
+                  {tempAddress?.country === 'CA' ? (
+                    <select
+                      value={tempAddress?.state || ''}
+                      onChange={e =>
+                        setTempAddress({
+                          ...tempAddress,
+                          state: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                    >
+                      <option value="">{t.selectState}</option>
+                      <option value="AB">Alberta</option>
+                      <option value="BC">Colombie-Britannique</option>
+                      <option value="MB">Manitoba</option>
+                      <option value="NB">Nouveau-Brunswick</option>
+                      <option value="NL">Terre-Neuve-et-Labrador</option>
+                      <option value="NS">Nouvelle-Écosse</option>
+                      <option value="NT">Territoires du Nord-Ouest</option>
+                      <option value="NU">Nunavut</option>
+                      <option value="ON">Ontario</option>
+                      <option value="PE">Île-du-Prince-Édouard</option>
+                      <option value="QC">Québec</option>
+                      <option value="SK">Saskatchewan</option>
+                      <option value="YT">Yukon</option>
+                    </select>
+                  ) : tempAddress?.country === 'US' ? (
+                    <select
+                      value={tempAddress?.state || ''}
+                      onChange={e =>
+                        setTempAddress({
+                          ...tempAddress,
+                          state: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                    >
+                      <option value="">{t.selectState}</option>
+                      <option value="AL">Alabama</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="AR">Arkansas</option>
+                      <option value="CA">California</option>
+                      <option value="CO">Colorado</option>
+                      <option value="CT">Connecticut</option>
+                      <option value="DE">Delaware</option>
+                      <option value="DC">District Of Columbia</option>
+                      <option value="FL">Florida</option>
+                      <option value="GA">Georgia</option>
+                      <option value="HI">Hawaii</option>
+                      <option value="ID">Idaho</option>
+                      <option value="IL">Illinois</option>
+                      <option value="IN">Indiana</option>
+                      <option value="IA">Iowa</option>
+                      <option value="KS">Kansas</option>
+                      <option value="KY">Kentucky</option>
+                      <option value="LA">Louisiana</option>
+                      <option value="ME">Maine</option>
+                      <option value="MD">Maryland</option>
+                      <option value="MA">Massachusetts</option>
+                      <option value="MI">Michigan</option>
+                      <option value="MN">Minnesota</option>
+                      <option value="MS">Mississippi</option>
+                      <option value="MO">Missouri</option>
+                      <option value="MT">Montana</option>
+                      <option value="NE">Nebraska</option>
+                      <option value="NV">Nevada</option>
+                      <option value="NH">New Hampshire</option>
+                      <option value="NJ">New Jersey</option>
+                      <option value="NM">New Mexico</option>
+                      <option value="NY">New York</option>
+                      <option value="NC">North Carolina</option>
+                      <option value="ND">North Dakota</option>
+                      <option value="OH">Ohio</option>
+                      <option value="OK">Oklahoma</option>
+                      <option value="OR">Oregon</option>
+                      <option value="PA">Pennsylvania</option>
+                      <option value="RI">Rhode Island</option>
+                      <option value="SC">South Carolina</option>
+                      <option value="SD">South Dakota</option>
+                      <option value="TN">Tennessee</option>
+                      <option value="TX">Texas</option>
+                      <option value="UT">Utah</option>
+                      <option value="VT">Vermont</option>
+                      <option value="VA">Virginia</option>
+                      <option value="WA">Washington</option>
+                      <option value="WV">West Virginia</option>
+                      <option value="WI">Wisconsin</option>
+                      <option value="WY">Wyoming</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={tempAddress?.state || ''}
+                      onChange={e =>
+                        setTempAddress({
+                          ...tempAddress,
+                          state: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t.zipCode} <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={tempAddress?.postal_code || ''}
+                    onChange={e =>
+                      setTempAddress({
+                        ...tempAddress,
+                        postal_code: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </div>
 
             {/* BOUTON DE VALIDATION DE L'ADRESSE */}
             <div className="mt-6">
@@ -378,14 +634,31 @@ function CheckoutForm({
                       <div
                         key={rateId || index}
                         className={`relative p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 mb-3 ${isSelected ? activeClasses : inactiveClasses}`}
-                        onClick={() => updatePaymentIntent(rate)}
+                        onClick={() => {
+                          // Format phone for Stripe (NANP standard "1XXXXXXXXXX")
+                          const cleanPhone = phone.replace(/\D/g, '');
+                          const stripePhone = cleanPhone.startsWith('1')
+                            ? cleanPhone
+                            : `1${cleanPhone}`;
+
+                          updatePaymentIntent(rate, {
+                            name: tempName || 'Valued Customer',
+                            street1: tempAddress.line1,
+                            street2: tempAddress.line2 || '',
+                            city: tempAddress.city,
+                            state: tempAddress.state,
+                            zip: tempAddress.postal_code,
+                            country: tempAddress.country,
+                            phone: stripePhone,
+                          });
+                        }}
                       >
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center w-full">
                           <div className="flex items-center gap-3">
                             {/* Radio Circle */}
                             <div
-                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
-                                                        ${isSelected ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}
+                              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0
+                                                          ${isSelected ? 'border-gray-900 bg-gray-900' : 'border-gray-300'}`}
                             >
                               {isSelected && (
                                 <div className="w-2 h-2 rounded-full bg-white" />
@@ -394,19 +667,16 @@ function CheckoutForm({
 
                             <div>
                               <div className="font-bold text-gray-900">
-                                {rate.provider}
+                                {rate.displayName || rate.servicelevel.name}
                               </div>
-                              <div className="text-sm text-gray-600">
-                                {rate.servicelevel.name}
+                              <div className="text-sm text-gray-500">
+                                {rate.duration_terms || rate.displayTime}
                               </div>
                             </div>
                           </div>
                           <div className="text-right">
                             <div className="font-bold text-lg text-gray-900">
                               {rate.amount} {rate.currency}
-                            </div>
-                            <div className="text-xs text-gray-500 font-medium">
-                              {rate.duration_terms}
                             </div>
                           </div>
                         </div>
@@ -508,7 +778,7 @@ function CheckoutForm({
                 >
                   <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
                 </svg>
-                Paiement sécurisé par Stripe
+                {t.securePayment}
               </p>
             </div>
           </div>

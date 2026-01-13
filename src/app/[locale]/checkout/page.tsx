@@ -78,6 +78,17 @@ export default async function CheckoutPage({
     totalToPay: t('totalToPay'),
     confirmAddress: t('confirmAddress'),
     calculating: t('calculating'),
+    securePayment: t('securePayment'),
+    fullName: t('fullName'),
+    phone: t('phone'),
+    addressLine1: t('addressLine1'),
+    addressLine2: t('addressLine2'),
+    city: t('city'),
+    state: t('state'),
+    zipCode: t('zipCode'),
+    country: t('country'),
+    selectState: t('selectState'),
+    statePlaceholder: t('statePlaceholder'),
   };
 
   return (
@@ -88,10 +99,9 @@ export default async function CheckoutPage({
         initialTotal={Number(
           cart.items.reduce((acc, item) => {
             // Find price matching cart currency
-            const priceRecord =
-              item.variant.pricing.find(
-                p => p.currency === cart.currency && p.isActive
-              ) || item.variant.pricing.find(p => p.currency === cart.currency);
+            const priceRecord = item.variant.pricing.find(
+              p => p.currency === cart.currency
+            );
 
             const price = priceRecord?.price || 0;
             return acc + Number(price) * item.quantity;

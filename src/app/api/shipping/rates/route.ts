@@ -285,6 +285,22 @@ async function handler(req: NextRequest) {
       },
     ];
 
+    // DEBUG: Log full customs declaration for verification (ACEUM, HS Codes)
+    if (customsDeclaration) {
+      logger.info(
+        {
+          customsDeclaration,
+          itemsDetail: customsDeclaration.items.map(i => ({
+            desc: i.description,
+            hsCode: i.hsCode,
+            origin: i.originCountry,
+            value: i.valueAmount,
+          })),
+        },
+        'DEBUG: Full Customs Declaration Payload'
+      );
+    }
+
     // Call Shippo service with Dynamic Origin
     const shipment = await getShippingRates(
       originAddress,
@@ -306,8 +322,77 @@ async function handler(req: NextRequest) {
       'Shipping rates fetched successfully'
     );
 
+    // FILTERING & RENAMING LOGIC
+    // We want to simplify choices for the user: 1. Standard, 2. Express
+    let filteredRates: any[] = [];
+
+    if (shipment.rates) {
+      let bestStandard: any = null;
+      let bestExpress: any = null;
+
+      for (const rate of shipment.rates) {
+        const name = (rate.servicelevel.name || '').toLowerCase();
+        const provider = (rate.provider || '').toLowerCase();
+
+        // Focus on UPS as requested
+        if (!provider.includes('ups')) continue;
+
+        const price = parseFloat(rate.amount);
+
+        // Helper to format time
+        const formatTime = (r: any) => {
+          if (r.duration_terms) {
+            return r.duration_terms
+              .replace(/days?/i, 'Jours')
+              .replace(/day?/i, 'Jour')
+              .trim();
+          }
+          if (r.days) {
+            return `${r.days} Jour${r.days > 1 ? 's' : ''}`;
+          }
+          return null;
+        };
+
+        // 1. STANDARD Strategy
+        if (name.includes('standard')) {
+          if (!bestStandard || price < parseFloat(bestStandard.amount)) {
+            bestStandard = { ...rate };
+            bestStandard.displayName = 'Standard';
+            bestStandard.displayTime = formatTime(rate) || '3-7 Jours';
+          }
+        }
+        // 2. EXPRESS Strategy
+        else if (
+          (name.includes('express') || name.includes('saver')) &&
+          !name.includes('early') &&
+          !name.includes('plus') &&
+          !name.includes('3 day')
+        ) {
+          if (!bestExpress || price < parseFloat(bestExpress.amount)) {
+            bestExpress = { ...rate };
+            bestExpress.displayName = 'Express';
+            bestExpress.displayTime = formatTime(rate) || '1-3 Jours';
+          }
+        }
+      }
+
+      if (bestStandard) filteredRates.push(bestStandard);
+      if (bestExpress) filteredRates.push(bestExpress);
+
+      // Sort by price ascending
+      filteredRates.sort((a, b) => parseFloat(a.amount) - parseFloat(b.amount));
+    }
+
+    logger.info(
+      {
+        originalCount: shipment.rates ? shipment.rates.length : 0,
+        filteredCount: filteredRates.length,
+      },
+      'Shipping rates filtered and renamed'
+    );
+
     return NextResponse.json({
-      rates: shipment.rates,
+      rates: filteredRates,
     });
   } catch (error) {
     logger.error({ error }, 'API Error /shipping/rates');

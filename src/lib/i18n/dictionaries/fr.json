@@ -181,6 +181,17 @@
     "shipping": "Livraison",
     "totalToPay": "Total à payer",
     "confirmAddress": "Confirmer l'adresse et voir la livraison",
-    "calculating": "Calcul en cours..."
+    "calculating": "Calcul en cours...",
+    "securePayment": "Paiement sécurisé par Stripe",
+    "fullName": "Nom complet",
+    "phone": "Téléphone",
+    "addressLine1": "Adresse (Ligne 1)",
+    "addressLine2": "Appartement, suite, etc. (optionnel)",
+    "city": "Ville",
+    "state": "Province / État",
+    "zipCode": "Code Postal",
+    "country": "Pays",
+    "selectState": "Sélectionner...",
+    "statePlaceholder": "Province / État"
   }
 }

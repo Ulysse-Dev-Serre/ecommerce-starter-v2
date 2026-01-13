@@ -57,6 +57,7 @@ export default async function OrderDetailPage({
       payment: 'Paiement',
       tracking: 'Suivi de commande',
       trackPackage: 'Suivre le colis',
+      apartment: 'App. / Bureau',
     },
     en: {
       backToOrders: '← Back to orders',
@@ -76,6 +77,7 @@ export default async function OrderDetailPage({
       payment: 'Payment',
       tracking: 'Order Tracking',
       trackPackage: 'Track package',
+      apartment: 'Apt / Suite',
     },
   }[locale] || {
     backToOrders: '← Back to orders',
@@ -95,6 +97,7 @@ export default async function OrderDetailPage({
     payment: 'Payment',
     tracking: 'Order Tracking',
     trackPackage: 'Track package',
+    apartment: 'Apt / Suite',
   };
 
   const statusLabels: Record<string, Record<string, string>> = {
@@ -166,26 +169,58 @@ export default async function OrderDetailPage({
   const shippingAddr = order.shippingAddress as Record<string, string> | null;
   const billingAddr = order.billingAddress as Record<string, string> | null;
 
-  // Helper pour formater l'adresse proprement
-  const formatAddress = (addr: Record<string, string> | null) => {
+  // Helper pour formater l'adresse avec un design épuré (Style Apple/Stripe)
+  const formatAddress = (
+    addr: Record<string, string> | null,
+    title: string
+  ) => {
     if (!addr) return null;
+
+    // Helper phone
+    const formatPhone = (phone: string) => {
+      if (!phone) return '';
+      const cleaned = phone.replace(/\D/g, '');
+      const match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
+      if (match) return `+1 (${match[2]}) ${match[3]}-${match[4]}`;
+      return phone;
+    };
+
     return (
-      <div className="text-sm text-gray-600 leading-relaxed">
-        <p className="font-semibold text-gray-900 mb-1">{addr.name}</p>
-        <p>{addr.street1 || addr.line1}</p>
-        {addr.street2 || addr.line2 ? (
-          <p>{addr.street2 || addr.line2}</p>
-        ) : null}
-        <p>
-          {addr.city}, {addr.state}{' '}
-          {addr.postalCode || addr.postal_code || addr.zip}
-        </p>
-        <p>{addr.country}</p>
-        {addr.phone && (
-          <p className="text-xs mt-2 text-gray-500 flex items-center gap-1">
-            <span className="opacity-70">Tel:</span> {addr.phone}
+      <div className="flex flex-col gap-4 text-sm">
+        {/* TITRE SECTION */}
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">
+          {title}
+        </h3>
+
+        {/* CONTENU ADRESSE */}
+        <div className="text-gray-900 space-y-1">
+          <p className="font-semibold capitalize text-base">
+            {addr.name.toLowerCase()}
           </p>
-        )}
+
+          <div className="text-gray-600 leading-relaxed">
+            <p>{addr.street1 || addr.line1}</p>
+            {(addr.street2 || addr.line2) && (
+              <p className="text-gray-500">
+                {t.apartment} {addr.street2 || addr.line2}
+              </p>
+            )}
+            <p>
+              {addr.city}, {addr.state} <span className="text-gray-400">|</span>{' '}
+              {addr.postalCode || addr.postal_code || addr.zip}
+            </p>
+            <p className="uppercase text-xs font-bold text-gray-400 mt-1 tracking-wider">
+              {addr.country}
+            </p>
+          </div>
+
+          {/* Contact séparé légèrement */}
+          {addr.phone && (
+            <p className="pt-3 text-gray-900 font-medium">
+              {formatPhone(addr.phone)}
+            </p>
+          )}
+        </div>
       </div>
     );
   };
@@ -194,11 +229,11 @@ export default async function OrderDetailPage({
     <div className="flex-1 py-10 bg-gray-50 min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header avec Navigation et Statut */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
             <Link
               href={`/${locale}/orders`}
-              className="text-sm text-gray-500 hover:text-gray-900 hover:underline mb-2 inline-flex items-center gap-1 transition-colors"
+              className="text-sm text-gray-500 hover:text-gray-900 hover:underline mb-4 inline-flex items-center gap-1 transition-colors"
             >
               <svg
                 className="w-4 h-4"
@@ -215,28 +250,187 @@ export default async function OrderDetailPage({
               </svg>
               {t.backToOrders}
             </Link>
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mt-2">
-              {t.orderNumber} #{order.orderNumber}
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+              {locale === 'fr' ? 'Détails de la commande' : 'Order Details'}
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {t.date}:{' '}
-              {new Date(order.createdAt).toLocaleDateString(
-                locale === 'fr' ? 'fr-CA' : 'en-CA',
-                {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                }
-              )}
+            <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
+              <span>
+                {t.orderNumber} #{order.orderNumber}
+              </span>
+              <span className="text-gray-300">|</span>
+              <span>
+                {t.date}:{' '}
+                {new Date(order.createdAt).toLocaleDateString(
+                  locale === 'fr' ? 'fr-CA' : 'en-CA',
+                  {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }
+                )}
+              </span>
             </p>
           </div>
-          <span
-            className={`px-4 py-2 rounded-full text-sm font-bold shadow-sm border ${getStatusColor(order.status)}`}
-          >
-            {statusLabels[locale]?.[order.status] || order.status}
-          </span>
+          {/* Status Badge supprimé d'ici car intégré dans le stepper ou redondant */}
+        </div>
+
+        {/* --- STEPPER DE PROGRESSION (Amazon Style) --- */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-8">
+          <div className="relative">
+            {/* Ligne de fond grise */}
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-100 -translate-y-1/2 rounded-full z-0"></div>
+
+            {/* Ligne de progression colorée (Calculée) */}
+            <div
+              className="absolute top-1/2 left-0 h-1 bg-green-500 -translate-y-1/2 rounded-full z-0 transition-all duration-500"
+              style={{
+                width:
+                  order.status === 'DELIVERED'
+                    ? '100%'
+                    : order.status === 'SHIPPED'
+                      ? '66%'
+                      : order.status === 'PAID'
+                        ? '33%'
+                        : '0%',
+              }}
+            ></div>
+
+            <div className="relative z-10 flex justify-between w-full">
+              {/* Étape 1: Acheté (Paid) */}
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-300
+                  ${['PAID', 'SHIPPED', 'DELIVERED'].includes(order.status) ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <span
+                  className={`text-xs font-bold uppercase tracking-wider ${['PAID', 'SHIPPED', 'DELIVERED'].includes(order.status) ? 'text-green-600' : 'text-gray-400'}`}
+                >
+                  {locale === 'fr' ? 'Commandé' : 'Ordered'}
+                </span>
+              </div>
+
+              {/* Étape 2: Expédié (Shipped) */}
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-300
+                  ${['SHIPPED', 'DELIVERED'].includes(order.status) ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}
+                >
+                  {['SHIPPED', 'DELIVERED'].includes(order.status) ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : (
+                    <span className="text-xs font-bold">2</span>
+                  )}
+                </div>
+                <span
+                  className={`text-xs font-bold uppercase tracking-wider ${['SHIPPED', 'DELIVERED'].includes(order.status) ? 'text-green-600' : 'text-gray-400'}`}
+                >
+                  {locale === 'fr' ? 'Expédié' : 'Shipped'}
+                </span>
+              </div>
+
+              {/* Étape 3: En route (Transit) - Visuel intermédiaire */}
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-300
+                  ${['SHIPPED', 'DELIVERED'].includes(order.status) ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}
+                >
+                  {order.status === 'DELIVERED' ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : order.status === 'SHIPPED' ? (
+                    <svg
+                      className="w-5 h-5 animate-pulse"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      />
+                    </svg>
+                  ) : (
+                    <span className="text-xs font-bold">3</span>
+                  )}
+                </div>
+                <span
+                  className={`text-xs font-bold uppercase tracking-wider ${['SHIPPED', 'DELIVERED'].includes(order.status) ? 'text-green-600' : 'text-gray-400'}`}
+                >
+                  {locale === 'fr' ? 'En route' : 'On the Way'}
+                </span>
+              </div>
+
+              {/* Étape 4: Livré (Delivered) */}
+              <div className="flex flex-col items-center gap-2">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-300
+                  ${order.status === 'DELIVERED' ? 'bg-green-500 border-green-500 text-white' : 'bg-white border-gray-300 text-gray-400'}`}
+                >
+                  {order.status === 'DELIVERED' ? (
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  ) : (
+                    <span className="text-xs font-bold">4</span>
+                  )}
+                </div>
+                <span
+                  className={`text-xs font-bold uppercase tracking-wider ${order.status === 'DELIVERED' ? 'text-green-600' : 'text-gray-400'}`}
+                >
+                  {locale === 'fr' ? 'Livré' : 'Delivered'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -482,56 +676,20 @@ export default async function OrderDetailPage({
             {/* Addresses Blocks */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
               {/* Shipping Address */}
-              <div className="p-5">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  {t.shippingAddress}
-                </h3>
+              <div className="p-6">
                 {shippingAddr && Object.keys(shippingAddr).length > 0 ? (
-                  formatAddress(shippingAddr)
+                  formatAddress(shippingAddr, t.shippingAddress)
                 ) : (
-                  <p className="text-gray-400 italic text-sm">Non spécifiée</p>
+                  <p className="text-gray-400 italic text-sm">
+                    Adresse de livraison non spécifiée
+                  </p>
                 )}
               </div>
 
               {/* Billing Address (if different or present) */}
               {billingAddr && Object.keys(billingAddr).length > 0 && (
-                <div className="p-5 border-t border-gray-100 bg-gray-50/30">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                      />
-                    </svg>
-                    {t.billingAddress}
-                  </h3>
-                  {formatAddress(billingAddr)}
+                <div className="p-6 border-t border-gray-100 bg-gray-50/10">
+                  {formatAddress(billingAddr, t.billingAddress)}
                 </div>
               )}
             </div>
