@@ -198,7 +198,7 @@ function CheckoutForm({
     country: 'CA',
   });
   const [tempName, setTempName] = useState<string>('');
-  const [phone, setPhone] = useState<string>(''); // Nouveau state pour le téléphone
+  const [phone, setPhone] = useState<string>('');
   const [isAddressReady, setIsAddressReady] = useState(false);
 
   // Effet pour valider le formulaire manuellement
@@ -228,10 +228,9 @@ function CheckoutForm({
     }
   }, [selectedRate, initialTotal]);
 
-  // Fonction helper pour update l'intent (sera appelée au click)
   const updatePaymentIntent = async (
     rate: any,
-    shippingDetails?: {
+    shippingDetailsArg?: {
       name: string;
       street1: string;
       street2?: string;
@@ -248,6 +247,28 @@ function CheckoutForm({
       // Extract PaymentIntent ID from clientSecret
       const paymentIntentId = clientSecret.split('_secret_')[0];
 
+      // S'assurer d'avoir des détails d'expédition valides
+      // Priorité: argument passé > tempAddress du state
+      const detailsToSend = shippingDetailsArg || {
+        name: tempName || 'Valued Customer',
+        street1: tempAddress.line1,
+        street2: tempAddress.line2 || '',
+        city: tempAddress.city,
+        state: tempAddress.state,
+        zip: tempAddress.postal_code,
+        country: tempAddress.country,
+        phone: phone, // Utiliser le state phone si non passé en argument
+      };
+
+      // AJOUT CRITIQUE: Inclure l'email pour le reçu Stripe (et notre DB)
+      // Priorité: prop userEmail > rien
+      const finalShippingDetails = {
+        ...detailsToSend,
+        email: userEmail,
+      };
+
+      console.log('Sending update-intent with details:', finalShippingDetails);
+
       const res = await fetch('/api/checkout/update-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -255,7 +276,7 @@ function CheckoutForm({
           paymentIntentId,
           shippingRate: rate,
           currency,
-          shippingDetails, // Envoi des détails d'expédition pour mise à jour Stripe
+          shippingDetails: finalShippingDetails, // Toujours envoyer un objet complet
         }),
       });
       const data = await res.json();

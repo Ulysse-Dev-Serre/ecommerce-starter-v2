@@ -7,6 +7,9 @@ import { createTransaction } from './shippo';
 import { calculateCart, type Currency } from './calculation.service';
 import { CartProjection } from './cart.service';
 import { decrementStock } from './inventory.service';
+import { resend, FROM_EMAIL } from '../../lib/resend';
+import { OrderConfirmationEmail } from '../../components/emails/order-confirmation';
+import { render } from '@react-email/render';
 
 export interface CreateOrderFromCartInput {
   cart: CartProjection;
@@ -134,6 +137,77 @@ export async function createOrderFromCart({
     },
     'Order created from cart'
   );
+
+  // --- ENVOI EMAIL TRANSACTIONNEL ---
+  try {
+    // 1. Déterminer l'email destinataire
+    // L'email fiable est celui confirmé par Stripe dans le Payment Intent (receipt_email)
+    const recipientEmail = paymentIntent.receipt_email;
+
+    if (recipientEmail) {
+      // 2. Préparer les données pour le template
+      const emailHtml = await render(
+        OrderConfirmationEmail({
+          orderId: order.orderNumber,
+          customerName: shippingAddress?.firstName || 'Client',
+          items: calculation.items.map(item => ({
+            name: item.productName,
+            quantity: item.quantity,
+            price: item.unitPrice.toString(),
+            currency: item.currency,
+          })),
+          totalAmount: totalAmount.toString(),
+          currency: cart.currency,
+          shippingAddress: {
+            street: shippingAddress?.street1
+              ? shippingAddress.street1 +
+                (shippingAddress.street2 ? ' ' + shippingAddress.street2 : '')
+              : 'N/A',
+            city: shippingAddress?.city || '',
+            state: shippingAddress?.state || '',
+            postalCode: shippingAddress?.postalCode || '',
+            country: shippingAddress?.country || '',
+          },
+        })
+      );
+
+      // 3. Envoyer via Resend
+      const { data, error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        to: recipientEmail,
+        subject: `Confirmation de commande ${order.orderNumber}`,
+        html: emailHtml,
+      });
+
+      if (error) {
+        logger.error(
+          { error, orderId: order.id },
+          'Failed to send confirmation email'
+        );
+      } else {
+        logger.info(
+          { emailId: data?.id, recipientEmail },
+          'Order confirmation email sent'
+        );
+      }
+    } else {
+      logger.warn(
+        { orderId: order.id },
+        'No recipient email found, skipping confirmation email'
+      );
+    }
+  } catch (emailError: any) {
+    // On ne veut pas faire échouer la création de commande si l'envoi d'email échoue
+    logger.error(
+      {
+        error: emailError,
+        message: emailError.message,
+        stack: emailError.stack,
+        orderId: order.id,
+      },
+      'Error sending confirmation email'
+    );
+  }
 
   return order;
 }

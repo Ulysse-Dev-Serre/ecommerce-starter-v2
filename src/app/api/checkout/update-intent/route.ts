@@ -25,6 +25,15 @@ async function updateIntentHandler(
   }
 
   try {
+    // LOG 1: BODY REÇU DU FRONTEND (Raw)
+    logger.info(
+      {
+        bodyReceived: JSON.stringify(body, null, 2),
+        shippingDetailsEmail: shippingDetails?.email, // Focus spécifique
+      },
+      'DEBUG: UPDATE-INTENT INPUT'
+    );
+
     // 1. Récupérer l'intent courant
     const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -92,16 +101,35 @@ async function updateIntentHandler(
           country: shippingDetails.country,
         },
       };
+
+      // FIX: Ensure receipt_email is set on the PaymentIntent so webhooks can use it
+      if (shippingDetails.email) {
+        updatePayload.receipt_email = shippingDetails.email;
+      }
     }
+
+    // LOG 2: PAYLOAD ENVOYÉ À STRIPE
+    logger.info(
+      {
+        stripeUpdatePayload: JSON.stringify(updatePayload, null, 2),
+      },
+      'DEBUG: STRIPE UPDATE PAYLOAD'
+    );
 
     const updatedIntent = await stripe.paymentIntents.update(
       paymentIntentId,
       updatePayload
     );
 
+    // LOG 3: RÉPONSE DE STRIPE
     logger.info(
-      { paymentIntentId, newTotal: newTotalCents },
-      'PaymentIntent updated with shipping cost and address'
+      {
+        paymentIntentId,
+        newTotal: newTotalCents,
+        updatedIntentReceiptEmail: updatedIntent.receipt_email, // Vérification immédiate
+        updatedIntentFull: JSON.stringify(updatedIntent, null, 2),
+      },
+      'DEBUG: PaymentIntent updated result'
     );
 
     return NextResponse.json({

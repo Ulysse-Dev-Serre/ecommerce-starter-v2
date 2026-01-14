@@ -23,6 +23,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const body = await request.text();
+
+    // LOG TOTAL: RAW BODY (Tronqué à 5000 chars pour éviter le spam, mais suffisant pour le début)
+    logger.info(
+      {
+        rawBodyPreview: body.substring(0, 5000),
+        length: body.length,
+      },
+      'DEBUG: STRIPE WEBHOOK RAW BODY'
+    );
+
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
@@ -256,6 +266,7 @@ function extractShippingAddress(
     firstName: shippingDetails.name?.split(' ')[0] || '',
     lastName: shippingDetails.name?.split(' ').slice(1).join(' ') || '',
     phone: shippingDetails.phone,
+    email: shippingDetails.email, // <--- AJOUTE : Extraction de l'email depuis Stripe
   };
 }
 
@@ -388,8 +399,20 @@ async function handlePaymentIntentSucceeded(
       requestId,
       paymentIntentId: paymentIntent.id,
       amount: paymentIntent.amount / 100,
+      debug_receipt_email: paymentIntent.receipt_email,
+      debug_charges_count: paymentIntent.charges?.data?.length,
+      // @ts-ignore - charges data might be expandable
+      debug_charge_email:
+        paymentIntent.charges?.data?.[0]?.billing_details?.email,
     },
     'Payment intent succeeded'
+  );
+
+  logger.info(
+    {
+      paymentIntentFull: JSON.stringify(paymentIntent, null, 2),
+    },
+    'DEBUG: Full Payment Intent Object'
   );
 
   const userId = paymentIntent.metadata?.userId;
@@ -460,11 +483,16 @@ async function handlePaymentIntentSucceeded(
   // Extraction de l'adresse
   const shippingAddress = extractShippingAddress(paymentIntent);
 
+  // CORRECTION: Pour un PaymentIntent, l'email n'est pas dans shipping, mais dans receipt_email
+  if (shippingAddress && paymentIntent.receipt_email) {
+    shippingAddress.email = paymentIntent.receipt_email;
+  }
+
   await createOrderFromCart({
     cart: virtualCart as any,
     userId,
     paymentIntent,
-    shippingAddress, // <--- AJOUT IMPORTANT
+    shippingAddress, // <--- Contient maintenant l'email
   });
 
   // ... (reste)
