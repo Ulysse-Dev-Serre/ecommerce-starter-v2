@@ -233,6 +233,18 @@ export async function createPaymentIntent({
     'Creating Stripe Payment Intent'
   );
 
+  // 2b. Récupérer l'email de l'utilisateur (OBLIGATOIRE CAR AUTHENTIFIÉ)
+  let receiptEmail: string | undefined;
+  if (userId) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    if (user?.email) {
+      receiptEmail = user.email;
+    }
+  }
+
   // 3. Créer le PaymentIntent
   const paymentIntent = await stripe.paymentIntents.create({
     amount: amountInCents,
@@ -240,6 +252,7 @@ export async function createPaymentIntent({
     automatic_payment_methods: {
       enabled: true,
     },
+    receipt_email: receiptEmail, // <--- LA CLÉ DU PROBLÈME EST ICI
     metadata: {
       userId: userId || '',
       cartId: cartId || '',

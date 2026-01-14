@@ -44,6 +44,14 @@ async function createIntentHandler(
   // Si bodyCartId est fourni, on essaie de le récupérer, sinon on cherche par userId/anonymous
   const cart = await getOrCreateCart(userId, undefined);
 
+  // LOG 1: BODY REÇU
+  logger.info(
+    {
+      bodyReceived: JSON.stringify(body, null, 2),
+    },
+    'DEBUG: CREATE-INTENT INPUT'
+  );
+
   // Petite validation de sécurité : si cartId est fourni, s'assurer que c'est bien celui de l'user
   if (bodyCartId && cart.id !== bodyCartId) {
     // Potentiellement mismatch entre le client local et le serveur
@@ -76,10 +84,12 @@ async function createIntentHandler(
       anonymousId: undefined, // TODO: gérer anonymousId si besoin
     });
 
+    // LOG 2: INTENT CRÉÉ
     logger.info(
       {
         requestId,
         paymentIntentId: paymentIntent.id,
+        createdIntentFull: JSON.stringify(paymentIntent, null, 2),
       },
       'PaymentIntent created successfully'
     );
