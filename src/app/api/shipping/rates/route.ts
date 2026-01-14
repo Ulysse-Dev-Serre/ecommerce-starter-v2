@@ -77,6 +77,10 @@ async function handler(req: NextRequest) {
     );
 
     let totalWeight = 1; // Default fallback
+    let parcelLength = '20'; // Default fallback
+    let parcelWidth = '15'; // Default fallback
+    let parcelHeight = '10'; // Default fallback
+
     let customsDeclaration = undefined;
 
     // Determine Origin Address
@@ -174,12 +178,42 @@ async function handler(req: NextRequest) {
         );
 
         let calculatedWeight = 0;
+        let maxL = 0;
+        let maxW = 0;
+        let sumH = 0;
+
         cart.items.forEach((item: any) => {
-          const w = item.variant?.weight ? Number(item.variant.weight) : 0;
-          calculatedWeight += w * item.quantity;
+          // Weight: Variant specific > Product default > 0
+          let valW = item.variant?.weight ? Number(item.variant.weight) : 0;
+          if (valW === 0 && item.variant?.product?.weight) {
+            valW = Number(item.variant.product.weight);
+          }
+          calculatedWeight += valW * item.quantity;
+
+          // Dimensions: Variant specific > Product default
+          let dim = item.variant?.dimensions as any;
+          if ((!dim || !dim.length) && item.variant?.product?.dimensions) {
+            dim = item.variant.product.dimensions as any;
+          }
+
+          if (dim && dim.length && dim.width && dim.height) {
+            const l = Number(dim.length) || 0;
+            const width = Number(dim.width) || 0;
+            const h = Number(dim.height) || 0;
+
+            if (l > maxL) maxL = l;
+            if (width > maxW) maxW = width;
+            sumH += h * item.quantity; // Simple vertical stacking logic
+          }
         });
 
         if (calculatedWeight > 0) totalWeight = calculatedWeight;
+
+        if (maxL > 0 && maxW > 0 && sumH > 0) {
+          parcelLength = maxL.toString();
+          parcelWidth = maxW.toString();
+          parcelHeight = sumH.toString();
+        }
 
         // Customs Logic
         if (addressTo.country !== 'CA' && originAddress.country === 'CA') {
@@ -270,15 +304,16 @@ async function handler(req: NextRequest) {
         totalWeight,
         hasCustoms: !!customsDeclaration,
         originAddress: originAddress.name,
+        parcel: { l: parcelLength, w: parcelWidth, h: parcelHeight },
       },
       'Fetching shipping rates with dynamic origin'
     );
 
     const parcels = [
       {
-        length: '20',
-        width: '15',
-        height: '10',
+        length: parcelLength,
+        width: parcelWidth,
+        height: parcelHeight,
         distanceUnit: 'cm' as const,
         weight: totalWeight.toString(),
         massUnit: 'kg' as const,
@@ -290,7 +325,7 @@ async function handler(req: NextRequest) {
       logger.info(
         {
           customsDeclaration,
-          itemsDetail: customsDeclaration.items.map(i => ({
+          itemsDetail: customsDeclaration.items.map((i: any) => ({
             desc: i.description,
             hsCode: i.hsCode,
             origin: i.originCountry,

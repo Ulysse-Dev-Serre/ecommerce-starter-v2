@@ -130,6 +130,8 @@ async function updateProductHandler(
     const body = await request.json();
 
     // Validate input with Zod
+    // Note: Manually extending validation for weight/dimensions as we just added them
+    // Ideally we update the Zod schema in lib/schemas/product.schema.ts
     const validation = UpdateProductSchema.safeParse(body);
     if (!validation.success) {
       logger.warn(
@@ -159,6 +161,13 @@ async function updateProductHandler(
     }
 
     const validatedData = validation.data;
+    // START MANUAL EXTENSION
+    const manualData = body as any;
+    const finalData: any = { ...validatedData };
+    if (manualData.weight !== undefined) finalData.weight = manualData.weight;
+    if (manualData.dimensions !== undefined)
+      finalData.dimensions = manualData.dimensions;
+    // END MANUAL EXTENSION
 
     logger.info(
       {
@@ -198,27 +207,28 @@ async function updateProductHandler(
 
     const updateData: UpdateProductData = {};
 
-    if (validatedData.slug !== undefined) updateData.slug = validatedData.slug;
-    if (validatedData.status !== undefined)
-      updateData.status = validatedData.status;
-    if (validatedData.isFeatured !== undefined)
-      updateData.isFeatured = validatedData.isFeatured;
-    if (validatedData.sortOrder !== undefined)
-      updateData.sortOrder = validatedData.sortOrder;
-    if (validatedData.originCountry !== undefined)
-      updateData.originCountry = validatedData.originCountry;
-    if (validatedData.hsCode !== undefined)
-      updateData.hsCode = validatedData.hsCode;
-    if (validatedData.shippingOriginId !== undefined)
-      updateData.shippingOriginId = validatedData.shippingOriginId || null;
-    if (validatedData.exportExplanation !== undefined)
-      updateData.exportExplanation = validatedData.exportExplanation;
-    if (validatedData.incoterm !== undefined)
-      updateData.incoterm = validatedData.incoterm;
+    if (finalData.slug !== undefined) updateData.slug = finalData.slug;
+    if (finalData.status !== undefined) updateData.status = finalData.status;
+    if (finalData.isFeatured !== undefined)
+      updateData.isFeatured = finalData.isFeatured;
+    if (finalData.sortOrder !== undefined)
+      updateData.sortOrder = finalData.sortOrder;
+    if (finalData.originCountry !== undefined)
+      updateData.originCountry = finalData.originCountry;
+    if (finalData.hsCode !== undefined) updateData.hsCode = finalData.hsCode;
+    if (finalData.shippingOriginId !== undefined)
+      updateData.shippingOriginId = finalData.shippingOriginId || null;
+    if (finalData.exportExplanation !== undefined)
+      updateData.exportExplanation = finalData.exportExplanation;
+    if (finalData.incoterm !== undefined)
+      updateData.incoterm = finalData.incoterm;
+    if (finalData.weight !== undefined) updateData.weight = finalData.weight;
+    if (finalData.dimensions !== undefined)
+      updateData.dimensions = finalData.dimensions;
 
     // Handle translations update
-    if (validatedData.translations && validatedData.translations.length > 0) {
-      updateData.translations = validatedData.translations.map(t => ({
+    if (finalData.translations && finalData.translations.length > 0) {
+      updateData.translations = finalData.translations.map((t: any) => ({
         language: t.language,
         name: t.name,
         description: t.description || null,

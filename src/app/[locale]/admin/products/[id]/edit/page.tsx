@@ -57,6 +57,12 @@ interface Variant {
       translations: { language: string; displayName: string }[];
     };
   }[];
+  weight?: number; // kg
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  };
 }
 
 interface Product {
@@ -65,6 +71,17 @@ interface Product {
   status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   isFeatured: boolean;
   sortOrder: number;
+  originCountry?: string | null;
+  hsCode?: string | null;
+  shippingOriginId?: string | null;
+  exportExplanation?: string | null;
+  incoterm?: string | null;
+  weight?: string | null; // using string for easier form handling, converted on submit
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  } | null;
   translations: Translation[];
 }
 
@@ -75,6 +92,10 @@ interface NewVariant {
   priceCAD: string;
   priceUSD: string;
   stock: string;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
 }
 
 interface SortableMediaItemProps {
@@ -165,6 +186,10 @@ export default function EditProductPage({
     shippingOriginId: '',
     exportExplanation: '',
     incoterm: '',
+    weight: '',
+    length: '',
+    width: '',
+    height: '',
   });
 
   const [enTranslation, setEnTranslation] = useState({
@@ -243,6 +268,16 @@ export default function EditProductPage({
         shippingOriginId: productData.shippingOriginId || '',
         exportExplanation: productData.exportExplanation || '',
         incoterm: productData.incoterm || '',
+        weight: productData.weight ? String(productData.weight) : '',
+        length: productData.dimensions?.length
+          ? String(productData.dimensions.length)
+          : '',
+        width: productData.dimensions?.width
+          ? String(productData.dimensions.width)
+          : '',
+        height: productData.dimensions?.height
+          ? String(productData.dimensions.height)
+          : '',
       });
 
       const enTrans = productData.translations.find(
@@ -486,6 +521,12 @@ export default function EditProductPage({
             shortDescription: frTranslation.shortDescription || null,
           },
         ],
+        weight: formData.weight ? parseFloat(formData.weight) : null,
+        dimensions: {
+          length: formData.length ? parseFloat(formData.length) : null,
+          width: formData.width ? parseFloat(formData.width) : null,
+          height: formData.height ? parseFloat(formData.height) : null,
+        },
       };
 
       const response = await fetch(`/api/admin/products/${productId}`, {
@@ -519,7 +560,13 @@ export default function EditProductPage({
 
   const handleUpdateVariant = async (
     variantId: string,
-    updates: { priceCAD?: string; priceUSD?: string; stock?: number }
+    updates: {
+      priceCAD?: string;
+      priceUSD?: string;
+      stock?: number;
+      weight?: number;
+      dimensions?: { length?: number; width?: number; height?: number };
+    }
   ) => {
     if (!productId) return;
 
@@ -544,6 +591,14 @@ export default function EditProductPage({
         payload.inventory = {
           stock: updates.stock,
         };
+      }
+
+      if (updates.weight !== undefined) {
+        payload.weight = updates.weight;
+      }
+
+      if (updates.dimensions !== undefined) {
+        payload.dimensions = updates.dimensions;
       }
 
       const response = await fetch(
@@ -609,13 +664,26 @@ export default function EditProductPage({
       priceCAD: '',
       priceUSD: '',
       stock: '0',
+      weight: '',
+      length: '',
+      width: '',
+      height: '',
     };
     setNewVariants([...newVariants, newVariant]);
   };
 
   const handleNewVariantChange = (
     id: string,
-    field: 'nameEN' | 'nameFR' | 'priceCAD' | 'priceUSD' | 'stock',
+    field:
+      | 'nameEN'
+      | 'nameFR'
+      | 'priceCAD'
+      | 'priceUSD'
+      | 'stock'
+      | 'weight'
+      | 'length'
+      | 'width'
+      | 'height',
     value: string
   ) => {
     setNewVariants(
@@ -638,6 +706,10 @@ export default function EditProductPage({
           priceCAD: v.priceCAD ? parseFloat(v.priceCAD) : null,
           priceUSD: v.priceUSD ? parseFloat(v.priceUSD) : null,
           stock: parseInt(v.stock) || 0,
+          weight: v.weight ? parseFloat(v.weight) : null,
+          length: v.length ? parseFloat(v.length) : null,
+          width: v.width ? parseFloat(v.width) : null,
+          height: v.height ? parseFloat(v.height) : null,
         })),
       };
 
@@ -1009,6 +1081,65 @@ export default function EditProductPage({
                 <p className="mt-1 text-xs text-gray-500">
                   Force specific Incoterm for this product.
                 </p>
+              </div>
+
+              {/* Weight & Dimensions */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Weight (kg)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={formData.weight}
+                    onChange={e =>
+                      setFormData({ ...formData, weight: e.target.value })
+                    }
+                    placeholder="0.0"
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Dimensions (L x W x H cm)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={formData.length}
+                      onChange={e =>
+                        setFormData({ ...formData, length: e.target.value })
+                      }
+                      placeholder="L"
+                      title="Length (cm)"
+                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    />
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={formData.width}
+                      onChange={e =>
+                        setFormData({ ...formData, width: e.target.value })
+                      }
+                      placeholder="W"
+                      title="Width (cm)"
+                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    />
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={formData.height}
+                      onChange={e =>
+                        setFormData({ ...formData, height: e.target.value })
+                      }
+                      placeholder="H"
+                      title="Height (cm)"
+                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
