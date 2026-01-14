@@ -2,7 +2,7 @@
 
 Ce document décrit l'architecture et le flux technique mis en œuvre pour l'envoi des emails de confirmation de commande via **Resend**.
 
-## Architecture du Flux
+## Flux 1 : Confirmation de Commande
 
 Le déclencheur de l'envoi d'email est la **confirmation du paiement via Stripe**.
 
@@ -24,14 +24,34 @@ Le déclencheur de l'envoi d'email est la **confirmation du paiement via Stripe*
     *   Compile le template React-Email.
     *   Envoie via l'API Resend.
 
+## Flux 2 : Notification d'Expédition (Shipping)
+
+Le déclencheur est une **action manuelle** dans le panneau d'administration.
+
+1.  **Admin (`/admin/orders/[id]`)**
+    *   L'administrateur change le statut de la commande à `SHIPPED`.
+    *   L'API (`/api/admin/orders/[id]/status`) délègue la mise à jour au service centralisé.
+
+2.  **Service Commande (`order.service.ts`)**
+    *   La fonction `updateOrderStatus` détecte le passage au statut `SHIPPED`.
+    *   Elle récupère les informations de suivi (`trackingCode`) depuis la relation `Shipments`.
+    *   Elle envoie l'email "Votre commande est en route" via Resend.
+
 ## Fichiers Clés
 
 | Rôle | Fichier | Description |
 | :--- | :--- | :--- |
 | **Configuration** | `src/lib/resend.ts` | Initialisation du client Resend. |
-| **Service** | `src/lib/services/order.service.ts` | Logique métier : décision d'envoi et appel API Resend. |
-| **Template** | `src/components/emails/order-confirmation.tsx` | Design et contenu HTML de l'email (React Email). |
-| **Script Test** | `scripts/test-resend.ts` | Script autonome pour valider la clé API et l'envoi (hors flux commande). |
+| **Service** | `src/lib/services/order.service.ts` | Logique centrale : gère la création (confirmation) et la mise à jour (expédition). |
+| **Template 1** | `src/components/emails/order-confirmation.tsx` | Email "Merci pour votre commande" (Envoyé après paiement). |
+| **Template 2** | `src/components/emails/order-shipped.tsx` | Email "Votre commande est en route" (Envoyé après expédition). |
+
+## Internationalisation (i18n) & Multi-Devises
+
+Le système s'adapte automatiquement sans configuration complexe :
+
+*   **Langue (FR/EN)** : Basée sur la langue de l'utilisateur lors de l'achat (prop `locale`).
+*   **Devise & Région** : Le format des prix (ex: `$10.00` vs `10,00 $`) est déduit automatiquement de la devise de la commande (`CAD` -> Format Canadien, `USD` -> Format US).
 
 ## Variables d'Environnement
 

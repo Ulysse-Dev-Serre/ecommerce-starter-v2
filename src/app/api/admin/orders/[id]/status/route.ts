@@ -138,26 +138,15 @@ async function handler(
       );
     }
 
-    // Mettre à jour le statut et créer l'historique
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: newStatus,
-        statusHistory: {
-          create: {
-            status: newStatus,
-            comment,
-            createdBy: authContext.userId,
-          },
-        },
-      },
-      include: {
-        statusHistory: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
-      },
-    });
+    // Mettre à jour le statut via le service (qui gère l'envoi d'email pour SHIPPED)
+    const { updateOrderStatus } = await import('@/lib/services/order.service');
+
+    const updatedOrder = await updateOrderStatus(
+      orderId,
+      newStatus,
+      comment,
+      authContext.userId
+    );
 
     logger.info(
       {

@@ -156,8 +156,12 @@ export async function createOrderFromCart({
             price: item.unitPrice.toString(),
             currency: item.currency,
           })),
+          subtotal: subtotalAmount.toString(),
+          shippingCost: shippingAmount.toString(),
+          taxCost: taxAmount.toString(),
           totalAmount: totalAmount.toString(),
           currency: cart.currency,
+          locale: 'fr', // TODO: Récupérer la langue préférée de l'utilisateur (via User ou Cart)
           shippingAddress: {
             street: shippingAddress?.street1
               ? shippingAddress.street1 +
@@ -339,10 +343,10 @@ export async function updateOrderStatus(
   const order = await prisma.order.update({
     where: { id: orderId },
     data: {
-      status,
+      status: status as OrderStatus,
       statusHistory: {
         create: {
-          status,
+          status: status as OrderStatus,
           comment,
           createdBy: userId,
         },
@@ -353,6 +357,9 @@ export async function updateOrderStatus(
         orderBy: { createdAt: 'desc' },
         take: 1,
       },
+      shipments: true, // Pour le tracking
+      payments: true, // Pour l'email (si dispo ici)
+      user: true, // Pour l'email utilisateur
     },
   });
 
@@ -364,6 +371,75 @@ export async function updateOrderStatus(
     },
     'Order status updated'
   );
+
+  // --- ENVOI EMAIL EXPEDITION ---
+  if (status === OrderStatus.SHIPPED) {
+    try {
+      // 1. Trouver l'email (User ou Payment Receipt)
+      // Priorité : Email du compte User > Email du paiement Stripe
+      let recipientEmail = order.user?.email;
+
+      if (!recipientEmail && order.payments.length > 0) {
+        // Fallback sur l'email du premier paiement (Stripe)
+        const paymentMetadata = order.payments[0].transactionData as any;
+        recipientEmail =
+          paymentMetadata?.receipt_email || paymentMetadata?.email;
+      }
+
+      // 2. Récupérer information de suivi (Premier shipment valide)
+      const shipment = order.shipments[0]; // On prend le dernier ou premier ?
+      // Normalement on crée le shipment AVANT de passer en Shipped.
+
+      if (recipientEmail && shipment && shipment.trackingCode) {
+        const { OrderShippedEmail } = await import(
+          '../../components/emails/order-shipped'
+        );
+
+        const shippingAddr = order.shippingAddress as any;
+
+        const emailHtml = await render(
+          OrderShippedEmail({
+            orderId: order.orderNumber,
+            customerName:
+              order.user?.firstName || shippingAddr?.firstName || 'Client',
+            trackingNumber: shipment.trackingCode,
+            trackingUrl:
+              shipment.trackingUrl ||
+              `https://parcelsapp.com/en/tracking/${shipment.trackingCode}`,
+            carrierName: shipment.carrier || 'Transporteur',
+            shippingAddress: {
+              street: shippingAddr?.street1 || shippingAddr?.street || '',
+              city: shippingAddr?.city || '',
+              state: shippingAddr?.state || '',
+              postalCode: shippingAddr?.postalCode || '',
+              country: shippingAddr?.country || '',
+            },
+            locale: 'fr', // TODO: Récupérer locale depuis Order (quand champ ajouté)
+          })
+        );
+
+        const { data, error } = await resend.emails.send({
+          from: FROM_EMAIL,
+          to: recipientEmail,
+          subject: `Votre commande ${order.orderNumber} est en route !`,
+          html: emailHtml,
+        });
+
+        if (error) {
+          logger.error({ error, orderId }, 'Failed to send shipped email');
+        } else {
+          logger.info({ emailId: data?.id }, 'Shipped email sent successfully');
+        }
+      } else {
+        logger.warn(
+          { orderId, hasEmail: !!recipientEmail, hasShipment: !!shipment },
+          'Skipping shipped email: Missing email or shipment info'
+        );
+      }
+    } catch (err: any) {
+      logger.error({ err }, 'Error in shipped email flow');
+    }
+  }
 
   return order;
 }
