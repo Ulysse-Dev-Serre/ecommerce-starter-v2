@@ -465,6 +465,12 @@ export interface CreateProductData {
   hsCode?: string;
   exportExplanation?: string;
   incoterm?: string;
+  weight?: number;
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  };
   translations?: {
     language: Language;
     name: string;
@@ -485,6 +491,12 @@ export interface UpdateProductData {
   shippingOriginId?: string | null;
   exportExplanation?: string | null;
   incoterm?: string | null;
+  weight?: number | null;
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  } | null;
   translations?: {
     language: Language;
     name: string;
@@ -557,6 +569,13 @@ export async function createProduct(
       hsCode: productData.hsCode,
       exportExplanation: productData.exportExplanation,
       incoterm: productData.incoterm,
+      weight:
+        productData.weight != null
+          ? new Prisma.Decimal(productData.weight)
+          : undefined,
+      dimensions: productData.dimensions
+        ? (productData.dimensions as any)
+        : undefined,
       translations: productData.translations
         ? {
             create: productData.translations,
@@ -587,13 +606,25 @@ export async function updateProduct(
   id: string,
   productData: UpdateProductData
 ): Promise<ProductWithTranslations> {
-  const { translations, ...productFields } = productData;
+  const { translations, weight, dimensions, ...productFields } = productData;
+
+  const dataToUpdate: any = {
+    ...productFields,
+    updatedAt: new Date(),
+  };
+
+  if (weight !== undefined) {
+    dataToUpdate.weight = weight != null ? new Prisma.Decimal(weight) : null;
+  }
+
+  if (dimensions !== undefined) {
+    dataToUpdate.dimensions = dimensions != null ? (dimensions as any) : null;
+  }
 
   const updatedProduct = await prisma.product.update({
     where: { id },
     data: {
-      ...productFields,
-      updatedAt: new Date(),
+      ...dataToUpdate,
       ...(translations && {
         translations: {
           upsert: translations.map(t => ({

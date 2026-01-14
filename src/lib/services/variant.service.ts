@@ -12,6 +12,10 @@ export interface SimpleVariantData {
   priceCAD?: number | null;
   priceUSD?: number | null;
   stock: number;
+  weight?: number | null;
+  length?: number | null;
+  width?: number | null;
+  height?: number | null;
 }
 
 const GENERIC_ATTRIBUTE_KEY = 'variant_type';
@@ -329,6 +333,18 @@ export async function createSimpleVariants(
       data: {
         productId,
         sku,
+        weight:
+          variantData.weight != null
+            ? new Prisma.Decimal(variantData.weight)
+            : undefined,
+        dimensions:
+          variantData.length || variantData.width || variantData.height
+            ? {
+                length: variantData.length || 0,
+                width: variantData.width || 0,
+                height: variantData.height || 0,
+              }
+            : undefined,
         attributeValues: {
           create: {
             attributeValueId: attributeValue.id,
