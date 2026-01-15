@@ -52,6 +52,7 @@
     "stripe": "^19.3.0",
     "svix": "^1.76.1",
     "tsx": "^4.20.5",
+    "vanilla-cookieconsent": "^3.1.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {

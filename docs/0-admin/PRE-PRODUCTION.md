@@ -149,7 +149,31 @@ Modifier les variables CSS dans `src/app/globals.css` :
 
 Voir: [Guide des thèmes](../8-frontend/theming.md)
 
-### 7. Configurer le domaine et CORS
+### 7. Configurer Analytics & Marketing (GTM/GA4)
+
+Pour avoir des statistiques de vente et lancer des publicités (Facebook/Google Ads) :
+
+1.  **Créer un compte Google Tag Manager (GTM)** :
+    *   Aller sur [tagmanager.google.com](https://tagmanager.google.com)
+    *   Créer un conteneur **Web**
+    *   Récupérer l'ID `GTM-XXXXXX`
+    *   Mettre à jour `.env` :
+    ```env
+    NEXT_PUBLIC_GTM_ID=GTM-XXXXXX
+    ```
+
+2.  **Créer un compte Google Analytics 4 (GA4)** :
+    *   Aller sur [analytics.google.com](https://analytics.google.com)
+    *   Créer une propriété (Devise: celle du site, Fuseau horaire: celui du site)
+    *   Récupérer le **Measurement ID** (`G-XXXXXX`)
+
+3.  **Lier les deux (Configuration One-Shot)** :
+    *   Dans GTM > Balises > Nouvelle > **Google Analytics: Google Tag**
+    *   Coller l'ID GA4 (`G-XXXXXX`)
+    *   Déclencheur : **Initialization - All Pages**
+    *   Publier le conteneur
+
+### 8. Configurer le domaine et CORS
 
 ```env
 NEXT_PUBLIC_APP_URL=https://ma-boutique.com
