@@ -213,6 +213,46 @@ export async function createOrderFromCart({
     );
   }
 
+  // --- ENVOI NOTIFICATION ADMIN ---
+  if (process.env.ADMIN_EMAIL) {
+    try {
+      const { AdminNewOrderEmail } = await import(
+        '../../components/emails/admin-new-order'
+      );
+
+      const siteUrl =
+        process.env.NEXT_PUBLIC_SITE_URL || 'https://agtechnest.com';
+
+      const adminHtml = await render(
+        AdminNewOrderEmail({
+          orderId: order.orderNumber,
+          internalOrderId: order.id,
+          customerName: shippingAddress?.firstName
+            ? `${shippingAddress.firstName} ${shippingAddress.lastName || ''}`
+            : 'Client',
+          totalAmount: totalAmount.toString(),
+          currency: cart.currency,
+          itemsCount: calculation.items.length,
+          siteUrl,
+        })
+      );
+
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: process.env.ADMIN_EMAIL,
+        subject: `💰 Nouvelle commande : ${totalAmount} ${cart.currency} (${order.orderNumber})`,
+        html: adminHtml,
+      });
+
+      logger.info({}, 'Admin notification email sent');
+    } catch (adminEmailError) {
+      logger.error(
+        { error: adminEmailError },
+        'Failed to send admin notification'
+      );
+    }
+  }
+
   return order;
 }
 
@@ -403,9 +443,7 @@ export async function updateOrderStatus(
             customerName:
               order.user?.firstName || shippingAddr?.firstName || 'Client',
             trackingNumber: shipment.trackingCode,
-            trackingUrl:
-              shipment.trackingUrl ||
-              `https://parcelsapp.com/en/tracking/${shipment.trackingCode}`,
+            trackingUrl: `https://parcelsapp.com/en/tracking/${shipment.trackingCode}`,
             carrierName: shipment.carrier || 'Transporteur',
             shippingAddress: {
               street: shippingAddr?.street1 || shippingAddr?.street || '',
@@ -438,6 +476,54 @@ export async function updateOrderStatus(
       }
     } catch (err: any) {
       logger.error({ err }, 'Error in shipped email flow');
+    }
+  } else if (
+    status === OrderStatus.REFUNDED ||
+    status === OrderStatus.CANCELLED
+  ) {
+    // --- ENVOI EMAIL REMBOURSEMENT ---
+    try {
+      let recipientEmail = order.user?.email;
+
+      if (!recipientEmail && order.payments.length > 0) {
+        const paymentMetadata = order.payments[0].transactionData as any;
+        recipientEmail =
+          paymentMetadata?.receipt_email || paymentMetadata?.email;
+      }
+
+      if (recipientEmail) {
+        const { OrderRefundedEmail } = await import(
+          '../../components/emails/order-refunded'
+        );
+
+        const shippingAddr = order.shippingAddress as any;
+
+        const emailHtml = await render(
+          OrderRefundedEmail({
+            orderId: order.orderNumber,
+            customerName:
+              order.user?.firstName || shippingAddr?.firstName || 'Client',
+            amountRefunded: order.totalAmount.toString(),
+            currency: order.currency,
+            locale: 'fr',
+          })
+        );
+
+        const { data, error } = await resend.emails.send({
+          from: FROM_EMAIL,
+          to: recipientEmail,
+          subject: `Remboursement commande ${order.orderNumber}`,
+          html: emailHtml,
+        });
+
+        if (error) {
+          logger.error({ error, orderId }, 'Failed to send refund email');
+        } else {
+          logger.info({ emailId: data?.id }, 'Refund email sent successfully');
+        }
+      }
+    } catch (err: any) {
+      logger.error({ err }, 'Error in refund email flow');
     }
   }
 

@@ -37,14 +37,26 @@ Le déclencheur est une **action manuelle** dans le panneau d'administration.
     *   Elle récupère les informations de suivi (`trackingCode`) depuis la relation `Shipments`.
     *   Elle envoie l'email "Votre commande est en route" via Resend.
 
+## Flux 3 : Remboursement (Refund)
+
+*   **Déclencheur** : Changement de statut à `REFUNDED` ou `CANCELLED` dans l'admin.
+*   **Action** : Envoi automatique de l'email "Remboursement effectué" au client.
+
+## Flux 4 : Notification Admin (Nouvelle Commande)
+
+*   **Déclencheur** : Création d'une nouvelle commande (après paiement réussi).
+*   **Action** : Envoi d'une alerte "💰 Nouvelle Commande" à l'email défini dans `ADMIN_EMAIL`.
+
 ## Fichiers Clés
 
 | Rôle | Fichier | Description |
 | :--- | :--- | :--- |
 | **Configuration** | `src/lib/resend.ts` | Initialisation du client Resend. |
 | **Service** | `src/lib/services/order.service.ts` | Logique centrale : gère la création (confirmation) et la mise à jour (expédition). |
-| **Template 1** | `src/components/emails/order-confirmation.tsx` | Email "Merci pour votre commande" (Envoyé après paiement). |
-| **Template 2** | `src/components/emails/order-shipped.tsx` | Email "Votre commande est en route" (Envoyé après expédition). |
+| **Template Client** | `src/components/emails/order-confirmation.tsx` | Email "Merci pour votre commande" (Après paiement). |
+| **Template Client** | `src/components/emails/order-shipped.tsx` | Email "Votre commande est en route" (Après expédition). |
+| **Template Client** | `src/components/emails/order-refunded.tsx` | Email "Remboursement effectué" (Après remboursement). |
+| **Template Admin** | `src/components/emails/admin-new-order.tsx` | Notification interne pour l'administrateur. |
 
 ## Internationalisation (i18n) & Multi-Devises
 
@@ -57,3 +69,4 @@ Le système s'adapte automatiquement sans configuration complexe :
 
 *   `RESEND_API_KEY` : Clé secrète de l'API Resend.
 *   `FROM_EMAIL` : Adresse expéditeur (Doit être un domaine vérifié ou `onboarding@resend.dev` en test).
+*   `ADMIN_EMAIL` : (Optionnel) Email recevant les notifications de nouvelles commandes.
