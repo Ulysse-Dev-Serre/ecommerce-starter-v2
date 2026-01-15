@@ -16,7 +16,7 @@ interface StatusActionsProps {
 const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
   [OrderStatus.PAID]: [OrderStatus.SHIPPED, OrderStatus.REFUNDED],
-  [OrderStatus.SHIPPED]: [], // La livraison est gérée automatiquement par l'API (Webhook)
+  [OrderStatus.SHIPPED]: [OrderStatus.REFUNDED], // La livraison (DELIVERED) est auto, mais Remboursement manuel possible
   [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
   [OrderStatus.CANCELLED]: [],
   [OrderStatus.REFUNDED]: [],
@@ -28,7 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
   [OrderStatus.SHIPPED]: 'Expédiée',
   [OrderStatus.DELIVERED]: 'Livrée',
   [OrderStatus.CANCELLED]: 'Annulée',
-  [OrderStatus.REFUNDED]: 'Remboursée',
+  [OrderStatus.REFUNDED]: 'Initier Remboursement',
 };
 
 export function StatusActions({
