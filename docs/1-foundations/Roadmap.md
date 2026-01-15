@@ -42,8 +42,8 @@
 **Objectif :** Rendre le site opérationnel pour une vraie vente et une vraie livraison (MVP Launch).
 
 **Issues à faire :**
-- [] **Issue 24** : Intégration Shippo (Calcul & Labels)
-- [ ] **Issue 25** : Emails Transactionnels (Resend/React-Email)
+- [x] **Issue 24** : Intégration Shippo (Calcul & Labels)
+- [x] **Issue 25** : Emails Transactionnels (Resend/React-Email)
 - [ ] **Issue 26** : Marketing Pixels (GA4, FB, TikTok) & Cookie Consent
 - [ ] **Issue 27** : Pages Légales & Contenu Statique
 - [ ] **Issue 28** : Stripe Tax Configuration

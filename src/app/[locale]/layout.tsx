@@ -10,6 +10,8 @@ import { ToastProvider } from '../../components/ui/toast-provider';
 import { CartMergeHandler } from '../../components/cart/cart-merge-handler';
 import { prisma } from '@/lib/db/prisma';
 import '../globals.css';
+import GoogleTagManager from '../../components/analytics/GoogleTagManager';
+import CookieConsentComponent from '../../components/analytics/CookieConsent';
 
 // Disable static generation (requires DB & Auth)
 export const dynamic = 'force-dynamic';
@@ -60,6 +62,8 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         >
+          <GoogleTagManager />
+          <CookieConsentComponent />
           <ToastProvider>
             {children}
             <ConditionalFooter />
@@ -92,6 +96,8 @@ export default async function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         >
+          <GoogleTagManager />
+          <CookieConsentComponent />
           <ToastProvider>
             <CartMergeHandler />
             <Navbar locale={locale} userRole={userRole} />
