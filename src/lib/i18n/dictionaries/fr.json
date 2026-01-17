@@ -20,6 +20,21 @@
     "contact": "Contact",
     "backToSite": "Retour au site"
   },
+  "error": {
+    "notFound": {
+      "title": "Page non trouvée",
+      "subtitle": "404",
+      "description": "La page que vous cherchez n'existe pas ou a été déplacée.",
+      "backHome": "Retour à l'accueil"
+    },
+    "serverError": {
+      "title": "Une erreur est survenue",
+      "subtitle": "500",
+      "description": "Désolé, quelque chose s'est mal passé. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "backHome": "Retour à l'accueil"
+    }
+  },
   "auth": {
     "signedInAs": "Connecté en tant que",
     "userProfile": "Profil utilisateur",
@@ -105,7 +120,6 @@
       "active": "Actif",
       "inactive": "Inactif",
       "archived": "Archivé",
-      "variants": "Variantes",
       "variantsOptional": "Variantes (Optionnel)",
       "variantsConfiguration": "Configuration des variantes",
       "selectAttributesHelp": "Sélectionnez 2 attributs pour générer toutes les combinaisons de variantes. Laissez vide pour créer un produit sans variantes.",
@@ -193,5 +207,28 @@
     "country": "Pays",
     "selectState": "Sélectionner...",
     "statePlaceholder": "Province / État"
+  },
+  "footer": {
+    "about": "À propos",
+    "legal": "Mentions Légales",
+    "privacy": "Politique de Confidentialité",
+    "terms": "Conditions d'Utilisation",
+    "refund": "Politique de Remboursement",
+    "copyright": "© {year} {storeName}. Tous droits réservés."
+  },
+  "legal": {
+    "lastUpdated": "Dernière mise à jour : {date}",
+    "privacyPolicy": {
+      "title": "Politique de Confidentialité",
+      "content": "Ceci est un exemple de politique de confidentialité. En tant que template, vous devez adapter ce contenu aux lois applicables (Loi 25 au Québec, RGPD en Europe, etc.)."
+    },
+    "termsOfService": {
+      "title": "Conditions d'Utilisation",
+      "content": "Ceci est un exemple de conditions d'utilisation. Veuillez consulter un conseiller juridique pour rédiger vos propres conditions."
+    },
+    "refundPolicy": {
+      "title": "Politique de Remboursement",
+      "content": "Ceci est un exemple de politique de remboursement. Définissez clairement vos règles de retour, d'échange et de remboursement ici."
+    }
   }
 }

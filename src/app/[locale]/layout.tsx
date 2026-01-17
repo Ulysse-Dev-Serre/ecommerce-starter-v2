@@ -66,7 +66,7 @@ export default async function RootLayout({
           <CookieConsentComponent />
           <ToastProvider>
             {children}
-            <ConditionalFooter />
+            <ConditionalFooter locale={locale} />
           </ToastProvider>
         </body>
       </html>
@@ -102,7 +102,7 @@ export default async function RootLayout({
             <CartMergeHandler />
             <Navbar locale={locale} userRole={userRole} />
             {children}
-            <ConditionalFooter />
+            <ConditionalFooter locale={locale} />
           </ToastProvider>
         </body>
       </html>

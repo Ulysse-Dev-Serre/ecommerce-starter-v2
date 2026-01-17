@@ -116,10 +116,39 @@ async function updateIntentHandler(
       'DEBUG: STRIPE UPDATE PAYLOAD'
     );
 
-    const updatedIntent = await stripe.paymentIntents.update(
-      paymentIntentId,
-      updatePayload
-    );
+    // 3. Update the payment intent
+    // We try to enable automatic_tax if configured. If it fails (e.g. registration missing in sandbox),
+    // we fallback to updating without automatic_tax so we don't block the user.
+
+    let updatedIntent;
+
+    if (process.env.STRIPE_AUTOMATIC_TAX === 'true') {
+      try {
+        // Try with tax enabled
+        updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
+          ...updatePayload,
+          automatic_tax: { enabled: true },
+        });
+      } catch (taxError: any) {
+        // If error is specifically about unknown parameter (sandbox issue) or tax config
+        logger.warn(
+          { error: taxError.message },
+          'Stripe Tax activation failed (likely missing Sandbox config). Fallback to standard update.'
+        );
+
+        // Fallback: update without automatic_tax
+        updatedIntent = await stripe.paymentIntents.update(
+          paymentIntentId,
+          updatePayload
+        );
+      }
+    } else {
+      // Standard update without tax
+      updatedIntent = await stripe.paymentIntents.update(
+        paymentIntentId,
+        updatePayload
+      );
+    }
 
     // LOG 3: RÉPONSE DE STRIPE
     logger.info(

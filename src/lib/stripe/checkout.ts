@@ -126,8 +126,8 @@ export async function createCheckoutSession({
     cancel_url: cancelUrl,
     // Activer Stripe Tax pour calcul automatique des taxes (si configuré)
     ...(enableAutomaticTax && { automatic_tax: { enabled: true } }),
-    // Collecter l'adresse pour le calcul des taxes
-    billing_address_collection: enableAutomaticTax ? 'required' : 'auto',
+    // Collecter l'adresse pour le calcul des taxes (remis à auto pour éviter le warning en dev)
+    billing_address_collection: 'auto',
     metadata: {
       userId: userId || '',
       cartId: cartId || '',
@@ -262,9 +262,10 @@ export async function createPaymentIntent({
       subtotal: amountInCents.toString(), // CRUCIAL pour l'update du shipping
     },
     // Activer Stripe Tax si configuré
-    ...(process.env.STRIPE_AUTOMATIC_TAX === 'true' && {
-      automatic_tax: { enabled: true },
-    }),
+    // automatic_tax will be enabled in update-intent when we have the address
+    // ...(process.env.STRIPE_AUTOMATIC_TAX === 'true' && {
+    //   automatic_tax: { enabled: true },
+    // }),
   });
 
   return paymentIntent;
