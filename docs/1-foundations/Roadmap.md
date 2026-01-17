@@ -39,15 +39,15 @@
 
 ## 🚀 P2 – Launch Readiness (Logistics & Legal) — CRITIQUE
 
-**Objectif :** Rendre le site opérationnel pour une vraie vente et une vraie livraison (MVP Launch).
+**Objectif :** Rendre le site opérationnel pour une vraDeveloper: Reload Windowie vente et une vraie livraison (MVP Launch).
 
 **Issues à faire :**
 - [x] **Issue 24** : Intégration Shippo (Calcul & Labels)
 - [x] **Issue 25** : Emails Transactionnels (Resend/React-Email)
-- [ ] **Issue 26** : Marketing Pixels (GA4, FB, TikTok) & Cookie Consent
-- [ ] **Issue 27** : Pages Légales & Contenu Statique
-- [ ] **Issue 28** : Stripe Tax Configuration
-- [ ] **Issue 29** : Pages d'erreur Custom (404/500)
+- [x] **Issue 26** : Marketing Pixels (GA4, FB, TikTok) & Cookie Consent
+- [x] **Issue 27** : Pages Légales & Contenu Statique
+- [ ] **Issue 28** : Stripe Tax Configuration (Voir [Documentation & Limitation](../9-payment-system/stripe-tax-configuration.md)) 
+- [x] **Issue 29** : Pages d'erreur Custom (404/500)
 - [ ] **Issue 30** : Premier Déploiement Vercel (Production)
 - [ ] **Issue 31** : Gestion des retours et remboursements
 

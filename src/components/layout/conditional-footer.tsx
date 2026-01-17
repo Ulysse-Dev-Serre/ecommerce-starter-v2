@@ -4,12 +4,18 @@ import { usePathname } from 'next/navigation';
 
 import { Footer } from './footer';
 
-export function ConditionalFooter(): React.JSX.Element | null {
+interface ConditionalFooterProps {
+  locale?: string;
+}
+
+export function ConditionalFooter({
+  locale,
+}: ConditionalFooterProps): React.JSX.Element | null {
   const pathname = usePathname();
 
   if (pathname?.includes('/admin')) {
     return null;
   }
 
-  return <Footer />;
+  return <Footer locale={locale} />;
 }

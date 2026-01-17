@@ -20,6 +20,21 @@
     "contact": "Contact",
     "backToSite": "Back to site"
   },
+  "error": {
+    "notFound": {
+      "title": "Page not found",
+      "subtitle": "404",
+      "description": "The page you are looking for does not exist or has been moved.",
+      "backHome": "Back to home"
+    },
+    "serverError": {
+      "title": "Something went wrong",
+      "subtitle": "500",
+      "description": "Sorry, something went wrong. Please try again.",
+      "retry": "Try again",
+      "backHome": "Back to home"
+    }
+  },
   "auth": {
     "signedInAs": "Signed in as",
     "userProfile": "User profile",
@@ -105,7 +120,6 @@
       "active": "Active",
       "inactive": "Inactive",
       "archived": "Archived",
-      "variants": "Variants",
       "variantsOptional": "Variants (Optional)",
       "variantsConfiguration": "Variants Configuration",
       "selectAttributesHelp": "Select 2 attributes to generate all variant combinations. Leave empty to create a product without variants.",
@@ -193,5 +207,28 @@
     "country": "Country",
     "selectState": "Select...",
     "statePlaceholder": "State / Province"
+  },
+  "footer": {
+    "about": "About",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "refund": "Refund Policy",
+    "copyright": "© {year} {storeName}. All rights reserved."
+  },
+  "legal": {
+    "lastUpdated": "Last updated: {date}",
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "content": "This is a sample privacy policy. As a template, you should adapt this content to applicable laws (Bill 25 in Quebec, GDPR in Europe, etc.)."
+    },
+    "termsOfService": {
+      "title": "Terms of Service",
+      "content": "This is a sample terms of service. Please consult a legal advisor to draft your own terms."
+    },
+    "refundPolicy": {
+      "title": "Refund Policy",
+      "content": "This is a sample refund policy. Clearly define your return, exchange, and refund rules here."
+    }
   }
 }
