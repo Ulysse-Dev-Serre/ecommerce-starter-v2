@@ -174,7 +174,7 @@ async function handler(
     logger.error(
       {
         error: errorMessage,
-        orderId: (await params).id,
+        orderId,
         userId: authContext.userId,
       },
       'Error updating order status'

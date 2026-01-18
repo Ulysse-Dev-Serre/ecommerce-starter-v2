@@ -86,7 +86,13 @@ async function createProductHandler(
       status: validatedData.status,
       isFeatured: validatedData.isFeatured,
       sortOrder: validatedData.sortOrder,
-      translations: validatedData.translations,
+      translations: validatedData.translations?.map(t => ({
+        ...t,
+        description: t.description ?? undefined,
+        shortDescription: t.shortDescription ?? undefined,
+        metaTitle: t.metaTitle ?? undefined,
+        metaDescription: t.metaDescription ?? undefined,
+      })),
     };
 
     const product = await createProduct(productData);

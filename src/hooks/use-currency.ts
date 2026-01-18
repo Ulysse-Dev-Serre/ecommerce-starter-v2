@@ -14,7 +14,12 @@ function getCurrencyFromEnv(): Currency {
 export function useCurrency() {
   const currency = getCurrencyFromEnv();
 
-  return { currency, isLoaded: true };
+  const setCurrency = (newCurrency: Currency) => {
+    document.cookie = `currency=${newCurrency}; path=/; max-age=31536000`; // 1 year
+    window.location.reload();
+  };
+
+  return { currency, setCurrency, isLoaded: true };
 }
 
 export interface PriceData {

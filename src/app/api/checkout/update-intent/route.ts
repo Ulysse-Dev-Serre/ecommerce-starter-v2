@@ -129,6 +129,18 @@ async function updateIntentHandler(
           ...updatePayload,
           automatic_tax: { enabled: true },
         });
+
+        // Check if Stripe silently ignored our tax request
+        if (!(updatedIntent as any).automatic_tax?.enabled) {
+          logger.warn(
+            {
+              paymentIntentId,
+              automaticTaxStatus: (updatedIntent as any).automatic_tax,
+              envVar: process.env.STRIPE_AUTOMATIC_TAX,
+            },
+            '🚨 STRIPE SILENTLY IGNORED TAX REQUEST 🚨 - Tax integration not available on this account/mode?'
+          );
+        }
       } catch (taxError: any) {
         // If error is specifically about unknown parameter (sandbox issue) or tax config
         logger.warn(

@@ -4,11 +4,13 @@ interface NotFoundProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function NotFound({ params }: NotFoundProps) {
-  const { locale } = await params;
+export default async function NotFound(props: any) {
+  const params = props?.params;
+  // Fallback to 'en' if params is undefined (common in 404s triggered outside page context)
+  const locale = params ? (await params).locale : 'en';
 
-  // Fallback to 'fr' if locale is somehow invalid, though usually handled by middleware
-  const safeLocale = ['fr', 'en'].includes(locale) ? locale : 'fr';
+  // Fallback to 'en' if locale is somehow invalid, though usually handled by middleware
+  const safeLocale = locale && ['fr', 'en'].includes(locale) ? locale : 'en';
 
   const dictionary = (
     await import(`@/lib/i18n/dictionaries/${safeLocale}.json`)

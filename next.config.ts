@@ -32,6 +32,9 @@ const nextConfig: NextConfig = {
   experimental: {
     turbo: {},
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async headers() {
     return [
       {

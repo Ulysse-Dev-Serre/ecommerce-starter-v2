@@ -100,10 +100,19 @@ export default async function CartPage({
           ...item,
           variant: {
             ...item.variant,
+            // Serialize variant Decimal & JSON fields
+            weight: item.variant.weight ? Number(item.variant.weight) : null,
             pricing: item.variant.pricing.map(p => ({
               ...p,
               price: p.price.toString(),
             })),
+            product: {
+              ...item.variant.product,
+              // Serialize product Decimal & JSON fields
+              weight: item.variant.product.weight
+                ? Number(item.variant.product.weight)
+                : null,
+            },
           },
         })),
       }

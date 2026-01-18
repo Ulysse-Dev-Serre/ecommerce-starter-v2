@@ -21,6 +21,8 @@ import {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
+  let stripeEvent: Stripe.Event | undefined;
+
   try {
     const body = await request.text();
 
@@ -55,9 +57,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    let event: Stripe.Event;
     try {
-      event = validateWebhookSignature(body, signature, webhookSecret);
+      stripeEvent = validateWebhookSignature(body, signature, webhookSecret);
     } catch (error) {
       await alertInvalidSignature({
         source: 'stripe',
@@ -74,8 +75,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     logger.info(
       {
         requestId,
-        eventId: event.id,
-        eventType: event.type,
+        eventId: stripeEvent.id,
+        eventType: stripeEvent.type,
       },
       'Webhook event received'
     );
@@ -85,14 +86,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       where: {
         source_eventId: {
           source: 'stripe',
-          eventId: event.id,
+          eventId: stripeEvent.id,
         },
       },
     });
 
     if (existingEvent?.processed) {
       logger.info(
-        { requestId, eventId: event.id },
+        { requestId, eventId: stripeEvent.id },
         'Webhook already processed, skipping'
       );
       return NextResponse.json({ received: true });
@@ -102,42 +103,42 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await prisma.webhookEvent.create({
         data: {
           source: 'stripe',
-          eventId: event.id,
-          eventType: event.type,
+          eventId: stripeEvent.id,
+          eventType: stripeEvent.type,
           payloadHash,
           processed: false,
         },
       });
     }
 
-    switch (event.type) {
+    switch (stripeEvent.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = stripeEvent.data.object as Stripe.Checkout.Session;
         await handleCheckoutSessionCompleted(session, requestId);
         break;
       }
 
       case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const paymentIntent = stripeEvent.data.object as Stripe.PaymentIntent;
         await handlePaymentIntentSucceeded(paymentIntent, requestId);
         break;
       }
 
       case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        const paymentIntent = stripeEvent.data.object as Stripe.PaymentIntent;
         await handlePaymentIntentFailed(paymentIntent, requestId);
         break;
       }
 
       case 'checkout.session.expired': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = stripeEvent.data.object as Stripe.Checkout.Session;
         await handleCheckoutSessionExpired(session, requestId);
         break;
       }
 
       default:
         logger.info(
-          { requestId, eventType: event.type },
+          { requestId, eventType: stripeEvent.type },
           'Unhandled webhook event type'
         );
     }
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       where: {
         source_eventId: {
           source: 'stripe',
-          eventId: event.id,
+          eventId: stripeEvent.id,
         },
       },
       data: {
@@ -163,19 +164,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {
         requestId,
         error: errorMsg,
-        eventId: event?.id,
-        eventType: event?.type,
+        eventId: stripeEvent?.id,
+        eventType: stripeEvent?.type,
       },
       'Webhook processing failed'
     );
 
     // Update webhook event with error details if event exists
-    if (event?.id) {
+    if (stripeEvent?.id) {
       const webhookEvent = await prisma.webhookEvent.findUnique({
         where: {
           source_eventId: {
             source: 'stripe',
-            eventId: event.id,
+            eventId: stripeEvent.id,
           },
         },
       });
@@ -185,7 +186,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           where: {
             source_eventId: {
               source: 'stripe',
-              eventId: event.id,
+              eventId: stripeEvent.id,
             },
           },
           data: {
@@ -199,7 +200,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           logger.error(
             {
               requestId,
-              eventId: event.id,
+              eventId: stripeEvent.id,
               retryCount: updatedEvent.retryCount,
               maxRetries: updatedEvent.maxRetries,
             },
@@ -209,8 +210,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           await alertWebhookFailure({
             webhookId: webhookEvent.id,
             source: 'stripe',
-            eventId: event.id,
-            eventType: event.type,
+            eventId: stripeEvent.id,
+            eventType: stripeEvent.type,
             error: errorMsg,
             retryCount: updatedEvent.retryCount,
             maxRetries: updatedEvent.maxRetries,
@@ -266,7 +267,8 @@ function extractShippingAddress(
     firstName: shippingDetails.name?.split(' ')[0] || '',
     lastName: shippingDetails.name?.split(' ').slice(1).join(' ') || '',
     phone: shippingDetails.phone,
-    email: shippingDetails.email, // <--- AJOUTE : Extraction de l'email depuis Stripe
+    email:
+      'email' in shippingDetails ? (shippingDetails as any).email : undefined,
   };
 }
 
@@ -400,10 +402,10 @@ async function handlePaymentIntentSucceeded(
       paymentIntentId: paymentIntent.id,
       amount: paymentIntent.amount / 100,
       debug_receipt_email: paymentIntent.receipt_email,
-      debug_charges_count: paymentIntent.charges?.data?.length,
+      debug_charges_count: (paymentIntent as any).charges?.data?.length,
       // @ts-ignore - charges data might be expandable
-      debug_charge_email:
-        paymentIntent.charges?.data?.[0]?.billing_details?.email,
+      debug_charge_email: (paymentIntent as any).charges?.data?.[0]
+        ?.billing_details?.email,
     },
     'Payment intent succeeded'
   );

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/logger';
 import { withError } from '@/lib/middleware/withError';
-import { AuthContext, withAdminAuth } from '@/lib/middleware/withAuth';
+import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getOrderByIdAdmin } from '@/lib/services/order.service';
 
@@ -13,8 +13,8 @@ import { getOrderByIdAdmin } from '@/lib/services/order.service';
  */
 async function getOrderAdminHandler(
   request: NextRequest,
-  authContext: AuthContext,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
+  authContext: AuthContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { id: orderId } = await params;

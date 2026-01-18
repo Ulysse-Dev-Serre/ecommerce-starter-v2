@@ -39,7 +39,13 @@ export default async function ProductPage({
             include: {
               attributeValue: {
                 include: {
-                  attribute: true,
+                  attribute: {
+                    include: {
+                      translations: {
+                        where: { language },
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -70,7 +76,9 @@ export default async function ProductPage({
     })),
     stock: v.inventory?.stock || 0,
     attributes: v.attributeValues.map(av => ({
-      name: av.attributeValue.attribute.name,
+      name:
+        av.attributeValue.attribute.translations[0]?.name ||
+        av.attributeValue.attribute.key,
       value: av.attributeValue.value,
     })),
   }));

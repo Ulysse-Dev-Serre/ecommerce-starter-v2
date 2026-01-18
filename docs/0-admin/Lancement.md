@@ -37,8 +37,7 @@
 **P4 #57 : Tests unitaires**
 - ~20h mais fais-le progressivement
 
-**P2 #26-29 : i18n complet (si tu veux vraiment FR/EN)**
-- ~30h mais peut attendre 3 mois
+
 
 ---
 
