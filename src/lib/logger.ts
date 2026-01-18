@@ -27,6 +27,43 @@ interface Logger {
 }
 
 // Logger avec contrôle par environnement
+
+// Liste des clés sensibles à masquer
+const SENSITIVE_KEYS = [
+  'password',
+  'token',
+  'secret',
+  'authorization',
+  'cookie',
+  'stripe-signature',
+  // 'email', // Décommenter si on veut masquer les emails, mais utile pour debug admin
+];
+
+// Fonction récursive de nettoyage
+function redactSensitiveData(data: any): any {
+  if (!data || typeof data !== 'object') return data;
+
+  if (Array.isArray(data)) {
+    return data.map(redactSensitiveData);
+  }
+
+  const redacted = { ...data };
+
+  for (const key of Object.keys(redacted)) {
+    const lowerKey = key.toLowerCase();
+
+    // Si la clé est sensible, on masque la valeur
+    if (SENSITIVE_KEYS.some(k => lowerKey.includes(k))) {
+      redacted[key] = '[REDACTED]';
+    } else if (typeof redacted[key] === 'object' && redacted[key] !== null) {
+      // Récursion pour les objets imbriqués
+      redacted[key] = redactSensitiveData(redacted[key]);
+    }
+  }
+
+  return redacted;
+}
+
 const createLogger = (): Logger => {
   const shouldLog = (level: string): boolean => allowedLevels.includes(level);
 
@@ -37,12 +74,14 @@ const createLogger = (): Logger => {
   ): void => {
     if (!shouldLog(level)) return; // Skip si niveau pas autorisé
 
+    const safeData = redactSensitiveData(data); // <--- Nettoyage ici
+
     const logEntry = {
       timestamp: new Date().toISOString(),
       level,
       service: 'ecommerce-frontend',
       environment: currentEnv,
-      ...(typeof data === 'object' ? data : { data }),
+      ...(typeof safeData === 'object' ? safeData : { data: safeData }),
       message: message ?? data?.message ?? '',
     };
 
