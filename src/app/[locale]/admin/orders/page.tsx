@@ -8,6 +8,8 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { OrderFilters } from '@/components/admin/orders/filters';
 
+import { OrderStatus } from '@/generated/prisma';
+
 interface Order {
   id: string;
   orderNumber: string;
@@ -20,7 +22,7 @@ interface Order {
   createdAt: string;
   totalAmount: number;
   currency: string;
-  status: string;
+  status: OrderStatus;
   payments: any[];
 }
 

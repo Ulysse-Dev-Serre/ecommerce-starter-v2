@@ -7,7 +7,7 @@ async function sendSlackAlert(message: string): Promise<void> {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
-    logger.warn('SLACK_WEBHOOK_URL not configured, skipping Slack alert');
+    logger.warn({}, 'SLACK_WEBHOOK_URL not configured, skipping Slack alert');
     return;
   }
 

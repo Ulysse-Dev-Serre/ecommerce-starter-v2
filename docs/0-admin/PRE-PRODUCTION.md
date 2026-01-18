@@ -80,7 +80,6 @@ DATABASE_URL=postgresql://user:pass@host:5432/boutique_irrigation
 
 ```bash
 npm run db:push    # Créer les tables
-npm run db:seed    # Données de test (optionnel)
 ```
 
 ### 4. Configurer l'authentification (Clerk)

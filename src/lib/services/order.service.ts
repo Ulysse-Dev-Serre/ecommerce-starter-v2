@@ -4,6 +4,7 @@ import { OrderStatus } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 import { createTransaction } from './shippo';
+import { stripe } from '../../lib/stripe/client';
 import { calculateCart, type Currency } from './calculation.service';
 import { CartProjection } from './cart.service';
 import { decrementStock } from './inventory.service';
@@ -380,6 +381,46 @@ export async function updateOrderStatus(
   comment?: string,
   userId?: string
 ) {
+  // Logic to process Stripe refund before updating local status
+  if (status === 'REFUNDED') {
+    const existingOrder = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { payments: true },
+    });
+
+    if (existingOrder) {
+      const stripePayment = existingOrder.payments.find(
+        p => p.method === 'STRIPE' && p.status === 'COMPLETED'
+      );
+
+      if (stripePayment?.externalId) {
+        try {
+          // Check if the payment intent is already refunded is tricky without calling API,
+          // but calling create refund directly will handle it (throws unique error)
+          await stripe.refunds.create({
+            payment_intent: stripePayment.externalId,
+          });
+          logger.info(
+            { orderId, paymentIntent: stripePayment.externalId },
+            'Stripe refund executed successfully'
+          );
+        } catch (error: any) {
+          // If already refunded, allow the function to proceed to update local status
+          if (error.code === 'charge_already_refunded') {
+            logger.warn(
+              { orderId },
+              'Charge already refunded in Stripe, proceeding with local status update'
+            );
+          } else {
+            logger.error({ error, orderId }, 'Stripe refund failed');
+            // Block the local update if Stripe refund fails for other reasons
+            throw new Error(`Stripe refund failed: ${error.message}`);
+          }
+        }
+      }
+    }
+  }
+
   const order = await prisma.order.update({
     where: { id: orderId },
     data: {

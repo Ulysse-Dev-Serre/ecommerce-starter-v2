@@ -40,7 +40,8 @@ Le déclencheur est une **action manuelle** dans le panneau d'administration.
 ## Flux 3 : Remboursement (Refund)
 
 *   **Déclencheur** : Changement de statut à `REFUNDED` ou `CANCELLED` dans l'admin.
-*   **Action** : Envoi automatique de l'email "Remboursement effectué" au client.
+*   **Action Stripe** : Le système tente automatiquement d'émettre un remboursement via l'API Stripe (lié au PaymentIntent original) lorsque le statut passe à `REFUNDED`.
+*   **Action Email** : Envoi automatique de l'email "Remboursement effectué" au client.
 
 ## Flux 4 : Notification Admin (Nouvelle Commande)
 

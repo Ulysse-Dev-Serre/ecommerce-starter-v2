@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(supplier);
   } catch (error) {
-    logger.error(error, 'Error creating location');
+    logger.error({ error }, 'Error creating location');
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: suppliers });
   } catch (error) {
-    logger.error(error, 'Error fetching locations');
+    logger.error({ error }, 'Error fetching locations');
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

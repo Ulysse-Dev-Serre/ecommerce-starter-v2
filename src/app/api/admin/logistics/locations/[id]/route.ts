@@ -60,7 +60,7 @@ export async function PUT(
 
     return NextResponse.json(supplier);
   } catch (error) {
-    logger.error(error, 'Error updating location');
+    logger.error({ error }, 'Error updating location');
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
@@ -90,7 +90,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error(error, 'Error deleting location');
+    logger.error({ error }, 'Error deleting location');
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
