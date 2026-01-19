@@ -2,11 +2,17 @@ import Stripe from 'stripe';
 
 import { logger } from '../logger';
 
+// Initialize Stripe lazily or with a dummy key during build if needed
+// This prevents build errors in CI where secrets might not be available during static generation
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'dummy_key_for_build';
+
 if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is not defined in environment variables');
+  // We only log a warning here instead of throwing, to allow build to proceed
+  // The API routes using this will fail at runtime if the key is missing, which is expected
+  console.warn('STRIPE_SECRET_KEY is not defined in environment variables');
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(stripeKey, {
   apiVersion: '2024-12-18.acacia' as any,
   typescript: true,
   appInfo: {
@@ -17,9 +23,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 logger.info(
   {
-    mode: process.env.STRIPE_SECRET_KEY.startsWith('sk_test_')
-      ? 'test'
-      : 'live',
+    mode: stripeKey.startsWith('sk_test_') ? 'test' : 'live',
   },
   'Stripe client initialized'
 );
