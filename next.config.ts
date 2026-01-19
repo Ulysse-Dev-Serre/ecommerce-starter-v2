@@ -29,12 +29,6 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    turbo: {},
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   async headers() {
     return [
       {
