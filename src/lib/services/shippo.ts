@@ -54,6 +54,7 @@ export interface CustomsDeclaration {
   nonDeliveryOption: 'RETURN' | 'ABANDON';
   certify: boolean;
   certifySigner: string;
+  commercialInvoice?: boolean;
   items: CustomsItem[];
 }
 

@@ -66,7 +66,7 @@ export const AdminNewOrderEmail = ({
 
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <Link
-                href={`${siteUrl}/fr/admin/orders/${internalOrderId}`}
+                href={`${siteUrl}/admin/orders/${internalOrderId}`}
                 style={button}
               >
                 Voir la commande

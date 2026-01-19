@@ -2,6 +2,8 @@ import Link from 'next/link';
 
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
+import { getProducts } from '@/lib/services/product.service';
+import { Language } from '@/generated/prisma';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -15,20 +17,17 @@ export default async function ShopPage({
   const { locale } = await params;
   const { page = '1', category } = await searchParams;
 
-  const queryParams = new URLSearchParams({
-    page,
-    limit: '12',
-    status: 'ACTIVE',
-    language: locale.toUpperCase(),
-    ...(category && { category }),
-  });
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000'}/api/products?${queryParams}`,
-    { next: { revalidate: 60 } }
+  const { products, pagination } = await getProducts(
+    {
+      status: 'ACTIVE', // ProductStatus.ACTIVE (using string literal for simplicity or import enum)
+      language: locale.toUpperCase() as Language,
+      categorySlug: category,
+    },
+    {
+      page: parseInt(page),
+      limit: 12,
+    }
   );
-
-  const { data: products, pagination } = await response.json();
 
   return (
     <div className="container mx-auto px-4 py-8">

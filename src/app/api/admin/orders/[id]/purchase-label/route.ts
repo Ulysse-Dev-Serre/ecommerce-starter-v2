@@ -105,6 +105,7 @@ async function purchaseLabelHandler(
           zip: process.env.SHIPPO_FROM_ZIP || 'H2X 1Y6',
           country: process.env.SHIPPO_FROM_COUNTRY || 'CA',
           email: process.env.SHIPPO_FROM_EMAIL || 'admin@agtechnest.com',
+          phone: process.env.SHIPPO_FROM_PHONE || '',
         };
 
         const addressTo = {

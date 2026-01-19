@@ -23,20 +23,22 @@ const shippingRequestSchema = z.object({
 // Default warehouse address (Fallback)
 const WAREHOUSE_ADDRESS: Address = {
   name: 'AgTechNest Warehouse',
-  street1: '123 Tech Blvd',
-  city: 'Montreal',
+  street1: '546 rue leclerc',
+  street2: 'app 7',
+  city: 'Repentigny',
   state: 'QC',
-  zip: 'H2X 1Y6',
+  zip: 'J6A 7R3',
   country: 'CA',
+  phone: process.env.SHIPPO_FROM_PHONE || '',
 };
 
 // Default parcel configuration (unused mostly if we define parcels dynamically)
 const DEFAULT_PARCEL: Parcel = {
-  length: '20',
-  width: '15',
-  height: '10',
+  length: '40',
+  width: '20',
+  height: '20',
   distanceUnit: 'cm',
-  weight: '1',
+  weight: '3.2',
   massUnit: 'kg',
 };
 
@@ -272,6 +274,7 @@ async function handler(req: NextRequest) {
             nonDeliveryOption: 'RETURN' as const,
             certify: true,
             certifySigner: originAddress.name,
+            commercialInvoice: true,
             incoterm: originIncoterm as any,
             eelPfc: undefined,
             // Only send B13A info if explicitly required/filed.
