@@ -50,20 +50,54 @@ export default async function CheckoutPage({
   let initialTotal = 0;
   let currentCartId = '';
 
+  // Préparation des items pour le résumé
+  const summaryItems: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    currency: string;
+    image?: string;
+  }> = [];
+
   if (directVariantId && directQuantity) {
     // Mode Achat Direct
     currentCartId = 'direct_purchase'; // Placeholder, pas utilisé par CheckoutClient en mode direct
 
     const variant = await prisma.productVariant.findUnique({
       where: { id: directVariantId },
-      include: { pricing: true },
+      include: {
+        pricing: true,
+        media: { take: 1, orderBy: { sortOrder: 'asc' } },
+        product: {
+          include: {
+            translations: {
+              where: { language: locale.toUpperCase() as Language },
+            },
+            media: { take: 1, orderBy: { sortOrder: 'asc' } },
+          },
+        },
+      },
     });
 
     if (variant) {
       const priceRecord = variant.pricing.find(p => p.currency === currency);
       // Fallback USD si CAD manquant (ou vice versa) logic simple
-      const price = priceRecord?.price || 0;
-      initialTotal = Number(price) * parseInt(directQuantity);
+      const price = Number(priceRecord?.price || 0);
+      initialTotal = price * parseInt(directQuantity);
+
+      // Image: Variante > Produit Principal
+      const image = (variant.media[0]?.url ||
+        (variant.product as any).media[0]?.url) as string | undefined;
+
+      summaryItems.push({
+        name:
+          variant.product.translations[0]?.name ||
+          variant.product.slug + (variant.sku ? ` (${variant.sku})` : ''),
+        quantity: parseInt(directQuantity),
+        price: price,
+        currency: currency,
+        image: image,
+      });
     }
   } else {
     // Mode Panier Standard
@@ -99,8 +133,22 @@ export default async function CheckoutPage({
           p => p.currency === cart.currency
         );
 
-        const price = priceRecord?.price || 0;
-        return acc + Number(price) * item.quantity;
+        const price = Number(priceRecord?.price || 0);
+
+        // Image logic: getOrCreateCart returns variant.media (primary or take 1)
+        const image = item.variant.media[0]?.url;
+
+        summaryItems.push({
+          name:
+            item.variant.product.translations[0]?.name ||
+            item.variant.product.slug,
+          quantity: item.quantity,
+          price: price,
+          currency: cart.currency,
+          image: image,
+        });
+
+        return acc + price * item.quantity;
       }, 0)
     );
   }
@@ -144,6 +192,7 @@ export default async function CheckoutPage({
         currency={currency}
         translations={clientTranslations}
         userEmail={userEmail}
+        summaryItems={summaryItems}
       />
     </div>
   );

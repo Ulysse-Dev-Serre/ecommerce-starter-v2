@@ -47,6 +47,13 @@ interface CheckoutClientProps {
     statePlaceholder: string;
   };
   userEmail?: string | null | undefined;
+  summaryItems?: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    currency: string;
+    image?: string;
+  }>;
 }
 
 export function CheckoutClient({
@@ -56,6 +63,7 @@ export function CheckoutClient({
   currency,
   translations: t,
   userEmail,
+  summaryItems,
 }: CheckoutClientProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +149,7 @@ export function CheckoutClient({
         initialTotal={initialTotal}
         userEmail={userEmail}
         cartId={cartId}
+        summaryItems={summaryItems}
       />
     </Elements>
   );
@@ -179,6 +188,13 @@ interface CheckoutFormProps {
   };
   userEmail?: string | null | undefined;
   cartId: string;
+  summaryItems?: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+    currency: string;
+    image?: string;
+  }>;
 }
 
 function CheckoutForm({
@@ -189,6 +205,7 @@ function CheckoutForm({
   translations: t,
   userEmail,
   cartId,
+  summaryItems,
 }: CheckoutFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -756,6 +773,52 @@ function CheckoutForm({
               </h2>
 
               <div className="space-y-4 text-sm">
+                {/* Items List */}
+                {summaryItems && summaryItems.length > 0 && (
+                  <div className="mb-6 space-y-4 overflow-y-auto max-h-[40vh] pr-2">
+                    {summaryItems.map((item, idx) => (
+                      <div key={idx} className="flex gap-4 items-center">
+                        {/* Image Container */}
+                        <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100 rounded-lg overflow-hidden">
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center bg-gray-50 text-gray-400">
+                              <span className="text-[10px]">No image</span>
+                            </div>
+                          )}
+                          <div className="absolute top-0 right-0 bg-gray-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                            {item.quantity}
+                          </div>
+                        </div>
+
+                        {/* Details */}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">
+                            {item.name}
+                          </h4>
+                          <p className="text-xs text-gray-500">
+                            {item.price.toFixed(2)} {item.currency}
+                          </p>
+                        </div>
+
+                        {/* Total per line */}
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900">
+                            {(item.price * item.quantity).toFixed(2)}{' '}
+                            {item.currency}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="border-b border-gray-100 pt-2" />
+                  </div>
+                )}
+
                 <div className="flex justify-between text-gray-600">
                   <span>{t.subtotal}</span>
                   <span className="font-medium text-gray-900">
