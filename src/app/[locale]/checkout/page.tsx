@@ -11,12 +11,16 @@ import { prisma } from '@/lib/db/prisma';
 
 interface CheckoutPageProps {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ directVariantId?: string; directQuantity?: string }>;
 }
 
 export default async function CheckoutPage({
   params,
+  searchParams,
 }: CheckoutPageProps): Promise<React.ReactElement> {
   const { locale } = await params;
+  const { directVariantId, directQuantity } = await searchParams;
+
   const t = await getTranslations({ locale, namespace: 'Checkout' });
   const { userId: clerkId } = await auth();
 
@@ -40,25 +44,65 @@ export default async function CheckoutPage({
 
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const currency = cookieStore.get('currency')?.value || 'CAD';
 
-  // On récupère le panier pour avoir le total inital
-  // (Même si on recalculera tout côté client, c'est bien d'avoir l'état initial)
-  if (!userId && !anonymousId) {
-    // Pas de session, on redirige vers le panier (vide)
-    // ou on laisse faire et getOrCreateCart throw ? Non on évite le crash.
-    return (
-      <div className="p-8 text-center">
-        Redirecting to cart...
-        <meta httpEquiv="refresh" content={`0; url = /${locale}/cart`} />
-      </div>
+  // Si achat direct, on calcule le total sans panier
+  let initialTotal = 0;
+  let currentCartId = '';
+
+  if (directVariantId && directQuantity) {
+    // Mode Achat Direct
+    currentCartId = 'direct_purchase'; // Placeholder, pas utilisé par CheckoutClient en mode direct
+
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: directVariantId },
+      include: { pricing: true },
+    });
+
+    if (variant) {
+      const priceRecord = variant.pricing.find(p => p.currency === currency);
+      // Fallback USD si CAD manquant (ou vice versa) logic simple
+      const price = priceRecord?.price || 0;
+      initialTotal = Number(price) * parseInt(directQuantity);
+    }
+  } else {
+    // Mode Panier Standard
+    // On récupère le panier pour avoir le total inital
+    if (!userId && !anonymousId) {
+      return (
+        <div className="p-8 text-center">
+          Redirecting to cart...
+          <meta httpEquiv="refresh" content={`0; url = /${locale}/cart`} />
+        </div>
+      );
+    }
+
+    const cart = await getOrCreateCart(userId, anonymousId);
+
+    if (!cart || cart.items.length === 0) {
+      // Si panier vide, on redirige vers le panier
+      // Sauf si on vient d'ajouter un item (race condition?)
+      // Pour l'instant on garde la redirection si vide
+      return (
+        <div className="p-8 text-center">
+          Your cart is empty. Redirecting...
+          <meta httpEquiv="refresh" content={`0; url = /${locale}/cart`} />
+        </div>
+      );
+    }
+
+    currentCartId = cart.id;
+    initialTotal = Number(
+      cart.items.reduce((acc, item) => {
+        // Find price matching cart currency
+        const priceRecord = item.variant.pricing.find(
+          p => p.currency === cart.currency
+        );
+
+        const price = priceRecord?.price || 0;
+        return acc + Number(price) * item.quantity;
+      }, 0)
     );
-  }
-
-  const cart = await getOrCreateCart(userId, anonymousId);
-
-  if (!cart || cart.items.length === 0) {
-    // Si panier vide, on redirige ou on affiche une erreur (géré par le client ou redirect serveur)
-    // Pour l'instant on laisse le client gérer ou on render null
   }
 
   // On prépare les props pour le client
@@ -94,20 +138,10 @@ export default async function CheckoutPage({
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       <CheckoutClient
-        cartId={cart.id}
+        cartId={currentCartId}
         locale={locale}
-        initialTotal={Number(
-          cart.items.reduce((acc, item) => {
-            // Find price matching cart currency
-            const priceRecord = item.variant.pricing.find(
-              p => p.currency === cart.currency
-            );
-
-            const price = priceRecord?.price || 0;
-            return acc + Number(price) * item.quantity;
-          }, 0)
-        )}
-        currency={cart.currency}
+        initialTotal={initialTotal}
+        currency={currency}
         translations={clientTranslations}
         userEmail={userEmail}
       />

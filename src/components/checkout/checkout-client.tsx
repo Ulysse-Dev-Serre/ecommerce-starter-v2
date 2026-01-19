@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -59,9 +60,22 @@ export function CheckoutClient({
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const searchParams = useSearchParams();
+  const directVariantId = searchParams.get('directVariantId');
+  const directQuantity = searchParams.get('directQuantity');
+
   // 1. Au chargement, on crée une PaymentIntent (ou Session) vide pour avoir le clientSecret
   // C'est nécessaire pour initialiser <Elements> de Stripe
   useEffect(() => {
+    // Si mode direct, on prépare l'objet directItem
+    const directItem =
+      directVariantId && directQuantity
+        ? {
+            variantId: directVariantId,
+            quantity: parseInt(directQuantity),
+          }
+        : undefined;
+
     // TODO: Créer une route API dédiée pour initier l'intention de paiement custom
     // Pour l'instant on va simuler ou appeler l'existante si compatible
 
@@ -74,14 +88,18 @@ export function CheckoutClient({
     void fetch('/api/checkout/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cartId, currency }),
+      body: JSON.stringify({
+        cartId,
+        currency,
+        directItem, // Ajout du paramètre optionnel pour achat direct
+      }),
     })
       .then(res => res.json())
       .then(data => {
         if (data.clientSecret) setClientSecret(data.clientSecret);
         else setError('Failed to init payment');
       });
-  }, [cartId, currency]);
+  }, [cartId, currency, directVariantId, directQuantity]);
 
   if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
   if (!clientSecret) return <div className="p-4">Loading checkout...</div>;

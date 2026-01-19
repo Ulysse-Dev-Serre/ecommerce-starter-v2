@@ -84,8 +84,10 @@ export function ProductActions({
   const handleBuyNow = async () => {
     setIsBuyingNow(true);
     try {
-      const { checkout } = await import('@/lib/utils/checkout');
-      await checkout([{ variantId, quantity }], locale);
+      // Redirection vers le checkout avec les paramètres pour l'achat direct
+      router.push(
+        `/${locale}/checkout?directVariantId=${variantId}&directQuantity=${quantity}`
+      );
     } catch (error) {
       console.error('Failed to buy now:', error);
       showToast(

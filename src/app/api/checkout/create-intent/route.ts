@@ -23,7 +23,7 @@ async function createIntentHandler(
   const userId = authContext.userId;
 
   const body = await request.json();
-  const { cartId: bodyCartId } = body;
+  const { cartId: bodyCartId, directItem } = body;
 
   // Récupérer la devise depuis le cookie ou utiliser la request
   const cookieStore = await cookies();
@@ -40,36 +40,54 @@ async function createIntentHandler(
     );
   }
 
-  // 1. Récupérer le panier pour valider les items
-  // Si bodyCartId est fourni, on essaie de le récupérer, sinon on cherche par userId/anonymous
-  const cart = await getOrCreateCart(userId, undefined);
+  let cartItems: { variantId: string; quantity: number }[] = [];
+  let cartIdForIntent: string | undefined = undefined;
 
-  // LOG 1: BODY REÇU
-  logger.info(
-    {
-      bodyReceived: JSON.stringify(body, null, 2),
-    },
-    'DEBUG: CREATE-INTENT INPUT'
-  );
+  // Mode 1: Achat Direct (Direct Item)
+  if (directItem) {
+    logger.info({ directItem }, 'Processing direct purchase intent');
+    cartItems = [
+      {
+        variantId: directItem.variantId,
+        quantity: directItem.quantity,
+      },
+    ];
+    // Pas de cartId dans ce cas
+    cartIdForIntent = 'direct_purchase';
+  } else {
+    // Mode 2: Panier (Standard)
+    // 1. Récupérer le panier pour valider les items
+    // Si bodyCartId est fourni, on essaie de le récupérer, sinon on cherche par userId/anonymous
+    const cart = await getOrCreateCart(userId, undefined);
 
-  // Petite validation de sécurité : si cartId est fourni, s'assurer que c'est bien celui de l'user
-  if (bodyCartId && cart.id !== bodyCartId) {
-    // Potentiellement mismatch entre le client local et le serveur
-    // On continue avec le 'cart' récupéré par getOrCreateCart qui est la source de vérité
-    logger.warn(
-      { reqCartId: bodyCartId, userCartId: cart.id },
-      'Cart ID mismatch, using user cart'
+    // LOG 1: BODY REÇU
+    logger.info(
+      {
+        bodyReceived: JSON.stringify(body, null, 2),
+      },
+      'DEBUG: CREATE-INTENT INPUT'
     );
-  }
 
-  if (cart.items.length === 0) {
-    return NextResponse.json({ error: 'Cart is empty.' }, { status: 400 });
-  }
+    // Petite validation de sécurité : si cartId est fourni, s'assurer que c'est bien celui de l'user
+    if (bodyCartId && cart.id !== bodyCartId) {
+      // Potentiellement mismatch entre le client local et le serveur
+      // On continue avec le 'cart' récupéré par getOrCreateCart qui est la source de vérité
+      logger.warn(
+        { reqCartId: bodyCartId, userCartId: cart.id },
+        'Cart ID mismatch, using user cart'
+      );
+    }
 
-  const cartItems = cart.items.map(item => ({
-    variantId: item.variant.id,
-    quantity: item.quantity,
-  }));
+    if (cart.items.length === 0) {
+      return NextResponse.json({ error: 'Cart is empty.' }, { status: 400 });
+    }
+
+    cartItems = cart.items.map(item => ({
+      variantId: item.variant.id,
+      quantity: item.quantity,
+    }));
+    cartIdForIntent = cart.id;
+  }
 
   try {
     // 2. Réserver le stock (si activé)
@@ -80,8 +98,15 @@ async function createIntentHandler(
       items: cartItems,
       currency,
       userId,
-      cartId: cart.id,
+      cartId: cartIdForIntent,
       anonymousId: undefined, // TODO: gérer anonymousId si besoin
+      metadata: directItem
+        ? {
+            isDirectPurchase: 'true',
+            directVariantId: directItem.variantId,
+            directQuantity: directItem.quantity.toString(),
+          }
+        : undefined,
     });
 
     // LOG 2: INTENT CRÉÉ
@@ -90,6 +115,7 @@ async function createIntentHandler(
         requestId,
         paymentIntentId: paymentIntent.id,
         createdIntentFull: JSON.stringify(paymentIntent, null, 2),
+        isDirect: !!directItem,
       },
       'PaymentIntent created successfully'
     );

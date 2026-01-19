@@ -166,6 +166,7 @@ export interface CreatePaymentIntentParams {
   userId?: string;
   cartId?: string;
   anonymousId?: string;
+  metadata?: Record<string, string>;
 }
 
 export async function createPaymentIntent({
@@ -174,6 +175,7 @@ export async function createPaymentIntent({
   userId,
   cartId,
   anonymousId,
+  metadata = {},
 }: CreatePaymentIntentParams): Promise<Stripe.PaymentIntent> {
   // 1. Récupérer et valider les variants (similaire à createCheckoutSession)
   const variants = await prisma.productVariant.findMany({
@@ -260,6 +262,7 @@ export async function createPaymentIntent({
       items: JSON.stringify(items),
       integration_check: 'accept_a_payment',
       subtotal: amountInCents.toString(), // CRUCIAL pour l'update du shipping
+      ...metadata,
     },
     // Activer Stripe Tax si configuré
     // automatic_tax will be enabled in update-intent when we have the address
