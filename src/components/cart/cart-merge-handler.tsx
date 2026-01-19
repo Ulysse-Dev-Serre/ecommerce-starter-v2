@@ -32,7 +32,7 @@ export function CartMergeHandler(): null {
       }
     };
 
-    mergeCart();
+    void mergeCart();
   }, [isSignedIn, isLoaded, router]);
 
   return null;

@@ -63,8 +63,8 @@ export function ShippingManagement({
           Action Required: Shipping Label
         </h2>
         <p className="text-gray-900 font-medium mb-4">
-          Shipping rate ID not found in metadata. Clicking "Generate" will
-          recalculate the best rate based on the customer's choice.
+          Shipping rate ID not found in metadata. Clicking &quot;Generate&quot;
+          will recalculate the best rate based on the customer&apos;s choice.
         </p>
         <div className="flex gap-4">
           <button

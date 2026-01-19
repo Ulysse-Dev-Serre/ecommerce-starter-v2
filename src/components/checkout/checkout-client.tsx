@@ -71,7 +71,7 @@ export function CheckoutClient({
     // On va devoir modifier /api/checkout/create-session ou en créer une nouvelle /api/checkout/create-intent
     // car 'create-session' crée une session Stripe Checkout (page hébergée), pas un Intent pour Elements custom.
 
-    fetch('/api/checkout/create-intent', {
+    void fetch('/api/checkout/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cartId, currency }),
@@ -338,7 +338,7 @@ function CheckoutForm({
         setShippingRates(data.rates);
         // Auto-select first rate
         const firstRate = data.rates[0];
-        updatePaymentIntent(firstRate);
+        await updatePaymentIntent(firstRate);
       } else {
         console.warn('No rates found:', data);
         setShippingRates([]);
@@ -655,14 +655,14 @@ function CheckoutForm({
                       <div
                         key={rateId || index}
                         className={`relative p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 mb-3 ${isSelected ? activeClasses : inactiveClasses}`}
-                        onClick={() => {
+                        onClick={async () => {
                           // Format phone for Stripe (NANP standard "1XXXXXXXXXX")
                           const cleanPhone = phone.replace(/\D/g, '');
                           const stripePhone = cleanPhone.startsWith('1')
                             ? cleanPhone
                             : `1${cleanPhone}`;
 
-                          updatePaymentIntent(rate, {
+                          await updatePaymentIntent(rate, {
                             name: tempName || 'Valued Customer',
                             street1: tempAddress.line1,
                             street2: tempAddress.line2 || '',
@@ -709,7 +709,7 @@ function CheckoutForm({
                 <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                   <p className="text-gray-500">
                     Aucune option de livraison trouvée pour cette adresse.
-                    Veuillez vérifier l'adresse ou contacter le support.
+                    Veuillez vérifier l&apos;adresse ou contacter le support.
                   </p>
                 </div>
               ) : (

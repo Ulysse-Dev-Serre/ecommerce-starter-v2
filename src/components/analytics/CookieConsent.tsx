@@ -10,7 +10,7 @@ export default function CookieConsentComponent() {
     // Define the type for the callback argument
     // vanilla-cookieconsent passes the cookie object to callbacks
 
-    CookieConsent.run({
+    void CookieConsent.run({
       ...cookieConfig,
       onFirstConsent: ({ cookie }) => {
         updateGtmConsent(cookie);

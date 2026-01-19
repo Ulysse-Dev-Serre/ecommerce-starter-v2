@@ -23,7 +23,7 @@ export default function Error({
           Une erreur est survenue
         </h2>
         <p className="text-muted-foreground mb-8">
-          Désolé, quelque chose s'est mal passé. Veuillez réessayer.
+          Désolé, quelque chose s&apos;est mal passé. Veuillez réessayer.
         </p>
         <div className="flex gap-4 justify-center">
           <button
@@ -36,7 +36,7 @@ export default function Error({
             href="/"
             className="bg-gray-200 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors"
           >
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
         </div>
       </div>

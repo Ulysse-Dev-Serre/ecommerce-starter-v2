@@ -3,7 +3,6 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
   Link,
   Preview,
@@ -46,7 +45,7 @@ export const AdminNewOrderEmail = ({
           <Section style={message}>
             <Heading style={heading}>💰 Nouvelle Commande !</Heading>
             <Text style={textStyle}>
-              Une nouvelle commande vient d'être passée sur la boutique.
+              Une nouvelle commande vient d&apos;être passée sur la boutique.
             </Text>
 
             <Section style={statsBox}>

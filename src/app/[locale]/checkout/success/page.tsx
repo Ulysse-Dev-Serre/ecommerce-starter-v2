@@ -86,7 +86,7 @@ export default function CheckoutSuccessPage({
     };
 
     // Vérification initiale
-    checkOrder().then(confirmed => {
+    void checkOrder().then(confirmed => {
       if (confirmed) return;
 
       // Si pas encore confirmé, on poll toutes les 2 secondes

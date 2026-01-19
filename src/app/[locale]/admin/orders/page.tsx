@@ -81,7 +81,7 @@ function OrdersContent() {
       }
     };
 
-    fetchOrders();
+    void fetchOrders();
   }, [page, status, search]);
 
   if (loading) {

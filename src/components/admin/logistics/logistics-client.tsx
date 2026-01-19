@@ -105,13 +105,12 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
                 <div className="mt-4 space-y-2 text-sm text-gray-600">
                   {/*  Show rudimentary address info if JSON */}
                   <p className="truncate">
-                    {/* @ts-ignore - JSON field handling needs proper typing in component */}
+                    {/* JSON field handling needs proper typing in component */}
                     {(supplier.address as any)?.street1 ||
                       t('addressUndefined')}
                   </p>
                   <p>
-                    {/* @ts-ignore */}
-                    {(supplier.address as any)?.city}, {/* @ts-ignore */}{' '}
+                    {(supplier.address as any)?.city},{' '}
                     {(supplier.address as any)?.country}
                   </p>
                 </div>

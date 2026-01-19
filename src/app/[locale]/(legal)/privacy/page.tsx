@@ -33,8 +33,9 @@ export default async function PrivacyPage({ params }: PageProps) {
           <p className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded border border-yellow-200 dark:border-yellow-900">
             <strong>Note:</strong> This page is using translations from{' '}
             <code>{locale}.json</code>. To edit this content, update the
-            "legal.privacyPolicy.content" key in the translation file, or
-            replace this component's logic to load from a Markdown file or CMS.
+            &quot;legal.privacyPolicy.content&quot; key in the translation file,
+            or replace this component&apos;s logic to load from a Markdown file
+            or CMS.
           </p>
         </div>
       </div>

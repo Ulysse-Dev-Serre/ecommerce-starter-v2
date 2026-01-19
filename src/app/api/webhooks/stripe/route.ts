@@ -403,7 +403,7 @@ async function handlePaymentIntentSucceeded(
       amount: paymentIntent.amount / 100,
       debug_receipt_email: paymentIntent.receipt_email,
       debug_charges_count: (paymentIntent as any).charges?.data?.length,
-      // @ts-ignore - charges data might be expandable
+      // charges data might be expandable
       debug_charge_email: (paymentIntent as any).charges?.data?.[0]
         ?.billing_details?.email,
     },

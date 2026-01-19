@@ -15,13 +15,13 @@ export default function NotFound() {
         <div className="-mt-12 relative">
           <h2 className="text-2xl font-semibold mb-2">Page non trouvée</h2>
           <p className="text-muted-foreground mb-8">
-            La page que vous cherchez n'existe pas.
+            La page que vous cherchez n&apos;existe pas.
           </p>
           <Link
             href="/"
             className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
           >
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
         </div>
       </div>
