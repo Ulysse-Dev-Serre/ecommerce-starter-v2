@@ -42,6 +42,21 @@ export default function ContactPage() {
                 </div>
               </div>
             </div>
+
+            <div className="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+              <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
+                Demande de remboursement
+              </h3>
+              <p className="text-sm text-yellow-800">
+                Pour toute demande de remboursement, merci de vous rendre dans
+                la section{' '}
+                <a href="/orders" className="font-bold underline">
+                  Mes Commandes
+                </a>{' '}
+                et de sélectionner la commande concernée. Vous y trouverez un
+                formulaire dédié.
+              </p>
+            </div>
           </div>
 
           <form className="space-y-4">

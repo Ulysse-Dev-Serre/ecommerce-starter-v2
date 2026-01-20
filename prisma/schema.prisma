@@ -25,9 +25,11 @@ enum OrderStatus {
   PENDING
   PAID
   SHIPPED
+  IN_TRANSIT
   DELIVERED
   CANCELLED
   REFUNDED
+  REFUND_REQUESTED
 }
 
 enum PaymentStatus {

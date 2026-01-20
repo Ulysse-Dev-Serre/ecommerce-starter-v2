@@ -48,8 +48,8 @@
 - [x] **Issue 27** : Pages Légales & Contenu Statique
 - [ ] **Issue 28** : Stripe Tax Configuration (Voir [Documentation & Limitation](../9-payment-system/stripe-tax-configuration.md)) 
 - [x] **Issue 29** : Pages d'erreur Custom (404/500)
-- [ ] **Issue 30** : Premier Déploiement Vercel (Production)
-- [ ] **Issue 31** : Gestion des retours et remboursements
+- [x] **Issue 30** : Premier Déploiement Vercel (Production)
+- [x] **Issue 31** : Gestion des retours et remboursements
 
 ---
 
@@ -70,6 +70,8 @@
 - [ ] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
 - [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
+- [ ] **Issue 44** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
+- [ ] **Issue 45** : Hardening UX : Notifications détaillées en cas de panne de services tiers (Stripe/Shippo down)
 
 ---
 

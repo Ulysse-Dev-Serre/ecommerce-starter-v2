@@ -18,7 +18,9 @@
     "previous": "Précédent",
     "home": "Accueil",
     "contact": "Contact",
-    "backToSite": "Retour au site"
+    "backToSite": "Retour au site",
+    "quantity": "Quantité",
+    "discount": "Réduction"
   },
   "error": {
     "notFound": {
@@ -229,6 +231,64 @@
     "refundPolicy": {
       "title": "Politique de Remboursement",
       "content": "Ceci est un exemple de politique de remboursement. Définissez clairement vos règles de retour, d'échange et de remboursement ici."
+    }
+  },
+  "Orders": {
+    "list": {
+      "title": "Mes commandes",
+      "noOrders": "Vous n'avez pas encore de commandes.",
+      "shopNow": "Commencer vos achats",
+      "viewDetails": "Voir détails"
+    },
+    "detail": {
+      "backToOrders": "← Retour aux commandes",
+      "orderNumber": "Commande",
+      "status": "Statut",
+      "date": "Date",
+      "items": "Articles",
+      "summary": "Résumé",
+      "subtotal": "Sous-total",
+      "shipping": "Livraison",
+      "tax": "Taxes",
+      "total": "Total",
+      "shippingAddress": "Adresse de livraison",
+      "billingAddress": "Adresse de facturation",
+      "statusPending": "En attente",
+      "statusPaid": "Payée",
+      "statusShipped": "Expédiée",
+      "statusInTransit": "En route",
+      "statusDelivered": "Livrée",
+      "statusCancelled": "Annulée",
+      "statusRefunded": "Remboursée",
+      "statusRefundRequested": "Remboursement demandé",
+      "tracking": "Suivi de colis",
+      "trackPackage": "Suivre le colis",
+      "apartment": "App. / Bureau"
+    },
+    "refund": {
+      "requestTitle": "Demander un remboursement",
+      "requestDescription": "Si vous rencontrez un problème avec votre commande, vous pouvez nous envoyer une demande de remboursement. Merci d'expliquer la raison et de joindre une photo si nécessaire.",
+      "reasonLabel": "Raison de votre demande",
+      "reasonPlaceholder": "Décrivez le problème ici (dommages, article manquant, etc.)...",
+      "imageLabel": "Joindre une photo (optionnel)",
+      "submit": "Envoyer la demande",
+      "submitting": "Envoi en cours...",
+      "successTitle": "Demande envoyée !",
+      "successMessage": "Votre demande a été transmise à notre équipe. Le statut de votre commande a été mis à jour en \"Demande de remboursement\".",
+      "error": "Une erreur est survenue lors de l'envoi. Veuillez réessayer.",
+      "openButton": "Besoin d'un remboursement ?",
+      "cancelButton": "Annuler",
+      "waitDeliveryTitle": "Action requise",
+      "waitDeliveryMessage": "Votre colis est en cours de préparation ou d'expédition. Veuillez attendre de recevoir votre colis avant de demander un remboursement.",
+      "cancelOrder": "Annuler ma commande",
+      "cancelDelivery": "Annuler la livraison",
+      "cancelOrderDesc": "Votre commande n'a pas encore été expédiée. Vous pouvez l'annuler maintenant pour un remboursement immédiat.",
+      "cancelling": "Annulation en cours...",
+      "confirmCancel": "Voulez-vous vraiment annuler cette commande ?",
+      "refundPendingTitle": "Remboursement en cours",
+      "refundPendingMessage": "Bonjour {name},\n\nNous avons initié le remboursement de {amount} {currency} pour votre commande {orderNumber}.\n\nLe montant devrait apparaître sur votre relevé bancaire dans un délai de 5 à 10 jours ouvrables, selon les délais de traitement de votre banque.",
+      "refundDoneTitle": "Remboursement effectué",
+      "refundDoneMessage": "Le remboursement de {amount} {currency} a été traité avec succès."
     }
   }
 }

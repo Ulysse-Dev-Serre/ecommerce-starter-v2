@@ -12,9 +12,28 @@ import type { AuthContext } from '@/lib/middleware/withAuth';
 // Workflow de transition d'état valide
 const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
-  [OrderStatus.PAID]: [OrderStatus.SHIPPED, OrderStatus.REFUNDED],
-  [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.REFUNDED],
-  [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
+  [OrderStatus.PAID]: [
+    OrderStatus.SHIPPED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.SHIPPED]: [
+    OrderStatus.IN_TRANSIT,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.IN_TRANSIT]: [
+    OrderStatus.DELIVERED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED, OrderStatus.REFUND_REQUESTED],
+  [OrderStatus.REFUND_REQUESTED]: [
+    OrderStatus.REFUNDED,
+    OrderStatus.PAID,
+    OrderStatus.SHIPPED,
+    OrderStatus.DELIVERED,
+  ],
   [OrderStatus.CANCELLED]: [], // État terminal
   [OrderStatus.REFUNDED]: [], // État terminal
 };
@@ -24,9 +43,11 @@ const statusUpdateSchema = z.object({
     OrderStatus.PENDING,
     OrderStatus.PAID,
     OrderStatus.SHIPPED,
+    OrderStatus.IN_TRANSIT,
     OrderStatus.DELIVERED,
     OrderStatus.CANCELLED,
     OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
   ]),
   comment: z.string().optional(),
 });

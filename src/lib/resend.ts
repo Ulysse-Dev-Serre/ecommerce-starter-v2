@@ -13,4 +13,5 @@ if (!resendApiKey) {
 // The service will fail at runtime if the key is invalid, which is expected behavior.
 export const resend = new Resend(resendApiKey || 're_dummy_key_for_build');
 
-export const FROM_EMAIL = 'Acme <onboarding@resend.dev>';
+export const FROM_EMAIL =
+  process.env.FROM_EMAIL || 'Acme <onboarding@resend.dev>';

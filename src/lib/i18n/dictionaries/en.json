@@ -18,7 +18,9 @@
     "previous": "Previous",
     "home": "Home",
     "contact": "Contact",
-    "backToSite": "Back to site"
+    "backToSite": "Back to site",
+    "quantity": "Quantity",
+    "discount": "Discount"
   },
   "error": {
     "notFound": {
@@ -229,6 +231,64 @@
     "refundPolicy": {
       "title": "Refund Policy",
       "content": "This is a sample refund policy. Clearly define your return, exchange, and refund rules here."
+    }
+  },
+  "Orders": {
+    "list": {
+      "title": "My Orders",
+      "noOrders": "You don't have any orders yet.",
+      "shopNow": "Start shopping",
+      "viewDetails": "View details"
+    },
+    "detail": {
+      "backToOrders": "← Back to orders",
+      "orderNumber": "Order",
+      "status": "Status",
+      "date": "Date",
+      "items": "Items",
+      "summary": "Summary",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "tax": "Tax",
+      "total": "Total",
+      "shippingAddress": "Shipping Address",
+      "billingAddress": "Billing Address",
+      "statusPending": "Pending",
+      "statusPaid": "Paid",
+      "statusShipped": "Shipped",
+      "statusInTransit": "On the way",
+      "statusDelivered": "Delivered",
+      "statusCancelled": "Cancelled",
+      "statusRefunded": "Refunded",
+      "statusRefundRequested": "Refund Requested",
+      "tracking": "Tracking",
+      "trackPackage": "Track Package",
+      "apartment": "Apt / Suite"
+    },
+    "refund": {
+      "requestTitle": "Request a Refund",
+      "requestDescription": "If you have any issues with your order, you can send us a refund request. Please explain the reason and attach a photo if necessary.",
+      "reasonLabel": "Reason for your request",
+      "reasonPlaceholder": "Describe the issue here (damages, missing item, etc.)...",
+      "imageLabel": "Attach a photo (optional)",
+      "submit": "Send Request",
+      "submitting": "Sending...",
+      "successTitle": "Request Sent!",
+      "successMessage": "Your request has been sent to our team. Your order status has been updated to \"Refund Requested\".",
+      "error": "An error occurred while sending. Please try again.",
+      "openButton": "Need a refund?",
+      "cancelButton": "Cancel",
+      "waitDeliveryTitle": "Action Required",
+      "waitDeliveryMessage": "Your package is being prepared or shipped. Please wait to receive your package before requesting a refund.",
+      "cancelOrder": "Cancel my order",
+      "cancelDelivery": "Cancel delivery",
+      "cancelOrderDesc": "Your order has not been shipped yet. You can cancel it now for an immediate refund.",
+      "cancelling": "Cancelling...",
+      "confirmCancel": "Are you sure you want to cancel this order?",
+      "refundPendingTitle": "Refund in progress",
+      "refundPendingMessage": "Hello {name},\n\nWe have initiated the refund of {amount} {currency} for your order {orderNumber}.\n\nThe amount should appear on your bank statement within 5 to 10 business days, depending on your bank's processing times.",
+      "refundDoneTitle": "Refund completed",
+      "refundDoneMessage": "The refund of {amount} {currency} has been successfully processed."
     }
   }
 }

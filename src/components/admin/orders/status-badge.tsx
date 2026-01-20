@@ -18,6 +18,10 @@ export function StatusBadge({ status }: StatusBadgeProps) {
       label: 'Shipped',
       class: 'bg-blue-100 text-blue-800',
     },
+    IN_TRANSIT: {
+      label: 'On the way',
+      class: 'bg-indigo-100 text-indigo-800',
+    },
     DELIVERED: {
       label: 'Delivered',
       class: 'bg-purple-100 text-purple-800',
@@ -29,6 +33,11 @@ export function StatusBadge({ status }: StatusBadgeProps) {
     REFUNDED: {
       label: 'Refunded',
       class: 'bg-gray-100 text-gray-800',
+    },
+    REFUND_REQUESTED: {
+      label: 'Refund Requested',
+      class:
+        'bg-red-600 text-white animate-pulse shadow-md border-2 border-red-800',
     },
   };
 

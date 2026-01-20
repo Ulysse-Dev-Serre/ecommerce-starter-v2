@@ -43,7 +43,8 @@ export interface CustomsDeclaration {
     | 'MERCHANDISE'
     | 'GIFT'
     | 'SAMPLE'
-    | 'RETURN'
+    | 'RETURN_MERCHANDISE'
+    | 'HUMANITARIAN_DONATION'
     | 'DOCUMENTS'
     | 'OTHER';
   contentsExplanation?: string;
@@ -56,6 +57,34 @@ export interface CustomsDeclaration {
   certifySigner: string;
   commercialInvoice?: boolean;
   items: CustomsItem[];
+}
+
+export interface Rate {
+  objectId?: string;
+  object_id?: string;
+  amount: string;
+  currency: string;
+  provider: string;
+  servicelevel: {
+    name: string;
+    token: string;
+  };
+  days?: number;
+  duration_terms?: string;
+}
+
+export interface Transaction {
+  objectId?: string;
+  object_id?: string;
+  status: 'SUCCESS' | 'ERROR' | 'QUEUED' | 'WAITING' | string;
+  trackingNumber?: string;
+  tracking_number?: string;
+  trackingUrl?: string;
+  tracking_url?: string;
+  labelUrl?: string;
+  label_url?: string;
+  messages?: { text: string; code?: string }[];
+  provider?: string;
 }
 
 /**
@@ -124,6 +153,75 @@ export async function getShippingRates(
     return shipment;
   } catch (error) {
     console.error('Error creating shipment:', error);
+    throw error;
+  }
+}
+
+/**
+ * Calculate return shipping rates (inverses From/To and adds is_return flag)
+ */
+export async function getReturnShippingRates(
+  addressFrom: Address, // This will be the CUSTOMER address
+  addressTo: Address, // This will be YOUR WAREHOUSE address
+  parcels: Parcel[],
+  customsDeclaration?: CustomsDeclaration
+) {
+  // MOCK MODE
+  if (process.env.SHIPPO_MOCK_MODE === 'true') {
+    logger.info({
+      msg: 'SHIPPO: Mock mode enabled, returning fake return rates',
+    });
+    return {
+      object_status: 'SUCCESS',
+      rates: [
+        {
+          object_id: 'mock_rate_return_' + Date.now(),
+          amount: '12.00',
+          currency: 'CAD',
+          provider: 'MOCK_POST',
+          servicelevel: {
+            name: 'Return Standard Mock',
+            token: 'mock_ret_std',
+          },
+          days: 3,
+          duration_terms: '3-5 days',
+          attributes: [],
+        },
+      ],
+    };
+  }
+
+  if (!shippo) {
+    throw new Error('SHIPPO_API_KEY is not defined and Mock mode is disabled');
+  }
+
+  try {
+    // If shipping from outside CA (e.g. US), don't restrict to Canadian UPS account
+    const carrierAccounts =
+      addressFrom.country === 'CA' && process.env.SHIPPO_UPS_ACCOUNT_ID
+        ? [process.env.SHIPPO_UPS_ACCOUNT_ID]
+        : undefined;
+
+    // ONLY use isReturn (scan-based) for domestic shipments.
+    // International returns (US -> CA) usually don't support scan-based payment
+    // and must be created as standard prepaid shipments.
+    const isDomesticReturn = addressFrom.country === addressTo.country;
+
+    const shipment = await shippo.shipments.create({
+      addressFrom: addressFrom,
+      addressTo: addressTo,
+      parcels: parcels,
+      customsDeclaration: customsDeclaration as any,
+      carrierAccounts: carrierAccounts,
+      extra: {
+        isReturn: isDomesticReturn,
+      },
+      async: false,
+    });
+
+    return shipment;
+  } catch (error) {
+    console.error('Error creating return shipment:', error);
     throw error;
   }
 }

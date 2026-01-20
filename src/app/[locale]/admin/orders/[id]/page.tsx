@@ -309,7 +309,18 @@ export default async function OrderDetailPage({
           </div>
 
           {/* Status actions */}
-          <OrderDetailClient orderId={order.id} currentStatus={order.status} />
+          <OrderDetailClient
+            orderId={order.id}
+            orderNumber={order.orderNumber}
+            customerName={
+              order.user.firstName && order.user.lastName
+                ? `${order.user.firstName} ${order.user.lastName}`
+                : 'N/A'
+            }
+            totalAmount={order.totalAmount.toString()}
+            currency={order.currency}
+            currentStatus={order.status}
+          />
 
           {/* Status history */}
           {order.statusHistory && order.statusHistory.length > 0 && (
