@@ -43,3 +43,11 @@ Nous avons intégré un système de génération d'étiquettes de retour automat
 - Les services liés se trouvent dans : `src/lib/services/order.service.ts` (`createReturnLabel`)
 - L'API de gestion : `src/app/api/admin/orders/[id]/return-label/route.ts`
 - Le template d'email : `src/components/emails/order-return-label.tsx`
+
+
+
+Prochains Objectifs:
+
+🛡️ Connexion Stripe Refund : Connecter le bouton de confirmation admin à l'API Stripe pour déclencher le remboursement monétaire réel sur la carte du client.
+📸 Enrichissement Client : Ajouter l'option d'envoi de photos et de descriptions détaillées dans le formulaire de demande de remboursement utilisateur.
+🚀 Validation Finale : Effectuer les tests de bout en bout et le commit/push final.

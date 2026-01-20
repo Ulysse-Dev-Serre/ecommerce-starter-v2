@@ -46,7 +46,7 @@
 - [x] **Issue 25** : Emails Transactionnels (Resend/React-Email)
 - [x] **Issue 26** : Marketing Pixels (GA4, FB, TikTok) & Cookie Consent
 - [x] **Issue 27** : Pages Légales & Contenu Statique
-- [ ] **Issue 28** : Stripe Tax Configuration (Voir [Documentation & Limitation](../9-payment-system/stripe-tax-configuration.md)) 
+- [x] **Issue 28** : Stripe Tax Configuration (Voir [Documentation & Limitation](../9-payment-system/stripe-tax-configuration.md)) 
 - [x] **Issue 29** : Pages d'erreur Custom (404/500)
 - [x] **Issue 30** : Premier Déploiement Vercel (Production)
 - [x] **Issue 31** : Gestion des retours et remboursements
@@ -58,7 +58,7 @@
 **Objectif :** Améliorer l'administration, le référencement et durcir la sécurité.
 
 **Issues à faire :**
-- [ ] **Issue 32** : Admin Panel Avancé (Catégories, Customers, Analytics)
+- [ ] **Issue 32** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
 - [ ] **Issue 33** : Admin : Gestion complète des Catégories (CRUD)
 - [ ] **Issue 34** : SEO international : hreflang et x-default
 - [ ] **Issue 35** : Canonical & facettes : éviter la duplication
@@ -70,6 +70,7 @@
 - [ ] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
 - [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
+[ ] **Issue 44** : Admin Panel Avancé (Catégories, Customers, Analytics)
 - [ ] **Issue 44** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
 - [ ] **Issue 45** : Hardening UX : Notifications détaillées en cas de panne de services tiers (Stripe/Shippo down)
 

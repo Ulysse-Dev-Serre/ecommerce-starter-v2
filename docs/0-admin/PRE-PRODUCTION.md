@@ -182,6 +182,16 @@ NEXT_PUBLIC_CORS_ORIGIN=https://ma-boutique.com
 
 ⚠️ **CORS_ORIGIN doit correspondre à votre domaine en production** (pas localhost)
 
+### 9. Configurer Google Maps API (Restrictions)
+
+Dans la console Google Cloud [Console > APIs & Services > Credentials](https://console.cloud.google.com/apis/credentials) :
+
+- [ ] Modifiez les **Restrictions HTTP** de votre clé API.
+- [ ] Supprimez `http://localhost:3000/*` (si présent en production).
+- [ ] Ajoutez votre domaine réel : `https://votre-domaine.com/*`.
+
+*Note: Sans cette étape, l'autocomplétion d'adresse pourrait échouer en production ou être vulnérable au vol de quota.*
+
 ---
 
 ## 🔑 Clés Stripe en mode Live
@@ -389,6 +399,7 @@ Avant de lancer en production, vérifier que **tous** les éléments suivants so
 - [ ] Base de données configurée et migrée
 - [ ] Clerk et Stripe configurés
 - [ ] Webhooks configurés pour les deux services
+- [ ] **Restrictions Google Maps** : Domaine réel ajouté et localhost supprimé (Console Google Cloud)
 
 ### Stripe
 - [ ] Clés live configurées (`sk_live_`, `pk_live_`)

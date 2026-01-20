@@ -9,6 +9,7 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import AddressAutocomplete from './AddressAutocomplete';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(
@@ -451,13 +452,29 @@ function CheckoutForm({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t.addressLine1} <span className="text-red-500 ml-1">*</span>
                 </label>
-                <input
-                  type="text"
+                <AddressAutocomplete
+                  onAddressSelect={selected => {
+                    setTempAddress({
+                      ...tempAddress,
+                      line1: selected.line1,
+                      city: selected.city,
+                      state: selected.state,
+                      postal_code: selected.postal_code,
+                      country: selected.country,
+                    });
+                  }}
+                  onInputChange={val => {
+                    setTempAddress({
+                      ...tempAddress,
+                      line1: val,
+                    });
+                  }}
                   value={tempAddress?.line1 || ''}
-                  onChange={e =>
-                    setTempAddress({ ...tempAddress, line1: e.target.value })
-                  }
+                  placeholder={t.addressLine1}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                  countryRestriction={
+                    tempAddress?.country === 'US' ? 'us' : 'ca'
+                  }
                 />
               </div>
 

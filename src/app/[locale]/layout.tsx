@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
 
 import { Navbar } from '../../components/layout/navbar';
 import { ConditionalFooter } from '../../components/layout/conditional-footer';
@@ -68,6 +69,10 @@ export default async function RootLayout({
             {children}
             <ConditionalFooter locale={locale} />
           </ToastProvider>
+          <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${clerkKey ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''}&libraries=places`}
+            strategy="beforeInteractive"
+          />
         </body>
       </html>
     );
@@ -104,6 +109,10 @@ export default async function RootLayout({
             {children}
             <ConditionalFooter locale={locale} />
           </ToastProvider>
+          <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly`}
+            strategy="beforeInteractive"
+          />
         </body>
       </html>
     </ClerkProvider>
