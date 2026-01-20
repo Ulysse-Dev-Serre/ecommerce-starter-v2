@@ -58,8 +58,8 @@
 **Objectif :** Améliorer l'administration, le référencement et durcir la sécurité.
 
 **Issues à faire :**
-- [ ] **Issue 32** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
-- [ ] **Issue 33** : Admin : Gestion complète des Catégories (CRUD)
+- [x] **Issue 32** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
+- [x] **Issue 33** : Admin Panel Avancé (Customers, Analytics)
 - [ ] **Issue 34** : SEO international : hreflang et x-default
 - [ ] **Issue 35** : Canonical & facettes : éviter la duplication
 - [ ] **Issue 36** : Sitemap(s) multilingues & robots.txt
@@ -70,8 +70,7 @@
 - [ ] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
 - [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
-[ ] **Issue 44** : Admin Panel Avancé (Catégories, Customers, Analytics)
-- [ ] **Issue 44** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
+- [ ] **Issue 44** : Admin : Gestion complète des Catégories (CRUD)
 - [ ] **Issue 45** : Hardening UX : Notifications détaillées en cas de panne de services tiers (Stripe/Shippo down)
 
 ---

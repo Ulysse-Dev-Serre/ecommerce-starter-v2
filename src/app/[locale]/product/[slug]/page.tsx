@@ -106,7 +106,14 @@ export default async function ProductPage({
               </div>
             )}
 
-            <ProductClient variants={variants} locale={locale} />
+            <ProductClient
+              variants={variants}
+              locale={locale}
+              productId={product.id}
+              productName={translation?.name || product.slug}
+              initialPrice={variants[0]?.pricing[0]?.price}
+              initialCurrency={variants[0]?.pricing[0]?.currency}
+            />
           </div>
         </div>
       </div>

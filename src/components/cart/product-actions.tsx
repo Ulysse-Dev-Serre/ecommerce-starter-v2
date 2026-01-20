@@ -7,8 +7,11 @@ import { useRouter } from 'next/navigation';
 
 import { useToast } from '../ui/toast-provider';
 
+import { trackEvent } from '@/lib/analytics/tracker';
+
 interface ProductActionsProps {
   variantId: string;
+  productName: string;
   locale: string;
   disabled?: boolean;
   showQuantitySelector?: boolean;
@@ -19,6 +22,7 @@ interface ProductActionsProps {
 
 export function ProductActions({
   variantId,
+  productName,
   locale,
   disabled = false,
   showQuantitySelector = true,
@@ -72,6 +76,11 @@ export function ProductActions({
 
       if (response.ok) {
         showToast(t.addedToCart(quantity), 'success');
+        trackEvent(
+          'add_to_cart',
+          { variantId, quantity, productName },
+          productName
+        );
         router.refresh();
       }
     } catch (error) {
@@ -84,6 +93,11 @@ export function ProductActions({
   const handleBuyNow = async () => {
     setIsBuyingNow(true);
     try {
+      trackEvent(
+        'begin_checkout',
+        { variantId, quantity, productName, type: 'direct' },
+        productName
+      );
       // Redirection vers le checkout avec les paramètres pour l'achat direct
       router.push(
         `/${locale}/checkout?directVariantId=${variantId}&directQuantity=${quantity}`

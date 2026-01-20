@@ -13,6 +13,8 @@ import { prisma } from '@/lib/db/prisma';
 import '../globals.css';
 import GoogleTagManager from '../../components/analytics/GoogleTagManager';
 import CookieConsentComponent from '../../components/analytics/CookieConsent';
+import { AnalyticsTracker } from '../../components/analytics/AnalyticsTracker';
+import { Suspense } from 'react';
 
 // Disable static generation (requires DB & Auth)
 export const dynamic = 'force-dynamic';
@@ -65,6 +67,9 @@ export default async function RootLayout({
         >
           <GoogleTagManager />
           <CookieConsentComponent />
+          <Suspense fallback={null}>
+            <AnalyticsTracker />
+          </Suspense>
           <ToastProvider>
             {children}
             <ConditionalFooter locale={locale} />
@@ -103,6 +108,9 @@ export default async function RootLayout({
         >
           <GoogleTagManager />
           <CookieConsentComponent />
+          <Suspense fallback={null}>
+            <AnalyticsTracker />
+          </Suspense>
           <ToastProvider>
             <CartMergeHandler />
             <Navbar locale={locale} userRole={userRole} />

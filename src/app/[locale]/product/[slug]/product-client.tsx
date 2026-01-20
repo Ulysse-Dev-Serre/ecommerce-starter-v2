@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
+import { trackEvent } from '@/lib/analytics/tracker';
 
 interface Variant {
   id: string;
@@ -19,9 +19,33 @@ interface Variant {
 interface ProductClientProps {
   variants: Variant[];
   locale: string;
+  productId: string;
+  productName: string;
+  initialPrice?: string;
+  initialCurrency?: string;
 }
 
-export function ProductClient({ variants, locale }: ProductClientProps) {
+export function ProductClient({
+  variants,
+  locale,
+  productId,
+  productName,
+  initialPrice,
+  initialCurrency,
+}: ProductClientProps) {
+  useEffect(() => {
+    trackEvent(
+      'view_item',
+      {
+        productId,
+        productName,
+        price: initialPrice,
+        currency: initialCurrency,
+      },
+      productName
+    );
+  }, [productId, productName, initialPrice, initialCurrency]);
+
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants[0]?.id || ''
   );
@@ -175,6 +199,7 @@ export function ProductClient({ variants, locale }: ProductClientProps) {
 
       <ProductActions
         variantId={selectedVariant.id}
+        productName={productName}
         locale={locale}
         disabled={!selectedVariant.id || selectedVariant.stock <= 0}
         maxQuantity={selectedVariant.stock}

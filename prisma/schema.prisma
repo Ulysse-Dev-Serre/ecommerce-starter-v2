@@ -101,6 +101,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Attribution (First Touch)
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
   addresses Address[]
   carts     Cart[]
   orders    Order[]
@@ -434,6 +439,14 @@ model Order {
   billingAddress   Json
   customerNotes    String?
   internalNotes    String?
+  
+  // Attribution (Last Touch)
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+  utmContent       String?
+  utmTerm          String?
+
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
 
@@ -831,6 +844,31 @@ model SupplierOrderItem {
 
   @@index([supplierOrderId])
   @@map("supplier_order_items")
+}
+
+// Nouvelle table pour le funnel de conversion
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  eventType   String   // page_view, view_item, add_to_cart, begin_checkout, purchase
+  eventName   String?  // Nom optionnel
+  path        String?  // URL du chemin
+  userId      String?
+  anonymousId String?  // Cookie ID pour les invités
+  
+  // Métadonnées flexibles (ex: productId, price, currency)
+  metadata    Json?    
+  
+  // Attribution au moment de l'événement
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([anonymousId, createdAt])
+  @@index([userId, createdAt])
+  @@map("analytics_events")
 }
 
 

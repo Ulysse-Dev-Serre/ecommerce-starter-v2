@@ -221,8 +221,8 @@ export default async function OrderDetailPage({
               <div>
                 <p className="text-gray-600">Name</p>
                 <p className="font-medium">
-                  {order.user.firstName && order.user.lastName
-                    ? `${order.user.firstName} ${order.user.lastName}`
+                  {order.user.firstName || order.user.lastName
+                    ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim()
                     : 'N/A'}
                 </p>
               </div>
@@ -313,8 +313,8 @@ export default async function OrderDetailPage({
             orderId={order.id}
             orderNumber={order.orderNumber}
             customerName={
-              order.user.firstName && order.user.lastName
-                ? `${order.user.firstName} ${order.user.lastName}`
+              order.user.firstName || order.user.lastName
+                ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim()
                 : 'N/A'
             }
             totalAmount={order.totalAmount.toString()}

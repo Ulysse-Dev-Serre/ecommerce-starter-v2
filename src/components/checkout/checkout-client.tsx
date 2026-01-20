@@ -10,6 +10,7 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import AddressAutocomplete from './AddressAutocomplete';
+import { trackEvent } from '@/lib/analytics/tracker';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(
@@ -213,6 +214,10 @@ function CheckoutForm({
   const [shippingRates, setShippingRates] = useState<any[]>([]);
   const [selectedRate, setSelectedRate] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    trackEvent('begin_checkout', { cartId, currency, initialTotal });
+  }, []);
 
   // New states for better UX/Debugging of shipping rates
   const [isLoading, setIsLoading] = useState(false);

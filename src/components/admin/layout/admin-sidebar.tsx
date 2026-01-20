@@ -79,10 +79,6 @@ export function AdminSidebar() {
       icon: BarChart3,
     },
     {
-      href: `/${locale}/admin/content`,
-      icon: FileText,
-    },
-    {
       title: t.logistics,
       href: `/${locale}/admin/logistics`,
       icon: Truck,

@@ -43,6 +43,13 @@ npx prisma studio
 | **[Clerk ↔ PostgreSQL](./4-database-stack/clerk-postgres-sync.md)** | Synchronisation utilisateurs | Tests webhooks     |
 | **[Migrations Prisma](./4-database-stack/prisma-migrations.md)**     | Gestion migrations schema    | Évolution database |
 
+### 📊 **12. Analytique**
+
+| Document                                                                     | Contenu                            | Usage                     |
+| ---------------------------------------------------------------------------- | ---------------------------------- | ------------------------- |
+| **[Consentement Analytique](./12-analytic/internal-tracking-consent.md)** | Politique de tracking interne      | Mise en conformité future |
+| **[Méthodologie de Test](./12-analytic/testing-methodology.md)**        | Guide pour tester ses campagnes    | Validation Data           |
+
 ---
 
 ## 🎯 Guides par Objectif
