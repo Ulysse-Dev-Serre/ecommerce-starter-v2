@@ -27,7 +27,7 @@ export interface ProductVariantProjection {
   id: string;
   sku: string;
   pricing: {
-    price: Prisma.Decimal;
+    price: string;
     currency: string;
     priceType: string;
   }[];
@@ -276,7 +276,16 @@ export async function getProducts(
   );
 
   return {
-    products: products as ProductProjection[],
+    products: products.map(product => ({
+      ...product,
+      variants: product.variants.map(variant => ({
+        ...variant,
+        pricing: variant.pricing.map(p => ({
+          ...p,
+          price: (p.price as any).toString(),
+        })),
+      })),
+    })) as unknown as ProductProjection[],
     pagination: {
       page,
       limit,
@@ -414,6 +423,17 @@ export async function getProductBySlug(
       },
       `Product fetched: ${slug}`
     );
+
+    return {
+      ...product,
+      variants: product.variants.map(variant => ({
+        ...variant,
+        pricing: variant.pricing.map(p => ({
+          ...p,
+          price: (p.price as any).toString(),
+        })),
+      })),
+    } as unknown as ProductProjection;
   } else {
     logger.warn(
       {
@@ -422,9 +442,8 @@ export async function getProductBySlug(
       },
       `Product not found: ${slug}`
     );
+    return null;
   }
-
-  return product as unknown as ProductProjection | null;
 }
 
 /**

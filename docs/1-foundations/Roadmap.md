@@ -61,16 +61,7 @@
 - [x] **Issue 32** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
 - [x] **Issue 33** : Admin Panel Avancé (Customers, Analytics)
 - [x] **Issue 34** : SEO international : hreflang et x-default
-- [ ] **Issue 35** : Canonical & facettes : éviter la duplication
-
-"issue 35 Ce qui est FAIT (Canonical de base) :
-J'ai déjà ajouté la balise canonical de base dans layout.tsx ce matin.
-Exemple : Si tu es sur /fr/product/jardin-v1, la balise canonical pointe bien vers /fr/product/jardin-v1. C'est le niveau 1.
-Ce qui RESTE À FAIRE (Le vrai challenge "Facettes") :
-C'est la gestion des filtres URL : /shop?category=seeds&sort=price_asc.
-Google peut voir ça comme une page différente de /shop ou de /shop?sort=price_asc&category=seeds (contenu dupliqué).
-Le fix : Il faut s'assurer que TOUTES ces variantes déclarent une seule URL canonique propre : /shop."
-
+- [x] **Issue 35** : Canonical & facettes : éviter la duplication (Réglé : URLs canoniques sans paramètres de recherche)
 
 - [x] **Issue 36** : Sitemap(s) multilingues & robots.txt
 - [x] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues

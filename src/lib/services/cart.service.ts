@@ -33,7 +33,7 @@ export interface CartProjection {
         }[];
       };
       pricing: {
-        price: any; // Prisma Decimal type
+        price: string;
         currency: string;
       }[];
       inventory: {
@@ -191,7 +191,21 @@ export async function getOrCreateCart(
     );
   }
 
-  return cart as unknown as CartProjection;
+  const serializedCart = {
+    ...cart,
+    items: cart.items.map(item => ({
+      ...item,
+      variant: {
+        ...item.variant,
+        pricing: item.variant.pricing.map(p => ({
+          ...p,
+          price: (p.price as any).toString(),
+        })),
+      },
+    })),
+  };
+
+  return serializedCart as unknown as CartProjection;
 }
 
 /**
