@@ -62,7 +62,7 @@
 - [x] **Issue 33** : Admin Panel Avancé (Customers, Analytics)
 - [x] **Issue 34** : SEO international : hreflang et x-default
 - [ ] **Issue 35** : Canonical & facettes : éviter la duplication
-- [ ] **Issue 36** : Sitemap(s) multilingues & robots.txt
+- [x] **Issue 36** : Sitemap(s) multilingues & robots.txt
 - [ ] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues
 - [ ] **Issue 38** : Données structurées (Schema.org) bilingues
 - [ ] **Issue 39** : Formats localisés (monnaies, dates, unités)
