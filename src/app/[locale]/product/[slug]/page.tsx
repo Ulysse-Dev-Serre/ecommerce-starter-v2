@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { Language, ProductStatus } from '@/generated/prisma';
 import { ImageGallery } from '@/components/product/image-gallery';
+import { JsonLd } from '@/components/seo/json-ld';
 import { prisma } from '@/lib/db/prisma';
 
 import { ProductClient } from './product-client';
@@ -121,8 +122,63 @@ export default async function ProductPage({
     })),
   }));
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+  const productUrl = `${siteUrl}/${locale}/product/${product.slug}`;
+  const imageUrl = images[0]?.url || '';
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: translation?.name || product.slug,
+    description:
+      translation?.description || translation?.shortDescription || '',
+    image: imageUrl,
+    sku: product.variants[0]?.sku || '',
+    offers: {
+      '@type': 'Offer',
+      price: variants[0]?.pricing[0]?.price || '0',
+      priceCurrency: variants[0]?.pricing[0]?.currency || 'CAD',
+      availability:
+        (variants[0]?.stock || 0) > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      url: productUrl,
+    },
+    brand: {
+      '@type': 'Organization',
+      name: 'AgTechNest',
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: locale === 'fr' ? 'Accueil' : 'Home',
+        item: `${siteUrl}/${locale}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: locale === 'fr' ? 'Boutique' : 'Shop',
+        item: `${siteUrl}/${locale}/shop`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: translation?.name || product.slug,
+        item: productUrl,
+      },
+    ],
+  };
+
   return (
     <div className="flex-1 py-8">
+      <JsonLd data={productJsonLd} />
+      <JsonLd data={breadcrumbJsonLd} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <ImageGallery

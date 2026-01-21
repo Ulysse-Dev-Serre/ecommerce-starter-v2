@@ -64,7 +64,8 @@
 - [ ] **Issue 35** : Canonical & facettes : éviter la duplication
 - [x] **Issue 36** : Sitemap(s) multilingues & robots.txt
 - [x] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues
-- [ ] **Issue 38** : Données structurées (Schema.org) bilingues
+- [x] **Issue 38** : Données structurées (Schema.org) bilingues
+- [ ] **Issue 38-bis** : Fichier llms.txt pour IA
 - [ ] **Issue 39** : Formats localisés (monnaies, dates, unités)
 - [ ] **Issue 40** : Migration & redirections 301
 - [ ] **Issue 41** : Politique d’indexation & Liens internes
