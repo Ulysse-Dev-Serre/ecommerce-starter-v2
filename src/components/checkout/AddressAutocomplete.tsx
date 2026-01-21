@@ -84,15 +84,19 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     const placePrediction = suggestion.placePrediction;
     if (!placePrediction) return;
 
-    onInputChange(placePrediction.text.text);
+    // Don't update the input yet - wait for the full address details
     setSuggestions([]);
     setShowSuggestions(false);
 
     try {
-      const { place } = await window.google.maps.places.Place.fetchFields({
+      // Create a new Place instance with the placeId
+      const place = new window.google.maps.places.Place({
         id: placePrediction.placeId,
+      });
+
+      // Fetch the address components
+      await place.fetchFields({
         fields: ['addressComponents', 'formattedAddress'],
-        sessionToken: sessionTokenRef.current,
       });
 
       if (place && place.addressComponents) {
@@ -119,8 +123,14 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           if (types.includes('country')) country = component.shortText;
         });
 
+        const streetAddress = `${streetNumber} ${route}`.trim();
+
+        // Update the input field with ONLY the street address
+        onInputChange(streetAddress);
+
+        // Then populate all other fields
         onAddressSelect({
-          line1: `${streetNumber} ${route}`.trim(),
+          line1: streetAddress,
           city,
           state,
           postal_code: zipCode,
