@@ -20,7 +20,20 @@
     "contact": "Contact",
     "backToSite": "Back to site",
     "quantity": "Quantity",
-    "discount": "Discount"
+    "discount": "Discount",
+    "title": "Contact Us",
+    "description": "Have a question about our products or your order? Fill out the form and we will get back to you as soon as possible.",
+    "emailLabel": "Email",
+    "addressLabel": "Address",
+    "refundTitle": "Refund Request",
+    "refundText": "For any refund request, please go to the <link>My Orders</link> section and select the relevant order. You will find a dedicated form there.",
+    "formName": "Name",
+    "formNamePlaceholder": "Your name",
+    "formEmail": "Email",
+    "formEmailPlaceholder": "your@email.com",
+    "formMessage": "Message",
+    "formMessagePlaceholder": "How can we help you?",
+    "formSubmit": "Send (Coming Soon)"
   },
   "error": {
     "notFound": {
@@ -290,5 +303,9 @@
       "refundDoneTitle": "Refund completed",
       "refundDoneMessage": "The refund of {amount} {currency} has been successfully processed."
     }
+  },
+  "Metadata": {
+    "title": "Universal E-commerce Starter",
+    "description": "Flexible, ready-to-use universal e-commerce starter."
   }
 }

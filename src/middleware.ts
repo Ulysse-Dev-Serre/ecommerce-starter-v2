@@ -2,9 +2,9 @@
 import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { i18n } from '@/lib/i18n/config';
 
-const locales = ['fr', 'en'];
-const defaultLocale = 'fr';
+const { locales, defaultLocale } = i18n;
 
 const CURRENCY_COOKIE_NAME = 'currency';
 const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;

@@ -3,6 +3,8 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { getTranslations } from 'next-intl/server';
+import { i18n } from '@/lib/i18n/config';
 import Script from 'next/script';
 
 import { Navbar } from '../../components/layout/navbar';
@@ -29,10 +31,29 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export const metadata: Metadata = {
-  title: 'Nom de votre site E-commerce',
-  description: "Starter e-commerce universel, flexible et prêt à l'emploi.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        fr: '/fr',
+        en: '/en',
+        'x-default': '/en',
+      },
+    },
+  };
+}
 
 // Générer les paramètres statiques pour les locales
 export async function generateStaticParams(): Promise<{ locale: string }[]> {

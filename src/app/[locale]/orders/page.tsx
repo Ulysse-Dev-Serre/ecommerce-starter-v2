@@ -5,8 +5,7 @@ import { auth } from '@clerk/nextjs/server';
 
 import { prisma } from '@/lib/db/prisma';
 import { getUserOrders } from '@/lib/services/order.service';
-import { getMessages } from 'next-intl/server';
-import { NextIntlClientProvider, useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +17,6 @@ export default async function OrdersPage({
   params,
 }: OrdersPageProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const messages = await getMessages();
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -36,22 +34,18 @@ export default async function OrdersPage({
 
   const orders = await getUserOrders(user.id);
 
-  return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <OrdersListContent orders={orders} locale={locale} />
-    </NextIntlClientProvider>
-  );
+  return <OrdersListContent orders={orders} locale={locale} />;
 }
 
-function OrdersListContent({
+async function OrdersListContent({
   orders,
   locale,
 }: {
   orders: any[];
   locale: string;
 }) {
-  const t = useTranslations('Orders.list');
-  const tDetail = useTranslations('Orders.detail');
+  const t = await getTranslations({ locale, namespace: 'Orders.list' });
+  const tDetail = await getTranslations({ locale, namespace: 'Orders.detail' });
 
   const statusLabels: Record<string, string> = {
     PENDING: tDetail('statusPending'),

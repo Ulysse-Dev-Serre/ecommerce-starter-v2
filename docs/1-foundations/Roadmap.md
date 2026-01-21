@@ -60,7 +60,7 @@
 **Issues à faire :**
 - [x] **Issue 32** : Optimisation UX : Autocomplétion d'adresse (Google Places API) pour Shippo
 - [x] **Issue 33** : Admin Panel Avancé (Customers, Analytics)
-- [ ] **Issue 34** : SEO international : hreflang et x-default
+- [x] **Issue 34** : SEO international : hreflang et x-default
 - [ ] **Issue 35** : Canonical & facettes : éviter la duplication
 - [ ] **Issue 36** : Sitemap(s) multilingues & robots.txt
 - [ ] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues

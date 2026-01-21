@@ -6,8 +6,8 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/db/prisma';
 import { getOrderById } from '@/lib/services/order.service';
 import { RefundRequestForm } from '@/components/orders/refund-request-form';
-import { getMessages } from 'next-intl/server';
-import { NextIntlClientProvider, useTranslations } from 'next-intl';
+import { getTranslations, getMessages } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +19,6 @@ export default async function OrderDetailPage({
   params,
 }: OrderDetailPageProps): Promise<React.ReactElement> {
   const { locale, id } = await params;
-  const messages = await getMessages();
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -80,6 +79,8 @@ export default async function OrderDetailPage({
     {} as Record<string, { image?: string; slug: string; name?: string }>
   );
 
+  const messages = await getMessages();
+
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <OrderDetailContent
@@ -91,7 +92,7 @@ export default async function OrderDetailPage({
   );
 }
 
-function OrderDetailContent({
+async function OrderDetailContent({
   order,
   locale,
   productData,
@@ -100,9 +101,9 @@ function OrderDetailContent({
   locale: string;
   productData: Record<string, { image?: string; slug: string; name?: string }>;
 }) {
-  const t = useTranslations('Orders.detail');
-  const tCommon = useTranslations('common');
-  const tRefund = useTranslations('Orders.refund');
+  const t = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const tCommon = await getTranslations({ locale, namespace: 'common' });
+  const tRefund = await getTranslations({ locale, namespace: 'Orders.refund' });
 
   const statusLabels: Record<string, string> = {
     PENDING: t('statusPending'),

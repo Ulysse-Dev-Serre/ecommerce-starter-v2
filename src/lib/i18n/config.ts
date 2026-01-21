@@ -1,16 +1,10 @@
 // i18n Configuration
 export const i18n = {
-  defaultLocale: 'fr',
+  defaultLocale: 'en',
   locales: ['fr', 'en'] as const,
 } as const;
 
 export type Locale = (typeof i18n)['locales'][number];
-
-export function getMessages(
-  locale: string
-): Promise<Record<string, Record<string, string>>> {
-  return import(`./dictionaries/${locale}.json`).then(module => module.default);
-}
 
 export function getLocaleFromPath(pathname: string): Locale {
   const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);

@@ -20,7 +20,20 @@
     "contact": "Contact",
     "backToSite": "Retour au site",
     "quantity": "Quantité",
-    "discount": "Réduction"
+    "discount": "Réduction",
+    "title": "Nous contacter",
+    "description": "Une question sur nos produits ou votre commande ? Remplissez le formulaire et nous vous répondrons dans les plus brefs délais.",
+    "emailLabel": "Email",
+    "addressLabel": "Adresse",
+    "refundTitle": "Demande de remboursement",
+    "refundText": "Pour toute demande de remboursement, merci de vous rendre dans la section <link>Mes Commandes</link> et de sélectionner la commande concernée. Vous y trouverez un formulaire dédié.",
+    "formName": "Nom",
+    "formNamePlaceholder": "Votre nom",
+    "formEmail": "Email",
+    "formEmailPlaceholder": "votre@email.com",
+    "formMessage": "Message",
+    "formMessagePlaceholder": "Comment pouvons-nous vous aider ?",
+    "formSubmit": "Envoyer (Bientôt disponible)"
   },
   "error": {
     "notFound": {
@@ -290,5 +303,9 @@
       "refundDoneTitle": "Remboursement effectué",
       "refundDoneMessage": "Le remboursement de {amount} {currency} a été traité avec succès."
     }
+  },
+  "Metadata": {
+    "title": "Starter E-commerce Universel",
+    "description": "Starter e-commerce universel, flexible et prêt à l'emploi."
   }
 }
