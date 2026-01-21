@@ -75,11 +75,14 @@
     "price": "Price",
     "addToCart": "Add to cart",
     "outOfStock": "Out of stock",
-    "inStock": "In stock"
+    "inStock": "In stock",
+    "fallbackDescription": "Buy {title} from us."
   },
   "shop": {
     "title": "Shop",
-    "addToCart": "Add"
+    "addToCart": "Add",
+    "viewOptions": "View options",
+    "noImage": "No image"
   },
   "cart": {
     "title": "Cart",

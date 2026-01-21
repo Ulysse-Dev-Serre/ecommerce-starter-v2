@@ -75,11 +75,14 @@
     "price": "Prix",
     "addToCart": "Ajouter au panier",
     "outOfStock": "Rupture de stock",
-    "inStock": "En stock"
+    "inStock": "En stock",
+    "fallbackDescription": "Achetez {title} chez nous."
   },
   "shop": {
     "title": "Boutique",
-    "addToCart": "Ajouter"
+    "addToCart": "Ajouter",
+    "viewOptions": "Voir les options",
+    "noImage": "Pas d'image"
   },
   "cart": {
     "title": "Panier",

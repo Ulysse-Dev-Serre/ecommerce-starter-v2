@@ -5,9 +5,26 @@ import { PriceDisplay } from '@/components/price-display';
 import { getProducts } from '@/lib/services/product.service';
 import { Language } from '@/generated/prisma';
 
+import { getTranslations } from 'next-intl/server';
+import { Metadata } from 'next';
+
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ page?: string; category?: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ShopPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'shop' });
+
+  return {
+    title: t('title'),
+    openGraph: {
+      title: t('title'),
+    },
+  };
 }
 
 export default async function ShopPage({
@@ -16,6 +33,7 @@ export default async function ShopPage({
 }: ShopPageProps): Promise<React.JSX.Element> {
   const { locale } = await params;
   const { page = '1', category } = await searchParams;
+  const t = await getTranslations({ locale, namespace: 'shop' });
 
   const { products, pagination } = await getProducts(
     {
@@ -31,9 +49,7 @@ export default async function ShopPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">
-        {locale === 'fr' ? 'Boutique' : 'Shop'}
-      </h1>
+      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product: any) => {
@@ -61,7 +77,7 @@ export default async function ShopPage({
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      {locale === 'fr' ? "Pas d'image" : 'No image'}
+                      {t('noImage')}
                     </div>
                   )}
                 </div>
@@ -86,7 +102,7 @@ export default async function ShopPage({
                   href={`/${locale}/product/${product.slug}`}
                   className="w-full inline-block text-center bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors"
                 >
-                  {locale === 'fr' ? 'Voir les options' : 'View options'}
+                  {t('viewOptions')}
                 </Link>
               ) : (
                 <ProductActions
@@ -96,6 +112,7 @@ export default async function ShopPage({
                   compact={true}
                   showQuantitySelector={true}
                   maxQuantity={firstVariant?.inventory?.stock || 99}
+                  productName={translation?.name || product.slug}
                 />
               )}
             </div>
@@ -109,7 +126,7 @@ export default async function ShopPage({
             p => (
               <a
                 key={p}
-                href={`/shop?page=${p}${category ? `&category=${category}` : ''}`}
+                href={`/${locale}/shop?page=${p}${category ? `&category=${category}` : ''}`}
                 className={`px-4 py-2 rounded ${
                   p === pagination.page
                     ? 'bg-primary text-white'

@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import { Language, ProductStatus } from '@/generated/prisma';
 import { ImageGallery } from '@/components/product/image-gallery';
@@ -11,6 +13,42 @@ export const dynamic = 'force-dynamic';
 
 interface ProductPageProps {
   params: Promise<{ locale: string; slug: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const language = locale.toUpperCase() as Language;
+
+  const product = await prisma.product.findUnique({
+    where: { slug },
+    include: {
+      translations: { where: { language } },
+      media: { orderBy: { sortOrder: 'asc' }, take: 1 },
+    },
+  });
+
+  if (!product) {
+    return {};
+  }
+
+  const t = await getTranslations({ locale, namespace: 'products' });
+  const translation = product.translations[0];
+  const title = translation?.name || product.slug;
+  const description = translation?.description
+    ? translation.description.substring(0, 160)
+    : t('fallbackDescription', { title });
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: product.media[0] ? [product.media[0].url] : [],
+    },
+  };
 }
 
 export default async function ProductPage({

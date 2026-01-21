@@ -1,4 +1,24 @@
 import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { Metadata } from 'next';
+
+interface Props {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'common' });
+
+  return {
+    title: t('contact'),
+    description: t('description'),
+    openGraph: {
+      title: t('contact'),
+      description: t('description'),
+    },
+  };
+}
 
 export default function ContactPage() {
   const t = useTranslations('contact');
