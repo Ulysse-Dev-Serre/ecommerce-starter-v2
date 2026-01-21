@@ -1,0 +1,36 @@
+# Ecommerce Starter V2
+
+> A universal, production-ready Next.js e-commerce starter kit.
+
+## Project Overview
+This project is a modern e-commerce platform built with:
+- **Framework**: Next.js 15 (App Router)
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: Clerk
+- **Payments**: Stripe (Elements & Webhooks)
+- **Shipping**: Shippo
+- **Styling**: Tailwind CSS
+- **Internationalization**: next-intl (FR/EN)
+
+## Site Structure
+
+### Core Pages
+- [Home Page](/en) - Main landing page.
+- [Shop](/en/shop) - Product catalog with filtering and pagination.
+- [Cart](/en/cart) - Shopping cart.
+- [Contact](/en/contact) - Contact form and information.
+
+### Dynamic Routes
+- Products: `/en/product/[slug]` (e.g., `/en/product/premium-planter-box`)
+- Categories: `/en/shop?category=[slug]`
+
+### Administration
+- [Admin Dashboard](/en/admin) - Order and product management (Restricted).
+
+## Key Features for AI Understanding
+- **Structured Data**: Product pages include JSON-LD (Schema.org/Product).
+- **Sitemap**: Available at `/sitemap.xml`.
+- **Localization**: Content is available in French (`/fr`) and English (`/en`).
+
+## Developer Documentation
+For technical details on the architecture and setup, refer to the source code repository or the `/docs` directory if available publicly.
