@@ -34,7 +34,7 @@ export function ProductClient({
   initialCurrency,
 }: ProductClientProps) {
   useEffect(() => {
-    trackEvent(
+    void trackEvent(
       'view_item',
       {
         productId,

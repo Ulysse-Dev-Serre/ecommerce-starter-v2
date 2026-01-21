@@ -62,6 +62,16 @@
 - [x] **Issue 33** : Admin Panel Avancé (Customers, Analytics)
 - [x] **Issue 34** : SEO international : hreflang et x-default
 - [ ] **Issue 35** : Canonical & facettes : éviter la duplication
+
+"issue 35 Ce qui est FAIT (Canonical de base) :
+J'ai déjà ajouté la balise canonical de base dans layout.tsx ce matin.
+Exemple : Si tu es sur /fr/product/jardin-v1, la balise canonical pointe bien vers /fr/product/jardin-v1. C'est le niveau 1.
+Ce qui RESTE À FAIRE (Le vrai challenge "Facettes") :
+C'est la gestion des filtres URL : /shop?category=seeds&sort=price_asc.
+Google peut voir ça comme une page différente de /shop ou de /shop?sort=price_asc&category=seeds (contenu dupliqué).
+Le fix : Il faut s'assurer que TOUTES ces variantes déclarent une seule URL canonique propre : /shop."
+
+
 - [x] **Issue 36** : Sitemap(s) multilingues & robots.txt
 - [x] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues
 - [x] **Issue 38** : Données structurées (Schema.org) bilingues
@@ -70,6 +80,7 @@
 - [ ] **Issue 40** : Migration & redirections 301
 - [ ] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
+- [ ] **Issue 42-bis** : Vérifications Post-Déploiement (Rich Results, Open Graph, Sitemap live, Inspect URL)
 - [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
 - [ ] **Issue 44** : Admin : Gestion complète des Catégories (CRUD)
 - [ ] **Issue 45** : Hardening UX : Notifications détaillées en cas de panne de services tiers (Stripe/Shippo down)

@@ -216,7 +216,7 @@ function CheckoutForm({
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    trackEvent('begin_checkout', { cartId, currency, initialTotal });
+    void trackEvent('begin_checkout', { cartId, currency, initialTotal });
   }, []);
 
   // New states for better UX/Debugging of shipping rates

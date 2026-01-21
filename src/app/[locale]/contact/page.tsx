@@ -1,6 +1,6 @@
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -20,8 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ContactPage() {
-  const t = useTranslations('contact');
+export default async function ContactPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'contact' });
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
@@ -67,9 +68,12 @@ export default function ContactPage() {
               <p className="text-sm text-yellow-800">
                 {t.rich('refundText', {
                   link: chunks => (
-                    <a href="/orders" className="font-bold underline">
+                    <Link
+                      href={`/${locale}/orders`}
+                      className="font-bold underline"
+                    >
                       {chunks}
-                    </a>
+                    </Link>
                   ),
                 })}
               </p>

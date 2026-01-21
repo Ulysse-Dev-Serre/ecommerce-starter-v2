@@ -58,8 +58,8 @@ export const RefundRequestAdminEmail = ({
               <Hr style={hr} />
               <Text style={label}>Image jointe :</Text>
               <Text style={text}>
-                L'image a été envoyée en pièce jointe ou est consultable via le
-                dashboard.
+                L&apos;image a été envoyée en pièce jointe ou est consultable
+                via le dashboard.
               </Text>
             </>
           )}

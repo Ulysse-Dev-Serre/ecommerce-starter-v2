@@ -124,6 +124,7 @@ export default async function Home({
                             compact={true}
                             showQuantitySelector={true}
                             maxQuantity={firstVariant.inventory?.stock || 99}
+                            productName={translation?.name || product.slug}
                           />
                         ))}
                     </div>

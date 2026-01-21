@@ -2,6 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 interface AddressAutocompleteProps {
   onAddressSelect: (address: {
     line1: string;
@@ -32,7 +38,6 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   // Initialisation du Token de session (Places New)
   useEffect(() => {
     if (window.google && window.google.maps && window.google.maps.places) {
-      // @ts-ignore - Nouveau format de token pour Places (New)
       sessionTokenRef.current =
         new window.google.maps.places.AutocompleteSessionToken();
     }
@@ -52,7 +57,6 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
     const fetchSuggestions = async () => {
       try {
-        // @ts-ignore - Utilisation de la nouvelle API recommandée par Google (2025)
         const { suggestions: results } =
           await window.google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(
             {
@@ -85,7 +89,6 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     setShowSuggestions(false);
 
     try {
-      // @ts-ignore - Récupération des détails via la nouvelle classe Place
       const { place } = await window.google.maps.places.Place.fetchFields({
         id: placePrediction.placeId,
         fields: ['addressComponents', 'formattedAddress'],
@@ -125,7 +128,6 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         });
 
         // Renouveler le token pour la prochaine session
-        // @ts-ignore
         sessionTokenRef.current =
           new window.google.maps.places.AutocompleteSessionToken();
       }

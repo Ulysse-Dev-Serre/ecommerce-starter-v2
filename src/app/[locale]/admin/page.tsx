@@ -154,7 +154,7 @@ export default async function AdminDashboard() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Vue d'ensemble de la performance de votre boutique
+          Vue d&apos;ensemble de la performance de votre boutique
         </p>
       </div>
 

@@ -266,7 +266,7 @@ export default async function CustomerDetailPage({
             <div className="flex items-center gap-2 mb-4">
               <Target className="h-4 w-4 text-primary" />
               <h3 className="font-semibold text-gray-900">
-                Source d'acquisition
+                Source d&apos;acquisition
               </h3>
             </div>
             <div className="space-y-3">

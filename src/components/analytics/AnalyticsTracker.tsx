@@ -13,7 +13,7 @@ export function AnalyticsTracker() {
     captureAndSaveUTM();
 
     // 2. Traquer la vue de page
-    trackEvent('page_view', {
+    void trackEvent('page_view', {
       title: document.title,
     });
   }, [pathname, searchParams]); // Relancer à chaque changement de route ou de paramètres

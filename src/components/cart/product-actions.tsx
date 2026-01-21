@@ -76,7 +76,7 @@ export function ProductActions({
 
       if (response.ok) {
         showToast(t.addedToCart(quantity), 'success');
-        trackEvent(
+        void trackEvent(
           'add_to_cart',
           { variantId, quantity, productName },
           productName
@@ -93,7 +93,7 @@ export function ProductActions({
   const handleBuyNow = async () => {
     setIsBuyingNow(true);
     try {
-      trackEvent(
+      void trackEvent(
         'begin_checkout',
         { variantId, quantity, productName, type: 'direct' },
         productName

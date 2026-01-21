@@ -42,11 +42,10 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
           />
           <Tooltip
             cursor={{ fill: 'transparent' }}
-            formatter={(
-              value: number | undefined,
-              name: string,
-              props: any
-            ) => [`${value || 0} (${props.payload.percentage}%)`, 'Visitors']}
+            formatter={(value: any, name: any, props: any) => [
+              `${value} (${props.payload.percentage}%)`,
+              'Visitors',
+            ]}
           />
           <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={40}>
             {data.map((entry, index) => (

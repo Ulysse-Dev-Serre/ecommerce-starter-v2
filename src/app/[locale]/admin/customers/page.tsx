@@ -126,7 +126,9 @@ export default async function CustomersPage({
               <tr>
                 <th className="px-6 py-4 font-semibold">Client</th>
                 <th className="px-6 py-4 font-semibold">Email</th>
-                <th className="px-6 py-4 font-semibold">Date d'inscription</th>
+                <th className="px-6 py-4 font-semibold">
+                  Date d&apos;inscription
+                </th>
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
