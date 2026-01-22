@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@clerk/nextjs/server';
@@ -10,6 +11,13 @@ import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 interface OrdersPageProps {
   params: Promise<{ locale: string }>;

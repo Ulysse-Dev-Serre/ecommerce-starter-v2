@@ -1,9 +1,17 @@
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/db/prisma';
 import { UserRole } from '@/generated/prisma';
 import { AdminSidebar } from '@/components/admin/layout/admin-sidebar';
 import { AdminHeader } from '@/components/admin/layout/admin-header';
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 // Disable static generation (requires DB & Auth)
 export const dynamic = 'force-dynamic';

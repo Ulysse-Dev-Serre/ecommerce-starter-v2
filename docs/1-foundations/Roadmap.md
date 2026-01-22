@@ -68,7 +68,7 @@
 - [x] **Issue 38-bis** : Fichier llms.txt pour IA
 - [x] **Issue 39** : Formats localisés (monnaies, dates, unités)
 - [x] **Issue 40** : Migration & redirections 301
-- [ ] **Issue 41** : Politique d’indexation & Liens internes
+- [x] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
 - [ ] **Issue 42-bis** : Vérifications Post-Déploiement (Rich Results, Open Graph, Sitemap live, Inspect URL)
 - [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)

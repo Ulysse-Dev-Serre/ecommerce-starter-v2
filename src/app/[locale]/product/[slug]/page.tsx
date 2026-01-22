@@ -8,6 +8,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { prisma } from '@/lib/db/prisma';
 
 import { ProductClient } from './product-client';
+import { RelatedProducts } from '@/components/product/related-products';
 
 // Disable static generation (requires DB)
 export const dynamic = 'force-dynamic';
@@ -217,6 +218,7 @@ export default async function ProductPage({
             />
           </div>
         </div>
+        <RelatedProducts currentProductId={product.id} locale={locale} />
       </div>
     </div>
   );
