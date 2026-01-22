@@ -39,7 +39,7 @@
 
 ## 🚀 P2 – Launch Readiness (Logistics & Legal) — CRITIQUE
 
-**Objectif :** Rendre le site opérationnel pour une vraDeveloper: Reload Windowie vente et une vraie livraison (MVP Launch).
+**Objectif :** Rendre le site opérationnel pour une vraie vente et une vraie livraison (MVP Launch).
 
 **Issues à faire :**
 - [x] **Issue 24** : Intégration Shippo (Calcul & Labels)
@@ -62,13 +62,12 @@
 - [x] **Issue 33** : Admin Panel Avancé (Customers, Analytics)
 - [x] **Issue 34** : SEO international : hreflang et x-default
 - [x] **Issue 35** : Canonical & facettes : éviter la duplication (Réglé : URLs canoniques sans paramètres de recherche)
-
 - [x] **Issue 36** : Sitemap(s) multilingues & robots.txt
 - [x] **Issue 37** : Métadonnées dynamiques & Open Graph multilingues
 - [x] **Issue 38** : Données structurées (Schema.org) bilingues
 - [x] **Issue 38-bis** : Fichier llms.txt pour IA
-- [ ] **Issue 39** : Formats localisés (monnaies, dates, unités)
-- [ ] **Issue 40** : Migration & redirections 301
+- [x] **Issue 39** : Formats localisés (monnaies, dates, unités)
+- [x] **Issue 40** : Migration & redirections 301
 - [ ] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
 - [ ] **Issue 42-bis** : Vérifications Post-Déploiement (Rich Results, Open Graph, Sitemap live, Inspect URL)

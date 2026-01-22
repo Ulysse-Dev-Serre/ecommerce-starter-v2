@@ -37,6 +37,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // Exemple de redirection manuelle pour un changement de slug (Migration V1 -> V2) :
+      // {
+      //   source: '/ancien-nom-produit',
+      //   destination: '/fr/produits/nouveau-nom-produit',
+      //   permanent: true,
+      // },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

@@ -94,7 +94,8 @@ export default clerkMiddleware((auth, req: NextRequest) => {
     );
 
     const response = NextResponse.redirect(
-      new URL(`/${defaultLocale}${pathname}`, req.url)
+      new URL(`/${defaultLocale}${pathname}`, req.url),
+      301
     );
     response.headers.set('x-request-id', requestId);
     return response;

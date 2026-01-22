@@ -1,6 +1,6 @@
 # E-Commerce Starter V2
 
-## 🎯 Vision
+## Vision
 
 **Starter e-commerce universel, flexible et prêt à l'emploi** pour lancer rapidement des boutiques en ligne dans n'importe quelle niche et pays.
 
@@ -8,14 +8,14 @@
 
 Base technique solide et modulaire, pas une boutique figée :
 
-- **🌍 Multi-pays** : Taxes locales, devises, zones d'expédition configurables
-- **🎨 Multi-niches** : Animaux, plantes, jouets, vêtements, électronique...
-- **🌐 Multi-langues** : Français/Anglais par défaut, extensible à d'autres langues
-- **⚡ Déploiement rapide** : De l'idée à la boutique en ligne en quelques jours
+- **Multi-pays** : Taxes locales, devises, zones d'expédition configurables
+- **Multi-niches** : Animaux, plantes, jouets, vêtements, électronique...
+- **Multi-langues** : Français/Anglais par défaut, extensible à d'autres langues
+- **Déploiement rapide** : De l'idée à la boutique en ligne en quelques jours
 
 ---
 
-## ⚡ Démarrage ultra-rapide
+## Démarrage rapide
 
 ```bash
 git clone [repo]
@@ -26,43 +26,43 @@ cp .env.exemple .env
 npm run dev
 ```
 
-**🚀 Prêt en 5 minutes** → [Guide installation détaillé](docs/setup.md)
+**Prêt en 5 minutes** -> [Guide installation détaillé](docs/setup.md)
 
 ---
 
-## 📦 Fonctionnalités incluses
+## Fonctionnalités incluses
 
-### 🛍️ **E-commerce complet**
+### E-commerce complet
 
 - Catalogue produits avec variantes
 - Panier intelligent (invité + connecté)
 - Checkout sécurisé Stripe
 - Gestion commandes et emails automatiques
 
-### 🌍 **International par design**
+### International par design
 
 - Support multi-pays (Canada/USA/France)
 - URLs bilingues (`/fr/`, `/en/`) avec SEO optimisé
 - Calculs taxes et expédition localisés
 
-### 🔒 **Production-ready**
+### Production-ready
 
 - Authentification robuste (Clerk)
 - Sécurité avancée (rate limiting, CSRF, XSS)
 - Monitoring et logs structurés
 - Tests automatisés
 
-### 🎨 **Personnalisation rapide**
+### Personnalisation rapide
 
 - Système de thèmes CSS en quelques clics
 - Configuration par variables d'environnement
 - Architecture modulaire extensible
 
-**Exemples** : Boutique de plantes 🌱, accessoires pour chiens 🐕, jouets éducatifs 🧸
+**Exemples** : Boutique de plantes, accessoires pour chiens, jouets éducatifs
 
 ---
 
-## 🛠️ Stack technique
+## Stack technique
 
 - **Frontend** : Next.js 15 + TypeScript + Tailwind CSS
 - **Backend** : Next.js API Routes + Prisma ORM
@@ -74,7 +74,7 @@ npm run dev
 
 ---
 
-## 🚀 Commandes essentielles
+## Commandes essentielles
 
 ```bash
 # Développement
@@ -94,28 +94,28 @@ npm run build            # Build production
 
 ---
 
-## 📚 Documentation
+## Documentation
 
-### 🚀 **Premier démarrage**
+### Premier démarrage
 
 - **[Installation & Setup](docs/setup.md)** - Guide complet étape par étape
 - **[Clerk ↔ PostgreSQL](docs/4-database-stack/clerk-postgres-sync.md)** - Synchronisation utilisateurs
 
-### 📖 **Compréhension du projet**
+### Compréhension du projet
 
-- **[Navigation documentation](docs/INDEX.md)** - Table des matières intelligente
+- **[Navigation documentation](docs/INDEX.md)** - Table des matières
 - **[Architecture](docs/1-foundations/architecture.md)** - Structure technique complète
 - **[Roadmap](docs/1-foundations/Roadmap.md)** - Évolution et milestones
 
-### 🔧 **Guides techniques**
+### Guides techniques
 
-- **[Système i18n](docs/2-Language_internationalization/language-config.md)** - Ajouter des langues
-- **[Thèmes CSS](docs/3-development-tools/theming.md)** - Personnaliser l'apparence
+- **[Architecture i18n](docs/2-Language_internationalization/i18n-architecture.md)** - Ajouter des langues
+- **[Thèmes CSS](docs/8-frontend/theming.md)** - Personnaliser l'apparence
 - **[Logging & Debug](docs/3-development-tools/logging.md)** - Monitoring avancé
 
 ---
 
-## 🎯 Objectifs du starter
+## Objectifs du starter
 
 ### Pour l'entreprise
 
@@ -137,10 +137,10 @@ npm run build            # Build production
 
 ---
 
-## 📄 Licence
+## Licence
 
 MIT License - Utilisation libre pour projets commerciaux.
 
 ---
 
-**🆘 Besoin d'aide ?** Consulter la [navigation documentation](docs/INDEX.md) ou créer une issue.
+**Besoin d'aide ?** Consulter la [navigation documentation](docs/INDEX.md) ou créer une issue.
