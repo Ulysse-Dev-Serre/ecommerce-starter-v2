@@ -91,4 +91,11 @@ async function mergeCartHandler(
   return response;
 }
 
-export const POST = withError(withAuth(mergeCartHandler));
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../lib/middleware/withRateLimit';
+
+export const POST = withError(
+  withAuth(withRateLimit(mergeCartHandler, RateLimits.PUBLIC))
+);

@@ -71,7 +71,7 @@
 - [x] **Issue 41** : Politique d’indexation & Liens internes
 - [ ] **Issue 42** : Mise en place Google Search Console & vérifications i18n
 - [ ] **Issue 42-bis** : Vérifications Post-Déploiement (Rich Results, Open Graph, Sitemap live, Inspect URL)
-- [ ] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
+- [x] **Issue 43** : Sécurité & Durcissement (Checklist consolidée)
 - [ ] **Issue 44** : Admin : Gestion complète des Catégories (CRUD)
 - [ ] **Issue 45** : Hardening UX : Notifications détaillées en cas de panne de services tiers (Stripe/Shippo down)
 

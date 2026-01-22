@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
 import { auth } from '@clerk/nextjs/server';
 
-export async function POST(req: Request) {
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+
+async function handler(req: Request) {
   try {
     const body = await req.json();
     const {
@@ -50,3 +53,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withError(withRateLimit(handler, RateLimits.PUBLIC));

@@ -18,7 +18,12 @@ import {
   validateWebhookSignature,
 } from '../../../../lib/stripe/webhooks';
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../lib/middleware/withRateLimit';
+
+async function handler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
   let stripeEvent: Stripe.Event | undefined;
@@ -238,6 +243,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+export const POST = withRateLimit(handler, RateLimits.WEBHOOK);
 
 // Helper pour extraire l'adresse de Stripe
 function extractShippingAddress(

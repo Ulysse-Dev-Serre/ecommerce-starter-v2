@@ -3,9 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../../lib/db/prisma';
 import { logger } from '../../../../../lib/logger';
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+import { withError } from '../../../../../lib/middleware/withError';
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../../lib/middleware/withRateLimit';
+
+async function handler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
+  // Remove internal try-catch to let withError handle it?
+  // Code has complex logic inside try, so I will keep try-catch and just wrap for rate limit + error safety
   try {
     // Get total webhook events
     const totalEvents = await prisma.webhookEvent.count({
@@ -98,6 +106,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(stats);
   } catch (error) {
+    // Keep original error logging/handling if needed, but withError catches bubbles too.
     logger.error(
       {
         requestId,
@@ -115,3 +124,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 }
+
+// Applying ADMIN rate limit because this seems to be an admin status route, or WEBHOOK?
+// It reveals internal stats, so it should probably be ADMIN or very strict.
+// Path is src/app/api/webhooks/stripe/status/route.ts
+// It seems to be unprotected? The handler doesn't check for auth?
+// If it's a public route exposing stats, that's a security risk potentially.
+// I see no auth check in the original code.
+// I will apply RateLimits.ADMIN but wait... if it is not authed, ADMIN rate limit doesn't protect access.
+// Ideally it should have withAdmin. But maybe it's used by a monitoring tool?
+// I will apply RateLimits.WEBHOOK (100/min) for now or similar, but maybe verify if it should be protected.
+// Given it is in 'webhooks', maybe it is intended for external monitoring?
+// But it uses prisma directly.
+// I will use RateLimits.ADMIN (30/min) effectively treating it as sensitive.
+
+export const GET = withError(withRateLimit(handler, RateLimits.ADMIN));

@@ -90,4 +90,11 @@ async function getCartHandler(
   return response;
 }
 
-export const GET = withError(withOptionalAuth(getCartHandler));
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../lib/middleware/withRateLimit';
+
+export const GET = withError(
+  withOptionalAuth(withRateLimit(getCartHandler, RateLimits.PUBLIC))
+);

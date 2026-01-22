@@ -219,5 +219,14 @@ async function removeCartLineHandler(
   }
 }
 
-export const PUT = withError(withOptionalAuth(updateCartLineHandler));
-export const DELETE = withError(withOptionalAuth(removeCartLineHandler));
+import {
+  withRateLimit,
+  RateLimits,
+} from '../../../../../lib/middleware/withRateLimit';
+
+export const PUT = withError(
+  withOptionalAuth(withRateLimit(updateCartLineHandler, RateLimits.CART_WRITE))
+);
+export const DELETE = withError(
+  withOptionalAuth(withRateLimit(removeCartLineHandler, RateLimits.CART_WRITE))
+);
