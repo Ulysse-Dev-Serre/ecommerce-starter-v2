@@ -5,22 +5,20 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { getTranslations, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
+import { siteConfig } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
-import Script from 'next/script';
-
-import { Navbar } from '../../components/layout/navbar';
-import { ConditionalFooter } from '../../components/layout/conditional-footer';
-import { ToastProvider } from '../../components/ui/toast-provider';
-import { CartMergeHandler } from '../../components/cart/cart-merge-handler';
 import { prisma } from '@/lib/db/prisma';
-import '../globals.css';
-import GoogleTagManager from '../../components/analytics/GoogleTagManager';
-import CookieConsentComponent from '../../components/analytics/CookieConsent';
-import { AnalyticsTracker } from '../../components/analytics/AnalyticsTracker';
+import { Navbar } from '@/components/layout/navbar';
+import { ConditionalFooter } from '@/components/layout/conditional-footer';
+import GoogleTagManager from '@/components/analytics/GoogleTagManager';
+import CookieConsentComponent from '@/components/analytics/CookieConsent';
+import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
+import { ToastProvider } from '@/components/ui/toast-provider';
+import { CartMergeHandler } from '@/components/cart/cart-merge-handler';
+import Script from 'next/script';
 import { Suspense } from 'react';
-
-// Disable static generation (requires DB & Auth)
-export const dynamic = 'force-dynamic';
+import React from 'react';
+import '../globals.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,7 +40,10 @@ export async function generateMetadata({
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return {
-    title: t('title'),
+    title: {
+      default: siteConfig.name,
+      template: `%s | ${siteConfig.name}`,
+    },
     description: t('description'),
     metadataBase: new URL(baseUrl),
     alternates: {

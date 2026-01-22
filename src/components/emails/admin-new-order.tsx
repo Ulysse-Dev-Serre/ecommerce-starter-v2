@@ -10,36 +10,36 @@ import {
   Text,
 } from '@react-email/components';
 import { formatPrice } from '@/lib/utils/currency';
-import * as React from 'react';
-import { i18n } from '@/lib/i18n/config';
+import { siteConfig } from '@/lib/config/site';
 import * as styles from './styles';
 
 interface AdminNewOrderEmailProps {
   orderId: string;
-  internalOrderId?: string;
+  internalOrderId: string;
   customerName: string;
   totalAmount: string;
   currency: string;
   itemsCount: number;
-  siteUrl?: string;
+  siteUrl: string;
+  locale: string;
 }
 
 export const AdminNewOrderEmail = ({
-  orderId = 'ORD-2024-001234',
-  internalOrderId = 'cmk0000000000000000000000',
-  customerName = 'Jean Dupont',
-  totalAmount = '129.99',
-  currency = 'CAD',
-  itemsCount = 3,
-  siteUrl = 'https://agtechnest.com',
+  orderId,
+  internalOrderId,
+  customerName,
+  totalAmount,
+  currency,
+  itemsCount,
+  siteUrl,
+  locale,
 }: AdminNewOrderEmailProps) => {
-  const locale = i18n.adminLocale;
   const formattedPrice = formatPrice(totalAmount, currency as any, locale);
 
   const t = {
     fr: {
       preview: `Nouvelle commande : ${formattedPrice} par ${customerName}`,
-      brand: 'Admin AgTechNest',
+      brand: `Admin ${siteConfig.name}`,
       title: 'Nouvelle Commande !',
       message: "Une nouvelle commande vient d'être passée sur la boutique.",
       labelAmount: 'Montant',
@@ -51,7 +51,7 @@ export const AdminNewOrderEmail = ({
     },
     en: {
       preview: `New Order: ${formattedPrice} by ${customerName}`,
-      brand: 'AgTechNest Admin',
+      brand: `${siteConfig.name} Admin`,
       title: 'New Order!',
       message: 'A new order has just been placed on the store.',
       labelAmount: 'Amount',
@@ -63,10 +63,7 @@ export const AdminNewOrderEmail = ({
     },
   };
 
-  const text =
-    t[locale as keyof typeof t] ||
-    t[i18n.defaultLocale as keyof typeof t] ||
-    t.en;
+  const text = t[locale as keyof typeof t] || t.en;
 
   return (
     <Html>

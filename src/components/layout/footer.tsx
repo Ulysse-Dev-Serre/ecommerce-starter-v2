@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { logger } from '../../lib/logger';
+import { siteConfig } from '@/lib/config/site';
 
 interface FooterProps {
   locale: string;
@@ -16,7 +17,7 @@ export function Footer({ locale }: FooterProps): React.JSX.Element {
   const tNavbar = useTranslations('navbar');
 
   const year = new Date().getFullYear();
-  const storeName = tNavbar('brand') || 'AgTechNest';
+  const storeName = siteConfig.name;
 
   return (
     <footer className="bg-background border-t border-border theme-border mt-auto">

@@ -16,6 +16,7 @@ import React, { useState, type MouseEvent } from 'react';
 import { logger } from '../../lib/logger';
 import { useCurrency, type Currency } from '../../hooks/use-currency';
 import { i18n } from '../../lib/i18n/config';
+import { siteConfig } from '@/lib/config/site';
 
 interface NavbarProps {
   locale: string;
@@ -95,7 +96,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
               <h1 className="text-xl font-bold theme-primary cursor-pointer">
-                {tNavbar('brand')}
+                {siteConfig.name}
               </h1>
             </Link>
           </div>

@@ -11,24 +11,21 @@ import {
   Hr,
   Link,
 } from '@react-email/components';
-import * as React from 'react';
-import { i18n } from '@/lib/i18n/config';
+import { siteConfig } from '@/lib/config/site';
+import * as styles from './styles';
 
 interface OrderReturnLabelEmailProps {
   orderId: string;
   customerName: string;
   labelUrl: string;
-  locale?: string;
+  locale: string;
 }
 
-import * as styles from './styles';
-
-// ...
 export const OrderReturnLabelEmail = ({
-  orderId = 'ORD-123',
-  customerName = 'Client',
-  labelUrl = '#',
-  locale = i18n.defaultLocale,
+  orderId,
+  customerName,
+  labelUrl,
+  locale,
 }: OrderReturnLabelEmailProps) => {
   const t = {
     fr: {
@@ -58,10 +55,7 @@ export const OrderReturnLabelEmail = ({
     },
   };
 
-  const text =
-    t[locale as keyof typeof t] ||
-    t[i18n.defaultLocale as keyof typeof t] ||
-    t.en;
+  const text = t[locale as keyof typeof t] || t.fr;
 
   return (
     <Html>
@@ -71,7 +65,7 @@ export const OrderReturnLabelEmail = ({
         <Container style={styles.container}>
           {/* Header Black Bar */}
           <Section style={styles.header}>
-            <Text style={styles.brand}>AgTechNest</Text>
+            <Text style={styles.brand}>{siteConfig.name}</Text>
           </Section>
 
           {/* Main Content */}

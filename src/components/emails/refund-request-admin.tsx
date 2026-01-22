@@ -9,8 +9,7 @@ import {
   Section,
   Text,
 } from '@react-email/components';
-import * as React from 'react';
-import { i18n } from '@/lib/i18n/config';
+import { siteConfig } from '@/lib/config/site';
 import * as styles from './styles';
 
 interface RefundRequestAdminEmailProps {
@@ -19,6 +18,7 @@ interface RefundRequestAdminEmailProps {
   customerEmail: string;
   reason: string;
   imageUrl?: string;
+  locale: string;
 }
 
 export const RefundRequestAdminEmail = ({
@@ -27,13 +27,13 @@ export const RefundRequestAdminEmail = ({
   customerEmail,
   reason,
   imageUrl,
+  locale,
 }: RefundRequestAdminEmailProps) => {
-  const locale = i18n.adminLocale;
-
   const t = {
     fr: {
       preview: `Nouvelle demande de remboursement pour la commande ${orderNumber}`,
       title: 'Demande de Remboursement',
+      brand: `Admin ${siteConfig.name}`,
       message:
         'Une nouvelle demande de remboursement a été soumise par un client.',
       labelOrder: 'Commande :',
@@ -48,6 +48,7 @@ export const RefundRequestAdminEmail = ({
     en: {
       preview: `New refund request for order ${orderNumber}`,
       title: 'Refund Request',
+      brand: `${siteConfig.name} Admin`,
       message: 'A new refund request has been submitted by a customer.',
       labelOrder: 'Order:',
       labelCustomer: 'Customer:',
@@ -59,10 +60,7 @@ export const RefundRequestAdminEmail = ({
     },
   };
 
-  const text =
-    t[locale as keyof typeof t] ||
-    t[i18n.defaultLocale as keyof typeof t] ||
-    t.en;
+  const text = t[locale as keyof typeof t] || t.en;
 
   return (
     <Html>
@@ -71,9 +69,10 @@ export const RefundRequestAdminEmail = ({
       <Body style={styles.main}>
         <Container style={styles.container}>
           <Section style={styles.header}>
-            <Heading style={styles.heading}>{text.title}</Heading>
+            <Heading style={styles.brand}>{text.brand}</Heading>
           </Section>
           <Section style={styles.message}>
+            <Heading style={styles.heading}>{text.title}</Heading>
             <Text style={styles.textStyle}>{text.message}</Text>
             <Hr style={styles.hr} />
             <Text style={styles.sectionTitle}>{text.labelOrder}</Text>
