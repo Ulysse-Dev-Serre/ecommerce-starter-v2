@@ -6,6 +6,9 @@ import { OrderDetailClient } from '@/components/admin/orders/order-detail-client
 import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 import { getOrderByIdAdmin } from '@/lib/services/order.service';
 
+import { formatDate, formatDateTime } from '@/lib/utils/date';
+import { formatPrice } from '@/lib/utils/currency';
+
 export const dynamic = 'force-dynamic';
 
 interface OrderDetailPageProps {
@@ -34,14 +37,7 @@ export default async function OrderDetailPage({
             Order {order.orderNumber}
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Placed on{' '}
-            {new Date(order.createdAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            Placed on {formatDateTime(order.createdAt, locale)}
           </p>
         </div>
         <StatusBadge status={order.status} />
@@ -86,10 +82,19 @@ export default async function OrderDetailPage({
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-gray-900">
-                        {item.totalPrice.toString()} {item.currency}
+                        {formatPrice(
+                          item.totalPrice,
+                          item.currency as any,
+                          locale
+                        )}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {item.unitPrice.toString()} each
+                        {formatPrice(
+                          item.unitPrice,
+                          item.currency as any,
+                          locale
+                        )}{' '}
+                        each
                       </p>
                     </div>
                   </div>
@@ -103,33 +108,54 @@ export default async function OrderDetailPage({
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium">
-                    {order.subtotalAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.subtotalAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Tax</span>
                   <span className="font-medium">
-                    {order.taxAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.taxAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-medium">
-                    {order.shippingAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.shippingAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
                 {parseFloat(order.discountAmount.toString()) > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Discount</span>
                     <span>
-                      -{order.discountAmount.toString()} {order.currency}
+                      -
+                      {formatPrice(
+                        order.discountAmount,
+                        order.currency as any,
+                        locale
+                      )}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-gray-200 pt-2 text-base font-semibold">
                   <span>Total</span>
                   <span>
-                    {order.totalAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.totalAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
               </div>
@@ -161,9 +187,14 @@ export default async function OrderDetailPage({
                       <div>
                         <p className="text-gray-600">Amount</p>
                         <p className="font-medium">
-                          {payment.amount.toString()} {payment.currency}
+                          {formatPrice(
+                            payment.amount,
+                            payment.currency as any,
+                            locale
+                          )}
                         </p>
                       </div>
+
                       <div>
                         <p className="text-gray-600">Transaction ID</p>
                         <p className="font-mono text-xs">
@@ -174,7 +205,7 @@ export default async function OrderDetailPage({
                         <div className="col-span-2">
                           <p className="text-gray-600">Processed At</p>
                           <p className="font-medium">
-                            {new Date(payment.processedAt).toLocaleString()}
+                            {formatDateTime(payment.processedAt, locale)}
                           </p>
                         </div>
                       )}
@@ -338,7 +369,7 @@ export default async function OrderDetailPage({
                       <StatusBadge status={history.status as any} />
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
-                      {new Date(history.createdAt).toLocaleString()}
+                      {formatDateTime(history.createdAt, locale)}
                     </p>
                     {history.comment && (
                       <p className="mt-1 text-sm text-gray-600">

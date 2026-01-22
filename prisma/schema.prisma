@@ -446,6 +446,7 @@ model Order {
   utmCampaign      String?
   utmContent       String?
   utmTerm          String?
+  language         Language    @default(EN)
 
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt

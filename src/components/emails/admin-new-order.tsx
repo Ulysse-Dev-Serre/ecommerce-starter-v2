@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from '@react-email/components';
+import { formatPrice } from '@/lib/utils/currency';
 import * as React from 'react';
 
 interface AdminNewOrderEmailProps {
@@ -30,11 +31,13 @@ export const AdminNewOrderEmail = ({
   itemsCount = 3,
   siteUrl = 'https://agtechnest.com',
 }: AdminNewOrderEmailProps) => {
+  const formattedPrice = formatPrice(totalAmount, currency as any, 'fr');
+
   return (
     <Html>
       <Head />
       <Preview>
-        Nouvelle commande : {totalAmount} {currency} par {customerName}
+        Nouvelle commande : {formattedPrice} par {customerName}
       </Preview>
       <Body style={main}>
         <Container style={container}>
@@ -50,9 +53,7 @@ export const AdminNewOrderEmail = ({
 
             <Section style={statsBox}>
               <Text style={statLabel}>Montant</Text>
-              <Text style={statValue}>
-                {totalAmount} {currency}
-              </Text>
+              <Text style={statValue}>{formattedPrice}</Text>
 
               <Text style={statLabel}>Client</Text>
               <Text style={statValue}>{customerName}</Text>

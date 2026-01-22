@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from '@react-email/components';
+import { formatPrice } from '@/lib/utils/currency';
 import * as React from 'react';
 
 interface OrderRefundedEmailProps {
@@ -27,12 +28,14 @@ export const OrderRefundedEmail = ({
   currency = 'CAD',
   locale = 'fr',
 }: OrderRefundedEmailProps) => {
+  const formattedAmount = formatPrice(amountRefunded, currency as any, locale);
+
   const t = {
     fr: {
       preview: `Remboursement initié pour la commande ${orderId}`,
       title: 'Remboursement en cours',
       greeting: `Bonjour ${customerName},`,
-      message: `Nous avons initié le remboursement de ${amountRefunded} ${currency} pour votre commande ${orderId}.`,
+      message: `Nous avons initié le remboursement de ${formattedAmount} pour votre commande ${orderId}.`,
       details: `Le montant devrait apparaître sur votre relevé bancaire dans un délai de 5 à 10 jours ouvrables, selon les délais de traitement de votre banque.`,
       footerValues: 'Nos valeurs',
       footerEnvironment: "AgTechNest s'engage pour une agriculture durable.",
@@ -44,7 +47,7 @@ export const OrderRefundedEmail = ({
       preview: `Refund initiated for order ${orderId}`,
       title: 'Refund Initiated',
       greeting: `Hi ${customerName},`,
-      message: `We have initiated a refund of ${amountRefunded} ${currency} for your order ${orderId}.`,
+      message: `We have initiated a refund of ${formattedAmount} for your order ${orderId}.`,
       details: `The amount should appear on your bank statement within 5 to 10 business days, depending on your bank's processing time.`,
       footerValues: 'Our Values',
       footerEnvironment: 'AgTechNest is committed to sustainable agriculture.',

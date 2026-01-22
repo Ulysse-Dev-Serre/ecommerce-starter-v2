@@ -35,7 +35,7 @@ export function PriceDisplay({
   const formattedPrice = formatPrice(
     parseFloat(price),
     displayCurrency as 'CAD' | 'USD',
-    locale === 'fr' ? 'fr-CA' : 'en-CA'
+    locale
   );
 
   return (
@@ -75,11 +75,7 @@ export function PriceTotal({
     return sum + parseFloat(price) * item.quantity;
   }, 0);
 
-  const formattedTotal = formatPrice(
-    total,
-    currency,
-    locale === 'fr' ? 'fr-CA' : 'en-CA'
-  );
+  const formattedTotal = formatPrice(total, currency, locale);
 
   return <span className={className}>{formattedTotal}</span>;
 }

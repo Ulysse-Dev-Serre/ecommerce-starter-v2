@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Target,
 } from 'lucide-react';
+import { formatDate, formatDateTime } from '@/lib/utils/date';
 import { prisma } from '@/lib/db/prisma';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/admin/orders/status-badge';
@@ -18,13 +19,13 @@ import { StatusBadge } from '@/components/admin/orders/status-badge';
 export const dynamic = 'force-dynamic';
 
 interface CustomerDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }
 
 export default async function CustomerDetailPage({
   params,
 }: CustomerDetailPageProps) {
-  const { id } = await params;
+  const { locale, id } = await params;
 
   const customer = await prisma.user.findUnique({
     where: { id },
@@ -53,6 +54,11 @@ export default async function CustomerDetailPage({
     (sum, order) => sum + Number(order.totalAmount),
     0
   );
+  // Note: Since orders could theoretically be in different currencies (even if env is fixed)
+  // we use a safe currency for display in the stats, or just use 'CAD' as fallback.
+  // Given the user's strategy, it's consistent with their CURRENT_CURRENCY.
+  const displayCurrency = (process.env.NEXT_PUBLIC_CURRENCY as any) || 'CAD';
+
   const totalOrders = customer.orders.length;
 
   return (
@@ -61,7 +67,7 @@ export default async function CustomerDetailPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/admin/customers"
+            href={`/${locale}/admin/customers`}
             className="rounded-lg border border-gray-200 bg-white p-2 hover:bg-gray-50 transition-colors"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -90,7 +96,7 @@ export default async function CustomerDetailPage({
                     Total dépensé
                   </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {formatPrice(totalSpent, 'CAD', 'fr-CA')}
+                    {formatPrice(totalSpent, displayCurrency, locale)}
                   </p>
                 </div>
               </div>
@@ -150,22 +156,23 @@ export default async function CustomerDetailPage({
                       >
                         <td className="px-6 py-4 font-medium text-primary">
                           <Link
-                            href={`/admin/orders/${order.id}`}
+                            href={`/${locale}/admin/orders/${order.id}`}
                             className="hover:underline"
                           >
                             {order.orderNumber}
                           </Link>
                         </td>
                         <td className="px-6 py-4 text-gray-600">
-                          {order.createdAt.toLocaleDateString('fr-FR')}
+                          {formatDate(order.createdAt, locale)}
                         </td>
                         <td className="px-6 py-4 font-medium text-gray-900">
                           {formatPrice(
                             Number(order.totalAmount),
                             order.currency as any,
-                            'fr-CA'
+                            locale
                           )}
                         </td>
+
                         <td className="px-6 py-4">
                           <StatusBadge status={order.status} />
                         </td>
@@ -255,7 +262,7 @@ export default async function CustomerDetailPage({
               <div className="flex items-center gap-3 text-sm">
                 <Calendar className="h-4 w-4 text-gray-400" />
                 <span className="text-gray-600">
-                  Inscrit le {customer.createdAt.toLocaleDateString('fr-FR')}
+                  Inscrit le {formatDate(customer.createdAt, locale)}
                 </span>
               </div>
             </div>

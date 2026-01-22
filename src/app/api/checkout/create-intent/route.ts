@@ -89,6 +89,9 @@ async function createIntentHandler(
     cartIdForIntent = cart.id;
   }
 
+  // 3. Créer le PaymentIntent
+  const locale = body.locale || 'en';
+
   try {
     // 2. Réserver le stock (si activé)
     await reserveStock(cartItems);
@@ -100,13 +103,16 @@ async function createIntentHandler(
       userId,
       cartId: cartIdForIntent,
       anonymousId: undefined, // TODO: gérer anonymousId si besoin
-      metadata: directItem
-        ? {
-            isDirectPurchase: 'true',
-            directVariantId: directItem.variantId,
-            directQuantity: directItem.quantity.toString(),
-          }
-        : undefined,
+      metadata: {
+        locale,
+        ...(directItem
+          ? {
+              isDirectPurchase: 'true',
+              directVariantId: directItem.variantId,
+              directQuantity: directItem.quantity.toString(),
+            }
+          : {}),
+      },
     });
 
     // LOG 2: INTENT CRÉÉ

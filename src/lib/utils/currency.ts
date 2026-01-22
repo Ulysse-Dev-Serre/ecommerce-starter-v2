@@ -1,63 +1,84 @@
-export type SupportedCurrency = 'CAD' | 'USD' | 'EUR';
+import type { Decimal } from '@prisma/client/runtime/library';
 
-export const CURRENCY_SYMBOLS: Record<SupportedCurrency, string> = {
-  CAD: '$',
-  USD: '$',
-  EUR: '€',
-};
+export type SupportedCurrency = 'CAD' | 'USD';
 
 export const CURRENCY_DECIMALS: Record<SupportedCurrency, number> = {
   CAD: 2,
   USD: 2,
-  EUR: 2,
 };
 
+/**
+ * Formate un prix de manière localisée.
+ * @param amount - Montant (number, string ou Decimal Prisma)
+ * @param currency - Devise (CAD ou USD) - OBLIGATOIRE pour éviter les erreurs de déploiement
+ * @param locale - Langue (défaut: 'en')
+ * @param showCurrencyCode - Si true, affiche le code (ex: CAD 10.00)
+ */
 export function formatPrice(
-  amount: number | string,
-  currency: SupportedCurrency = 'CAD',
-  locale: string = 'en-CA',
+  amount: number | string | Decimal,
+  currency: SupportedCurrency,
+  locale: string = 'en',
   showCurrencyCode: boolean = false
 ): string {
-  const numericAmount =
-    typeof amount === 'string' ? parseFloat(amount) : amount;
-
-  if (showCurrencyCode) {
-    // Format with currency code (default Intl behavior)
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: CURRENCY_DECIMALS[currency],
-      maximumFractionDigits: CURRENCY_DECIMALS[currency],
-    }).format(numericAmount);
-  } else {
-    // Format without currency code (just symbol and amount)
-    const formatted = new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: CURRENCY_DECIMALS[currency],
-      maximumFractionDigits: CURRENCY_DECIMALS[currency],
-      currencyDisplay: 'symbol',
-    }).format(numericAmount);
-
-    // Remove all currency codes/identifiers: "USD", "CAD", "EUR", "US", "CA", "EU"
-    return formatted.replace(/\s?(USD|CAD|EUR|US|CA|EU)\s?/g, '').trim();
+  if (!currency) {
+    throw new Error(
+      'CURRENCY_ERROR: La devise est manquante dans formatPrice. Vérifiez NEXT_PUBLIC_CURRENCY dans votre .env'
+    );
   }
+
+  // Conversion sécurisée des types
+  const numericAmount =
+    typeof amount === 'object' && amount !== null && 'toNumber' in amount
+      ? (amount as any).toNumber()
+      : typeof amount === 'string'
+        ? parseFloat(amount)
+        : amount;
+
+  const options: Intl.NumberFormatOptions = {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: CURRENCY_DECIMALS[currency],
+    maximumFractionDigits: CURRENCY_DECIMALS[currency],
+  };
+
+  if (!showCurrencyCode) {
+    options.currencyDisplay = 'symbol';
+  }
+
+  const formatted = new Intl.NumberFormat(locale, options).format(
+    numericAmount
+  );
+
+  if (!showCurrencyCode) {
+    // Supprime les identifiants de pays superflus (ex: "CA$", "US$") pour ne garder que "$"
+    return formatted.replace(/\s?(USD|CAD|US|CA)\s?/g, '').trim();
+  }
+
+  return formatted;
 }
 
+/**
+ * Convertit un montant en centimes pour Stripe
+ */
 export function toStripeAmount(
   amount: number | string,
-  currency: SupportedCurrency = 'CAD'
+  currency: SupportedCurrency
 ): number {
+  if (!currency) throw new Error('toStripeAmount: currency is required');
   const numericAmount =
     typeof amount === 'string' ? parseFloat(amount) : amount;
   const decimals = CURRENCY_DECIMALS[currency];
   return Math.round(numericAmount * Math.pow(10, decimals));
 }
 
+/**
+ * Convertit un montant Stripe (centimes) en nombre décimal
+ */
 export function fromStripeAmount(
   stripeAmount: number,
-  currency: SupportedCurrency = 'CAD'
+  currency: SupportedCurrency
 ): number {
+  if (!currency) throw new Error('fromStripeAmount: currency is required');
   const decimals = CURRENCY_DECIMALS[currency];
   return stripeAmount / Math.pow(10, decimals);
 }

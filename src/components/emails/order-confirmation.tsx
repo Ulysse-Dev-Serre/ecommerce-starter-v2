@@ -13,6 +13,7 @@ import {
   Section,
   Text,
 } from '@react-email/components';
+import { formatPrice } from '@/lib/utils/currency';
 import * as React from 'react';
 
 interface OrderItem {
@@ -111,23 +112,6 @@ export const OrderConfirmationEmail = ({
 
   const text = t[locale as keyof typeof t] || t.fr;
 
-  const formatPrice = (amount: string | number, currencyCode: string) => {
-    // Déduire la région en fonction de la devise pour un formatage correct
-    // Exemple: CAD -> CA (fr-CA ou en-CA), USD -> US (en-US), EUR -> FR (fr-FR)
-    let region = 'US'; // Fallback par défaut
-    if (currencyCode.toUpperCase() === 'CAD') region = 'CA';
-    if (currencyCode.toUpperCase() === 'EUR') region = 'FR';
-
-    // Si la devise est USD, on préfère souvent le format US classique ($10.00) même si l'utilisateur est francophone,
-    // mais pour être cohérent avec la locale, on construit "fr-US" ou "en-US".
-    const localeString = `${locale}-${region}`;
-
-    return new Intl.NumberFormat(localeString, {
-      style: 'currency',
-      currency: currencyCode,
-    }).format(typeof amount === 'string' ? parseFloat(amount) : amount);
-  };
-
   return (
     <Html>
       <Head />
@@ -187,7 +171,7 @@ export const OrderConfirmationEmail = ({
                 </Column>
                 <Column style={priceColumn}>
                   <Text style={itemPrice}>
-                    {formatPrice(item.price, item.currency)}
+                    {formatPrice(item.price, item.currency as any, locale)}
                   </Text>
                 </Column>
               </Row>
@@ -203,7 +187,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column style={priceColumn}>
                 <Text style={summaryValue}>
-                  {formatPrice(subtotal, currency)}
+                  {formatPrice(subtotal, currency as any, locale)}
                 </Text>
               </Column>
             </Row>
@@ -213,7 +197,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column style={priceColumn}>
                 <Text style={summaryValue}>
-                  {formatPrice(shippingCost, currency)}
+                  {formatPrice(shippingCost, currency as any, locale)}
                 </Text>
               </Column>
             </Row>
@@ -223,7 +207,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column style={priceColumn}>
                 <Text style={summaryValue}>
-                  {formatPrice(taxCost, currency)}
+                  {formatPrice(taxCost, currency as any, locale)}
                 </Text>
               </Column>
             </Row>
@@ -234,7 +218,7 @@ export const OrderConfirmationEmail = ({
               </Column>
               <Column style={priceColumn}>
                 <Text style={totalValue}>
-                  {formatPrice(totalAmount, currency)}
+                  {formatPrice(totalAmount, currency as any, locale)}
                 </Text>
               </Column>
             </Row>

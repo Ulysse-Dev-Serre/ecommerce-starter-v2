@@ -10,10 +10,18 @@ import {
 import { prisma } from '@/lib/db/prisma';
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { RevenueChart } from '@/components/admin/analytics/revenue-chart';
+import { formatPrice, type SupportedCurrency } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboard() {
+interface AdminDashboardProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function AdminDashboard({ params }: AdminDashboardProps) {
+  const { locale } = await params;
+  const currency = process.env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(now.getDate() - 7);
@@ -91,7 +99,7 @@ export default async function AdminDashboard() {
   const chartData = Array.from({ length: 7 }).map((_, i) => {
     const date = new Date();
     date.setDate(now.getDate() - (6 - i));
-    const dateStr = date.toLocaleDateString('fr-FR', { weekday: 'short' });
+    const dateStr = formatDate(date, locale, { weekday: 'short' });
 
     const dayAmount = recentPayments
       .filter(p => p.createdAt.toDateString() === date.toDateString())
@@ -120,7 +128,7 @@ export default async function AdminDashboard() {
   const stats = [
     {
       title: "Chiffre d'affaires",
-      value: `$${(totalRevenue._sum.amount || 0).toFixed(2)}`,
+      value: formatPrice(totalRevenue._sum.amount || 0, currency, locale),
       change: revenueTrend,
       trend: Number(revenueTrend.replace('%', '')) >= 0 ? 'up' : 'down',
       icon: DollarSign,
@@ -236,7 +244,7 @@ export default async function AdminDashboard() {
                     ? `${timeAgo} min`
                     : timeAgo < 1440
                       ? `${Math.floor(timeAgo / 60)}h`
-                      : `${Math.floor(timeAgo / 1440)}j`;
+                      : `${Math.floor(timeAgo / 1440)}${locale === 'fr' ? 'j' : 'd'}`;
 
                 return (
                   <Link
@@ -254,7 +262,11 @@ export default async function AdminDashboard() {
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <span className="text-sm font-medium text-gray-900">
-                        ${order.totalAmount.toString()}
+                        {formatPrice(
+                          order.totalAmount,
+                          order.currency as SupportedCurrency,
+                          locale
+                        )}
                       </span>
                       <StatusBadge status={order.status} />
                     </div>

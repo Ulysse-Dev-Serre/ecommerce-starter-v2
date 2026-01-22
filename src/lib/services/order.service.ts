@@ -1,6 +1,6 @@
 import Stripe from 'stripe';
 
-import { OrderStatus } from '../../generated/prisma';
+import { OrderStatus, Language } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 import { createTransaction, getReturnShippingRates } from './shippo';
@@ -11,6 +11,10 @@ import { decrementStock } from './inventory.service';
 import { resend, FROM_EMAIL } from '../../lib/resend';
 import { OrderConfirmationEmail } from '../../components/emails/order-confirmation';
 import { render } from '@react-email/render';
+
+const fr = require('../i18n/dictionaries/fr.json');
+const en = require('../i18n/dictionaries/en.json');
+const dictionaries: Record<string, any> = { fr, en };
 
 export interface CreateOrderFromCartInput {
   cart: CartProjection;
@@ -43,6 +47,9 @@ export async function createOrderFromCart({
   const subtotalAmount = parseFloat(calculation.subtotal.toString());
   const taxAmount = 0; // Géré par Stripe Tax
 
+  // Récupérer la langue depuis les metadata
+  const locale = (paymentIntent.metadata?.locale || 'en').toLowerCase();
+
   // Récupérer les frais de port depuis les metadata du PaymentIntent
   const shippingCostMeta = paymentIntent.metadata?.shipping_cost;
   const shippingAmount = shippingCostMeta ? parseFloat(shippingCostMeta) : 0;
@@ -50,9 +57,6 @@ export async function createOrderFromCart({
   // Récupérer l'ID du tarif Shippo (si le client a choisi une livraison)
   const shippingRateId = paymentIntent.metadata?.shipping_rate_id;
   let shipmentCreateData;
-
-  // L'achat de l'étiquette est manuel via le dashboard Admin pour éviter les frais automatiques.
-  // On ne fait RIEN ici avec shippingRateId pour l'instant, sauf peut-être le stocker si besoin plus tard.
 
   const discountAmount = 0;
 
@@ -63,7 +67,15 @@ export async function createOrderFromCart({
     subtotalAmount + taxAmount + shippingAmount - discountAmount;
 
   // Sécurité: Si le total calculé diffère significativement du total payé, on log un warning
-  // Mais pour la DB, on veut que le total soit mathématiquement juste par rapport aux sous-totaux
+  if (Math.abs(stripeTotal - calculatedTotal) > 0.01) {
+    logger.warn(
+      { orderNumber, stripeTotal, calculatedTotal },
+      'Écart détecté entre le montant payé sur Stripe et le calcul du panier'
+    );
+  }
+
+  // Pour la DB, on utilise le total calculé pour garantir la cohérence mathématique des colonnes,
+  // tout en ayant logué l'alerte si un écart existait avec Stripe.
   const totalAmount = calculatedTotal;
 
   const order = await prisma.order.create({
@@ -79,6 +91,7 @@ export async function createOrderFromCart({
       totalAmount,
       shippingAddress: shippingAddress || {},
       billingAddress: billingAddress || {},
+      language: locale.toUpperCase() === 'FR' ? Language.FR : Language.EN,
       // Création automatique de l'expédition si l'étiquette a été achetée
       shipments: shipmentCreateData
         ? {
@@ -162,7 +175,7 @@ export async function createOrderFromCart({
           taxCost: taxAmount.toString(),
           totalAmount: totalAmount.toString(),
           currency: cart.currency,
-          locale: 'fr', // TODO: Récupérer la langue préférée de l'utilisateur (via User ou Cart)
+          locale: order.language.toLowerCase(), // Utiliser la langue enregistrée
           shippingAddress: {
             street: shippingAddress?.street1
               ? shippingAddress.street1 +
@@ -177,10 +190,17 @@ export async function createOrderFromCart({
       );
 
       // 3. Envoyer via Resend
+      const dict =
+        dictionaries[order.language.toLowerCase()] || dictionaries.en;
+      const subject = dict.Emails.confirmation.subject.replace(
+        '{orderNumber}',
+        order.orderNumber
+      );
+
       const { data, error } = await resend.emails.send({
         from: FROM_EMAIL,
         to: recipientEmail,
-        subject: `Confirmation de commande ${order.orderNumber}`,
+        subject,
         html: emailHtml,
       });
 
@@ -493,14 +513,21 @@ export async function updateOrderStatus(
               postalCode: shippingAddr?.postalCode || '',
               country: shippingAddr?.country || '',
             },
-            locale: 'fr', // TODO: Récupérer locale depuis Order (quand champ ajouté)
+            locale: order.language.toLowerCase(),
           })
+        );
+
+        const dict =
+          dictionaries[order.language.toLowerCase()] || dictionaries.en;
+        const subject = dict.Emails.shipped.subject.replace(
+          '{orderNumber}',
+          order.orderNumber
         );
 
         const { data, error } = await resend.emails.send({
           from: FROM_EMAIL,
           to: recipientEmail,
-          subject: `Votre commande ${order.orderNumber} est en route !`,
+          subject,
           html: emailHtml,
         });
 
@@ -546,14 +573,21 @@ export async function updateOrderStatus(
               order.user?.firstName || shippingAddr?.firstName || 'Client',
             amountRefunded: order.totalAmount.toString(),
             currency: order.currency,
-            locale: 'fr',
+            locale: order.language.toLowerCase(),
           })
+        );
+
+        const dict =
+          dictionaries[order.language.toLowerCase()] || dictionaries.en;
+        const subject = dict.Emails.refunded.subject.replace(
+          '{orderNumber}',
+          order.orderNumber
         );
 
         const { data, error } = await resend.emails.send({
           from: FROM_EMAIL,
           to: recipientEmail,
-          subject: `Remboursement commande ${order.orderNumber}`,
+          subject,
           html: emailHtml,
         });
 
@@ -720,14 +754,21 @@ export async function createReturnLabel(
           customerName:
             order.user?.firstName || addr.name?.split(' ')[0] || 'Client',
           labelUrl: finalLabelUrl,
-          locale: 'fr',
+          locale: order.language.toLowerCase(),
         })
+      );
+
+      const dict =
+        dictionaries[order.language.toLowerCase()] || dictionaries.en;
+      const subject = dict.Emails.returnLabel.subject.replace(
+        '{orderNumber}',
+        order.orderNumber
       );
 
       await resend.emails.send({
         from: FROM_EMAIL,
         to: customerAddress.email,
-        subject: `Étiquette de retour pour votre commande ${order.orderNumber}`,
+        subject,
         html: emailHtml,
       });
       logger.info(

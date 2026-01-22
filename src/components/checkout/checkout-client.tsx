@@ -11,6 +11,7 @@ import {
 } from '@stripe/react-stripe-js';
 import AddressAutocomplete from './AddressAutocomplete';
 import { trackEvent } from '@/lib/analytics/tracker';
+import { formatPrice } from '@/lib/utils/currency';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(
@@ -754,7 +755,7 @@ function CheckoutForm({
                           </div>
                           <div className="text-right">
                             <div className="font-bold text-lg text-gray-900">
-                              {rate.amount} {rate.currency}
+                              {formatPrice(rate.amount, rate.currency, locale)}
                             </div>
                           </div>
                         </div>
@@ -824,15 +825,21 @@ function CheckoutForm({
                             {item.name}
                           </h4>
                           <p className="text-xs text-gray-500">
-                            {item.price.toFixed(2)} {item.currency}
+                            {formatPrice(
+                              item.price,
+                              item.currency as any,
+                              locale
+                            )}
                           </p>
                         </div>
 
-                        {/* Total per line */}
                         <div className="text-right">
                           <p className="font-semibold text-gray-900">
-                            {(item.price * item.quantity).toFixed(2)}{' '}
-                            {item.currency}
+                            {formatPrice(
+                              item.price * item.quantity,
+                              item.currency as any,
+                              locale
+                            )}
                           </p>
                         </div>
                       </div>
@@ -844,7 +851,7 @@ function CheckoutForm({
                 <div className="flex justify-between text-gray-600">
                   <span>{t.subtotal}</span>
                   <span className="font-medium text-gray-900">
-                    {initialTotal.toFixed(2)} {currency}
+                    {formatPrice(initialTotal, currency as any, locale)}
                   </span>
                 </div>
               </div>
@@ -862,7 +869,7 @@ function CheckoutForm({
                     {t.totalToPay}
                   </span>
                   <span className="font-extrabold text-xl text-gray-900">
-                    {total.toFixed(2)} {currency}
+                    {formatPrice(total, currency as any, locale)}
                   </span>
                 </div>
               </div>

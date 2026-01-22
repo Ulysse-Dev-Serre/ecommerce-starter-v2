@@ -310,5 +310,19 @@
   "Metadata": {
     "title": "Universal E-commerce Starter",
     "description": "Flexible, ready-to-use universal e-commerce starter."
+  },
+  "Emails": {
+    "confirmation": {
+      "subject": "Order Confirmation {orderNumber}"
+    },
+    "shipped": {
+      "subject": "Your order {orderNumber} is on its way!"
+    },
+    "refunded": {
+      "subject": "Refund for order {orderNumber}"
+    },
+    "returnLabel": {
+      "subject": "Return label for your order {orderNumber}"
+    }
   }
 }

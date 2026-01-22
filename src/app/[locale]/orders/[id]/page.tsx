@@ -8,6 +8,8 @@ import { getOrderById } from '@/lib/services/order.service';
 import { RefundRequestForm } from '@/components/orders/refund-request-form';
 import { getTranslations, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
+import { formatDate } from '@/lib/utils/date';
+import { formatPrice } from '@/lib/utils/currency';
 
 export const dynamic = 'force-dynamic';
 
@@ -196,12 +198,7 @@ async function OrderDetailContent({
               {t('orderNumber')} #{order.orderNumber}
             </h2>
             <p className="text-gray-500 mt-1">
-              {t('date')} :{' '}
-              {new Date(order.createdAt).toLocaleDateString(locale, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {t('date')} : {formatDate(order.createdAt, locale)}
             </p>
           </div>
           <div
@@ -277,13 +274,19 @@ async function OrderDetailContent({
                           order.user?.firstName ||
                           (order.shippingAddress as any)?.name?.split(' ')[0] ||
                           'Client',
-                        amount: order.totalAmount.toString(),
-                        currency: order.currency,
+                        amount: formatPrice(
+                          order.totalAmount,
+                          order.currency as any,
+                          locale
+                        ),
                         orderNumber: order.orderNumber,
                       })
                     : tRefund('refundDoneMessage', {
-                        amount: order.totalAmount.toString(),
-                        currency: order.currency,
+                        amount: formatPrice(
+                          order.totalAmount,
+                          order.currency as any,
+                          locale
+                        ),
                       })}
                 </div>
               </div>
@@ -377,12 +380,20 @@ async function OrderDetailContent({
                         )}
                         <p className="text-sm text-gray-500 mt-1">
                           {tCommon('quantity')} : {item.quantity} ×{' '}
-                          {item.unitPrice.toString()} {order.currency}
+                          {formatPrice(
+                            item.unitPrice,
+                            order.currency as any,
+                            locale
+                          )}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-bold text-gray-900">
-                          {item.totalPrice.toString()} {order.currency}
+                          {formatPrice(
+                            item.totalPrice,
+                            order.currency as any,
+                            locale
+                          )}
                         </p>
                       </div>
                     </li>
@@ -414,33 +425,54 @@ async function OrderDetailContent({
                 <div className="flex justify-between text-gray-500">
                   <span>{t('subtotal')}</span>
                   <span>
-                    {order.subtotalAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.subtotalAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>{t('shipping')}</span>
                   <span>
-                    {order.shippingAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.shippingAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-500">
                   <span>{t('tax')}</span>
                   <span>
-                    {order.taxAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.taxAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
                 {order.discountAmount > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>{tCommon('discount')}</span>
                     <span>
-                      -{order.discountAmount.toString()} {order.currency}
+                      -
+                      {formatPrice(
+                        order.discountAmount,
+                        order.currency as any,
+                        locale
+                      )}
                     </span>
                   </div>
                 )}
                 <div className="pt-6 border-t border-gray-100 flex justify-between items-center">
                   <span className="text-lg font-bold">{t('total')}</span>
                   <span className="text-2xl font-black">
-                    {order.totalAmount.toString()} {order.currency}
+                    {formatPrice(
+                      order.totalAmount,
+                      order.currency as any,
+                      locale
+                    )}
                   </span>
                 </div>
               </div>

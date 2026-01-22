@@ -6,6 +6,8 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/db/prisma';
 import { getUserOrders } from '@/lib/services/order.service';
 import { getTranslations } from 'next-intl/server';
+import { formatDate } from '@/lib/utils/date';
+import { formatPrice } from '@/lib/utils/currency';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,12 +108,7 @@ async function OrdersListContent({
                       {tDetail('orderNumber')} #{order.orderNumber}
                     </p>
                     <p className="text-sm font-medium text-gray-400 uppercase tracking-widest">
-                      {tDetail('date')}:{' '}
-                      {new Date(order.createdAt).toLocaleDateString(locale, {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
+                      {tDetail('date')}: {formatDate(order.createdAt, locale)}
                     </p>
                     <p className="text-sm font-bold text-gray-500">
                       {order.items.length}{' '}
@@ -127,7 +124,11 @@ async function OrdersListContent({
                       {statusLabels[order.status] || order.status}
                     </div>
                     <p className="mt-3 text-2xl font-black text-gray-900">
-                      {order.totalAmount.toString()} {order.currency}
+                      {formatPrice(
+                        order.totalAmount,
+                        order.currency as any,
+                        locale
+                      )}
                     </p>
                   </div>
                 </div>
