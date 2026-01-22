@@ -36,9 +36,7 @@ export async function RelatedProducts({
 
   return (
     <div className="mt-20 border-t border-gray-100 pt-16">
-      <h2 className="text-2xl font-bold mb-8">
-        {locale === 'fr' ? 'Vous aimerez aussi' : 'You might also like'}
-      </h2>
+      <h2 className="text-2xl font-bold mb-8">{t('relatedProducts')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} locale={locale} />

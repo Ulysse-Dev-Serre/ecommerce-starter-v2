@@ -5,6 +5,8 @@ import { use, useEffect, useState } from 'react';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
+import { i18n } from '@/lib/i18n/config';
+
 export default function CheckoutSuccessPage({
   params,
 }: {
@@ -42,7 +44,7 @@ export default function CheckoutSuccessPage({
   };
 
   const { locale: localeParam } = use(params);
-  const locale = localeParam || 'en';
+  const locale = localeParam || i18n.defaultLocale;
   const t =
     translations[locale as keyof typeof translations] || translations.en;
 

@@ -1,4 +1,9 @@
 {
+  "home": {
+    "heroTitle": "Votre Boutique",
+    "featuredProducts": "Produits en vedette",
+    "noFeaturedProducts": "Aucun produit en vedette pour le moment."
+  },
   "common": {
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
@@ -21,6 +26,9 @@
     "backToSite": "Retour au site",
     "quantity": "Quantité",
     "discount": "Réduction",
+    "previousImage": "Image précédente",
+    "nextImage": "Image suivante",
+    "goToImage": "Aller à l'image",
     "title": "Nous contacter",
     "description": "Une question sur nos produits ou votre commande ? Remplissez le formulaire et nous vous répondrons dans les plus brefs délais.",
     "emailLabel": "Email",
@@ -76,7 +84,12 @@
     "addToCart": "Ajouter au panier",
     "outOfStock": "Rupture de stock",
     "inStock": "En stock",
-    "fallbackDescription": "Achetez {title} chez nous."
+    "fallbackDescription": "Achetez {title} chez nous.",
+    "buyNow": "Acheter maintenant",
+    "adding": "Ajout...",
+    "buying": "Achat...",
+    "addedToCart": "{count, plural, =1 {# article ajouté au panier} other {# articles ajoutés au panier}}",
+    "relatedProducts": "Vous aimerez aussi"
   },
   "shop": {
     "title": "Boutique",

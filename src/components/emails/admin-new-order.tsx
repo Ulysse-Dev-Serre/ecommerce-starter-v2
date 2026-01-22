@@ -11,6 +11,8 @@ import {
 } from '@react-email/components';
 import { formatPrice } from '@/lib/utils/currency';
 import * as React from 'react';
+import { i18n } from '@/lib/i18n/config';
+import * as styles from './styles';
 
 interface AdminNewOrderEmailProps {
   orderId: string;
@@ -31,46 +33,75 @@ export const AdminNewOrderEmail = ({
   itemsCount = 3,
   siteUrl = 'https://agtechnest.com',
 }: AdminNewOrderEmailProps) => {
-  const formattedPrice = formatPrice(totalAmount, currency as any, 'fr');
+  const locale = i18n.adminLocale;
+  const formattedPrice = formatPrice(totalAmount, currency as any, locale);
+
+  const t = {
+    fr: {
+      preview: `Nouvelle commande : ${formattedPrice} par ${customerName}`,
+      brand: 'Admin AgTechNest',
+      title: 'Nouvelle Commande !',
+      message: "Une nouvelle commande vient d'être passée sur la boutique.",
+      labelAmount: 'Montant',
+      labelCustomer: 'Client',
+      labelOrder: 'Commande',
+      labelItems: 'Articles',
+      itemsCount: `${itemsCount} article(s)`,
+      button: 'Voir la commande',
+    },
+    en: {
+      preview: `New Order: ${formattedPrice} by ${customerName}`,
+      brand: 'AgTechNest Admin',
+      title: 'New Order!',
+      message: 'A new order has just been placed on the store.',
+      labelAmount: 'Amount',
+      labelCustomer: 'Customer',
+      labelOrder: 'Order',
+      labelItems: 'Items',
+      itemsCount: `${itemsCount} item(s)`,
+      button: 'View Order',
+    },
+  };
+
+  const text =
+    t[locale as keyof typeof t] ||
+    t[i18n.defaultLocale as keyof typeof t] ||
+    t.en;
 
   return (
     <Html>
       <Head />
-      <Preview>
-        Nouvelle commande : {formattedPrice} par {customerName}
-      </Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Section style={header}>
-            <Heading style={brand}>AgTechNest Admin</Heading>
+      <Preview>{text.preview}</Preview>
+      <Body style={styles.main}>
+        <Container style={styles.container}>
+          <Section style={styles.header}>
+            <Heading style={styles.brand}>{text.brand}</Heading>
           </Section>
 
-          <Section style={message}>
-            <Heading style={heading}>Nouvelle Commande !</Heading>
-            <Text style={textStyle}>
-              Une nouvelle commande vient d&apos;être passée sur la boutique.
-            </Text>
+          <Section style={styles.message}>
+            <Heading style={styles.heading}>{text.title}</Heading>
+            <Text style={styles.textStyle}>{text.message}</Text>
 
-            <Section style={statsBox}>
-              <Text style={statLabel}>Montant</Text>
-              <Text style={statValue}>{formattedPrice}</Text>
+            <Section style={styles.trackingBox}>
+              <Text style={styles.trackingTitle}>{text.labelAmount}</Text>
+              <Text style={styles.trackingNumberStyle}>{formattedPrice}</Text>
 
-              <Text style={statLabel}>Client</Text>
-              <Text style={statValue}>{customerName}</Text>
+              <Text style={styles.trackingTitle}>{text.labelCustomer}</Text>
+              <Text style={styles.textStyle}>{customerName}</Text>
 
-              <Text style={statLabel}>Commande</Text>
-              <Text style={statValue}>#{orderId}</Text>
+              <Text style={styles.trackingTitle}>{text.labelOrder}</Text>
+              <Text style={styles.textStyle}>#{orderId}</Text>
 
-              <Text style={statLabel}>Articles</Text>
-              <Text style={statValue}>{itemsCount} article(s)</Text>
+              <Text style={styles.trackingTitle}>{text.labelItems}</Text>
+              <Text style={styles.textStyle}>{text.itemsCount}</Text>
             </Section>
 
             <div style={{ textAlign: 'center', marginTop: '30px' }}>
               <Link
                 href={`${siteUrl}/admin/orders/${internalOrderId}`}
-                style={button}
+                style={styles.button}
               >
-                Voir la commande
+                {text.button}
               </Link>
             </div>
           </Section>
@@ -81,86 +112,3 @@ export const AdminNewOrderEmail = ({
 };
 
 export default AdminNewOrderEmail;
-
-// --- STYLES ---
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-  padding: '40px 0',
-};
-
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '0',
-  maxWidth: '600px',
-  borderRadius: '8px',
-  boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-  overflow: 'hidden',
-};
-
-const header = {
-  backgroundColor: '#111827',
-  padding: '20px 0',
-  textAlign: 'center' as const,
-};
-
-const brand = {
-  color: '#ffffff',
-  fontSize: '20px',
-  fontWeight: 'bold',
-  margin: '0',
-};
-
-const message = {
-  padding: '40px 40px',
-};
-
-const heading = {
-  fontSize: '24px',
-  fontWeight: '800',
-  color: '#111827',
-  textAlign: 'center' as const,
-  margin: '0 0 20px',
-};
-
-const textStyle = {
-  fontSize: '16px',
-  color: '#4b5563',
-  textAlign: 'center' as const,
-  margin: '0 0 30px',
-};
-
-const statsBox = {
-  backgroundColor: '#f9fafb',
-  borderRadius: '8px',
-  padding: '20px',
-  border: '1px solid #e5e7eb',
-};
-
-const statLabel = {
-  fontSize: '12px',
-  textTransform: 'uppercase' as const,
-  color: '#6b7280',
-  fontWeight: '600',
-  marginBottom: '4px',
-};
-
-const statValue = {
-  fontSize: '18px',
-  fontWeight: '700',
-  color: '#111827',
-  marginBottom: '16px',
-};
-
-const button = {
-  backgroundColor: '#111827',
-  borderRadius: '6px',
-  color: '#ffffff',
-  fontSize: '14px',
-  fontWeight: '600',
-  textDecoration: 'none',
-  padding: '12px 24px',
-  display: 'inline-block',
-};

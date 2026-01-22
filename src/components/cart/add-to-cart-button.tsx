@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface AddToCartButtonProps {
   variantId: string;
@@ -46,23 +47,18 @@ export function AddToCartButton({
     }
   };
 
+  const tProducts = useTranslations('products');
+  const tShop = useTranslations('shop');
+
+  const label = fullWidth ? tProducts('addToCart') : tShop('addToCart');
+
   return (
     <button
       onClick={handleAddToCart}
       disabled={disabled || isLoading}
       className={`bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${fullWidth ? 'w-full py-3 px-6 rounded-lg text-base' : ''}`}
     >
-      {isLoading
-        ? locale === 'fr'
-          ? 'Ajout...'
-          : 'Adding...'
-        : locale === 'fr'
-          ? fullWidth
-            ? 'Ajouter au panier'
-            : 'Ajouter'
-          : fullWidth
-            ? 'Add to cart'
-            : 'Add'}
+      {isLoading ? tProducts('adding') : label}
     </button>
   );
 }

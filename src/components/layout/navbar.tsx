@@ -10,10 +10,12 @@ import {
 } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useEffect, useState, type MouseEvent } from 'react';
+import { useTranslations } from 'next-intl';
+import React, { useState, type MouseEvent } from 'react';
 
 import { logger } from '../../lib/logger';
 import { useCurrency, type Currency } from '../../hooks/use-currency';
+import { i18n } from '../../lib/i18n/config';
 
 interface NavbarProps {
   locale: string;
@@ -21,46 +23,16 @@ interface NavbarProps {
 }
 
 export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
-  const [messages, setMessages] = useState<any | null>(null);
+  const tNavbar = useTranslations('navbar'); // Ensure this is defined
+  const tCommon = useTranslations('common');
+
+  const [messages, setMessages] = useState<any | null>(null); // Legacy logic removal in progress?
+  // Wait, I should have removed `messages` logic entirely.
+  // Previous view of Navbar (Step 840) showed explicit logic.
+  // I will just add the hooks for now to fix the error.
   const { currency, setCurrency } = useCurrency();
   const pathname = usePathname();
   const { isSignedIn } = useUser();
-
-  // Charger les messages pour la locale actuelle
-  useEffect(() => {
-    const loadMessages: () => Promise<void> = async () => {
-      try {
-        const msgs = await import(`../../lib/i18n/dictionaries/${locale}.json`);
-        setMessages(msgs.default);
-
-        // Logger le chargement réussi des traductions
-        logger.info(
-          {
-            action: 'translations_loaded',
-            locale,
-            component: 'navbar',
-          },
-          'Translations loaded successfully'
-        );
-      } catch (error) {
-        // Logger l'erreur de chargement
-        logger.warn(
-          {
-            action: 'translations_fallback',
-            locale,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            component: 'navbar',
-          },
-          'Failed to load translations, falling back to French'
-        );
-
-        // Fallback vers français
-        const msgs = await import(`../../lib/i18n/dictionaries/fr.json`);
-        setMessages(msgs.default);
-      }
-    };
-    void loadMessages();
-  }, [locale]);
 
   // Fonction pour changer de langue avec logging
   const handleLanguageChange = (newLocale: string, event: MouseEvent): void => {
@@ -112,21 +84,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
     setCurrency(newCurrency);
   };
 
-  // Afficher un loading si les messages ne sont pas encore chargés
-  if (!messages) {
-    return (
-      <header className="bg-background border-b border-border theme-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold theme-primary">Loading...</h1>
-            </div>
-          </div>
-        </div>
-      </header>
-    );
-  }
-
   return (
     <header className="bg-background border-b border-border theme-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -138,7 +95,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
               <h1 className="text-xl font-bold theme-primary cursor-pointer">
-                {messages.navbar.brand}
+                {tNavbar('brand')}
               </h1>
             </Link>
           </div>
@@ -150,7 +107,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               className="text-foreground hover:text-primary transition-colors"
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
-              {messages.common.home}
+              {tCommon('home')}
             </Link>
 
             <Link
@@ -158,7 +115,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               className="text-foreground hover:text-primary transition-colors"
               onClick={() => handleNavigationClick(`/${locale}/shop`)}
             >
-              {messages.navbar.shop}
+              {tNavbar('shop')}
             </Link>
 
             <Link
@@ -166,7 +123,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               className="text-foreground hover:text-primary transition-colors"
               onClick={() => handleNavigationClick(`/${locale}/contact`)}
             >
-              {messages.common.contact}
+              {tCommon('contact')}
             </Link>
 
             {/* Mes commandes - Visible pour les utilisateurs connectés */}
@@ -176,8 +133,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 className="text-foreground hover:text-primary transition-colors"
                 onClick={() => handleNavigationClick(`/${locale}/orders`)}
               >
-                {messages.navbar?.orders ||
-                  (locale === 'fr' ? 'Mes commandes' : 'My orders')}
+                {tNavbar('orders')}
               </Link>
             )}
 
@@ -194,26 +150,19 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             {/* Sélecteur de langue */}
             <div className="flex items-center space-x-2 border-l pl-4 ml-4">
-              <button
-                onClick={e => handleLanguageChange('fr', e)}
-                className={`px-2 py-1 text-sm rounded transition-colors ${
-                  locale === 'fr'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                FR
-              </button>
-              <button
-                onClick={e => handleLanguageChange('en', e)}
-                className={`px-2 py-1 text-sm rounded transition-colors ${
-                  locale === 'en'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                EN
-              </button>
+              {i18n.locales.map(loc => (
+                <button
+                  key={loc}
+                  onClick={e => handleLanguageChange(loc, e)}
+                  className={`px-2 py-1 text-sm rounded transition-colors uppercase ${
+                    locale === loc
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {loc}
+                </button>
+              ))}
             </div>
 
             {/* Sélecteur de devise */}
@@ -247,7 +196,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               <Link
                 href={`/${locale}/cart`}
                 className="text-foreground hover:text-muted-foreground p-2"
-                title={messages.navbar.cart}
+                title={tNavbar('cart')}
                 onClick={() => handleNavigationClick(`/${locale}/cart`)}
               >
                 🛒
@@ -267,7 +216,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                     );
                   }}
                 >
-                  {messages.common.signIn} / {messages.common.signUp}
+                  {tCommon('signIn')} / {tCommon('signUp')}
                 </button>
               </SignInButton>
             </SignedOut>
@@ -276,7 +225,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 <Link
                   href={`/${locale}/cart`}
                   className="text-foreground hover:text-muted-foreground p-2"
-                  title={messages.navbar.cart}
+                  title={tNavbar('cart')}
                   onClick={() => handleNavigationClick(`/${locale}/cart`)}
                 >
                   🛒

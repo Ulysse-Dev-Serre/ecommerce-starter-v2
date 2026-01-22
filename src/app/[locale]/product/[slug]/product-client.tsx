@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
 import { trackEvent } from '@/lib/analytics/tracker';
@@ -49,17 +50,13 @@ export function ProductClient({
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants[0]?.id || ''
   );
+  const t = useTranslations('products');
+  const tCommon = useTranslations('shop'); // For "viewOptions" etc
 
   const selectedVariant = variants.find(v => v.id === selectedVariantId);
 
   if (!selectedVariant) {
-    return (
-      <div className="text-error">
-        {locale === 'fr'
-          ? 'Aucune variante disponible'
-          : 'No variant available'}
-      </div>
-    );
+    return <div className="text-error">{t('outOfStock')}</div>;
   }
 
   const attributeGroups = variants.reduce(
@@ -155,7 +152,7 @@ export function ProductClient({
       {!hasAttributes && variants.length > 1 && (
         <div>
           <label className="block text-sm font-medium mb-2">
-            {locale === 'fr' ? 'Variante' : 'Variant'}
+            {t('variant')}
           </label>
           <div className="flex flex-wrap gap-2">
             {variants.map(variant => {
@@ -186,14 +183,10 @@ export function ProductClient({
       <div className="text-sm text-muted-foreground">
         {selectedVariant.stock > 0 ? (
           <span className="text-success">
-            {locale === 'fr'
-              ? `En stock (${selectedVariant.stock} disponibles)`
-              : `In stock (${selectedVariant.stock} available)`}
+            {t('inStock', { stock: selectedVariant.stock })}
           </span>
         ) : (
-          <span className="text-error">
-            {locale === 'fr' ? 'Rupture de stock' : 'Out of stock'}
-          </span>
+          <span className="text-error">{t('outOfStock')}</span>
         )}
       </div>
 

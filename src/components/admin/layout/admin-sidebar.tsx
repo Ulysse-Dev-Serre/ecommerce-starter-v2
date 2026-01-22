@@ -15,11 +15,13 @@ import {
   Home,
   Truck,
 } from 'lucide-react';
+import { i18n } from '@/lib/i18n/config';
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const params = useParams();
-  const locale = (params.locale as string) || 'en';
+
+  const locale = (params.locale as string) || i18n.defaultLocale;
   const [messages, setMessages] = useState<any>(null);
 
   useEffect(() => {

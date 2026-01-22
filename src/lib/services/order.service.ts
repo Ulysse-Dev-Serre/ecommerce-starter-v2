@@ -11,6 +11,7 @@ import { decrementStock } from './inventory.service';
 import { resend, FROM_EMAIL } from '../../lib/resend';
 import { OrderConfirmationEmail } from '../../components/emails/order-confirmation';
 import { render } from '@react-email/render';
+import { i18n } from '../i18n/config';
 
 const fr = require('../i18n/dictionaries/fr.json');
 const en = require('../i18n/dictionaries/en.json');
@@ -48,7 +49,9 @@ export async function createOrderFromCart({
   const taxAmount = 0; // Géré par Stripe Tax
 
   // Récupérer la langue depuis les metadata
-  const locale = (paymentIntent.metadata?.locale || 'en').toLowerCase();
+  const locale = (
+    paymentIntent.metadata?.locale || i18n.defaultLocale
+  ).toLowerCase();
 
   // Récupérer les frais de port depuis les metadata du PaymentIntent
   const shippingCostMeta = paymentIntent.metadata?.shipping_cost;

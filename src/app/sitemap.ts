@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db/prisma';
+import { i18n } from '@/lib/i18n/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 2. Définir les routes statiques de base
   const staticRoutes = ['', '/shop', '/contact'];
-  const locales = ['fr', 'en'];
+  const locales = i18n.locales;
+
+  // Helper to generate alternates
+  const getAlternates = (route: string) => {
+    return locales.reduce(
+      (acc, locale) => {
+        acc[locale] = `${baseUrl}/${locale}${route}`;
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  };
 
   // 3. Générer les entrées pour les routes statiques (multilingue)
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.flatMap(route =>
@@ -26,29 +38,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: route === '' ? 1.0 : 0.8,
       alternates: {
-        languages: {
-          fr: `${baseUrl}/fr${route}`,
-          en: `${baseUrl}/en${route}`,
-        },
+        languages: getAlternates(route),
       },
     }))
   );
 
   // 4. Générer les entrées pour les produits (multilingue)
-  const productEntries: MetadataRoute.Sitemap = products.flatMap(product =>
-    locales.map(locale => ({
-      url: `${baseUrl}/${locale}/product/${product.slug}`,
+  const productEntries: MetadataRoute.Sitemap = products.flatMap(product => {
+    const route = `/product/${product.slug}`;
+    const alternates = getAlternates(route);
+
+    return locales.map(locale => ({
+      url: `${baseUrl}/${locale}${route}`,
       lastModified: product.updatedAt,
       changeFrequency: 'weekly',
-      priority: 0.9, // Les produits sont importants
+      priority: 0.9,
       alternates: {
-        languages: {
-          fr: `${baseUrl}/fr/product/${product.slug}`,
-          en: `${baseUrl}/en/product/${product.slug}`,
-        },
+        languages: alternates,
       },
-    }))
-  );
+    }));
+  });
 
   return [...staticEntries, ...productEntries];
 }

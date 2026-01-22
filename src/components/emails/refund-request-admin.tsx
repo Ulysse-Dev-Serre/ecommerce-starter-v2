@@ -10,6 +10,8 @@ import {
   Text,
 } from '@react-email/components';
 import * as React from 'react';
+import { i18n } from '@/lib/i18n/config';
+import * as styles from './styles';
 
 interface RefundRequestAdminEmailProps {
   orderNumber: string;
@@ -25,129 +27,92 @@ export const RefundRequestAdminEmail = ({
   customerEmail,
   reason,
   imageUrl,
-}: RefundRequestAdminEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>
-      Nouvelle demande de remboursement pour la commande {orderNumber}
-    </Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Section style={header}>
-          <Heading style={heading}>Demande de Remboursement</Heading>
-        </Section>
-        <Section style={content}>
-          <Text style={text}>
-            Une nouvelle demande de remboursement a été soumise par un client.
-          </Text>
-          <Hr style={hr} />
-          <Text style={label}>Commande :</Text>
-          <Text style={value}>{orderNumber}</Text>
+}: RefundRequestAdminEmailProps) => {
+  const locale = i18n.adminLocale;
 
-          <Text style={label}>Client :</Text>
-          <Text style={value}>
-            {customerName} ({customerEmail})
-          </Text>
+  const t = {
+    fr: {
+      preview: `Nouvelle demande de remboursement pour la commande ${orderNumber}`,
+      title: 'Demande de Remboursement',
+      message:
+        'Une nouvelle demande de remboursement a été soumise par un client.',
+      labelOrder: 'Commande :',
+      labelCustomer: 'Client :',
+      labelReason: 'Raison du remboursement :',
+      labelImage: 'Image jointe :',
+      imageText:
+        "L'image a été envoyée en pièce jointe ou est consultable via le dashboard.",
+      footer:
+        'Pour traiter cette demande, rendez-vous dans le dashboard admin.',
+    },
+    en: {
+      preview: `New refund request for order ${orderNumber}`,
+      title: 'Refund Request',
+      message: 'A new refund request has been submitted by a customer.',
+      labelOrder: 'Order:',
+      labelCustomer: 'Customer:',
+      labelReason: 'Refund Reason:',
+      labelImage: 'Attached Image:',
+      imageText:
+        'The image was sent as an attachment or is viewable via the dashboard.',
+      footer: 'To process this request, go to the admin dashboard.',
+    },
+  };
 
-          <Hr style={hr} />
-          <Text style={label}>Raison du remboursement :</Text>
-          <Text style={paragraph}>{reason}</Text>
+  const text =
+    t[locale as keyof typeof t] ||
+    t[i18n.defaultLocale as keyof typeof t] ||
+    t.en;
 
-          {imageUrl && (
-            <>
-              <Hr style={hr} />
-              <Text style={label}>Image jointe :</Text>
-              <Text style={text}>
-                L&apos;image a été envoyée en pièce jointe ou est consultable
-                via le dashboard.
-              </Text>
-            </>
-          )}
-        </Section>
-        <Hr style={hr} />
-        <Section style={footer}>
-          <Text style={footerText}>
-            Pour traiter cette demande, rendez-vous dans le dashboard admin.
-          </Text>
-        </Section>
-      </Container>
-    </Body>
-  </Html>
-);
+  return (
+    <Html>
+      <Head />
+      <Preview>{text.preview}</Preview>
+      <Body style={styles.main}>
+        <Container style={styles.container}>
+          <Section style={styles.header}>
+            <Heading style={styles.heading}>{text.title}</Heading>
+          </Section>
+          <Section style={styles.message}>
+            <Text style={styles.textStyle}>{text.message}</Text>
+            <Hr style={styles.hr} />
+            <Text style={styles.sectionTitle}>{text.labelOrder}</Text>
+            <Text style={styles.textStyle}>{orderNumber}</Text>
 
-const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
-};
+            <Text style={styles.sectionTitle}>{text.labelCustomer}</Text>
+            <Text style={styles.textStyle}>
+              {customerName} ({customerEmail})
+            </Text>
 
-const container = {
-  backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '20px 0 48px',
-  marginBottom: '64px',
-};
+            <Hr style={styles.hr} />
+            <Text style={styles.sectionTitle}>{text.labelReason}</Text>
+            <Text
+              style={{
+                ...styles.textStyle,
+                backgroundColor: '#f4f4f4',
+                padding: '12px',
+                borderRadius: '4px',
+              }}
+            >
+              {reason}
+            </Text>
 
-const header = {
-  padding: '0 48px',
-};
-
-const heading = {
-  fontSize: '24px',
-  letterSpacing: '-0.5px',
-  lineHeight: '1.3',
-  fontWeight: '400',
-  color: '#484848',
-  padding: '17px 0 0',
-};
-
-const content = {
-  padding: '0 48px',
-};
-
-const text = {
-  color: '#484848',
-  fontSize: '16px',
-  lineHeight: '24px',
-  textAlign: 'left' as const,
-};
-
-const label = {
-  color: '#8898aa',
-  fontSize: '12px',
-  textTransform: 'uppercase' as const,
-  fontWeight: 'bold',
-  marginTop: '16px',
-};
-
-const value = {
-  color: '#484848',
-  fontSize: '18px',
-  fontWeight: 'bold',
-};
-
-const paragraph = {
-  color: '#484848',
-  fontSize: '16px',
-  lineHeight: '24px',
-  backgroundColor: '#f4f4f4',
-  padding: '12px',
-  borderRadius: '4px',
-};
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-};
-
-const footer = {
-  padding: '0 48px',
-};
-
-const footerText = {
-  color: '#8898aa',
-  fontSize: '12px',
-  lineHeight: '24px',
+            {imageUrl && (
+              <>
+                <Hr style={styles.hr} />
+                <Text style={styles.sectionTitle}>{text.labelImage}</Text>
+                <Text style={styles.textStyle}>{text.imageText}</Text>
+              </>
+            )}
+          </Section>
+          <Hr style={styles.hr} />
+          <Section style={styles.footer}>
+            <Text style={styles.footerText}>{text.footer}</Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
 };
 
 export default RefundRequestAdminEmail;

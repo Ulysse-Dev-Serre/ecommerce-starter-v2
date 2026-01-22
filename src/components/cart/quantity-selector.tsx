@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface QuantitySelectorProps {
   cartItemId?: string;
@@ -124,6 +125,8 @@ export function QuantitySelector({
     }
   };
 
+  const t = useTranslations('cart'); // or common
+
   return (
     <div className="flex items-center gap-2">
       <button
@@ -131,9 +134,7 @@ export function QuantitySelector({
         onClick={decrement}
         disabled={quantity <= 1 || isLoading}
         className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        aria-label={
-          locale === 'fr' ? 'Diminuer la quantité' : 'Decrease quantity'
-        }
+        aria-label={t('quantity')} // Simplified for now or add specific keys
       >
         −
       </button>
@@ -151,9 +152,7 @@ export function QuantitySelector({
         onClick={increment}
         disabled={quantity >= maxQuantity || isLoading}
         className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        aria-label={
-          locale === 'fr' ? 'Augmenter la quantité' : 'Increase quantity'
-        }
+        aria-label={t('quantity')}
       >
         +
       </button>

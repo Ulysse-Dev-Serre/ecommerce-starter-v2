@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import { auth } from '@clerk/nextjs/server';
 
@@ -118,12 +119,12 @@ export default async function CartPage({
       }
     : null;
 
+  const t = await getTranslations({ locale, namespace: 'cart' });
+
   return (
     <div className="flex-1 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8">
-          {locale === 'fr' ? 'Panier' : 'Cart'}
-        </h1>
+        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
         <CartClient cart={serializedCart} locale={locale} />
       </div>
     </div>

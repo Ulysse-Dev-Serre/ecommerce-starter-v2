@@ -17,7 +17,7 @@ export const CURRENCY_DECIMALS: Record<SupportedCurrency, number> = {
 export function formatPrice(
   amount: number | string | Decimal,
   currency: SupportedCurrency,
-  locale: string = 'en',
+  locale: string,
   showCurrencyCode: boolean = false
 ): string {
   if (!currency) {

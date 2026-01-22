@@ -6,7 +6,7 @@
  */
 export function formatDate(
   date: Date | string | number,
-  locale: string = 'en',
+  locale: string,
   options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'long',
@@ -31,7 +31,7 @@ export function formatDate(
  */
 export function formatDateTime(
   date: Date | string | number,
-  locale: string = 'en'
+  locale: string
 ): string {
   return formatDate(date, locale, {
     year: 'numeric',

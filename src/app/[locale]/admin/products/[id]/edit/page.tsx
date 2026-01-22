@@ -31,6 +31,7 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { i18n } from '@/lib/i18n/config';
 
 interface Translation {
   id: string;
@@ -164,7 +165,8 @@ export default function EditProductPage({
   const router = useRouter();
   const [productId, setProductId] = useState<string | null>(null);
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Debounce ref
-  const [locale, setLocale] = useState('en');
+
+  const [locale, setLocale] = useState(i18n.defaultLocale);
   const [messages, setMessages] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -220,7 +222,7 @@ export default function EditProductPage({
   useEffect(() => {
     void params.then(p => {
       setProductId(p.id);
-      setLocale(p.locale || 'en');
+      setLocale(p.locale || i18n.defaultLocale);
       void loadProduct(p.id);
       void loadVariants(p.id);
       void loadMedia(p.id);

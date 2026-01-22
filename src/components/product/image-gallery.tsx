@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface ImageGalleryProps {
   images: Array<{
@@ -18,11 +19,13 @@ export function ImageGallery({
   locale,
 }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const tCommon = useTranslations('common');
+  const tShop = useTranslations('shop');
 
   if (images.length === 0) {
     return (
       <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center text-gray-400">
-        {locale === 'fr' ? "Pas d'image" : 'No image'}
+        {tShop('noImage')}
       </div>
     );
   }
@@ -54,9 +57,7 @@ export function ImageGallery({
               <button
                 onClick={goToPrevious}
                 className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                aria-label={
-                  locale === 'fr' ? 'Image précédente' : 'Previous image'
-                }
+                aria-label={tCommon('previousImage')}
               >
                 <svg
                   className="w-6 h-6"
@@ -78,7 +79,7 @@ export function ImageGallery({
               <button
                 onClick={goToNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                aria-label={locale === 'fr' ? 'Image suivante' : 'Next image'}
+                aria-label={tCommon('nextImage')}
               >
                 <svg
                   className="w-6 h-6"
@@ -106,7 +107,7 @@ export function ImageGallery({
                       ? 'bg-white'
                       : 'bg-white/50 hover:bg-white/75'
                   }`}
-                  aria-label={`${locale === 'fr' ? "Aller à l'image" : 'Go to image'} ${index + 1}`}
+                  aria-label={`${tCommon('goToImage')} ${index + 1}`}
                 />
               ))}
             </div>

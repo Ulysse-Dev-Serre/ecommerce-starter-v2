@@ -1,23 +1,13 @@
-# 🚀 Checklist Pré-Production
+# Checklist Pré-Production
 
 Guide complet pour déployer et mettre en ligne une boutique.
 
 ---
 
-## 📋 Vue d'ensemble
+## Vue d'ensemble
 
 Le starter supporte le déploiement **multi-région** : une même codebase peut être déployée plusieurs fois avec des configurations différentes.
 
-### Architecture recommandée
-
-```
-ecommerce-starter-v2 (codebase)
-        │
-        ├── Boutique A - Canada (FR/EN + CAD)
-        ├── Boutique A - USA (EN + USD)
-        ├── Boutique B - Canada (FR/EN + CAD)
-        └── Boutique B - USA (EN + USD)
-```
 
 - **Même niche** = même base de données (stock synchronisé)
 - **Région différente** = configuration différente

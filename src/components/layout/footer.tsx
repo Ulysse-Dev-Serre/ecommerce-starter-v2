@@ -1,47 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { logger } from '../../lib/logger';
 
 interface FooterProps {
-  locale?: string;
+  locale: string;
 }
 
-export function Footer({ locale = 'fr' }: FooterProps): React.JSX.Element {
-  const [messages, setMessages] = useState<any | null>(null);
-
-  useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const msgs = await import(`../../lib/i18n/dictionaries/${locale}.json`);
-        setMessages(msgs.default);
-      } catch (error) {
-        logger.error(
-          { error, locale, component: 'footer' },
-          'Failed to load footer translations'
-        );
-        // Fallback
-        const msgs = await import(`../../lib/i18n/dictionaries/fr.json`);
-        setMessages(msgs.default);
-      }
-    };
-    void loadMessages();
-  }, [locale]);
+export function Footer({ locale }: FooterProps): React.JSX.Element {
+  const t = useTranslations('footer');
+  const tShop = useTranslations('shop');
+  const tCart = useTranslations('cart');
+  const tNavbar = useTranslations('navbar');
 
   const year = new Date().getFullYear();
-  const storeName = messages?.navbar?.brand || 'AgTechNest';
-
-  if (!messages) {
-    return (
-      <footer className="bg-background border-t border-border theme-border mt-auto py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          Loading...
-        </div>
-      </footer>
-    );
-  }
+  const storeName = tNavbar('brand') || 'AgTechNest';
 
   return (
     <footer className="bg-background border-t border-border theme-border mt-auto">
@@ -53,22 +28,20 @@ export function Footer({ locale = 'fr' }: FooterProps): React.JSX.Element {
               {storeName}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {messages.footer.copyright
-                .replace('{year}', year.toString())
-                .replace('{storeName}', storeName)}
+              {t('copyright', { year: year.toString(), storeName })}
             </p>
           </div>
 
           {/* Links Column 1: Shop */}
           <div>
-            <h4 className="font-semibold mb-4">{messages.shop.title}</h4>
+            <h4 className="font-semibold mb-4">{tShop('title')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link
                   href={`/${locale}/shop`}
                   className="hover:text-primary transition-colors"
                 >
-                  {messages.shop.title}
+                  {tShop('title')}
                 </Link>
               </li>
               <li>
@@ -76,7 +49,7 @@ export function Footer({ locale = 'fr' }: FooterProps): React.JSX.Element {
                   href={`/${locale}/cart`}
                   className="hover:text-primary transition-colors"
                 >
-                  {messages.cart.title}
+                  {tCart('title')}
                 </Link>
               </li>
             </ul>
@@ -84,14 +57,14 @@ export function Footer({ locale = 'fr' }: FooterProps): React.JSX.Element {
 
           {/* Links Column 2: Legal */}
           <div>
-            <h4 className="font-semibold mb-4">{messages.footer.legal}</h4>
+            <h4 className="font-semibold mb-4">{t('legal')}</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link
                   href={`/${locale}/privacy`}
                   className="hover:text-primary transition-colors"
                 >
-                  {messages.footer.privacy}
+                  {t('privacy')}
                 </Link>
               </li>
               <li>
@@ -99,7 +72,7 @@ export function Footer({ locale = 'fr' }: FooterProps): React.JSX.Element {
                   href={`/${locale}/terms`}
                   className="hover:text-primary transition-colors"
                 >
-                  {messages.footer.terms}
+                  {t('terms')}
                 </Link>
               </li>
               <li>
@@ -107,7 +80,7 @@ export function Footer({ locale = 'fr' }: FooterProps): React.JSX.Element {
                   href={`/${locale}/refund`}
                   className="hover:text-primary transition-colors"
                 >
-                  {messages.footer.refund}
+                  {t('refund')}
                 </Link>
               </li>
             </ul>

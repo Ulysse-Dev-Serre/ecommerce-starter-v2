@@ -28,6 +28,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { i18n } from '@/lib/i18n/config';
 
 interface ProductTranslation {
   language: string;
@@ -202,7 +203,8 @@ function SortableProductRow({
 
 export default function ProductsPage() {
   const params = useParams();
-  const locale = (params.locale as string) || 'en';
+
+  const locale = (params.locale as string) || i18n.defaultLocale;
   const [messages, setMessages] = useState<any>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);

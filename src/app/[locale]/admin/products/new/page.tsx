@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save, X, Plus, Trash2, Check } from 'lucide-react';
 import Link from 'next/link';
+import { i18n } from '@/lib/i18n/config';
 
 interface Translation {
   language: 'EN' | 'FR';
@@ -24,7 +25,8 @@ interface SimpleVariant {
 export default function NewProductPage() {
   const router = useRouter();
   const params = useParams();
-  const locale = (params.locale as string) || 'en';
+
+  const locale = (params.locale as string) || i18n.defaultLocale;
 
   const [messages, setMessages] = useState<any>(null);
   const [loading, setLoading] = useState(false);

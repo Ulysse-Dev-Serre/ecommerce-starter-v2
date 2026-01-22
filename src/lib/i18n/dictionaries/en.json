@@ -1,4 +1,9 @@
 {
+  "home": {
+    "heroTitle": "Your Store",
+    "featuredProducts": "Featured Products",
+    "noFeaturedProducts": "No featured products at the moment."
+  },
   "common": {
     "signIn": "Sign in",
     "signUp": "Sign up",
@@ -21,6 +26,9 @@
     "backToSite": "Back to site",
     "quantity": "Quantity",
     "discount": "Discount",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "goToImage": "Go to image",
     "title": "Contact Us",
     "description": "Have a question about our products or your order? Fill out the form and we will get back to you as soon as possible.",
     "emailLabel": "Email",
@@ -76,7 +84,12 @@
     "addToCart": "Add to cart",
     "outOfStock": "Out of stock",
     "inStock": "In stock",
-    "fallbackDescription": "Buy {title} from us."
+    "fallbackDescription": "Buy {title} from us.",
+    "buyNow": "Buy now",
+    "adding": "Adding...",
+    "buying": "Buying...",
+    "addedToCart": "{count, plural, =1 {# item added to cart} other {# items added to cart}}",
+    "relatedProducts": "You might also like"
   },
   "shop": {
     "title": "Shop",

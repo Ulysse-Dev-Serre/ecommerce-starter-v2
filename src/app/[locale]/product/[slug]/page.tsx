@@ -158,6 +158,10 @@ export default async function ProductPage({
     },
   };
 
+  /* Translations for JSON-LD */
+  const tCommon = await getTranslations({ locale, namespace: 'common' });
+  const tShop = await getTranslations({ locale, namespace: 'shop' });
+
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -165,13 +169,13 @@ export default async function ProductPage({
       {
         '@type': 'ListItem',
         position: 1,
-        name: locale === 'fr' ? 'Accueil' : 'Home',
+        name: tCommon('home'),
         item: `${siteUrl}/${locale}`,
       },
       {
         '@type': 'ListItem',
         position: 2,
-        name: locale === 'fr' ? 'Boutique' : 'Shop',
+        name: tShop('title'),
         item: `${siteUrl}/${locale}/shop`,
       },
       {

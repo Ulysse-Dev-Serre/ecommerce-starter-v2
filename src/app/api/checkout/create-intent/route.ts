@@ -14,6 +14,7 @@ import {
   createPaymentIntent,
   type CheckoutCurrency,
 } from '../../../../lib/stripe/checkout';
+import { i18n } from '@/lib/i18n/config';
 
 async function createIntentHandler(
   request: NextRequest,
@@ -90,7 +91,7 @@ async function createIntentHandler(
   }
 
   // 3. Créer le PaymentIntent
-  const locale = body.locale || 'en';
+  const locale = body.locale || i18n.defaultLocale;
 
   try {
     // 2. Réserver le stock (si activé)

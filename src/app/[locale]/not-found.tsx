@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { i18n } from '@/lib/i18n/config';
 
 interface NotFoundProps {
   params: Promise<{ locale: string }>;
@@ -6,11 +7,12 @@ interface NotFoundProps {
 
 export default async function NotFound(props: any) {
   const params = props?.params;
-  // Fallback to 'en' if params is undefined (common in 404s triggered outside page context)
-  const locale = params ? (await params).locale : 'en';
+  // Fallback to default if params is undefined (common in 404s triggered outside page context)
+  const locale = params ? (await params).locale : i18n.defaultLocale;
 
-  // Fallback to 'en' if locale is somehow invalid, though usually handled by middleware
-  const safeLocale = locale && ['fr', 'en'].includes(locale) ? locale : 'en';
+  // Fallback to default if locale is somehow invalid, though usually handled by middleware
+  const safeLocale =
+    locale && i18n.locales.includes(locale) ? locale : i18n.defaultLocale;
 
   const dictionary = (
     await import(`@/lib/i18n/dictionaries/${safeLocale}.json`)

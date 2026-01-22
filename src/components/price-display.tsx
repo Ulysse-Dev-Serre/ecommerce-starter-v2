@@ -6,6 +6,7 @@ import {
   type Currency,
 } from '@/hooks/use-currency';
 import { formatPrice } from '@/lib/utils/currency';
+import { useLocale } from 'next-intl';
 
 interface PriceDisplayProps {
   pricing: Array<{ price: string; currency: string }>;
@@ -17,9 +18,11 @@ interface PriceDisplayProps {
 export function PriceDisplay({
   pricing,
   className = '',
-  locale = 'fr',
+  locale,
   showFallbackIndicator = false,
 }: PriceDisplayProps) {
+  const defaultLocale = useLocale();
+  const currentLocale = locale || defaultLocale;
   const { currency, isLoaded } = useCurrency();
 
   if (!isLoaded) {
@@ -35,7 +38,7 @@ export function PriceDisplay({
   const formattedPrice = formatPrice(
     parseFloat(price),
     displayCurrency as 'CAD' | 'USD',
-    locale
+    currentLocale
   );
 
   return (
@@ -59,11 +62,9 @@ interface PriceTotalProps {
   locale?: string;
 }
 
-export function PriceTotal({
-  items,
-  className = '',
-  locale = 'fr',
-}: PriceTotalProps) {
+export function PriceTotal({ items, className = '', locale }: PriceTotalProps) {
+  const defaultLocale = useLocale();
+  const currentLocale = locale || defaultLocale;
   const { currency, isLoaded } = useCurrency();
 
   if (!isLoaded) {
@@ -75,7 +76,7 @@ export function PriceTotal({
     return sum + parseFloat(price) * item.quantity;
   }, 0);
 
-  const formattedTotal = formatPrice(total, currency, locale);
+  const formattedTotal = formatPrice(total, currency, currentLocale);
 
   return <span className={className}>{formattedTotal}</span>;
 }

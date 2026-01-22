@@ -3,7 +3,8 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getMessages } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
 import { i18n } from '@/lib/i18n/config';
 import Script from 'next/script';
 
@@ -57,7 +58,7 @@ export async function generateMetadata({
 
 // Générer les paramètres statiques pour les locales
 export async function generateStaticParams(): Promise<{ locale: string }[]> {
-  return [{ locale: 'fr' }, { locale: 'en' }];
+  return i18n.locales.map(locale => ({ locale }));
 }
 
 interface RootLayoutProps {
@@ -121,27 +122,31 @@ export default async function RootLayout({
   }
 
   // Mode normal avec Clerk
+  const messages = await getMessages({ locale });
+
   return (
     <ClerkProvider>
       <html lang={locale}>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
         >
-          <GoogleTagManager />
-          <CookieConsentComponent />
-          <Suspense fallback={null}>
-            <AnalyticsTracker />
-          </Suspense>
-          <ToastProvider>
-            <CartMergeHandler />
-            <Navbar locale={locale} userRole={userRole} />
-            {children}
-            <ConditionalFooter locale={locale} />
-          </ToastProvider>
-          <Script
-            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly&loading=async`}
-            strategy="afterInteractive"
-          />
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <GoogleTagManager />
+            <CookieConsentComponent />
+            <Suspense fallback={null}>
+              <AnalyticsTracker />
+            </Suspense>
+            <ToastProvider>
+              <CartMergeHandler />
+              <Navbar locale={locale} userRole={userRole} />
+              {children}
+              <ConditionalFooter locale={locale} />
+            </ToastProvider>
+            <Script
+              src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly&loading=async`}
+              strategy="afterInteractive"
+            />
+          </NextIntlClientProvider>
         </body>
       </html>
     </ClerkProvider>

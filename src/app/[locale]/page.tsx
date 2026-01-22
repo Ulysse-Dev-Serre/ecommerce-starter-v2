@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import { Language, ProductStatus } from '@/generated/prisma';
 import { ProductActions } from '@/components/cart/product-actions';
@@ -16,6 +17,8 @@ export default async function Home({
   params,
 }: HomeProps): Promise<React.ReactElement> {
   const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'home' });
+  const tShop = await getTranslations({ locale, namespace: 'shop' });
 
   const language = locale.toUpperCase() as Language;
 
@@ -37,21 +40,19 @@ export default async function Home({
     <div className="flex-1">
       <section className="bg-gradient-to-r from-muted to-background py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold">Hero</h1>
+          <h1 className="text-4xl font-bold">{t('heroTitle')}</h1>
         </div>
       </section>
 
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold mb-8 text-center">
-            {locale === 'fr' ? 'Produits en vedette' : 'Featured Products'}
+            {t('featuredProducts')}
           </h2>
 
           {featuredProducts.length === 0 ? (
             <p className="text-center text-muted-foreground">
-              {locale === 'fr'
-                ? 'Aucun produit en vedette pour le moment.'
-                : 'No featured products at the moment.'}
+              {t('noFeaturedProducts')}
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -78,7 +79,7 @@ export default async function Home({
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
-                            {locale === 'fr' ? "Pas d'image" : 'No image'}
+                            {tShop('noImage')}
                           </div>
                         )}
                       </div>
@@ -112,9 +113,7 @@ export default async function Home({
                             href={`/${locale}/product/${product.slug}`}
                             className="w-full inline-block text-center bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary-hover transition-colors"
                           >
-                            {locale === 'fr'
-                              ? 'Voir les options'
-                              : 'View options'}
+                            {tShop('viewOptions')}
                           </Link>
                         ) : (
                           <ProductActions
