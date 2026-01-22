@@ -91,10 +91,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-xl text-gray-600 mb-6">{t.emptyCart}</p>
+        <p className="text-xl text-muted-foreground mb-6">{t.emptyCart}</p>
         <a
           href={`/${locale}/shop`}
-          className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
+          className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary-hover transition-colors"
         >
           {t.continueShopping}
         </a>
@@ -117,7 +117,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
           return (
             <div
               key={item.id}
-              className="flex gap-4 border border-gray-200 rounded-lg p-4"
+              className="flex gap-4 border border-border rounded-lg p-4"
             >
               {image && (
                 <img
@@ -130,7 +130,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
                 <h3 className="font-semibold text-lg mb-1">
                   {translation?.name || item.variant.sku}
                 </h3>
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-muted-foreground mb-2">
                   SKU: {item.variant.sku}
                 </p>
                 <PriceDisplay
@@ -139,7 +139,9 @@ export function CartClient({ cart, locale }: CartClientProps) {
                   locale={locale}
                 />
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600">{t.quantity}:</span>
+                  <span className="text-sm text-muted-foreground">
+                    {t.quantity}:
+                  </span>
                   <QuantitySelector
                     cartItemId={item.id}
                     initialQuantity={item.quantity}
@@ -151,7 +153,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
                 <button
                   onClick={() => handleRemove(item.id)}
                   disabled={isLoading}
-                  className="text-red-600 hover:text-red-800 text-sm disabled:opacity-50"
+                  className="text-error hover:text-error/80 text-sm disabled:opacity-50"
                 >
                   {t.remove}
                 </button>
@@ -162,9 +164,9 @@ export function CartClient({ cart, locale }: CartClientProps) {
       </div>
 
       <div className="lg:col-span-1">
-        <div className="border border-gray-200 rounded-lg p-6 sticky top-4">
+        <div className="border border-border rounded-lg p-6 sticky top-4">
           <h2 className="text-xl font-bold mb-4">{t.total}</h2>
-          <div className="border-t pt-4">
+          <div className="border-t border-border pt-4">
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold">Total</span>
               <PriceTotal
@@ -176,13 +178,13 @@ export function CartClient({ cart, locale }: CartClientProps) {
             {isSignedIn ? (
               <a
                 href={`/${locale}/checkout`}
-                className="w-full block text-center bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors"
+                className="w-full block text-center bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary-hover transition-colors"
               >
                 {t.checkout}
               </a>
             ) : (
               <SignInButton mode="modal">
-                <button className="w-full bg-primary text-white py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors">
+                <button className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary-hover transition-colors">
                   {t.signInToCheckout}
                 </button>
               </SignInButton>

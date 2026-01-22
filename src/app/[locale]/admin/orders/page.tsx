@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Eye, Loader2, AlertCircle } from 'lucide-react';
 import { useParams, useSearchParams } from 'next/navigation';
 
-import { StatusBadge } from '@/components/admin/orders/status-badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { OrderFilters } from '@/components/admin/orders/filters';
 
 import { OrderStatus } from '@/generated/prisma';

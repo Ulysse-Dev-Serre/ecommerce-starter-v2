@@ -10,6 +10,7 @@ import { getTranslations, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,26 +119,6 @@ async function OrderDetailContent({
     REFUND_REQUESTED: t('statusRefundRequested'),
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'SHIPPED':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'IN_TRANSIT':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'DELIVERED':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'CANCELLED':
-      case 'REFUNDED':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'REFUND_REQUESTED':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
-      default:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    }
-  };
-
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return '';
     const cleaned = phone.replace(/\D/g, '');
@@ -178,12 +159,12 @@ async function OrderDetailContent({
   const billingAddr = order.billingAddress as Record<string, any> | null;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pt-8 pb-12">
+    <div className="min-h-screen bg-muted/30 pt-8 pb-12">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* En-tête avec bouton retour */}
         <Link
           href={`/${locale}/orders`}
-          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-black transition-colors mb-6 group"
+          className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6 group"
         >
           <span className="mr-2 group-hover:-translate-x-1 transition-transform">
             ←
@@ -194,27 +175,25 @@ async function OrderDetailContent({
         {/* Titre et ID de commande */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h2 className="text-3xl font-bold text-foreground flex items-center gap-3">
               {t('orderNumber')} #{order.orderNumber}
             </h2>
-            <p className="text-gray-500 mt-1">
+            <p className="text-muted-foreground mt-1">
               {t('date')} : {formatDate(order.createdAt, locale)}
             </p>
           </div>
-          <div
-            className={`px-4 py-2 rounded-full border text-sm font-bold shadow-sm ${getStatusColor(
-              order.status
-            )}`}
-          >
-            {statusLabels[order.status] || order.status}
-          </div>
+          <StatusBadge
+            status={order.status}
+            label={statusLabels[order.status]}
+            className="px-4 py-2 font-bold"
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* COLONNE GAUCHE (2/3) : Étapes & Articles */}
           <div className="lg:col-span-2 space-y-8">
             {/* 1. Progress Stepper Visuel */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <div className="bg-background rounded-2xl shadow-sm border border-border p-8">
               <div className="relative flex justify-between">
                 {['PAID', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED'].map(
                   (step, idx) => {
@@ -230,9 +209,9 @@ async function OrderDetailContent({
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-500 ${
                             isCompleted
-                              ? 'bg-black border-black text-white'
-                              : 'bg-white border-gray-200 text-gray-300'
-                          } ${isCurrent ? 'ring-4 ring-black/10' : ''}`}
+                              ? 'bg-foreground border-foreground text-background'
+                              : 'bg-background border-border text-muted-foreground'
+                          } ${isCurrent ? 'ring-4 ring-foreground/10' : ''}`}
                         >
                           {isCompleted ? '✓' : idx + 1}
                         </div>
@@ -248,10 +227,10 @@ async function OrderDetailContent({
                   }
                 )}
                 {/* Ligne de fond */}
-                <div className="absolute top-5 left-0 w-full h-0.5 bg-gray-100 -z-0" />
+                <div className="absolute top-5 left-0 w-full h-0.5 bg-border -z-0" />
                 {/* Ligne de progression */}
                 <div
-                  className="absolute top-5 left-0 h-0.5 bg-black transition-all duration-1000 -z-0"
+                  className="absolute top-5 left-0 h-0.5 bg-foreground transition-all duration-1000 -z-0"
                   style={{
                     width: `${Math.max(0, (currentStep / 3) * 100)}%`,
                   }}
@@ -261,13 +240,13 @@ async function OrderDetailContent({
 
             {/* Info Remboursement (si annulé ou remboursé) */}
             {(order.status === 'CANCELLED' || order.status === 'REFUNDED') && (
-              <div className="bg-blue-50 rounded-2xl p-8 border border-blue-100 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
-                <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+              <div className="bg-info/10 rounded-2xl p-8 border border-info/20 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                <h3 className="text-xl font-bold text-info mb-4 flex items-center gap-2">
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingTitle')
                     : tRefund('refundDoneTitle')}
                 </h3>
-                <div className="text-blue-800 whitespace-pre-wrap leading-relaxed font-medium">
+                <div className="text-info whitespace-pre-wrap leading-relaxed font-medium">
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingMessage', {
                         name:
@@ -294,9 +273,9 @@ async function OrderDetailContent({
 
             {/* 2. Tracking (si dispo) */}
             {order.shipments && order.shipments.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-blue-50 overflow-hidden ring-1 ring-blue-50/50">
-                <div className="bg-blue-50/30 px-6 py-4 border-b border-blue-50 flex justify-between items-center">
-                  <h2 className="font-bold text-blue-900 flex items-center gap-2">
+              <div className="bg-background rounded-2xl shadow-sm border border-info/20 overflow-hidden ring-1 ring-info/20">
+                <div className="bg-info/10 px-6 py-4 border-b border-info/20 flex justify-between items-center">
+                  <h2 className="font-bold text-info flex items-center gap-2">
                     📦 {t('tracking')}
                   </h2>
                 </div>
@@ -307,10 +286,10 @@ async function OrderDetailContent({
                       className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
                     >
                       <div>
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">
                           {shipment.carrier || 'Standard Shipping'}
                         </p>
-                        <p className="font-mono text-lg text-gray-900 tracking-wide select-all">
+                        <p className="font-mono text-lg text-foreground tracking-wide select-all">
                           {shipment.trackingCode}
                         </p>
                       </div>
@@ -322,7 +301,7 @@ async function OrderDetailContent({
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
+                          className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20"
                         >
                           {t('trackPackage')}
                           <span>↗</span>
@@ -335,13 +314,13 @@ async function OrderDetailContent({
             )}
 
             {/* 3. Liste des Articles */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-6 border-b border-gray-50 bg-gray-50/50">
-                <h2 className="text-lg font-bold text-gray-900">
+            <div className="bg-background rounded-2xl shadow-sm border border-border overflow-hidden">
+              <div className="p-6 border-b border-border bg-muted/30">
+                <h2 className="text-lg font-bold text-foreground">
                   {t('items')} ({order.items.length})
                 </h2>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border">
                 {order.items.map((item: any) => {
                   const snapshot = item.productSnapshot as any;
                   const currentProduct = item.productId
@@ -354,7 +333,7 @@ async function OrderDetailContent({
 
                   return (
                     <li key={item.id} className="p-6 flex items-center gap-6">
-                      <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100">
+                      <div className="w-20 h-20 bg-muted rounded-xl overflow-hidden flex-shrink-0 border border-border">
                         {imageUrl ? (
                           <img
                             src={imageUrl}
@@ -362,7 +341,7 @@ async function OrderDetailContent({
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300">
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
                             📦
                           </div>
                         )}
@@ -371,14 +350,16 @@ async function OrderDetailContent({
                         {slug ? (
                           <Link
                             href={`/${locale}/product/${slug}`}
-                            className="font-bold text-gray-900 hover:text-black hover:underline underline-offset-4 decoration-2"
+                            className="font-bold text-foreground hover:text-primary hover:underline underline-offset-4 decoration-2"
                           >
                             {itemName}
                           </Link>
                         ) : (
-                          <p className="font-bold text-gray-900">{itemName}</p>
+                          <p className="font-bold text-foreground">
+                            {itemName}
+                          </p>
                         )}
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {tCommon('quantity')} : {item.quantity} ×{' '}
                           {formatPrice(
                             item.unitPrice,
@@ -417,12 +398,12 @@ async function OrderDetailContent({
           {/* COLONNE DROITE (1/3) : Résumé & Adresses */}
           <div className="space-y-8">
             {/* Résumé Financier */}
-            <div className="bg-white text-gray-900 rounded-2xl p-8 border border-gray-100 shadow-sm">
+            <div className="bg-background text-foreground rounded-2xl p-8 border border-border shadow-sm">
               <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                 {t('summary')}
               </h2>
               <div className="space-y-4">
-                <div className="flex justify-between text-gray-500">
+                <div className="flex justify-between text-muted-foreground">
                   <span>{t('subtotal')}</span>
                   <span>
                     {formatPrice(
@@ -432,7 +413,7 @@ async function OrderDetailContent({
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-500">
+                <div className="flex justify-between text-muted-foreground">
                   <span>{t('shipping')}</span>
                   <span>
                     {formatPrice(
@@ -442,7 +423,7 @@ async function OrderDetailContent({
                     )}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-500">
+                <div className="flex justify-between text-muted-foreground">
                   <span>{t('tax')}</span>
                   <span>
                     {formatPrice(
@@ -453,7 +434,7 @@ async function OrderDetailContent({
                   </span>
                 </div>
                 {order.discountAmount > 0 && (
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-success">
                     <span>{tCommon('discount')}</span>
                     <span>
                       -
@@ -465,7 +446,7 @@ async function OrderDetailContent({
                     </span>
                   </div>
                 )}
-                <div className="pt-6 border-t border-gray-100 flex justify-between items-center">
+                <div className="pt-6 border-t border-border flex justify-between items-center">
                   <span className="text-lg font-bold">{t('total')}</span>
                   <span className="text-2xl font-black">
                     {formatPrice(
@@ -479,12 +460,12 @@ async function OrderDetailContent({
             </div>
 
             {/* Adresses */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8">
+            <div className="bg-background rounded-2xl shadow-sm border border-border p-8 space-y-8">
               <div>
-                <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">
+                <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-4">
                   📍 {t('shippingAddress')}
                 </h3>
-                <div className="text-gray-900 font-medium leading-relaxed">
+                <div className="text-foreground font-medium leading-relaxed">
                   <p className="font-bold">{shippingAddr?.name}</p>
                   <p>{shippingAddr?.line1 || shippingAddr?.street1}</p>
                   {(shippingAddr?.line2 || shippingAddr?.street2) && (
@@ -502,7 +483,7 @@ async function OrderDetailContent({
                       .join(', ')}
                   </p>
                   <p className="uppercase">{shippingAddr?.country}</p>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-muted-foreground mt-2">
                     {formatPhoneNumber(shippingAddr?.phone)}
                   </p>
                 </div>
@@ -510,10 +491,10 @@ async function OrderDetailContent({
 
               {billingAddr && billingAddr.name && (
                 <div>
-                  <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">
+                  <h3 className="text-sm font-black text-muted-foreground uppercase tracking-widest mb-4">
                     {t('billingAddress')}
                   </h3>
-                  <div className="text-gray-900 font-medium leading-relaxed">
+                  <div className="text-foreground font-medium leading-relaxed">
                     <p className="font-bold">{billingAddr.name}</p>
                     <p>{billingAddr.line1 || billingAddr.street1}</p>
                     <p>

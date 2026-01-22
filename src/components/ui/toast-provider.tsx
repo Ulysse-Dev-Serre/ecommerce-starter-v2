@@ -55,10 +55,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={toast.id}
             className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in-right ${
               toast.type === 'success'
-                ? 'bg-green-600 text-white'
+                ? 'bg-success text-white'
                 : toast.type === 'error'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-blue-600 text-white'
+                  ? 'bg-error text-white'
+                  : 'bg-info text-white'
             }`}
           >
             {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Package, CreditCard, User, MapPin } from 'lucide-react';
 
-import { StatusBadge } from '@/components/admin/orders/status-badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { OrderDetailClient } from '@/components/admin/orders/order-detail-client';
 import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 import { getOrderByIdAdmin } from '@/lib/services/order.service';
@@ -366,7 +366,7 @@ export default async function OrderDetailPage({
                     }`}
                   >
                     <p className="text-sm font-medium">
-                      <StatusBadge status={history.status as any} />
+                      <StatusBadge status={history.status} />
                     </p>
                     <p className="mt-1 text-xs text-gray-500">
                       {formatDateTime(history.createdAt, locale)}

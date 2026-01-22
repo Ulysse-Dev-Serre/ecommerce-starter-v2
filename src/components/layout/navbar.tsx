@@ -185,7 +185,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             {isSignedIn && userRole === 'ADMIN' && (
               <Link
                 href={`/${locale}/admin`}
-                className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                className="bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-secondary/80 transition-colors"
                 onClick={() => handleNavigationClick(`/${locale}/admin`)}
               >
                 📊 Dashboard
@@ -198,7 +198,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 onClick={e => handleLanguageChange('fr', e)}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
                   locale === 'fr'
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-foreground hover:bg-muted'
                 }`}
               >
@@ -208,7 +208,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 onClick={e => handleLanguageChange('en', e)}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
                   locale === 'en'
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-foreground hover:bg-muted'
                 }`}
               >
@@ -222,7 +222,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 onClick={() => handleCurrencyChange('CAD')}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
                   currency === 'CAD'
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-foreground hover:bg-muted'
                 }`}
               >
@@ -232,7 +232,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 onClick={() => handleCurrencyChange('USD')}
                 className={`px-2 py-1 text-sm rounded transition-colors ${
                   currency === 'USD'
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-foreground hover:bg-muted'
                 }`}
               >
@@ -254,7 +254,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               </Link>
               <SignInButton>
                 <button
-                  className="bg-primary text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"
+                  className="bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"
                   onClick={() => {
                     logger.info(
                       {

@@ -18,9 +18,9 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
   const image = primaryImage?.url || variantImage?.url;
 
   return (
-    <div className="group border border-border rounded-lg p-4 hover:shadow-lg transition flex flex-col h-full bg-white">
+    <div className="group border border-border rounded-lg p-4 hover:shadow-lg transition flex flex-col h-full bg-card">
       <Link href={`/${locale}/product/${product.slug}`} className="block mb-3">
-        <div className="w-full h-48 bg-gray-100 rounded-md overflow-hidden relative">
+        <div className="w-full h-48 bg-muted rounded-md overflow-hidden relative">
           {image ? (
             <img
               src={image}
@@ -28,7 +28,7 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
               {t('noImage')}
             </div>
           )}
@@ -53,7 +53,7 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
         {product.variants.length > 1 ? (
           <Link
             href={`/${locale}/product/${product.slug}`}
-            className="w-full inline-block text-center bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 transition-colors font-medium"
+            className="w-full inline-block text-center bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary-hover transition-colors font-medium"
           >
             {t('viewOptions')}
           </Link>

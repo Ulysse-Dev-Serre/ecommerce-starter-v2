@@ -55,7 +55,7 @@ export default async function ShopPage({
       <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
       {products.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-lg">
+        <div className="text-center py-20 bg-muted/50 rounded-lg">
           <p className="text-xl text-muted-foreground">
             {t('noProducts') || 'No products found'}
           </p>

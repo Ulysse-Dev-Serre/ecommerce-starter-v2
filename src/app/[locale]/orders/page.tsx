@@ -9,6 +9,7 @@ import { getUserOrders } from '@/lib/services/order.service';
 import { getTranslations } from 'next-intl/server';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,26 +69,6 @@ async function OrdersListContent({
     REFUND_REQUESTED: tDetail('statusRefundRequested'),
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PAID':
-        return 'bg-green-100 text-green-800';
-      case 'SHIPPED':
-        return 'bg-blue-100 text-blue-800';
-      case 'IN_TRANSIT':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'DELIVERED':
-        return 'bg-purple-100 text-purple-800';
-      case 'CANCELLED':
-      case 'REFUNDED':
-        return 'bg-red-100 text-red-800';
-      case 'REFUND_REQUESTED':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
-
   return (
     <div className="flex-1 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,10 +76,12 @@ async function OrdersListContent({
 
         {orders.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-xl text-gray-600 mb-6">{t('noOrders')}</p>
+            <p className="text-xl text-muted-foreground mb-6">
+              {t('noOrders')}
+            </p>
             <Link
               href={`/${locale}/shop`}
-              className="inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors font-bold"
+              className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary-hover transition-colors font-bold"
             >
               {t('shopNow')}
             </Link>
@@ -108,17 +91,17 @@ async function OrdersListContent({
             {orders.map(order => (
               <div
                 key={order.id}
-                className="bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-lg hover:border-gray-200 transition-all duration-300"
+                className="bg-background border border-border rounded-2xl p-6 hover:shadow-lg hover:border-border-focus transition-all duration-300"
               >
                 <div className="flex flex-wrap justify-between items-start gap-4">
                   <div className="space-y-1">
-                    <p className="font-black text-xl text-gray-900">
+                    <p className="font-black text-xl text-foreground">
                       {tDetail('orderNumber')} #{order.orderNumber}
                     </p>
-                    <p className="text-sm font-medium text-gray-400 uppercase tracking-widest">
+                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
                       {tDetail('date')}: {formatDate(order.createdAt, locale)}
                     </p>
-                    <p className="text-sm font-bold text-gray-500">
+                    <p className="text-sm font-bold text-muted-foreground">
                       {order.items.length}{' '}
                       {order.items.length > 1
                         ? tDetail('items').toLowerCase()
@@ -126,12 +109,12 @@ async function OrdersListContent({
                     </p>
                   </div>
                   <div className="text-right">
-                    <div
-                      className={`inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider shadow-sm border ${getStatusColor(order.status)}`}
-                    >
-                      {statusLabels[order.status] || order.status}
-                    </div>
-                    <p className="mt-3 text-2xl font-black text-gray-900">
+                    <StatusBadge
+                      status={order.status}
+                      label={statusLabels[order.status]}
+                      className="px-4 py-1.5 font-black uppercase tracking-wider"
+                    />
+                    <p className="mt-3 text-2xl font-black text-foreground">
                       {formatPrice(
                         order.totalAmount,
                         order.currency as any,
@@ -140,10 +123,10 @@ async function OrdersListContent({
                     </p>
                   </div>
                 </div>
-                <div className="mt-6 pt-6 border-t border-gray-50 flex justify-end">
+                <div className="mt-6 pt-6 border-t border-border flex justify-end">
                   <Link
                     href={`/${locale}/orders/${order.id}`}
-                    className="inline-flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-black hover:translate-x-1 transition-all"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-foreground hover:text-primary hover:translate-x-1 transition-all"
                   >
                     {t('viewDetails')}
                     <span className="text-lg">→</span>

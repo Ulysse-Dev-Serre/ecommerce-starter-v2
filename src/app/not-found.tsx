@@ -9,9 +9,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center px-4">
-        <h1 className="text-9xl font-bold text-gray-200 dark:text-gray-800">
-          404
-        </h1>
+        <h1 className="text-9xl font-bold text-muted opacity-30">404</h1>
         <div className="-mt-12 relative">
           <h2 className="text-2xl font-semibold mb-2">Page non trouvée</h2>
           <p className="text-muted-foreground mb-8">

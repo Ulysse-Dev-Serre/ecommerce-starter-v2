@@ -54,7 +54,7 @@ export function ProductClient({
 
   if (!selectedVariant) {
     return (
-      <div className="text-red-600">
+      <div className="text-error">
         {locale === 'fr'
           ? 'Aucune variante disponible'
           : 'No variant available'}
@@ -139,8 +139,8 @@ export function ProductClient({
                       isSelected
                         ? 'border-primary bg-primary text-white'
                         : isAvailable
-                          ? 'border-gray-300 hover:border-gray-400'
-                          : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                          ? 'border-border hover:border-border-focus'
+                          : 'border-muted text-muted-foreground cursor-not-allowed'
                     }`}
                   >
                     {value}
@@ -171,8 +171,8 @@ export function ProductClient({
                     isSelected
                       ? 'border-primary bg-primary text-white'
                       : isAvailable
-                        ? 'border-gray-300 hover:border-gray-400'
-                        : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                        ? 'border-border hover:border-border-focus'
+                        : 'border-muted text-muted-foreground cursor-not-allowed'
                   }`}
                 >
                   {variant.sku}
@@ -183,15 +183,15 @@ export function ProductClient({
         </div>
       )}
 
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-muted-foreground">
         {selectedVariant.stock > 0 ? (
-          <span className="text-green-600">
+          <span className="text-success">
             {locale === 'fr'
               ? `En stock (${selectedVariant.stock} disponibles)`
               : `In stock (${selectedVariant.stock} available)`}
           </span>
         ) : (
-          <span className="text-red-600">
+          <span className="text-error">
             {locale === 'fr' ? 'Rupture de stock' : 'Out of stock'}
           </span>
         )}
