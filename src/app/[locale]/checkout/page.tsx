@@ -181,6 +181,9 @@ export default async function CheckoutPage({
     country: t('country'),
     selectState: t('selectState'),
     statePlaceholder: t('statePlaceholder'),
+    validation: {
+      phone: t('validation.phone'),
+    },
   };
 
   return (

@@ -7,46 +7,21 @@ import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '../../../../lib/middleware/withAuth';
+import { withValidation } from '../../../../lib/middleware/withValidation';
 import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { addToCart } from '../../../../lib/services/cart.service';
+import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
 
 async function addToCartHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext
+  authContext: OptionalAuthContext,
+  data: AddToCartInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const body = await request.json();
-
-  const { variantId, quantity } = body;
-
-  if (!variantId || typeof variantId !== 'string') {
-    return NextResponse.json(
-      {
-        success: false,
-        requestId,
-        error: 'Invalid request',
-        message: 'variantId is required',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 400 }
-    );
-  }
-
-  if (!quantity || typeof quantity !== 'number' || quantity < 1) {
-    return NextResponse.json(
-      {
-        success: false,
-        requestId,
-        error: 'Invalid request',
-        message: 'quantity must be a positive number',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 400 }
-    );
-  }
+  const { variantId, quantity } = data;
 
   const cookieStore = await cookies();
   let anonymousId = cookieStore.get('cart_anonymous_id')?.value;
@@ -157,5 +132,10 @@ async function addToCartHandler(
 }
 
 export const POST = withError(
-  withOptionalAuth(withRateLimit(addToCartHandler, RateLimits.CART_WRITE))
+  withOptionalAuth(
+    withRateLimit(
+      withValidation(addToCartSchema, addToCartHandler),
+      RateLimits.CART_WRITE
+    )
+  )
 );

@@ -48,6 +48,9 @@ interface CheckoutClientProps {
     country: string;
     selectState: string;
     statePlaceholder: string;
+    validation: {
+      phone: string;
+    };
   };
   userEmail?: string | null | undefined;
   summaryItems?: Array<{
@@ -112,8 +115,13 @@ export function CheckoutClient({
       });
   }, [cartId, currency, directVariantId, directQuantity]);
 
-  if (error) return <div className="p-4 text-red-500">Error: {error}</div>;
-  if (!clientSecret) return <div className="p-4">Loading checkout...</div>;
+  if (error)
+    return (
+      <div className="p-4 text-red-500">
+        {t.error}: {error}
+      </div>
+    );
+  if (!clientSecret) return <div className="p-4">{t.loading}</div>;
 
   return (
     <Elements
@@ -188,6 +196,9 @@ interface CheckoutFormProps {
     country: string;
     selectState: string;
     statePlaceholder: string;
+    validation: {
+      phone: string;
+    };
   };
   userEmail?: string | null | undefined;
   cartId: string;
@@ -336,7 +347,7 @@ function CheckoutForm({
 
     // Validation simple du téléphone
     if (!phone || phone.length < 10) {
-      alert('Veuillez entrer un numéro de téléphone valide pour la livraison.');
+      alert(t.validation.phone);
       return;
     }
 

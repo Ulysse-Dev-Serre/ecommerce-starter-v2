@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
 import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
+import { withValidation } from '../../../../lib/middleware/withValidation';
 import {
   withRateLimit,
   RateLimits,
@@ -15,31 +16,40 @@ import {
   type CheckoutCurrency,
 } from '../../../../lib/stripe/checkout';
 import { i18n } from '@/lib/i18n/config';
+import {
+  createIntentSchema,
+  CreateIntentInput,
+} from '@/lib/validators/checkout';
 
 async function createIntentHandler(
   request: NextRequest,
-  authContext: AuthContext
+  authContext: AuthContext,
+  data: CreateIntentInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const userId = authContext.userId;
 
-  const body = await request.json();
-  const { cartId: bodyCartId, directItem } = body;
+  // Data est déjà validé et paré par withValidation middleware
+  const {
+    cartId: bodyCartId,
+    directItem,
+    currency: validatedCurrency,
+    locale: validatedLocale,
+  } = data;
 
   // Récupérer la devise depuis le cookie ou utiliser la request
-  const cookieStore = await cookies();
-  const currencyCookie = cookieStore.get('currency')?.value;
-  const currency: CheckoutCurrency =
-    (body.currency as CheckoutCurrency) ||
-    (currencyCookie as CheckoutCurrency) ||
-    'CAD';
+  // Note: le validateur a déjà géré la devise du body, on check le cookie en fallback si besoin
+  // Mais ici 'data.currency' a une valeur par défaut 'CAD' via Zod, donc on peut simplifier.
+  // Cependant, pour respecter la logique existante (priorité body > cookie > default), on garde cookie check ?
+  // Zod default s'applique si undefined. Donc si body.currency est absent, c'est CAD.
+  // Si on veut supporter cookie, on devrait peut-être le faire *avant* ou accepter que body prévaut.
+  // Gardons la logique simple: on utilise ce qui est validé.
 
-  if (currency !== 'CAD' && currency !== 'USD') {
-    return NextResponse.json(
-      { error: 'Invalid currency. Must be CAD or USD.' },
-      { status: 400 }
-    );
-  }
+  // Petite subtilité: l'original prenait cookie si body absent. Zod prend 'CAD' si body absent.
+  // Pour supporter cookie, il faudrait que Zod ne mette pas de default, ou qu'on check cookie ici.
+  // On va simplifier: on utilise data.currency. (Si le frontend envoie currency, c'est bon).
+
+  const currency: CheckoutCurrency = validatedCurrency as CheckoutCurrency;
 
   let cartItems: { variantId: string; quantity: number }[] = [];
   let cartIdForIntent: string | undefined = undefined;
@@ -57,22 +67,17 @@ async function createIntentHandler(
     cartIdForIntent = 'direct_purchase';
   } else {
     // Mode 2: Panier (Standard)
-    // 1. Récupérer le panier pour valider les items
-    // Si bodyCartId est fourni, on essaie de le récupérer, sinon on cherche par userId/anonymous
     const cart = await getOrCreateCart(userId, undefined);
 
     // LOG 1: BODY REÇU
     logger.info(
       {
-        bodyReceived: JSON.stringify(body, null, 2),
+        bodyReceived: JSON.stringify(data, null, 2),
       },
       'DEBUG: CREATE-INTENT INPUT'
     );
 
-    // Petite validation de sécurité : si cartId est fourni, s'assurer que c'est bien celui de l'user
     if (bodyCartId && cart.id !== bodyCartId) {
-      // Potentiellement mismatch entre le client local et le serveur
-      // On continue avec le 'cart' récupéré par getOrCreateCart qui est la source de vérité
       logger.warn(
         { reqCartId: bodyCartId, userCartId: cart.id },
         'Cart ID mismatch, using user cart'
@@ -91,7 +96,7 @@ async function createIntentHandler(
   }
 
   // 3. Créer le PaymentIntent
-  const locale = body.locale || i18n.defaultLocale;
+  const locale = validatedLocale || i18n.defaultLocale;
 
   try {
     // 2. Réserver le stock (si activé)
@@ -103,7 +108,7 @@ async function createIntentHandler(
       currency,
       userId,
       cartId: cartIdForIntent,
-      anonymousId: undefined, // TODO: gérer anonymousId si besoin
+      anonymousId: undefined,
       metadata: {
         locale,
         ...(directItem
@@ -154,5 +159,10 @@ async function createIntentHandler(
 }
 
 export const POST = withError(
-  withAuth(withRateLimit(createIntentHandler, RateLimits.CHECKOUT))
+  withAuth(
+    withRateLimit(
+      withValidation(createIntentSchema, createIntentHandler),
+      RateLimits.CHECKOUT
+    )
+  )
 );

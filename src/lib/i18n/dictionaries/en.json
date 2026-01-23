@@ -210,7 +210,26 @@
       "addressUndefined": "Address undefined",
       "save": "Save",
       "loading": "Loading...",
-      "editLocation": "Edit location"
+      "editLocation": "Edit location",
+      "locationName": "Location Name (e.g. Main Warehouse)",
+      "locationType": "Location Type",
+      "originAddress": "Origin Address (for rate calculation)",
+      "street": "Street Address",
+      "streetPlaceholder": "123 Example St",
+      "city": "City",
+      "cityPlaceholder": "New York",
+      "state": "State / Province",
+      "statePlaceholder": "NY",
+      "zip": "Zip / Postal Code",
+      "zipPlaceholder": "10001",
+      "country": "Country (2-letter ISO code)",
+      "countryPlaceholder": "US",
+      "email": "Contact Email (Optional)",
+      "emailPlaceholder": "logistics@example.com",
+      "phone": "Phone (Optional)",
+      "localStock": "Local Stock (Warehouse)",
+      "dropshipper": "Dropshipper",
+      "other": "Other"
     }
   },
   "Checkout": {
@@ -237,7 +256,10 @@
     "zipCode": "Zip / Postal Code",
     "country": "Country",
     "selectState": "Select...",
-    "statePlaceholder": "State / Province"
+    "statePlaceholder": "State / Province",
+    "validation": {
+      "phone": "Please enter a valid phone number for shipping."
+    }
   },
   "footer": {
     "about": "About",

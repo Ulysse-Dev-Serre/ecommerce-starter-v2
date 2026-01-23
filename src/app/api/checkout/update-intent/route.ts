@@ -3,32 +3,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
 import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
+import { withValidation } from '../../../../lib/middleware/withValidation';
 import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { stripe } from '../../../../lib/stripe/client';
 import { toStripeAmount } from '../../../../lib/utils/currency';
+import {
+  updateIntentSchema,
+  UpdateIntentInput,
+} from '@/lib/validators/checkout';
 
 async function updateIntentHandler(
   request: NextRequest,
-  authContext: AuthContext
+  authContext: AuthContext,
+  data: UpdateIntentInput
 ): Promise<NextResponse> {
-  const body = await request.json();
-  const { paymentIntentId, shippingRate, currency, shippingDetails } = body;
-
-  if (!paymentIntentId || !shippingRate) {
-    return NextResponse.json(
-      { error: 'Missing paymentIntentId or shippingRate' },
-      { status: 400 }
-    );
-  }
+  // Data is already validated by withValidation
+  const { paymentIntentId, shippingRate, currency, shippingDetails } = data;
 
   try {
     // LOG 1: BODY REÇU DU FRONTEND (Raw)
     logger.info(
       {
-        bodyReceived: JSON.stringify(body, null, 2),
+        bodyReceived: JSON.stringify(data, null, 2),
         shippingDetailsEmail: shippingDetails?.email, // Focus spécifique
       },
       'DEBUG: UPDATE-INTENT INPUT'
@@ -184,5 +183,10 @@ async function updateIntentHandler(
 }
 
 export const POST = withError(
-  withAuth(withRateLimit(updateIntentHandler, RateLimits.CHECKOUT))
+  withAuth(
+    withRateLimit(
+      withValidation(updateIntentSchema, updateIntentHandler),
+      RateLimits.CHECKOUT
+    )
+  )
 );

@@ -12,29 +12,21 @@ import {
   removeCartLine,
 } from '../../../../../lib/services/cart.service';
 
+import { withValidation } from '../../../../../lib/middleware/withValidation';
+import {
+  updateCartLineSchema,
+  UpdateCartLineInput,
+} from '@/lib/validators/cart';
+
 async function updateCartLineHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
-  authContext: OptionalAuthContext
+  authContext: OptionalAuthContext,
+  data: UpdateCartLineInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { id: cartItemId } = await context.params;
-  const body = await request.json();
-
-  const { quantity } = body;
-
-  if (!quantity || typeof quantity !== 'number' || quantity < 1) {
-    return NextResponse.json(
-      {
-        success: false,
-        requestId,
-        error: 'Invalid request',
-        message: 'quantity must be a positive number',
-        timestamp: new Date().toISOString(),
-      },
-      { status: 400 }
-    );
-  }
+  const { quantity } = data;
 
   const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
@@ -225,7 +217,12 @@ import {
 } from '../../../../../lib/middleware/withRateLimit';
 
 export const PUT = withError(
-  withOptionalAuth(withRateLimit(updateCartLineHandler, RateLimits.CART_WRITE))
+  withOptionalAuth(
+    withRateLimit(
+      withValidation(updateCartLineSchema, updateCartLineHandler),
+      RateLimits.CART_WRITE
+    )
+  )
 );
 export const DELETE = withError(
   withOptionalAuth(withRateLimit(removeCartLineHandler, RateLimits.CART_WRITE))

@@ -77,15 +77,22 @@ async function getAttributesHandler(
  *   ]
  * }
  */
+import { withValidation } from '../../../../lib/middleware/withValidation';
+import {
+  createAttributeSchema,
+  CreateAttributeInput,
+} from '@/lib/validators/admin';
+
 async function createAttributeHandler(
   request: NextRequest,
-  authContext: AuthContext
+  authContext: AuthContext,
+  data: CreateAttributeInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
   try {
-    const body = await request.json();
-    const attributeData: CreateAttributeData = body;
+    // Data is validated by middleware
+    const attributeData: CreateAttributeData = data as any; // Type alignment
 
     logger.info(
       {
@@ -125,4 +132,6 @@ async function createAttributeHandler(
 
 // Export handlers avec middlewares
 export const GET = withError(withAdmin(getAttributesHandler));
-export const POST = withError(withAdmin(createAttributeHandler));
+export const POST = withError(
+  withAdmin(withValidation(createAttributeSchema, createAttributeHandler))
+);

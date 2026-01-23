@@ -7,69 +7,26 @@ import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
+import { withValidation } from '../../../../lib/middleware/withValidation';
 import {
   CreateProductSchema,
-  formatZodErrors,
+  CreateProductInput,
 } from '../../../../lib/schemas/product.schema';
 import {
   createProduct,
   CreateProductData,
 } from '../../../../lib/services/product.service';
 
-/**
- * POST /api/admin/products
- * Crée un nouveau produit (admin uniquement)
- *
- * Body:
- * {
- *   slug: string,
- *   status?: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED',
- *   isFeatured?: boolean,
- *   sortOrder?: number,
- *   translations?: [
- *     { language: 'EN', name: string, description?: string, ... },
- *     { language: 'FR', name: string, description?: string, ... }
- *   ]
- * }
- */
 async function createProductHandler(
   request: NextRequest,
-  authContext: AuthContext
+  authContext: AuthContext,
+  data: CreateProductInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
   try {
-    const body = await request.json();
-
-    // Validate input with Zod
-    const validation = CreateProductSchema.safeParse(body);
-    if (!validation.success) {
-      logger.warn(
-        {
-          requestId,
-          action: 'create_product_validation_failed',
-          userId: authContext.userId,
-          errors: formatZodErrors(validation.error),
-        },
-        'Product validation failed'
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: 'Validation failed',
-          details: formatZodErrors(validation.error),
-          timestamp: new Date().toISOString(),
-        },
-        {
-          status: 400,
-          headers: { 'X-Request-ID': requestId },
-        }
-      );
-    }
-
-    const validatedData = validation.data;
+    // Data validated by middleware
+    const validatedData = data;
 
     logger.info(
       {
@@ -160,5 +117,10 @@ async function createProductHandler(
 }
 
 export const POST = withError(
-  withAdmin(withRateLimit(createProductHandler, RateLimits.ADMIN))
+  withAdmin(
+    withRateLimit(
+      withValidation(CreateProductSchema, createProductHandler),
+      RateLimits.ADMIN
+    )
+  )
 );

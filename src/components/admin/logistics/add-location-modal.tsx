@@ -108,7 +108,7 @@ export function AddLocationModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nom du lieu (ex: Entrepôt Principal)
+                {t('locationName')}
               </label>
               <input
                 type="text"
@@ -123,7 +123,7 @@ export function AddLocationModal({
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Type de lieu
+                {t('locationType')}
               </label>
               <select
                 required
@@ -133,9 +133,9 @@ export function AddLocationModal({
                 }
                 className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black sm:text-sm bg-white"
               >
-                <option value="LOCAL_STOCK">Local Stock (Warehouse)</option>
-                <option value="DROPSHIPPER">Dropshipper</option>
-                <option value="OTHER">Other</option>
+                <option value="LOCAL_STOCK">{t('localStock')}</option>
+                <option value="DROPSHIPPER">{t('dropshipper')}</option>
+                <option value="OTHER">{t('other')}</option>
               </select>
             </div>
           </div>
@@ -143,13 +143,13 @@ export function AddLocationModal({
           <div className="border-t border-gray-100 pt-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              Adresse de départ (pour le calcul des tarifs)
+              {t('originAddress')}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Adresse (Rue)
+                  {t('street')}
                 </label>
                 <input
                   type="text"
@@ -157,13 +157,13 @@ export function AddLocationModal({
                   value={formData.address.street1}
                   onChange={e => updateAddress('street1', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="123 rue Exemple"
+                  placeholder={t('streetPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Ville
+                  {t('city')}
                 </label>
                 <input
                   type="text"
@@ -171,13 +171,13 @@ export function AddLocationModal({
                   value={formData.address.city}
                   onChange={e => updateAddress('city', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="Montréal"
+                  placeholder={t('cityPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Province / État
+                  {t('state')}
                 </label>
                 <input
                   type="text"
@@ -185,13 +185,13 @@ export function AddLocationModal({
                   value={formData.address.state}
                   onChange={e => updateAddress('state', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="QC"
+                  placeholder={t('statePlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Code Postal / ZIP
+                  {t('zip')}
                 </label>
                 <input
                   type="text"
@@ -199,13 +199,13 @@ export function AddLocationModal({
                   value={formData.address.zip}
                   onChange={e => updateAddress('zip', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="H1A 1A1"
+                  placeholder={t('zipPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Pays (Code ISO 2 lettres)
+                  {t('country')}
                 </label>
                 <input
                   type="text"
@@ -216,25 +216,25 @@ export function AddLocationModal({
                     updateAddress('country', e.target.value.toUpperCase())
                   }
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="CA"
+                  placeholder={t('countryPlaceholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Email contact (Optionnel)
+                  {t('email')}
                 </label>
                 <input
                   type="email"
                   value={formData.address.email || ''}
                   onChange={e => updateAddress('email', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-                  placeholder="logistics@example.com"
+                  placeholder={t('emailPlaceholder')}
                 />
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Téléphone (Optionnel)
+                  {t('phone')}
                 </label>
                 <input
                   type="text"
@@ -253,16 +253,14 @@ export function AddLocationModal({
               disabled={loading}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              {t('cancel') || 'Annuler'}
+              {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
             >
-              {loading
-                ? t('loading') || 'Sauvegarde...'
-                : t('save') || 'Sauvegarder'}
+              {loading ? t('loading') : t('save')}
             </button>
           </div>
         </form>

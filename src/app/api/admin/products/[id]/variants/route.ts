@@ -107,47 +107,21 @@ async function getVariantsHandler(
  *   }
  * }
  */
+import { withValidation } from '@/lib/middleware/withValidation';
+import { CreateVariantsInput } from '@/lib/schemas/product.schema';
+
 async function createVariantsHandler(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  authContext: AuthContext,
+  data: CreateVariantsInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { id: productId } = await context.params;
 
   try {
-    const body = await request.json();
-
-    // Validate input with Zod
-    const validation = CreateVariantsSchema.safeParse(body);
-    if (!validation.success) {
-      logger.warn(
-        {
-          requestId,
-          action: 'create_variants_validation_failed',
-          userId: authContext.userId,
-          productId,
-          errors: formatZodErrors(validation.error),
-        },
-        'Variant creation validation failed'
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: 'Validation failed',
-          details: formatZodErrors(validation.error),
-          timestamp: new Date().toISOString(),
-        },
-        {
-          status: 400,
-          headers: { 'X-Request-ID': requestId },
-        }
-      );
-    }
-
-    const validatedData = validation.data;
+    // Data validated by middleware
+    const validatedData = data;
 
     logger.info(
       {
@@ -259,5 +233,10 @@ export const GET = withError(
 );
 
 export const POST = withError(
-  withAdmin(withRateLimit(createVariantsHandler, RateLimits.ADMIN))
+  withAdmin(
+    withRateLimit(
+      withValidation(CreateVariantsSchema, createVariantsHandler),
+      RateLimits.ADMIN
+    )
+  )
 );

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function OrderFilters({ locale }: { locale: string }) {
   const router = useRouter();
@@ -41,20 +42,49 @@ export function OrderFilters({ locale }: { locale: string }) {
           )}
         </form>
       </div>
-      <select
-        name="status"
-        value={currentStatus}
-        onChange={e => handleStatusChange(e.target.value)}
-        className="rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-      >
-        <option value="">All statuses</option>
-        <option value="PENDING">Pending</option>
-        <option value="PAID">Paid</option>
-        <option value="SHIPPED">Shipped</option>
-        <option value="DELIVERED">Delivered</option>
-        <option value="CANCELLED">Cancelled</option>
-        <option value="REFUNDED">Refunded</option>
-      </select>
+      <OrderStatusFilter locale={locale} currentStatus={currentStatus} />
     </div>
+  );
+}
+
+// Sub-component to handle translations cleanly
+
+function OrderStatusFilter({
+  locale,
+  currentStatus,
+}: {
+  locale: string;
+  currentStatus: string;
+}) {
+  const t = useTranslations('Orders.detail');
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleStatusChange = (status: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (status) {
+      params.set('status', status);
+    } else {
+      params.delete('status');
+    }
+    params.delete('page'); // Reset to page 1
+    router.push(`/${locale}/admin/orders?${params.toString()}`);
+  };
+
+  return (
+    <select
+      name="status"
+      value={currentStatus}
+      onChange={e => handleStatusChange(e.target.value)}
+      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+    >
+      <option value="">{t('status')}</option>
+      <option value="PENDING">{t('statusPending')}</option>
+      <option value="PAID">{t('statusPaid')}</option>
+      <option value="SHIPPED">{t('statusShipped')}</option>
+      <option value="DELIVERED">{t('statusDelivered')}</option>
+      <option value="CANCELLED">{t('statusCancelled')}</option>
+      <option value="REFUNDED">{t('statusRefunded')}</option>
+    </select>
   );
 }

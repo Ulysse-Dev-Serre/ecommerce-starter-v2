@@ -1,24 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getShippingRates, Address, Parcel } from '@/lib/services/shippo';
-import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { withError } from '@/lib/middleware/withError';
-
-// Schema validation aligning with frontend
-const shippingRequestSchema = z.object({
-  addressTo: z.object({
-    name: z.string(),
-    street1: z.string(),
-    city: z.string(),
-    state: z.string(),
-    zip: z.string(),
-    country: z.string(),
-    email: z.string().email().optional(),
-    phone: z.string().optional(),
-  }),
-});
+import { withValidation } from '@/lib/middleware/withValidation';
+import {
+  shippingRequestSchema,
+  ShippingRequestInput,
+} from '@/lib/validators/shipping';
 
 // Default warehouse address (Fallback)
 const WAREHOUSE_ADDRESS: Address = {
@@ -32,7 +22,6 @@ const WAREHOUSE_ADDRESS: Address = {
   phone: process.env.SHIPPO_FROM_PHONE || '',
 };
 
-// Default parcel configuration (unused mostly if we define parcels dynamically)
 const DEFAULT_PARCEL: Parcel = {
   length: '40',
   width: '20',
@@ -42,25 +31,10 @@ const DEFAULT_PARCEL: Parcel = {
   massUnit: 'kg',
 };
 
-async function handler(req: NextRequest) {
+async function handler(req: NextRequest, data: ShippingRequestInput) {
   try {
-    const body = await req.json();
-
-    // Zod validation
-    const result = shippingRequestSchema.safeParse(body);
-
-    if (!result.success) {
-      logger.warn(
-        { error: 'Zod validation failed' },
-        'Invalid address data for shipping rates'
-      );
-      return NextResponse.json(
-        { error: 'Invalid address data' },
-        { status: 400 }
-      );
-    }
-
-    const { addressTo } = result.data;
+    // Data is already validated by withValidation
+    const { addressTo, cartId: bodyCartId } = data;
 
     // Sanitize ZIP code
     if (addressTo.zip) {
@@ -69,8 +43,8 @@ async function handler(req: NextRequest) {
 
     let cartId = req.cookies.get('cartId')?.value;
 
-    if (!cartId && body.cartId) {
-      cartId = body.cartId;
+    if (!cartId && bodyCartId) {
+      cartId = bodyCartId;
     }
 
     logger.info(
@@ -328,7 +302,7 @@ async function handler(req: NextRequest) {
       logger.info(
         {
           customsDeclaration,
-          itemsDetail: customsDeclaration.items.map((i: any) => ({
+          itemsDetail: (customsDeclaration as any).items.map((i: any) => ({
             desc: i.description,
             hsCode: i.hsCode,
             origin: i.originCountry,
@@ -438,4 +412,9 @@ async function handler(req: NextRequest) {
   }
 }
 
-export const POST = withError(withRateLimit(handler, RateLimits.PUBLIC));
+export const POST = withError(
+  withRateLimit(
+    withValidation(shippingRequestSchema, handler),
+    RateLimits.PUBLIC
+  )
+);

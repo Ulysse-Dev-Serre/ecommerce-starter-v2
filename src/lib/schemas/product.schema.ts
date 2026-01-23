@@ -92,6 +92,16 @@ export const UpdateProductSchema = z.object({
   shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
   exportExplanation: z.string().optional().nullable(),
   incoterm: z.string().optional().nullable(),
+  weight: z.number().optional().nullable(),
+  dimensions: z
+    .object({
+      length: z.string().or(z.number()),
+      width: z.string().or(z.number()),
+      height: z.string().or(z.number()),
+      unit: z.string().optional(),
+    })
+    .optional()
+    .nullable(),
   translations: z.array(ProductTranslationSchema).optional(),
 });
 
@@ -174,6 +184,7 @@ export const CreateVariantsSchema = z.union([
 export type CreateProductInput = z.infer<typeof CreateProductSchema>;
 export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
 export type CreateVariantInput = z.infer<typeof CreateVariantSchema>;
+export type CreateVariantsInput = z.infer<typeof CreateVariantsSchema>;
 export type UpdateVariantInput = z.infer<typeof UpdateVariantSchema>;
 
 export function formatZodErrors(

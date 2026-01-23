@@ -210,7 +210,26 @@
       "addressUndefined": "Adresse non définie",
       "save": "Enregistrer",
       "loading": "Chargement...",
-      "editLocation": "Modifier le lieu"
+      "editLocation": "Modifier le lieu",
+      "locationName": "Nom du lieu (ex: Entrepôt Principal)",
+      "locationType": "Type de lieu",
+      "originAddress": "Adresse de départ (pour le calcul des tarifs)",
+      "street": "Adresse (Rue)",
+      "streetPlaceholder": "123 rue Exemple",
+      "city": "Ville",
+      "cityPlaceholder": "Montréal",
+      "state": "Province / État",
+      "statePlaceholder": "QC",
+      "zip": "Code Postal / ZIP",
+      "zipPlaceholder": "H1A 1A1",
+      "country": "Pays (Code ISO 2 lettres)",
+      "countryPlaceholder": "CA",
+      "email": "Email contact (Optionnel)",
+      "emailPlaceholder": "logistics@example.com",
+      "phone": "Téléphone (Optionnel)",
+      "localStock": "Stock Local (Entrepôt)",
+      "dropshipper": "Dropshipper",
+      "other": "Autre"
     }
   },
   "Checkout": {
@@ -237,7 +256,10 @@
     "zipCode": "Code Postal",
     "country": "Pays",
     "selectState": "Sélectionner...",
-    "statePlaceholder": "Province / État"
+    "statePlaceholder": "Province / État",
+    "validation": {
+      "phone": "Veuillez entrer un numéro de téléphone valide pour la livraison."
+    }
   },
   "footer": {
     "about": "À propos",
