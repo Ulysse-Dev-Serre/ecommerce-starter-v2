@@ -336,6 +336,9 @@
     },
     "returnLabel": {
       "subject": "Étiquette de retour pour votre commande {orderNumber}"
+    },
+    "delivered": {
+      "subject": "Votre commande {orderNumber} a été livrée"
     }
   }
 }

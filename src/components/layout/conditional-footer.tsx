@@ -17,5 +17,5 @@ export function ConditionalFooter({
     return null;
   }
 
-  return <Footer locale={locale} />;
+  return <Footer locale={locale || 'en'} />;
 }

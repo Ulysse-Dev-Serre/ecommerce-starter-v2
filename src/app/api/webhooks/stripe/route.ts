@@ -22,6 +22,7 @@ import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
+import { env } from '../../../../lib/env';
 
 async function handler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
@@ -53,7 +54,7 @@ async function handler(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
     }
 
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
     if (!webhookSecret) {
       logger.error({ requestId }, 'STRIPE_WEBHOOK_SECRET not configured');
       return NextResponse.json(

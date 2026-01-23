@@ -9,8 +9,9 @@ import {
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { processWebhookEvent } from '../../../../lib/services/webhook.service';
+import { env } from '../../../../lib/env';
 
-const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+const webhookSecret = env.CLERK_WEBHOOK_SECRET;
 
 async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
   logger.info(

@@ -336,6 +336,9 @@
     },
     "returnLabel": {
       "subject": "Return label for your order {orderNumber}"
+    },
+    "delivered": {
+      "subject": "Your order {orderNumber} has been delivered"
     }
   }
 }

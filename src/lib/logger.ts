@@ -1,16 +1,17 @@
 // src/lib/logger.ts
+import { env } from './env';
 
 // Configuration des niveaux par environnement
 // Dans src/lib/logger.ts
 const LOG_LEVELS = {
-  development: process.env.LOG_LEVEL
-    ? [process.env.LOG_LEVEL, 'warn', 'error']
+  development: env.LOG_LEVEL
+    ? [env.LOG_LEVEL, 'warn', 'error']
     : ['debug', 'info', 'warn', 'error'],
   production: ['warn', 'error'],
   test: ['error'],
 };
 
-const currentEnv = process.env.NODE_ENV ?? 'development';
+const currentEnv = env.NODE_ENV ?? 'development';
 const allowedLevels = LOG_LEVELS[currentEnv];
 
 // Fonction pour générer un ID unique

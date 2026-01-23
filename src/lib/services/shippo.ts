@@ -1,8 +1,9 @@
 import { Shippo } from 'shippo';
 import { logger } from '@/lib/logger';
+import { env } from '../env';
 
 // Initialize Shippo only if API key is present, otherwise we relies on Mock mode or error out later
-const shippoApiKey = process.env.SHIPPO_API_KEY;
+const shippoApiKey = env.SHIPPO_API_KEY;
 const shippo = shippoApiKey ? new Shippo({ apiKeyHeader: shippoApiKey }) : null;
 
 export interface Address {
@@ -96,49 +97,13 @@ export async function getShippingRates(
   parcels: Parcel[],
   customsDeclaration?: CustomsDeclaration
 ) {
-  // MOCK MODE
-  if (process.env.SHIPPO_MOCK_MODE === 'true') {
-    logger.info({ msg: 'SHIPPO: Mock mode enabled, returning fake rates' });
-    return {
-      object_status: 'SUCCESS',
-      rates: [
-        {
-          object_id: 'mock_rate_standard_' + Date.now(),
-          amount: '15.00',
-          currency: 'CAD',
-          provider: 'MOCK_POST',
-          servicelevel: {
-            name: 'Standard Mock',
-            token: 'mock_std',
-          },
-          days: 3,
-          duration_terms: '3-5 days',
-          attributes: [],
-        },
-        {
-          object_id: 'mock_rate_express_' + Date.now(),
-          amount: '25.00',
-          currency: 'CAD',
-          provider: 'MOCK_POST',
-          servicelevel: {
-            name: 'Express Mock',
-            token: 'mock_exp',
-          },
-          days: 1,
-          duration_terms: '1 day',
-          attributes: [],
-        },
-      ],
-    };
-  }
-
   if (!shippo) {
-    throw new Error('SHIPPO_API_KEY is not defined and Mock mode is disabled');
+    throw new Error('SHIPPO_API_KEY is not defined');
   }
 
   try {
-    const carrierAccounts = process.env.SHIPPO_UPS_ACCOUNT_ID
-      ? [process.env.SHIPPO_UPS_ACCOUNT_ID]
+    const carrierAccounts = env.SHIPPO_UPS_ACCOUNT_ID
+      ? [env.SHIPPO_UPS_ACCOUNT_ID]
       : undefined;
 
     const shipment = await shippo.shipments.create({
@@ -166,40 +131,15 @@ export async function getReturnShippingRates(
   parcels: Parcel[],
   customsDeclaration?: CustomsDeclaration
 ) {
-  // MOCK MODE
-  if (process.env.SHIPPO_MOCK_MODE === 'true') {
-    logger.info({
-      msg: 'SHIPPO: Mock mode enabled, returning fake return rates',
-    });
-    return {
-      object_status: 'SUCCESS',
-      rates: [
-        {
-          object_id: 'mock_rate_return_' + Date.now(),
-          amount: '12.00',
-          currency: 'CAD',
-          provider: 'MOCK_POST',
-          servicelevel: {
-            name: 'Return Standard Mock',
-            token: 'mock_ret_std',
-          },
-          days: 3,
-          duration_terms: '3-5 days',
-          attributes: [],
-        },
-      ],
-    };
-  }
-
   if (!shippo) {
-    throw new Error('SHIPPO_API_KEY is not defined and Mock mode is disabled');
+    throw new Error('SHIPPO_API_KEY is not defined');
   }
 
   try {
     // If shipping from outside CA (e.g. US), don't restrict to Canadian UPS account
     const carrierAccounts =
-      addressFrom.country === 'CA' && process.env.SHIPPO_UPS_ACCOUNT_ID
-        ? [process.env.SHIPPO_UPS_ACCOUNT_ID]
+      addressFrom.country === 'CA' && env.SHIPPO_UPS_ACCOUNT_ID
+        ? [env.SHIPPO_UPS_ACCOUNT_ID]
         : undefined;
 
     // ONLY use isReturn (scan-based) for domestic shipments.
@@ -229,34 +169,12 @@ export async function getReturnShippingRates(
 /**
  * Purchase a label for a specific rate
  */
+/**
+ * Purchase a label for a specific rate
+ */
 export async function createTransaction(rateId: string) {
-  // MOCK MODE
-  if (process.env.SHIPPO_MOCK_MODE === 'true') {
-    logger.info(
-      { rateId },
-      'SHIPPO: Mock mode enabled, creating fake transaction'
-    );
-
-    // Simulate error if rateId contains "fail"
-    if (rateId.includes('fail')) {
-      return {
-        status: 'ERROR',
-        messages: [{ text: 'Simulated failure in mock mode' }],
-      };
-    }
-
-    return {
-      status: 'SUCCESS',
-      object_id: 'mock_trans_' + Date.now(),
-      tracking_number: 'MOCK' + Date.now(),
-      tracking_url: 'https://shippo-delivery.com/mock/' + Date.now(),
-      label_url: 'https://placehold.co/600x400/png?text=Shipping+Label+Mock', // Valid imitation URL
-      rate: rateId,
-    };
-  }
-
   if (!shippo) {
-    throw new Error('SHIPPO_API_KEY is not defined and Mock mode is disabled');
+    throw new Error('SHIPPO_API_KEY is not defined');
   }
 
   try {

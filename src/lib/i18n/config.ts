@@ -1,10 +1,10 @@
 // i18n Configuration
-const defaultLocale = process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'en';
-const locales = process.env.NEXT_PUBLIC_LOCALES
-  ? (process.env.NEXT_PUBLIC_LOCALES.split(',') as string[])
-  : ['en', 'fr'];
+import { env } from '../env';
 
-const adminLocale = process.env.ADMIN_LOCALE || defaultLocale;
+const defaultLocale = env.NEXT_PUBLIC_DEFAULT_LOCALE;
+const locales = env.NEXT_PUBLIC_LOCALES;
+
+const adminLocale = env.ADMIN_LOCALE;
 
 export const i18n = {
   defaultLocale,

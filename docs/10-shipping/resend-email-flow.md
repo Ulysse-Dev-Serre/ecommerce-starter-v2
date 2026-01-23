@@ -48,6 +48,13 @@ Le déclencheur est une **action manuelle** dans le panneau d'administration.
 *   **Déclencheur** : Création d'une nouvelle commande (après paiement réussi).
 *   **Action** : Envoi d'une alerte "💰 Nouvelle Commande" à l'email défini dans `ADMIN_EMAIL`.
 
+## Flux 5 : Notification de Livraison (Delivered)
+
+*   **Déclencheur (Automatique)** : Webhook Shippo (événement `track_updated` -> `DELIVERED`).
+*   **Alternative (Manuelle)** : L'admin change le statut à `DELIVERED` depuis le dashboard.
+*   **Action** : Envoi de l'email "Votre commande a été livrée !".
+*   **Logique** : Met à jour le statut en base de données et notifie le client.
+
 ## Fichiers Clés
 
 | Rôle | Fichier | Description |
@@ -57,6 +64,7 @@ Le déclencheur est une **action manuelle** dans le panneau d'administration.
 | **Template Client** | `src/components/emails/order-confirmation.tsx` | Email "Merci pour votre commande" (Après paiement). |
 | **Template Client** | `src/components/emails/order-shipped.tsx` | Email "Votre commande est en route" (Après expédition). |
 | **Template Client** | `src/components/emails/order-refunded.tsx` | Email "Remboursement effectué" (Après remboursement). |
+| **Template Client** | `src/components/emails/order-delivered.tsx` | Email "Commande Livrée" (Après livraison réussie). |
 | **Template Admin** | `src/components/emails/admin-new-order.tsx` | Notification interne pour l'administrateur. |
 
 ## Internationalisation (i18n) & Multi-Devises

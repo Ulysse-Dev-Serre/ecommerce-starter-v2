@@ -1,5 +1,7 @@
+import { env } from '../env';
+
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || 'AgTechNest',
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+  name: env.NEXT_PUBLIC_SITE_NAME,
+  url: env.NEXT_PUBLIC_SITE_URL,
   description: "Starter e-commerce universel, flexible et prêt à l'emploi.",
 };

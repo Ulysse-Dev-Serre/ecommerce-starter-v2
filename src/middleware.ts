@@ -3,6 +3,7 @@ import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { i18n } from '@/lib/i18n/config';
+import { env } from '@/lib/env';
 
 const { locales, defaultLocale } = i18n;
 
@@ -43,8 +44,8 @@ function logMiddleware(
 ): void {
   const shouldLog =
     level === 'ERROR' || // Toujours logger les erreurs
-    (level === 'WARN' && process.env.NODE_ENV !== 'production') || // Warnings en dev/staging
-    (level === 'INFO' && process.env.NODE_ENV === 'development'); // Info seulement en dev
+    (level === 'WARN' && env.NODE_ENV !== 'production') || // Warnings en dev/staging
+    (level === 'INFO' && env.NODE_ENV === 'development'); // Info seulement en dev
 
   if (shouldLog) {
     const logEntry = {
@@ -123,7 +124,7 @@ export default clerkMiddleware((auth, req: NextRequest) => {
 
     response.cookies.set(CURRENCY_COOKIE_NAME, detectedCurrency, {
       httpOnly: false, // Accessible côté client pour le sélecteur
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 365, // 1 an
       path: '/',

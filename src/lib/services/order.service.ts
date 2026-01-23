@@ -12,6 +12,7 @@ import { resend, FROM_EMAIL } from '../../lib/resend';
 import { OrderConfirmationEmail } from '../../components/emails/order-confirmation';
 import { render } from '@react-email/render';
 import { i18n } from '../i18n/config';
+import { env } from '@/lib/env';
 
 const fr = require('../i18n/dictionaries/fr.json');
 const en = require('../i18n/dictionaries/en.json');
@@ -238,14 +239,13 @@ export async function createOrderFromCart({
   }
 
   // --- ENVOI NOTIFICATION ADMIN ---
-  if (process.env.ADMIN_EMAIL) {
+  if (env.ADMIN_EMAIL) {
     try {
       const { AdminNewOrderEmail } = await import(
         '../../components/emails/admin-new-order'
       );
 
-      const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL || 'https://agtechnest.com';
+      const siteUrl = env.NEXT_PUBLIC_SITE_URL;
 
       const adminHtml = await render(
         AdminNewOrderEmail({
@@ -258,12 +258,13 @@ export async function createOrderFromCart({
           currency: cart.currency,
           itemsCount: calculation.items.length,
           siteUrl,
+          locale: env.ADMIN_LOCALE || 'fr',
         })
       );
 
       await resend.emails.send({
         from: FROM_EMAIL,
-        to: process.env.ADMIN_EMAIL,
+        to: env.ADMIN_EMAIL,
         subject: `Nouvelle commande : ${totalAmount} ${cart.currency} (${order.orderNumber})`,
         html: adminHtml,
       });
@@ -505,7 +506,7 @@ export async function updateOrderStatus(
           OrderShippedEmail({
             orderId: order.orderNumber,
             customerName:
-              order.user?.firstName || shippingAddr?.firstName || 'Client',
+              shippingAddr?.firstName || order.user?.firstName || 'Client',
             trackingNumber: shipment.trackingCode,
             trackingUrl: `https://parcelsapp.com/en/tracking/${shipment.trackingCode}`,
             carrierName: shipment.carrier || 'Transporteur',
@@ -548,6 +549,66 @@ export async function updateOrderStatus(
     } catch (err: any) {
       logger.error({ err }, 'Error in shipped email flow');
     }
+  } else if (status === OrderStatus.DELIVERED) {
+    // --- ENVOI EMAIL LIVRAISON ---
+    try {
+      let recipientEmail = order.user?.email;
+
+      if (!recipientEmail && order.payments.length > 0) {
+        const paymentMetadata = order.payments[0].transactionData as any;
+        recipientEmail =
+          paymentMetadata?.receipt_email || paymentMetadata?.email;
+      }
+
+      if (recipientEmail) {
+        const { OrderDeliveredEmail } = await import(
+          '../../components/emails/order-delivered'
+        );
+
+        const shippingAddr = order.shippingAddress as any;
+
+        const emailHtml = await render(
+          OrderDeliveredEmail({
+            orderId: order.orderNumber,
+            customerName:
+              shippingAddr?.firstName || order.user?.firstName || 'Client',
+            shippingAddress: {
+              street: shippingAddr?.street1 || shippingAddr?.street || '',
+              city: shippingAddr?.city || '',
+              state: shippingAddr?.state || '',
+              postalCode: shippingAddr?.postalCode || '',
+              country: shippingAddr?.country || '',
+            },
+            locale: order.language.toLowerCase(),
+          })
+        );
+
+        const dict =
+          dictionaries[order.language.toLowerCase()] || dictionaries.en;
+        const subject = dict.Emails.delivered.subject.replace(
+          '{orderNumber}',
+          order.orderNumber
+        );
+
+        const { data, error } = await resend.emails.send({
+          from: FROM_EMAIL,
+          to: recipientEmail,
+          subject,
+          html: emailHtml,
+        });
+
+        if (error) {
+          logger.error({ error, orderId }, 'Failed to send delivered email');
+        } else {
+          logger.info(
+            { emailId: data?.id },
+            'Delivered email sent successfully'
+          );
+        }
+      }
+    } catch (err: any) {
+      logger.error({ err }, 'Error in delivered email flow');
+    }
   } else if (
     status === OrderStatus.REFUNDED ||
     status === OrderStatus.CANCELLED
@@ -573,7 +634,7 @@ export async function updateOrderStatus(
           OrderRefundedEmail({
             orderId: order.orderNumber,
             customerName:
-              order.user?.firstName || shippingAddr?.firstName || 'Client',
+              shippingAddr?.firstName || order.user?.firstName || 'Client',
             amountRefunded: order.totalAmount.toString(),
             currency: order.currency,
             locale: order.language.toLowerCase(),
@@ -645,7 +706,7 @@ export async function createReturnLabel(
     state: 'QC',
     zip: 'J6A7R3',
     country: 'CA',
-    phone: process.env.SHIPPO_FROM_PHONE || '5140000000',
+    phone: env.SHIPPO_FROM_PHONE || '5140000000',
     email: 'agtechnest@gmail.com',
   };
 
@@ -755,7 +816,7 @@ export async function createReturnLabel(
         OrderReturnLabelEmail({
           orderId: order.orderNumber,
           customerName:
-            order.user?.firstName || addr.name?.split(' ')[0] || 'Client',
+            addr.name?.split(' ')[0] || order.user?.firstName || 'Client',
           labelUrl: finalLabelUrl,
           locale: order.language.toLowerCase(),
         })

@@ -5,6 +5,7 @@ import { render } from '@react-email/render';
 import { prisma } from '@/lib/db/prisma';
 import { resend, FROM_EMAIL } from '@/lib/resend';
 import { logger } from '@/lib/logger';
+import { env } from '@/lib/env';
 import RefundRequestAdminEmail from '@/components/emails/refund-request-admin';
 
 import { withError } from '@/lib/middleware/withError';
@@ -71,7 +72,7 @@ async function handler(request: NextRequest) {
   );
 
   // Send email to admin
-  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminEmail = env.ADMIN_EMAIL;
   if (adminEmail) {
     const emailHtml = await render(
       RefundRequestAdminEmail({
@@ -80,6 +81,7 @@ async function handler(request: NextRequest) {
         customerEmail: user.email,
         reason: reason,
         imageUrl: file ? 'Attached' : undefined,
+        locale: env.ADMIN_LOCALE || 'fr',
       })
     );
 

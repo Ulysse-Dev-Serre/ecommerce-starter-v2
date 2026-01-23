@@ -28,6 +28,26 @@ Voici les fichiers clés qui gèrent la livraison :
 - **Base de Données** :  
   Nous stockons l'URL de l'étiquette (PDF) dans la table `Shipment` (colonne `labelUrl`) pour permettre la réimpression facile.
 
+- **Webhook (Retour d'information)** :
+  `src/app/api/webhooks/shippo/route.ts`
+  *Reçoit les mises à jour de statut de Shippo (ex: DELIVERED) pour mettre à jour la commande automatiquement.*
+
+## Automatisation (Webhook)
+
+Pour que le statut de la commande passe automatiquement à **DELIVERED** (et envoie l'email de livraison), nous utilisons un Webhook Shippo.
+
+### Configuration
+1. **URL** : `https://<votre-domaine>/api/webhooks/shippo?token=VOTRE_SECRET`
+2. **Event** : `track_updated`
+3. **Sécurité** : Le token dans l'URL est vérifié contre la variable d'environnement `SHIPPO_WEBHOOK_SECRET`.
+
+### Fonctionnement
+*   Shippo détecte que le colis est livré.
+*   Il appelle notre API Webhook.
+*   Le système trouve la commande grâce au numéro de suivi.
+*   Le statut passe à `DELIVERED`.
+*   L'email `OrderDeliveredEmail` est envoyé au client.
+
 ## Clés API
 
 - **Dev/Test** : Utilise des clés de test (`shippo_test_...`) qui génèrent de faux labels gratuits.
