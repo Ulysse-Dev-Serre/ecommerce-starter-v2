@@ -103,9 +103,10 @@ interface SortableMediaItemProps {
   item: any;
   onDelete: (id: string) => void;
   t: any;
+  tc: any;
 }
 
-function SortableMediaItem({ item, onDelete, t }: SortableMediaItemProps) {
+function SortableMediaItem({ item, onDelete, t, tc }: SortableMediaItemProps) {
   const {
     attributes,
     listeners,
@@ -136,7 +137,7 @@ function SortableMediaItem({ item, onDelete, t }: SortableMediaItemProps) {
       />
       {item.isPrimary && (
         <div className="absolute left-2 top-2 rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white">
-          {t.primary || 'Primary'}
+          {t.primary}
         </div>
       )}
       <div
@@ -149,7 +150,7 @@ function SortableMediaItem({ item, onDelete, t }: SortableMediaItemProps) {
       <button
         onClick={() => onDelete(item.id)}
         className="absolute right-2 top-2 rounded bg-red-600 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
-        title={t.delete || 'Delete'}
+        title={tc.delete}
       >
         <Trash2 className="h-4 w-4" />
       </button>
@@ -222,7 +223,7 @@ export default function EditProductPage({
   useEffect(() => {
     void params.then(p => {
       setProductId(p.id);
-      setLocale(p.locale || i18n.defaultLocale);
+      setLocale(p.locale as any); // Type cast to fix lint error
       void loadProduct(p.id);
       void loadVariants(p.id);
       void loadMedia(p.id);
@@ -392,12 +393,14 @@ export default function EditProductPage({
 
       // Recharger les médias
       await loadMedia(productId);
-      setSuccessMessage('Images uploaded successfully!');
+      setSuccessMessage(t.messages.mediaUploaded);
 
       // Effacer le message après 3 secondes
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload images');
+      setError(
+        err instanceof Error ? err.message : t.messages.errorUploadingMedia
+      );
     } finally {
       setUploading(false);
       // Reset input
@@ -410,11 +413,7 @@ export default function EditProductPage({
     if (!messages) return;
 
     const t = messages.admin.products;
-    if (
-      !confirm(
-        t.deleteMediaConfirm || 'Are you sure you want to delete this image?'
-      )
-    ) {
+    if (!confirm(t.deleteMediaConfirm)) {
       return;
     }
 
@@ -424,14 +423,16 @@ export default function EditProductPage({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete media');
+        throw new Error(t.messages.errorDeletingProduct);
       }
 
       await loadMedia(productId);
-      setSuccessMessage('Image deleted successfully!');
+      setSuccessMessage(t.messages.mediaDeleted);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete image');
+      setError(
+        err instanceof Error ? err.message : t.messages.errorDeletingProduct
+      );
     }
   };
 
@@ -542,10 +543,10 @@ export default function EditProductPage({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update product');
+        throw new Error(data.message || t.messages.errorUpdatingProduct);
       }
 
-      setSuccessMessage('Product updated successfully!');
+      setSuccessMessage(t.messages.productUpdated);
 
       // Recharger les données du produit
       await loadProduct(productId);
@@ -615,14 +616,16 @@ export default function EditProductPage({
       );
 
       if (!response.ok) {
-        throw new Error('Failed to update variant');
+        throw new Error(t.messages.errorUpdatingProduct);
       }
 
       await loadVariants(productId);
-      setSuccessMessage('Variant updated successfully!');
+      setSuccessMessage(t.messages.variantUpdated);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update variant');
+      setError(
+        err instanceof Error ? err.message : t.messages.errorUpdatingProduct
+      );
     }
   };
 
@@ -647,14 +650,16 @@ export default function EditProductPage({
       );
 
       if (!response.ok) {
-        throw new Error('Failed to delete variant');
+        throw new Error(t.messages.errorDeletingProduct);
       }
 
       await loadVariants(productId);
-      setSuccessMessage('Variant deleted successfully!');
+      setSuccessMessage(t.messages.variantDeleted);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete variant');
+      setError(
+        err instanceof Error ? err.message : t.messages.errorDeletingProduct
+      );
     }
   };
 
@@ -733,11 +738,11 @@ export default function EditProductPage({
 
       setNewVariants([]);
       await loadVariants(productId);
-      setSuccessMessage('New variants added successfully!');
+      setSuccessMessage(t.messages.variantsAdded);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Failed to create variants'
+        err instanceof Error ? err.message : t.messages.errorCreatingProduct
       );
     }
   };
@@ -796,11 +801,11 @@ export default function EditProductPage({
             </h1>
           </div>
         </div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-12 text-center shadow-sm">
-          <p className="text-red-600">Product not found</p>
+        <div className="admin-card text-center py-12">
+          <p className="text-red-600 font-medium">{t.productNotFound}</p>
           <Link
-            href="/admin/products"
-            className="mt-4 inline-block text-sm text-red-700 hover:text-red-900"
+            href={`/${locale}/admin/products`}
+            className="mt-4 admin-btn-secondary"
           >
             {t.back}
           </Link>
@@ -815,24 +820,22 @@ export default function EditProductPage({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/admin/products"
-            className="rounded-lg p-2 hover:bg-gray-100"
+            href={`/${locale}/admin/products`}
+            className="admin-btn-secondary p-2"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {t.editProduct}
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              {enTranslation.name || 'Product details'}
+            <h1 className="admin-page-title">{t.editProduct}</h1>
+            <p className="admin-page-subtitle">
+              {enTranslation.name || t.productInfo}
             </p>
           </div>
         </div>
         <button
           onClick={handleUpdateProduct}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+          className="admin-btn-primary"
         >
           <Save className="h-4 w-4" />
           {saving ? t.saving : tc.save}
@@ -857,9 +860,7 @@ export default function EditProductPage({
               </svg>
             </div>
             <div>
-              <h3 className="font-medium text-green-900">
-                {tc.success || 'Success'}
-              </h3>
+              <h3 className="font-medium text-green-900">{tc.success}</h3>
               <p className="mt-1 text-sm text-green-700">{successMessage}</p>
             </div>
           </div>
@@ -883,7 +884,7 @@ export default function EditProductPage({
         {/* Colonne gauche - Informations de base */}
         <div className="space-y-6">
           {/* Basic Info */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               {t.basicInfo}
             </h2>
@@ -899,7 +900,7 @@ export default function EditProductPage({
                   onChange={e =>
                     setFormData({ ...formData, slug: e.target.value })
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                   required
                 />
               </div>
@@ -916,7 +917,7 @@ export default function EditProductPage({
                       status: e.target.value as typeof formData.status,
                     })
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 >
                   <option value="DRAFT">{t.draft}</option>
                   <option value="ACTIVE">{t.active}</option>
@@ -946,18 +947,18 @@ export default function EditProductPage({
           </div>
 
           {/* Shipping & Customs */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <div className="mb-4 flex items-center gap-2">
               <Truck className="h-5 w-5 text-gray-400" />
               <h2 className="text-lg font-semibold text-gray-900">
-                Shipping & Customs
+                {t.shippingCustoms}
               </h2>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t.shippingOrigin || 'Shipping Origin'}
+                  {t.shippingOrigin}
                 </label>
                 <div className="relative">
                   <select
@@ -968,11 +969,9 @@ export default function EditProductPage({
                         shippingOriginId: e.target.value,
                       })
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 appearance-none bg-white"
+                    className="admin-input appearance-none bg-white"
                   >
-                    <option value="">
-                      {t.selectOrigin || 'Select a location...'}
-                    </option>
+                    <option value="">{t.selectOrigin}</option>
                     {suppliers.map((s: any) => (
                       <option key={s.id} value={s.id}>
                         {s.name} ({s.type})
@@ -986,14 +985,13 @@ export default function EditProductPage({
                   </div>
                 </div>
                 <p className="mt-1 text-xs text-gray-500">
-                  {t.shippingOriginHelp ||
-                    'Select the warehouse or supplier where this product ships from.'}
+                  {t.shippingOriginHelp}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  {t.originCountry || 'Country of Manufacture (ISO 2-char)'}
+                  {t.originCountry}
                 </label>
                 <input
                   type="text"
@@ -1006,17 +1004,16 @@ export default function EditProductPage({
                   }
                   maxLength={2}
                   placeholder="e.g. CA, US, CN"
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  {t.originCountryHelp ||
-                    'Required for customs (if different from shipping origin).'}
+                  {t.originCountryHelp}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  HS Code
+                  {t.hsCode}
                 </label>
                 <input
                   type="text"
@@ -1025,24 +1022,24 @@ export default function EditProductPage({
                     setFormData({ ...formData, hsCode: e.target.value })
                   }
                   placeholder="e.g. 6109.10"
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Harmonized System Code for customs declaration.
+                  {t.hsCodeHelp}
                   <a
                     href="https://www.hts.usitc.gov/"
                     target="_blank"
                     rel="noreferrer"
                     className="ml-1 text-blue-600 hover:underline"
                   >
-                    Search HS Codes
+                    {t.searchHSCodes}
                   </a>
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Export Explanation
+                  {t.exportExplanation}
                 </label>
                 <input
                   type="text"
@@ -1054,17 +1051,16 @@ export default function EditProductPage({
                     })
                   }
                   placeholder="e.g. LED Grow Lights, T-Shirt"
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Brief description of goods for customs (overrides global
-                  default).
+                  {t.exportExplanationHelp}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Incoterm Override
+                  {t.incotermOverride}
                 </label>
                 <select
                   value={formData.incoterm}
@@ -1074,22 +1070,20 @@ export default function EditProductPage({
                       incoterm: e.target.value,
                     })
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white"
+                  className="admin-input"
                 >
                   <option value="">Default (Inherit from Warehouse)</option>
                   <option value="DDU">DDU (Customer pays duties)</option>
                   <option value="DDP">DDP (Sender pays duties)</option>
                 </select>
-                <p className="mt-1 text-xs text-gray-500">
-                  Force specific Incoterm for this product.
-                </p>
+                <p className="mt-1 text-xs text-gray-500">{t.incotermHelp}</p>
               </div>
 
               {/* Weight & Dimensions */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Weight (kg)
+                    {t.weightKg}
                   </label>
                   <input
                     type="number"
@@ -1099,12 +1093,12 @@ export default function EditProductPage({
                       setFormData({ ...formData, weight: e.target.value })
                     }
                     placeholder="0.0"
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    className="admin-input"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Dimensions (L x W x H cm)
+                    {t.dimensionsCm}
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -1116,7 +1110,7 @@ export default function EditProductPage({
                       }
                       placeholder="L"
                       title="Length (cm)"
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      className="admin-input"
                     />
                     <input
                       type="number"
@@ -1127,7 +1121,7 @@ export default function EditProductPage({
                       }
                       placeholder="W"
                       title="Width (cm)"
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      className="admin-input"
                     />
                     <input
                       type="number"
@@ -1138,7 +1132,7 @@ export default function EditProductPage({
                       }
                       placeholder="H"
                       title="Height (cm)"
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      className="admin-input"
                     />
                   </div>
                 </div>
@@ -1147,9 +1141,9 @@ export default function EditProductPage({
           </div>
 
           {/* Media Section */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              {t.media || 'Media'}
+              {t.media}
             </h2>
 
             {/* Upload Zone */}
@@ -1157,16 +1151,14 @@ export default function EditProductPage({
               <div className="text-center">
                 <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
                 <p className="mt-2 text-sm font-medium text-gray-900">
-                  {t.uploadMedia || 'Upload images and videos'}
+                  {t.uploadMedia}
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
                   PNG, JPG, WebP, GIF, MP4 - Max 50MB
                 </p>
                 <label className="mt-4 inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
                   <Upload className="h-4 w-4" />
-                  {uploading
-                    ? t.uploading || 'Uploading...'
-                    : t.selectFiles || 'Select files'}
+                  {uploading ? t.uploading : t.selectFiles}
                   <input
                     type="file"
                     multiple
@@ -1184,17 +1176,13 @@ export default function EditProductPage({
               <>
                 {reorderingMedia && (
                   <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-                    <p className="text-sm text-blue-700">
-                      💾 {t.savingOrder || 'Saving media order...'}
-                    </p>
+                    <p className="text-sm text-blue-700">💾 {t.savingOrder}</p>
                   </div>
                 )}
 
                 <div className="mt-4 rounded-lg bg-blue-50 p-3">
                   <p className="text-xs text-blue-700">
-                    💡{' '}
-                    {t.dragToReorderMedia ||
-                      'Drag and drop images to reorder them'}
+                    💡 {t.dragToReorderMedia}
                   </p>
                 </div>
 
@@ -1214,6 +1202,7 @@ export default function EditProductPage({
                           item={item}
                           onDelete={handleDeleteMedia}
                           t={t}
+                          tc={tc}
                         />
                       ))}
                     </div>
@@ -1227,7 +1216,7 @@ export default function EditProductPage({
         {/* Colonne droite - Traductions */}
         <div className="space-y-6">
           {/* English Translation */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               🇬🇧 {t.english}
             </h2>
@@ -1242,7 +1231,7 @@ export default function EditProductPage({
                   onChange={e =>
                     setEnTranslation({ ...enTranslation, name: e.target.value })
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                   required
                 />
               </div>
@@ -1260,10 +1249,8 @@ export default function EditProductPage({
                       shortDescription: e.target.value,
                     })
                   }
-                  placeholder={
-                    t.shortDescriptionPlaceholder || 'Brief product summary'
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  placeholder={t.shortDescriptionPlaceholder}
+                  className="admin-input"
                 />
               </div>
 
@@ -1279,19 +1266,16 @@ export default function EditProductPage({
                       description: e.target.value,
                     })
                   }
-                  placeholder={
-                    t.fullDescriptionPlaceholder ||
-                    'Detailed product description'
-                  }
+                  placeholder={t.fullDescriptionPlaceholder}
                   rows={6}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 />
               </div>
             </div>
           </div>
 
           {/* French Translation */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               🇫🇷 {t.french}
             </h2>
@@ -1306,7 +1290,7 @@ export default function EditProductPage({
                   onChange={e =>
                     setFrTranslation({ ...frTranslation, name: e.target.value })
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 />
               </div>
 
@@ -1323,10 +1307,8 @@ export default function EditProductPage({
                       shortDescription: e.target.value,
                     })
                   }
-                  placeholder={
-                    t.shortDescriptionPlaceholder || 'Résumé bref du produit'
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  placeholder={t.shortDescriptionPlaceholder}
+                  className="admin-input"
                 />
               </div>
 
@@ -1342,12 +1324,9 @@ export default function EditProductPage({
                       description: e.target.value,
                     })
                   }
-                  placeholder={
-                    t.fullDescriptionPlaceholder ||
-                    'Description détaillée du produit'
-                  }
+                  placeholder={t.fullDescriptionPlaceholder}
                   rows={6}
-                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  className="admin-input"
                 />
               </div>
             </div>
@@ -1356,39 +1335,27 @@ export default function EditProductPage({
       </div>
 
       {/* Section Variantes - Pleine largeur */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+      <div className="admin-card p-0 overflow-hidden">
+        <h2 className="p-6 pb-2 text-lg font-semibold text-gray-900">
           {t.variants} ({variants.length})
         </h2>
 
         {variants.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="admin-table-container">
+            <table className="admin-table">
+              <thead className="admin-table-thead">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.variant}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.sku}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.price} CAD
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.price} USD
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.stock}
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.actions}
-                  </th>
+                  <th className="admin-table-th">{t.variant}</th>
+                  <th className="admin-table-th">{t.sku}</th>
+                  <th className="admin-table-th">{t.price} CAD</th>
+                  <th className="admin-table-th">{t.price} USD</th>
+                  <th className="admin-table-th">{t.stock}</th>
+                  <th className="admin-table-th text-right">{t.actions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {variants.map(variant => (
-                  <tr key={variant.id} className="hover:bg-gray-50">
+                  <tr key={variant.id} className="admin-table-tr">
                     <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
                       {getVariantName(variant)}
                     </td>
@@ -1410,7 +1377,7 @@ export default function EditProductPage({
                             priceCAD: e.target.value,
                           })
                         }
-                        className="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="w-24 admin-input py-1"
                       />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -1428,7 +1395,7 @@ export default function EditProductPage({
                             priceUSD: e.target.value,
                           })
                         }
-                        className="w-24 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="w-24 admin-input py-1"
                       />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
@@ -1440,7 +1407,7 @@ export default function EditProductPage({
                             stock: parseInt(e.target.value) || 0,
                           })
                         }
-                        className="w-20 rounded border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="w-20 admin-input py-1"
                       />
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-right">
@@ -1467,7 +1434,7 @@ export default function EditProductPage({
       </div>
 
       {/* Nouvelles variantes à ajouter */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="admin-card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">
             {tc.add} {t.variants}
@@ -1475,7 +1442,7 @@ export default function EditProductPage({
           <button
             type="button"
             onClick={handleAddNewVariant}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="admin-btn-primary bg-blue-600 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
             {tc.add} {t.variant}
@@ -1521,7 +1488,7 @@ export default function EditProductPage({
                           )
                         }
                         placeholder="Green"
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
 
@@ -1541,7 +1508,7 @@ export default function EditProductPage({
                           )
                         }
                         placeholder="Vert"
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
 
@@ -1562,7 +1529,7 @@ export default function EditProductPage({
                           )
                         }
                         placeholder="49.99"
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
 
@@ -1583,7 +1550,7 @@ export default function EditProductPage({
                           )
                         }
                         placeholder="36.99"
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
 
@@ -1602,7 +1569,7 @@ export default function EditProductPage({
                           )
                         }
                         placeholder="0"
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
 
@@ -1620,7 +1587,7 @@ export default function EditProductPage({
               <button
                 type="button"
                 onClick={handleSaveNewVariants}
-                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                className="admin-btn-primary bg-green-600 hover:bg-green-700"
               >
                 <Save className="h-4 w-4" />
                 {tc.save} {newVariants.length} {t.variant}
@@ -1632,17 +1599,17 @@ export default function EditProductPage({
       </div>
 
       {/* Footer avec boutons d'action */}
-      <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between admin-card p-4">
         <Link
-          href="/admin/products"
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          href={`/${locale}/admin/products`}
+          className="admin-btn-secondary"
         >
           {tc.cancel}
         </Link>
         <button
           onClick={handleUpdateProduct}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-gray-900 px-6 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+          className="admin-btn-primary"
         >
           <Save className="h-4 w-4" />
           {saving ? t.saving : tc.save}

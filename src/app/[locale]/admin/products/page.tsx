@@ -112,7 +112,7 @@ function SortableProductRow({
     <tr
       ref={setNodeRef}
       style={style}
-      className={`hover:bg-gray-50 ${isDragging ? 'bg-gray-100' : ''}`}
+      className={`admin-table-tr ${isDragging ? 'bg-gray-100' : ''}`}
     >
       <td className="px-3 py-4">
         <div
@@ -272,8 +272,11 @@ export default function ProductsPage() {
   };
 
   const getProductName = (translations: ProductTranslation[]) => {
-    const enTranslation = translations.find(t => t.language === 'EN');
-    return enTranslation?.name || translations[0]?.name || 'Unnamed Product';
+    const translation =
+      translations.find(t => t.language === locale.toUpperCase()) ||
+      translations.find(t => t.language === 'EN') ||
+      translations[0];
+    return translation?.name || t.unnamedProduct;
   };
 
   const getBasePrice = (variants: ProductVariant[]) => {
@@ -345,12 +348,14 @@ export default function ProductsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete product');
+        throw new Error(t.messages.errorDeletingProduct);
       }
 
       setProducts(products.filter(p => p.id !== productId));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete product');
+      alert(
+        err instanceof Error ? err.message : t.messages.errorDeletingProduct
+      );
     } finally {
       setDeletingId(null);
     }
@@ -397,16 +402,14 @@ export default function ProductsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save product order');
+        throw new Error(t.messages.errorReorderingProducts);
       }
     } catch (err) {
       console.error('Failed to save order:', err);
       // Recharger les produits en cas d'erreur
       void fetchProducts();
       alert(
-        err instanceof Error
-          ? err.message
-          : 'Failed to save product order. Please try again.'
+        err instanceof Error ? err.message : t.messages.errorReorderingProducts
       );
     } finally {
       setIsSavingOrder(false);
@@ -414,20 +417,20 @@ export default function ProductsPage() {
   };
 
   if (!messages || loading) {
+    const currentT = messages?.admin?.products;
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              {messages?.admin?.products?.title || 'Products'}
+            <h1 className="admin-page-title">
+              {currentT?.title || 'Products'}
             </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              {messages?.admin?.products?.manageYourCatalog ||
-                'Manage your product catalog'}
+            <p className="admin-page-subtitle">
+              {currentT?.manageYourCatalog || 'Manage your product catalog'}
             </p>
           </div>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+        <div className="admin-card text-center py-12">
           <p className="text-gray-500">
             {messages?.common?.loading || 'Loading...'}
           </p>
@@ -456,7 +459,7 @@ export default function ProductsPage() {
             onClick={fetchProducts}
             className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
           >
-            {tc.retry || 'Retry'}
+            {t.retry}
           </button>
         </div>
       </div>
@@ -468,12 +471,12 @@ export default function ProductsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t.title}</h1>
-          <p className="mt-2 text-sm text-gray-600">{t.manageVariants}</p>
+          <h1 className="admin-page-title">{t.title}</h1>
+          <p className="admin-page-subtitle">{t.manageVariants}</p>
         </div>
         <Link
           href={`/${locale}/admin/products/new`}
-          className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          className="admin-btn-primary"
         >
           <Plus className="h-4 w-4" />
           {t.newProduct}
@@ -483,15 +486,13 @@ export default function ProductsPage() {
       {/* Indicateur de sauvegarde */}
       {isSavingOrder && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-          <p className="text-sm text-blue-700">
-            💾 {t.savingOrder || 'Saving product order...'}
-          </p>
+          <p className="text-sm text-blue-700">💾 {t.savingOrder}</p>
         </div>
       )}
 
       {/* Stats */}
       <div className="grid gap-6 md:grid-cols-4">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <div className="flex items-center justify-between">
             <div className="rounded-lg bg-gray-100 p-2">
               <Package className="h-5 w-5 text-gray-700" />
@@ -507,7 +508,7 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <div className="flex items-center justify-between">
             <div className="rounded-lg bg-green-100 p-2">
               <Package className="h-5 w-5 text-green-700" />
@@ -521,7 +522,7 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <div className="flex items-center justify-between">
             <div className="rounded-lg bg-gray-100 p-2">
               <Package className="h-5 w-5 text-gray-700" />
@@ -535,7 +536,7 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <div className="flex items-center justify-between">
             <div className="rounded-lg bg-blue-100 p-2">
               <Package className="h-5 w-5 text-blue-700" />
@@ -559,7 +560,7 @@ export default function ProductsPage() {
             placeholder={`${tc.search} ${t.title.toLowerCase()}...`}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 py-2 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+            className="admin-input pl-10"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -567,7 +568,7 @@ export default function ProductsPage() {
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-gray-200 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+            className="admin-input w-40"
           >
             <option value="all">{t.allStatus}</option>
             <option value="DRAFT">{t.draft}</option>
@@ -580,18 +581,18 @@ export default function ProductsPage() {
 
       {/* Products list */}
       {filteredProducts.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+        <div className="admin-card text-center py-12">
           <Package className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-4 text-lg font-medium text-gray-900">
             {searchTerm ? t.noProductsFound : t.noProductsYet}
           </h3>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="admin-page-subtitle">
             {searchTerm ? t.adjustFilters : t.getStarted}
           </p>
           {!searchTerm && (
             <Link
               href={`/${locale}/admin/products/new`}
-              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+              className="admin-btn-primary mt-6"
             >
               <Plus className="h-4 w-4" />
               {t.createProduct}
@@ -599,62 +600,50 @@ export default function ProductsPage() {
           )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div className="admin-card p-0 overflow-hidden">
           <div className="mb-4 rounded-t-lg bg-blue-50 p-3">
-            <p className="text-sm text-blue-700">
-              💡 {t.dragToReorder || 'Drag and drop products to reorder them'}
-            </p>
+            <p className="text-sm text-blue-700">💡 {t.dragToReorder}</p>
           </div>
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
           >
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="w-12 px-3 py-3"></th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.product}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.status}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.price}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.stock}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.variants}
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                    {t.actions}
-                  </th>
-                </tr>
-              </thead>
-              <SortableContext
-                items={filteredProducts.map(p => p.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {filteredProducts.map(product => (
-                    <SortableProductRow
-                      key={product.id}
-                      product={product}
-                      locale={locale}
-                      getProductName={getProductName}
-                      getBasePrice={getBasePrice}
-                      getTotalStock={getTotalStock}
-                      handleDelete={handleDelete}
-                      deletingId={deletingId}
-                      messages={messages}
-                    />
-                  ))}
-                </tbody>
-              </SortableContext>
-            </table>
+            <div className="admin-table-container">
+              <table className="admin-table">
+                <thead className="admin-table-thead">
+                  <tr>
+                    <th className="w-12 px-3 py-3"></th>
+                    <th className="admin-table-th">{t.product}</th>
+                    <th className="admin-table-th">{t.status}</th>
+                    <th className="admin-table-th">{t.price}</th>
+                    <th className="admin-table-th">{t.stock}</th>
+                    <th className="admin-table-th">{t.variants}</th>
+                    <th className="admin-table-th text-right">{t.actions}</th>
+                  </tr>
+                </thead>
+                <SortableContext
+                  items={filteredProducts.map(p => p.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredProducts.map(product => (
+                      <SortableProductRow
+                        key={product.id}
+                        product={product}
+                        locale={locale}
+                        getProductName={getProductName}
+                        getBasePrice={getBasePrice}
+                        getTotalStock={getTotalStock}
+                        handleDelete={handleDelete}
+                        deletingId={deletingId}
+                        messages={messages}
+                      />
+                    ))}
+                  </tbody>
+                </SortableContext>
+              </table>
+            </div>
           </DndContext>
         </div>
       )}

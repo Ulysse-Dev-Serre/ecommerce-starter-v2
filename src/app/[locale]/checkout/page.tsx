@@ -8,6 +8,7 @@ import { getOrCreateCart } from '@/lib/services/cart.service';
 import { CheckoutClient } from '@/components/checkout/checkout-client';
 import { Language } from '@/generated/prisma';
 import { prisma } from '@/lib/db/prisma';
+import { SITE_CURRENCY } from '@/lib/constants';
 
 interface CheckoutPageProps {
   params: Promise<{ locale: string }>;
@@ -46,7 +47,8 @@ export default async function CheckoutPage({
 
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
-  const currency = cookieStore.get('currency')?.value || 'CAD';
+  // STRICT: Always use the environment configured currency, ignore cookies/fallbacks
+  const currency = SITE_CURRENCY;
 
   // Si achat direct, on calcule le total sans panier
   let initialTotal = 0;
@@ -130,9 +132,9 @@ export default async function CheckoutPage({
     currentCartId = cart.id;
     initialTotal = Number(
       cart.items.reduce((acc, item) => {
-        // Find price matching cart currency
+        // Find price matching site currency (STRICT: Ignore cart currency)
         const priceRecord = item.variant.pricing.find(
-          p => p.currency === cart.currency
+          p => p.currency === SITE_CURRENCY
         );
 
         const price = Number(priceRecord?.price || 0);
@@ -146,7 +148,7 @@ export default async function CheckoutPage({
             item.variant.product.slug,
           quantity: item.quantity,
           price: price,
-          currency: cart.currency,
+          currency: SITE_CURRENCY, // STRICT: Use site currency
           image: image,
         });
 

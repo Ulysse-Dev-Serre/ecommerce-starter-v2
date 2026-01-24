@@ -12,6 +12,7 @@ import {
   CreateProductSchema,
   CreateProductInput,
 } from '../../../../lib/schemas/product.schema';
+import { Language } from '../../../../generated/prisma';
 import {
   createProduct,
   CreateProductData,
@@ -43,8 +44,22 @@ async function createProductHandler(
       status: validatedData.status,
       isFeatured: validatedData.isFeatured,
       sortOrder: validatedData.sortOrder,
+      originCountry: validatedData.originCountry ?? undefined,
+      hsCode: validatedData.hsCode ?? undefined,
+      shippingOriginId: validatedData.shippingOriginId || undefined,
+      exportExplanation: validatedData.exportExplanation ?? undefined,
+      incoterm: validatedData.incoterm ?? undefined,
+      weight: validatedData.weight ?? undefined,
+      dimensions: validatedData.dimensions
+        ? {
+            length: validatedData.dimensions.length ?? undefined,
+            width: validatedData.dimensions.width ?? undefined,
+            height: validatedData.dimensions.height ?? undefined,
+          }
+        : undefined,
       translations: validatedData.translations?.map(t => ({
         ...t,
+        language: t.language.toUpperCase() as Language, // Convert 'en'/'fr' to Language enum 'EN'/'FR'
         description: t.description ?? undefined,
         shortDescription: t.shortDescription ?? undefined,
         metaTitle: t.metaTitle ?? undefined,

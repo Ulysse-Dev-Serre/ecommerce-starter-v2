@@ -2,47 +2,41 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, 'fix/*', 'feat/*']
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, 'fix/*', 'feat/*']
 
 jobs:
-  # Checks rapides sur PRs et develop
-  quick-check:
-    name: Quick Quality Check
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: TypeCheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-  # Vérification complète avant déploiement (main seulement)
-  deploy-check:
+  validate:
     name: Pre-Deploy Validation
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
 
     env:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_mock_key_for_ci_build_only
       CLERK_SECRET_KEY: sk_test_mock_key_for_ci_build_only
+      CLERK_WEBHOOK_SECRET: whsec_mock_key_for_ci
       NEXT_PUBLIC_CORS_ORIGIN: '*'
       DATABASE_URL: postgresql://user:password@localhost:5432/ci_db?schema=public
+      NEXT_PUBLIC_SITE_NAME: 'AgTechNest CI'
+      NEXT_PUBLIC_SITE_URL: 'http://localhost:3000'
+      STRIPE_SECRET_KEY: sk_test_mock_stripe_key
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_mock_stripe_key
+      STRIPE_WEBHOOK_SECRET: whsec_mock_stripe_webhook
+      STRIPE_AUTOMATIC_TAX: 'false'
+      RESEND_API_KEY: re_mock_resend_key
+      FROM_EMAIL: 'onboarding@resend.dev'
+      ADMIN_EMAIL: 'admin@example.com'
+      ADMIN_LOCALE: 'en'
+      SHIPPO_API_KEY: shippo_test_mock_key
+      SHIPPO_UPS_ACCOUNT_ID: mock_ups_id
+      SHIPPO_WEBHOOK_TOKEN: mock_shippo_token
+      SLACK_WEBHOOK_URL: 'https://hooks.slack.com/services/mock/webhook'
+      NEXT_PUBLIC_GTM_ID: 'GTM-MOCK'
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'mock_google_maps_key'
+      NEXT_PUBLIC_DEFAULT_LOCALE: 'en'
+      NEXT_PUBLIC_LOCALES: 'en,fr'
+      NEXT_PUBLIC_CURRENCY: 'CAD'
+      CLERK_TEST_USER_ID: 'user_mock_id'
 
     steps:
       - name: Checkout code

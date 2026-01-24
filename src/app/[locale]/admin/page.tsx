@@ -6,6 +6,7 @@ import {
   DollarSign,
   TrendingUp,
 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { prisma } from '@/lib/db/prisma';
 import { StatusBadge } from '@/components/admin/orders/status-badge';
@@ -22,6 +23,10 @@ interface AdminDashboardProps {
 
 export default async function AdminDashboard({ params }: AdminDashboardProps) {
   const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.dashboard',
+  });
   const currency = env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
   const now = new Date();
   const sevenDaysAgo = new Date(now);
@@ -128,28 +133,28 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
 
   const stats = [
     {
-      title: "Chiffre d'affaires",
+      title: t('stats.revenue'),
       value: formatPrice(totalRevenue._sum.amount || 0, currency, locale),
       change: revenueTrend,
       trend: Number(revenueTrend.replace('%', '')) >= 0 ? 'up' : 'down',
       icon: DollarSign,
     },
     {
-      title: 'Commandes',
+      title: t('stats.orders'),
       value: ordersCount.toString(),
       change: ordersTrend,
       trend: Number(ordersTrend.replace('%', '')) >= 0 ? 'up' : 'down',
       icon: ShoppingCart,
     },
     {
-      title: 'Produits',
+      title: t('stats.products'),
       value: productsCount.toString(),
-      change: 'Actifs',
+      change: locale === 'fr' ? 'Actifs' : 'Active',
       trend: 'up',
       icon: Package,
     },
     {
-      title: 'Clients registrados',
+      title: t('stats.customers'),
       value: customersCount.toString(),
       change: customersTrend,
       trend: Number(customersTrend.replace('%', '')) >= 0 ? 'up' : 'down',
@@ -161,10 +166,8 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
     <div className="space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Tableau de bord</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Vue d&apos;ensemble de la performance de votre boutique
-        </p>
+        <h1 className="admin-page-title">{t('title')}</h1>
+        <p className="admin-page-subtitle">{t('subtitle')}</p>
       </div>
 
       {/* Stats grid */}
@@ -172,10 +175,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
         {stats.map(stat => {
           const Icon = stat.icon;
           return (
-            <div
-              key={stat.title}
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-            >
+            <div key={stat.title} className="admin-card">
               <div className="flex items-center justify-between">
                 <div className="rounded-lg bg-gray-100 p-2">
                   <Icon className="h-5 w-5 text-gray-700" />
@@ -204,13 +204,13 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
       {/* Charts section */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Revenue chart */}
-        <div className="lg:col-span-2 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="lg:col-span-2 admin-card">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                Aperçu des revenus
+                {t('revenueOverview')}
               </h3>
-              <p className="text-sm text-gray-500">7 derniers jours</p>
+              <p className="text-sm text-gray-500">{t('last7Days')}</p>
             </div>
             <TrendingUp className="h-5 w-5 text-gray-400" />
           </div>
@@ -218,22 +218,22 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
         </div>
 
         {/* Recent orders */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
-              Commandes récentes
+              {t('recentOrders')}
             </h3>
             <Link
-              href="/admin/orders"
-              className="text-sm text-primary hover:text-primary/80"
+              href={`/${locale}/admin/orders`}
+              className="text-sm text-blue-600 hover:text-blue-800"
             >
-              Voir tout
+              {t('viewAll')}
             </Link>
           </div>
           <div className="space-y-4">
             {recentOrders.length === 0 ? (
               <p className="text-center text-sm text-gray-500 py-8">
-                Aucune commande
+                {t('noRecentOrders')}
               </p>
             ) : (
               recentOrders.map(order => {

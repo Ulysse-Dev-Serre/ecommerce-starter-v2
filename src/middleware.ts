@@ -82,20 +82,27 @@ export default clerkMiddleware((auth, req: NextRequest) => {
 
   // Logger seulement les redirections importantes (pas les visites normales)
   if (pathnameIsMissingLocale(pathname)) {
+    let targetLocale: string = defaultLocale;
+
+    // Si c'est une route admin, on utilise ADMIN_LOCALE
+    if (pathname.startsWith('/admin')) {
+      targetLocale = env.ADMIN_LOCALE;
+    }
+
     logMiddleware(
       'WARN',
       {
         requestId,
         action: 'i18n_redirect',
         from: pathname,
-        to: `/${defaultLocale}${pathname}`,
+        to: `/${targetLocale}${pathname}`,
         userAgent: req.headers.get('user-agent')?.substring(0, 100),
       },
       'Locale missing - redirecting to default'
     );
 
     const response = NextResponse.redirect(
-      new URL(`/${defaultLocale}${pathname}`, req.url),
+      new URL(`/${targetLocale}${pathname}`, req.url),
       301
     );
     response.headers.set('x-request-id', requestId);

@@ -69,15 +69,15 @@ export default async function CustomerDetailPage({
         <div className="flex items-center gap-4">
           <Link
             href={`/${locale}/admin/customers`}
-            className="rounded-lg border border-gray-200 bg-white p-2 hover:bg-gray-50 transition-colors"
+            className="admin-btn-secondary p-2"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="admin-page-title">
               {customer.firstName} {customer.lastName}
             </h1>
-            <p className="text-sm text-gray-500">ID Client: {customer.id}</p>
+            <p className="admin-page-subtitle">ID Client: {customer.id}</p>
           </div>
         </div>
       </div>
@@ -87,7 +87,7 @@ export default async function CustomerDetailPage({
         <div className="lg:col-span-2 space-y-6">
           {/* Stats Grid */}
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="admin-card">
               <div className="flex items-center gap-4 text-primary">
                 <div className="rounded-lg bg-primary/10 p-2">
                   <DollarSign className="h-6 w-6" />
@@ -102,7 +102,7 @@ export default async function CustomerDetailPage({
                 </div>
               </div>
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="admin-card">
               <div className="flex items-center gap-4 text-blue-600">
                 <div className="rounded-lg bg-blue-50 p-2">
                   <ShoppingBag className="h-6 w-6" />
@@ -120,23 +120,21 @@ export default async function CustomerDetailPage({
           </div>
 
           {/* Orders Table */}
-          <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="admin-card p-0 overflow-hidden">
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
               <h3 className="font-semibold text-gray-900 text-lg">
                 Historique des commandes
               </h3>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 text-xs uppercase text-gray-700">
+            <div className="admin-table-container">
+              <table className="admin-table">
+                <thead className="admin-table-thead">
                   <tr>
-                    <th className="px-6 py-4 font-semibold">N° Commande</th>
-                    <th className="px-6 py-4 font-semibold">Date</th>
-                    <th className="px-6 py-4 font-semibold">Montant</th>
-                    <th className="px-6 py-4 font-semibold">Statut</th>
-                    <th className="px-6 py-4 font-semibold text-right">
-                      Suivi
-                    </th>
+                    <th className="admin-table-th">N° Commande</th>
+                    <th className="admin-table-th">Date</th>
+                    <th className="admin-table-th">Montant</th>
+                    <th className="admin-table-th">Statut</th>
+                    <th className="admin-table-th text-right">Suivi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -151,10 +149,7 @@ export default async function CustomerDetailPage({
                     </tr>
                   ) : (
                     customer.orders.map(order => (
-                      <tr
-                        key={order.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
+                      <tr key={order.id} className="admin-table-tr">
                         <td className="px-6 py-4 font-medium text-primary">
                           <Link
                             href={`/${locale}/admin/orders/${order.id}`}
@@ -201,7 +196,7 @@ export default async function CustomerDetailPage({
           </div>
 
           {/* Addresses */}
-          <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="admin-card p-0 overflow-hidden">
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
               <h3 className="font-semibold text-gray-900 text-lg">
                 Adresses enregistrées
@@ -251,7 +246,7 @@ export default async function CustomerDetailPage({
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Customer Info */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <h3 className="font-semibold text-gray-900 mb-4">
               Informations de contact
             </h3>
@@ -306,7 +301,7 @@ export default async function CustomerDetailPage({
           </div>
 
           {/* Internal Notes */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="admin-card">
             <h3 className="font-semibold text-gray-900 mb-2 italic">
               Note Interne
             </h3>
@@ -315,10 +310,10 @@ export default async function CustomerDetailPage({
               du client ou les interactions passées.
             </p>
             <textarea
-              className="mt-3 w-full rounded-md border border-gray-300 p-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary min-h-[100px]"
+              className="mt-3 admin-input min-h-[100px]"
               placeholder="Ajouter une note..."
             ></textarea>
-            <button className="mt-2 text-xs font-semibold text-primary hover:underline">
+            <button className="mt-2 text-xs font-semibold text-blue-600 hover:underline">
               Enregistrer la note
             </button>
           </div>

@@ -25,6 +25,7 @@ import {
 import { env } from '../../../../lib/env';
 import { withError } from '../../../../lib/middleware/withError';
 
+import { SITE_CURRENCY } from '../../../../lib/constants';
 // ... (imports remain)
 
 async function handler(request: NextRequest): Promise<NextResponse> {
@@ -314,7 +315,6 @@ async function handleCheckoutSessionCompleted(
       pricing: {
         where: { isActive: true },
         orderBy: { validFrom: 'desc' },
-        take: 1,
       },
       media: true,
       product: {
@@ -433,7 +433,6 @@ async function handlePaymentIntentSucceeded(
       pricing: {
         where: { isActive: true },
         orderBy: { validFrom: 'desc' },
-        take: 1,
       },
       media: true,
       product: {
@@ -445,10 +444,13 @@ async function handlePaymentIntentSucceeded(
   });
 
   // Virtual Cart
+  // Strict: Ensure currency is correct using SITE_CURRENCY or PaymentIntent currency
+  const currency = (paymentIntent.currency || SITE_CURRENCY).toUpperCase();
+
   const virtualCart = {
     id: 'virtual_' + paymentIntent.id,
     userId,
-    currency: paymentIntent.currency.toUpperCase(),
+    currency: currency, // STRICT: Explicit currency
     anonymousId: paymentIntent.metadata?.anonymousId || null,
     status: 'ACTIVE' as const,
     createdAt: new Date(),

@@ -9,7 +9,10 @@ import {
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { stripe } from '../../../../lib/stripe/client';
-import { toStripeAmount } from '../../../../lib/utils/currency';
+import {
+  toStripeAmount,
+  SupportedCurrency,
+} from '../../../../lib/utils/currency';
 import {
   updateIntentSchema,
   UpdateIntentInput,
@@ -42,6 +45,9 @@ async function updateIntentHandler(
       'DEBUG: Update Intent Metadata Check'
     );
 
+    const resolvedCurrency = (currency ||
+      intent.currency.toUpperCase()) as SupportedCurrency;
+
     const subtotalStr = intent.metadata.subtotal;
     let subtotal = 0;
 
@@ -55,7 +61,7 @@ async function updateIntentHandler(
 
       const previousShippingCents = toStripeAmount(
         previousShipping.toString(),
-        currency
+        resolvedCurrency
       );
 
       subtotal = intent.amount - previousShippingCents;
@@ -71,7 +77,10 @@ async function updateIntentHandler(
     }
 
     // Le shippingRate est reçu du frontend (API Shippo)
-    const shippingAmountCents = toStripeAmount(shippingRate.amount, currency);
+    const shippingAmountCents = toStripeAmount(
+      shippingRate.amount,
+      resolvedCurrency
+    );
 
     // Nouveau total
     const newTotalCents = subtotal + shippingAmountCents;

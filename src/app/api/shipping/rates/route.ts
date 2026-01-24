@@ -10,6 +10,7 @@ import {
   shippingRequestSchema,
   ShippingRequestInput,
 } from '@/lib/validators/shipping';
+import { CAD_TO_USD_RATE, SITE_CURRENCY } from '@/lib/constants';
 
 // Initializing defaults (Will be overridden by DB values if found)
 async function handler(
@@ -40,6 +41,7 @@ async function handler(
     let parcelLength = '';
     let parcelWidth = '';
     let parcelHeight = '';
+    let totalWeight = 0; // Initialize to 0, will be updated by cart items
 
     let customsDeclaration = undefined;
 
@@ -344,6 +346,15 @@ async function handler(
         if (!provider.includes('ups')) continue;
 
         const price = parseFloat(rate.amount);
+        let finalPrice = price;
+
+        // CURRENCY CONVERSION (Shippo CAD -> Site USD)
+        if (rate.currency === 'CAD' && SITE_CURRENCY === 'USD') {
+          finalPrice = price * CAD_TO_USD_RATE;
+          // Update the rate object to reflect the new currency/amount
+          rate.amount = finalPrice.toFixed(2);
+          rate.currency = 'USD';
+        }
 
         // Helper to format time
         const formatTime = (r: any) => {
@@ -361,7 +372,7 @@ async function handler(
 
         // 1. STANDARD Strategy
         if (name.includes('standard')) {
-          if (!bestStandard || price < parseFloat(bestStandard.amount)) {
+          if (!bestStandard || finalPrice < parseFloat(bestStandard.amount)) {
             bestStandard = { ...rate };
             bestStandard.displayName = 'Standard';
             bestStandard.displayTime = formatTime(rate) || '3-7 Jours';
@@ -374,7 +385,7 @@ async function handler(
           !name.includes('plus') &&
           !name.includes('3 day')
         ) {
-          if (!bestExpress || price < parseFloat(bestExpress.amount)) {
+          if (!bestExpress || finalPrice < parseFloat(bestExpress.amount)) {
             bestExpress = { ...rate };
             bestExpress.displayName = 'Express';
             bestExpress.displayTime = formatTime(rate) || '1-3 Jours';

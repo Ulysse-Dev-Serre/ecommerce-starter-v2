@@ -14,8 +14,8 @@ import { render } from '@react-email/render';
 import { i18n } from '../i18n/config';
 import { env } from '@/lib/env';
 
-const fr = require('../i18n/dictionaries/fr.json');
-const en = require('../i18n/dictionaries/en.json');
+import fr from '../i18n/dictionaries/fr.json';
+import en from '../i18n/dictionaries/en.json';
 const dictionaries: Record<string, any> = { fr, en };
 
 export interface CreateOrderFromCartInput {

@@ -144,20 +144,18 @@ export default function NewProductPage() {
 
   const handleNextStep = () => {
     if (!formData.slug) {
-      setError('Product slug is required');
+      setError(t.validation.slugRequired);
       return;
     }
 
     if (!isSlugValid) {
-      setError(
-        'Le slug doit être valide pour continuer (minuscules, chiffres et tirets uniquement)'
-      );
+      setError(t.validation.slugInvalid);
       return;
     }
 
     const enTranslation = formData.translations[0];
     if (!enTranslation.name) {
-      setError('English product name is required');
+      setError(t.validation.nameRequired);
       return;
     }
 
@@ -173,19 +171,27 @@ export default function NewProductPage() {
     try {
       // Validation
       if (variants.length === 0) {
-        throw new Error('Au moins 1 variante est requise');
+        throw new Error(t.validation.variantRequired);
       }
 
       for (let i = 0; i < variants.length; i++) {
         const v = variants[i];
         if (!v.nameEN || !v.nameFR) {
-          throw new Error(`Variante ${i + 1}: nom EN et FR requis`);
+          throw new Error(
+            t.validation.variantNameRequired.replace(
+              '{{index}}',
+              (i + 1).toString()
+            )
+          );
         }
         const hasCAD = v.priceCAD && parseFloat(v.priceCAD) >= 0;
         const hasUSD = v.priceUSD && parseFloat(v.priceUSD) >= 0;
         if (!hasCAD && !hasUSD) {
           throw new Error(
-            `Variante ${i + 1}: au moins un prix (CAD ou USD) est requis`
+            t.validation.variantPriceRequired.replace(
+              '{{index}}',
+              (i + 1).toString()
+            )
           );
         }
       }
@@ -202,7 +208,7 @@ export default function NewProductPage() {
       const productData = await productResponse.json();
 
       if (!productResponse.ok) {
-        throw new Error(productData.message || 'Failed to create product');
+        throw new Error(productData.message || t.messages.errorCreatingProduct);
       }
 
       const productId = productData.product.id;
@@ -231,12 +237,14 @@ export default function NewProductPage() {
 
       if (!variantsResponse.ok) {
         const variantsError = await variantsResponse.json();
-        throw new Error(variantsError.message || 'Failed to create variants');
+        throw new Error(
+          variantsError.message || t.messages.errorCreatingProduct
+        );
       }
 
-      router.push('/admin/products');
+      router.push(`/${locale}/admin/products`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : tc.error);
     } finally {
       setLoading(false);
     }
@@ -245,7 +253,7 @@ export default function NewProductPage() {
   if (!messages) {
     return (
       <div className="space-y-6">
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
+        <div className="admin-card text-center py-12">
           <p className="text-gray-500">Loading...</p>
         </div>
       </div>
@@ -260,14 +268,14 @@ export default function NewProductPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
-            href="/admin/products"
-            className="rounded-lg p-2 hover:bg-gray-100"
+            href={`/${locale}/admin/products`}
+            className="admin-btn-secondary p-2"
           >
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{t.newProduct}</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="admin-page-title">{t.newProduct}</h1>
+            <p className="admin-page-subtitle">
               {step === 1 ? t.productInfo : t.variantsConfig}
             </p>
           </div>
@@ -313,7 +321,7 @@ export default function NewProductPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {step === 1 && (
           <>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="admin-card">
               <h2 className="mb-4 text-lg font-semibold text-gray-900">
                 {t.basicInfo}
               </h2>
@@ -330,14 +338,14 @@ export default function NewProductPage() {
                       setFormData({ ...formData, slug: e.target.value })
                     }
                     placeholder="product-url-slug"
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    className="admin-input"
                     required
                   />
                   {formData.slug && (
                     <p
                       className={`mt-1 text-xs ${isSlugValid ? 'text-green-600' : 'text-red-600'}`}
                     >
-                      {isSlugValid ? '✓ Slug valide' : '✗ Slug invalide'}
+                      {isSlugValid ? `✓ ${t.validSlug}` : `✗ ${t.invalidSlug}`}
                     </p>
                   )}
                   <p className="mt-1 text-xs text-gray-500">{t.slugHelp}</p>
@@ -355,7 +363,7 @@ export default function NewProductPage() {
                         status: e.target.value as typeof formData.status,
                       })
                     }
-                    className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    className="admin-input"
                   >
                     <option value="DRAFT">{t.draft}</option>
                     <option value="ACTIVE">{t.active}</option>
@@ -386,10 +394,7 @@ export default function NewProductPage() {
 
             <div className="space-y-4">
               {formData.translations.map((translation, index) => (
-                <div
-                  key={translation.language}
-                  className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-                >
+                <div key={translation.language} className="admin-card">
                   <h2 className="mb-4 text-lg font-semibold text-gray-900">
                     {translation.language === 'EN'
                       ? `🇬🇧 ${t.english}`
@@ -422,7 +427,7 @@ export default function NewProductPage() {
                               )
                         }
                         placeholder={t.productName}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                         required={translation.language === 'EN'}
                       />
                     </div>
@@ -442,7 +447,7 @@ export default function NewProductPage() {
                           )
                         }
                         placeholder={t.shortDescriptionPlaceholder}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
 
@@ -461,7 +466,7 @@ export default function NewProductPage() {
                         }
                         placeholder={t.fullDescriptionPlaceholder}
                         rows={4}
-                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                        className="admin-input"
                       />
                     </div>
                   </div>
@@ -471,8 +476,8 @@ export default function NewProductPage() {
 
             <div className="flex items-center justify-end gap-4">
               <Link
-                href="/admin/products"
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                href={`/${locale}/admin/products`}
+                className="admin-btn-secondary"
               >
                 {tc.cancel}
               </Link>
@@ -480,7 +485,7 @@ export default function NewProductPage() {
                 type="button"
                 onClick={handleNextStep}
                 disabled={!isSlugValid}
-                className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="admin-btn-primary disabled:opacity-50"
               >
                 {t.nextStep}
               </button>
@@ -490,7 +495,7 @@ export default function NewProductPage() {
 
         {step === 2 && (
           <>
-            <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+            <div className="admin-card">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">
                   {t.variants} ({variants.length})
@@ -498,7 +503,7 @@ export default function NewProductPage() {
                 <button
                   type="button"
                   onClick={handleAddVariant}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                  className="admin-btn-primary bg-blue-600 hover:bg-blue-700"
                 >
                   <Plus className="h-4 w-4" />
                   {tc.add} {t.variant}
@@ -507,12 +512,9 @@ export default function NewProductPage() {
 
               {variants.length === 0 ? (
                 <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
-                  <p className="text-sm text-gray-600">
-                    Aucune variante ajoutée. Cliquez sur &quot;{tc.add}{' '}
-                    {t.variant}&quot; pour commencer.
-                  </p>
+                  <p className="text-sm text-gray-600">{t.noVariantsAdded}</p>
                   <p className="mt-2 text-xs text-red-600">
-                    ⚠️ Au moins 1 variante est requise
+                    ⚠️ {t.validation.variantRequired}
                   </p>
                 </div>
               ) : (
@@ -553,7 +555,7 @@ export default function NewProductPage() {
                               )
                             }
                             placeholder="Green"
-                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                            className="admin-input"
                             required
                           />
                         </div>
@@ -574,7 +576,7 @@ export default function NewProductPage() {
                               )
                             }
                             placeholder="Vert"
-                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                            className="admin-input"
                             required
                           />
                         </div>
@@ -596,7 +598,7 @@ export default function NewProductPage() {
                               )
                             }
                             placeholder="49.99"
-                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                            className="admin-input"
                           />
                         </div>
 
@@ -617,7 +619,7 @@ export default function NewProductPage() {
                               )
                             }
                             placeholder="36.99"
-                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                            className="admin-input"
                           />
                         </div>
 
@@ -636,13 +638,17 @@ export default function NewProductPage() {
                               )
                             }
                             placeholder="0"
-                            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+                            className="admin-input"
                           />
                         </div>
 
                         <div className="md:col-span-2">
                           <p className="text-xs text-gray-500">
-                            💡 Au moins un prix (CAD ou USD) est requis
+                            💡{' '}
+                            {t.validation.variantPriceRequired.replace(
+                              '{{index}}',
+                              ''
+                            )}
                           </p>
                         </div>
                       </div>
@@ -656,22 +662,22 @@ export default function NewProductPage() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="admin-btn-secondary"
               >
                 {t.back}
               </button>
 
               <div className="flex items-center gap-4">
                 <Link
-                  href="/admin/products"
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  href={`/${locale}/admin/products`}
+                  className="admin-btn-secondary"
                 >
                   {tc.cancel}
                 </Link>
                 <button
                   type="submit"
                   disabled={loading || variants.length === 0}
-                  className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+                  className="admin-btn-primary disabled:opacity-50"
                 >
                   <Save className="h-4 w-4" />
                   {loading

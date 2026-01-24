@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Eye, Loader2, AlertCircle } from 'lucide-react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { StatusBadge } from '@/components/ui/status-badge';
 import { OrderFilters } from '@/components/admin/orders/filters';
@@ -37,6 +38,7 @@ function OrdersContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const locale = params?.locale as string;
+  const t = useTranslations('adminDashboard.orders');
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -117,10 +119,8 @@ function OrdersContent() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Manage and track customer orders
-          </p>
+          <h1 className="admin-page-title">{t('title')}</h1>
+          <p className="admin-page-subtitle">{t('subtitle')}</p>
         </div>
       </div>
 
@@ -128,41 +128,29 @@ function OrdersContent() {
       <OrderFilters locale={locale} />
 
       {/* Orders table */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden min-h-[400px]">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="admin-card p-0 overflow-hidden min-h-[400px]">
+        <table className="admin-table">
+          <thead className="admin-table-thead">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Order
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Customer
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Date
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Payment
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                Actions
+              <th className="admin-table-th">{t('table.order')}</th>
+              <th className="admin-table-th">{t('table.customer')}</th>
+              <th className="admin-table-th">{t('table.date')}</th>
+              <th className="admin-table-th">{t('table.total')}</th>
+              <th className="admin-table-th">{t('table.status')}</th>
+              <th className="admin-table-th">{t('table.payment')}</th>
+              <th className="admin-table-th text-right">
+                {t('table.actions')}
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-gray-200">
             {!orders || orders.length === 0 ? (
               <tr>
                 <td
                   colSpan={7}
                   className="px-6 py-12 text-center text-gray-500"
                 >
-                  No orders found
+                  {t('table.noOrders')}
                 </td>
               </tr>
             ) : (
@@ -176,8 +164,14 @@ function OrdersContent() {
                       {order.orderNumber}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {order.items.length} item
-                      {order.items.length > 1 ? 's' : ''}
+                      {order.items.length}{' '}
+                      {order.items.length > 1
+                        ? locale === 'fr'
+                          ? 'articles'
+                          : 'items'
+                        : locale === 'fr'
+                          ? 'article'
+                          : 'item'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -191,11 +185,14 @@ function OrdersContent() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+                    {new Date(order.createdAt).toLocaleDateString(
+                      locale === 'fr' ? 'fr-FR' : 'en-US',
+                      {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      }
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
@@ -223,7 +220,7 @@ function OrdersContent() {
                       className="inline-flex items-center gap-1 text-primary hover:text-primary/80"
                     >
                       <Eye className="h-4 w-4" />
-                      View
+                      {t('table.view')}
                     </Link>
                   </td>
                 </tr>
@@ -237,15 +234,17 @@ function OrdersContent() {
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing{' '}
+            {locale === 'fr' ? 'Affichage de' : 'Showing'}{' '}
             <span className="font-medium">
               {(pagination.page - 1) * pagination.limit + 1}
             </span>{' '}
-            to{' '}
+            {locale === 'fr' ? 'à' : 'to'}{' '}
             <span className="font-medium">
               {Math.min(pagination.page * pagination.limit, pagination.total)}
             </span>{' '}
-            of <span className="font-medium">{pagination.total}</span> orders
+            {locale === 'fr' ? 'sur' : 'of'}{' '}
+            <span className="font-medium">{pagination.total}</span>{' '}
+            {locale === 'fr' ? 'commandes' : 'orders'}
           </div>
           <div className="flex gap-2">
             {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(

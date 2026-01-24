@@ -1,159 +1,211 @@
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, CreditCard, User, MapPin } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  CreditCard,
+  Mail,
+  Package,
+  Truck,
+  User,
+} from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
-import { StatusBadge } from '@/components/ui/status-badge';
-import { OrderDetailClient } from '@/components/admin/orders/order-detail-client';
-import { ShippingManagement } from '@/components/admin/orders/shipping-management';
-import { getOrderByIdAdmin } from '@/lib/services/order.service';
-
-import { formatDate, formatDateTime } from '@/lib/utils/date';
-import { formatPrice } from '@/lib/utils/currency';
+import { prisma } from '@/lib/db/prisma';
+import { StatusBadge } from '@/components/admin/orders/status-badge';
+import { formatPrice, type SupportedCurrency } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
+import { StatusActions } from '@/components/admin/orders/status-actions';
 
 export const dynamic = 'force-dynamic';
 
 interface OrderDetailPageProps {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }
 
 export default async function OrderDetailPage({
   params,
 }: OrderDetailPageProps) {
-  const { locale, id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.orders.detail',
+  });
+  const tOrders = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.orders',
+  });
 
-  const order = await getOrderByIdAdmin(id);
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      items: {
+        include: {
+          variant: true,
+        },
+      },
+      user: true,
+      payments: true,
+      shipments: true,
+      statusHistory: {
+        orderBy: { createdAt: 'desc' },
+      },
+    },
+  });
+
+  if (!order) {
+    notFound();
+  }
+
+  const shippingAddr = order.shippingAddress as any;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link
-          href={`/${locale}/admin/orders`}
-          className="rounded-lg border border-gray-300 p-2 hover:bg-gray-50"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Order {order.orderNumber}
-          </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Placed on {formatDateTime(order.createdAt, locale)}
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/${locale}/admin/orders`}
+            className="admin-btn-secondary p-2 rounded-full"
+          >
+            <ArrowLeft className="h-4 w-4 text-gray-600" />
+          </Link>
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="admin-page-title">{order.orderNumber}</h1>
+              <StatusBadge status={order.status} />
+            </div>
+            <p className="admin-page-subtitle">
+              {t('placedOn', {
+                date: formatDate(order.createdAt, locale, {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                }),
+              })}
+            </p>
+          </div>
         </div>
-        <StatusBadge status={order.status} />
+
+        <div className="flex items-center gap-3">
+          <StatusActions
+            orderId={order.id}
+            orderNumber={order.orderNumber}
+            customerName={`${order.user?.firstName} ${order.user?.lastName}`}
+            totalAmount={order.totalAmount.toString()}
+            currency={order.currency}
+            currentStatus={order.status}
+            onStatusChange={() => {}} // This is a server component, so we don't need a real callback here, just for TS
+          />
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main content */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Order items */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <Package className="h-5 w-5" />
-              Order Items
-            </h2>
-            <div className="space-y-4">
+        {/* Main content - 2 columns */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Order Items */}
+          <div className="admin-card p-0 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                <Package className="h-4 w-4 text-gray-500" />
+                {t('orderItems')}
+              </h3>
+            </div>
+            <div className="divide-y divide-gray-200">
               {order.items.map(item => {
-                const translation = item.product?.translations?.[0];
-                const image = item.product?.media?.[0]?.url;
+                const snapshot = item.productSnapshot as any;
+                const productName =
+                  snapshot?.name?.[locale] ||
+                  snapshot?.name?.en ||
+                  'Unnamed product';
 
                 return (
-                  <div
-                    key={item.id}
-                    className="flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0"
-                  >
-                    {image && (
-                      <img
-                        src={image}
-                        alt={translation?.name || item.variant?.sku || ''}
-                        className="h-20 w-20 rounded-lg border border-gray-200 object-cover"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">
-                        {translation?.name || 'Product'}
-                      </h3>
+                  <div key={item.id} className="px-6 py-4 flex items-center">
+                    <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+                      {snapshot?.image && (
+                        <img
+                          src={snapshot.image}
+                          alt={productName}
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="ml-4 flex-1">
+                      <p className="font-medium text-gray-900">{productName}</p>
                       <p className="text-sm text-gray-500">
                         SKU: {item.variant?.sku || 'N/A'}
                       </p>
-                      <p className="mt-1 text-sm text-gray-600">
-                        Quantity: {item.quantity}
-                      </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-medium text-gray-900">
+                    <div className="text-right ml-4">
+                      <p className="text-sm font-medium text-gray-900">
+                        {item.quantity} ×{' '}
                         {formatPrice(
-                          item.totalPrice,
-                          item.currency as any,
+                          item.unitPrice,
+                          order.currency as SupportedCurrency,
                           locale
                         )}
                       </p>
                       <p className="text-sm text-gray-500">
                         {formatPrice(
-                          item.unitPrice,
-                          item.currency as any,
+                          item.totalPrice,
+                          order.currency as SupportedCurrency,
                           locale
-                        )}{' '}
-                        each
+                        )}
                       </p>
                     </div>
                   </div>
                 );
               })}
             </div>
-
-            {/* Order summary */}
-            <div className="mt-6 border-t border-gray-200 pt-4">
-              <div className="space-y-2">
+            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+              <div className="flex flex-col gap-2 max-w-xs ml-auto">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">
+                  <span className="text-gray-500">{t('summary.subtotal')}</span>
+                  <span className="text-gray-900">
                     {formatPrice(
                       order.subtotalAmount,
-                      order.currency as any,
+                      order.currency as SupportedCurrency,
                       locale
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">
+                  <span className="text-gray-500">{t('summary.tax')}</span>
+                  <span className="text-gray-900">
                     {formatPrice(
                       order.taxAmount,
-                      order.currency as any,
+                      order.currency as SupportedCurrency,
                       locale
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium">
+                  <span className="text-gray-500">{t('summary.shipping')}</span>
+                  <span className="text-gray-900">
                     {formatPrice(
                       order.shippingAmount,
-                      order.currency as any,
+                      order.currency as SupportedCurrency,
                       locale
                     )}
                   </span>
                 </div>
-                {parseFloat(order.discountAmount.toString()) > 0 && (
+                {Number(order.discountAmount) > 0 && (
                   <div className="flex justify-between text-sm text-green-600">
-                    <span>Discount</span>
+                    <span>{t('summary.discount')}</span>
                     <span>
                       -
                       {formatPrice(
                         order.discountAmount,
-                        order.currency as any,
+                        order.currency as SupportedCurrency,
                         locale
                       )}
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between border-t border-gray-200 pt-2 text-base font-semibold">
-                  <span>Total</span>
+                <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2 mt-1">
+                  <span>{t('summary.total')}</span>
                   <span>
                     {formatPrice(
                       order.totalAmount,
-                      order.currency as any,
+                      order.currency as SupportedCurrency,
                       locale
                     )}
                   </span>
@@ -162,225 +214,178 @@ export default async function OrderDetailPage({
             </div>
           </div>
 
-          {/* Payment information */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <CreditCard className="h-5 w-5" />
-              Payment Information
-            </h2>
-            {order.payments.length > 0 ? (
-              <div className="space-y-3">
-                {order.payments.map(payment => (
-                  <div
-                    key={payment.id}
-                    className="rounded-lg border border-gray-100 bg-gray-50 p-4"
-                  >
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <p className="text-gray-600">Method</p>
-                        <p className="font-medium">{payment.method}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Status</p>
-                        <p className="font-medium">{payment.status}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-600">Amount</p>
-                        <p className="font-medium">
+          {/* Payment info */}
+          <div className="admin-card p-0 overflow-hidden">
+            <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-gray-500" />
+                {t('paymentInfo')}
+              </h3>
+            </div>
+            <div className="p-6">
+              {order.payments.length === 0 ? (
+                <p className="text-sm text-gray-500">No payment data found</p>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {order.payments.map((p, idx) => (
+                    <div
+                      key={p.id}
+                      className={
+                        idx > 0
+                          ? 'pt-6 border-t border-gray-100 md:border-t-0 md:pt-0'
+                          : ''
+                      }
+                    >
+                      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                        <dt className="text-gray-500">{t('payment.method')}</dt>
+                        <dd className="font-medium text-gray-900">
+                          {p.method}
+                        </dd>
+
+                        <dt className="text-gray-500">{t('payment.status')}</dt>
+                        <dd>
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                              p.status === 'COMPLETED'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                        </dd>
+
+                        <dt className="text-gray-500">{t('payment.amount')}</dt>
+                        <dd className="text-gray-900">
                           {formatPrice(
-                            payment.amount,
-                            payment.currency as any,
+                            p.amount,
+                            p.currency as SupportedCurrency,
                             locale
                           )}
-                        </p>
-                      </div>
+                        </dd>
 
-                      <div>
-                        <p className="text-gray-600">Transaction ID</p>
-                        <p className="font-mono text-xs">
-                          {payment.externalId || 'N/A'}
-                        </p>
-                      </div>
-                      {payment.processedAt && (
-                        <div className="col-span-2">
-                          <p className="text-gray-600">Processed At</p>
-                          <p className="font-medium">
-                            {formatDateTime(payment.processedAt, locale)}
-                          </p>
-                        </div>
-                      )}
+                        <dt className="text-gray-500">
+                          {t('payment.transactionId')}
+                        </dt>
+                        <dd className="text-gray-900 break-all font-mono text-[10px]">
+                          {p.externalId}
+                        </dd>
+
+                        <dt className="text-gray-500">
+                          {t('payment.processedAt')}
+                        </dt>
+                        <dd className="text-gray-900">
+                          {formatDate(p.createdAt, locale)}
+                        </dd>
+                      </dl>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar - 1 column */}
+        <div className="space-y-6">
+          {/* Customer */}
+          <div className="admin-card">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+              <User className="h-4 w-4 text-gray-500" />
+              {tOrders('table.customer')}
+            </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold">
+                {order.user?.firstName?.[0] ||
+                  order.user?.email?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">
+                  {order.user?.firstName} {order.user?.lastName}
+                </p>
+                <Link
+                  href={`/${locale}/admin/customers/${order.user?.id}`}
+                  className="text-xs text-blue-600 hover:underline"
+                >
+                  {tOrders('table.viewDetails') || 'Voir le profil'}
+                </Link>
+              </div>
+            </div>
+            <div className="space-y-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Mail className="h-4 w-4" />
+                {order.user?.email}
+              </div>
+            </div>
+          </div>
+
+          {/* Shipping Address */}
+          <div className="admin-card">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+              <Truck className="h-4 w-4 text-gray-500" />
+              {t('shippingAddress')}
+            </h3>
+            {shippingAddr ? (
+              <div className="text-sm text-gray-600 space-y-1">
+                <p className="font-medium text-gray-900">
+                  {shippingAddr.name ||
+                    order.user?.firstName + ' ' + order.user?.lastName}
+                </p>
+                <p>{shippingAddr.line1 || shippingAddr.street1}</p>
+                {(shippingAddr.line2 || shippingAddr.street2) && (
+                  <p>{shippingAddr.line2 || shippingAddr.street2}</p>
+                )}
+                <p>
+                  {shippingAddr.city}
+                  {shippingAddr.state ? `, ${shippingAddr.state}` : ''}{' '}
+                  {shippingAddr.postal_code || shippingAddr.zip}
+                </p>
+                <p className="uppercase">{shippingAddr.country}</p>
+                {shippingAddr.phone && (
+                  <p className="mt-2 pt-2 border-t border-gray-100">
+                    📞 {shippingAddr.phone}
+                  </p>
+                )}
               </div>
             ) : (
-              <p className="text-gray-500">No payment information available</p>
+              <p className="text-sm text-gray-400 italic">
+                No shipping address provided
+              </p>
             )}
           </div>
 
-          {/* Shipping Management */}
-          {(() => {
-            const payment = order.payments.find(
-              p => p.method === 'STRIPE' && p.status === 'COMPLETED'
-            );
-            const metadata = payment?.transactionData
-              ? (payment.transactionData as any).metadata
-              : null;
-
-            return (
-              <ShippingManagement
-                orderId={order.id}
-                shipment={order.shipments[0]}
-                shippingRateId={metadata?.shipping_rate_id}
-                shippingCost={metadata?.shipping_cost}
-                currency={order.currency}
-                debugMetadata={metadata}
-              />
-            );
-          })()}
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Customer information */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <User className="h-5 w-5" />
-              Customer
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-gray-600">Name</p>
-                <p className="font-medium">
-                  {order.user.firstName || order.user.lastName
-                    ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim()
-                    : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-600">Email</p>
-                <p className="font-medium">{order.user.email}</p>
-              </div>
-              <div>
-                <p className="text-gray-600">Customer ID</p>
-                <p className="font-mono text-xs">{order.user.id}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Shipping address */}
-          <div className="rounded-lg border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <MapPin className="h-5 w-5" />
-              Shipping Address
-            </h2>
-            <div className="text-sm">
-              {(() => {
-                const addr = order.shippingAddress as Record<
-                  string,
-                  string
-                > | null;
-                if (!addr)
-                  return (
-                    <p className="text-gray-500 italic">
-                      No shipping address provided
-                    </p>
-                  );
-
-                // Helper phone
-                const formatPhone = (phone: string) => {
-                  if (!phone) return '';
-                  const cleaned = phone.replace(/\D/g, '');
-                  const match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
-                  if (match) return `+1 (${match[2]}) ${match[3]}-${match[4]}`;
-                  return phone;
-                };
-
-                return (
-                  <div className="flex flex-col gap-4">
-                    {/* CONTENU ADRESSE */}
-                    <div className="text-gray-900 space-y-1">
-                      <p className="font-semibold capitalize text-base border-b border-gray-100 pb-2 mb-2">
-                        {addr.name}
-                      </p>
-
-                      <div className="text-gray-600 leading-relaxed">
-                        <p>{addr.street1 || addr.line1}</p>
-                        {(addr.street2 || addr.line2) && (
-                          <p className="text-gray-500">
-                            Apt / Suite {addr.street2 || addr.line2}
-                          </p>
-                        )}
-                        <p>
-                          {addr.city}, {addr.state}{' '}
-                          <span className="text-gray-400">|</span>{' '}
-                          <span className="font-mono font-medium text-gray-800">
-                            {addr.postalCode || addr.postal_code || addr.zip}
-                          </span>
-                        </p>
-                        <p className="uppercase text-xs font-bold text-gray-400 mt-1 tracking-wider">
-                          {addr.country}
-                        </p>
-                      </div>
-
-                      {/* Contact séparé légèrement */}
-                      {addr.phone && (
-                        <p className="pt-3 text-gray-900 font-medium flex items-center gap-2">
-                          <span className="text-xs text-gray-400 uppercase tracking-widest">
-                            Tel
-                          </span>
-                          {formatPhone(addr.phone)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-
-          {/* Status actions */}
-          <OrderDetailClient
-            orderId={order.id}
-            orderNumber={order.orderNumber}
-            customerName={
-              order.user.firstName || order.user.lastName
-                ? `${order.user.firstName || ''} ${order.user.lastName || ''}`.trim()
-                : 'N/A'
-            }
-            totalAmount={order.totalAmount.toString()}
-            currency={order.currency}
-            currentStatus={order.status}
-          />
-
-          {/* Status history */}
-          {order.statusHistory && order.statusHistory.length > 0 && (
-            <div className="rounded-lg border border-gray-200 bg-white p-6">
-              <h2 className="mb-4 text-lg font-semibold">Status History</h2>
-              <div className="space-y-3">
-                {order.statusHistory.map((history, index) => (
+          {/* History / Timeline */}
+          <div className="admin-card">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              {t('history')}
+            </h3>
+            <div className="relative space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-200">
+              {order.statusHistory.map((h, idx) => (
+                <div key={h.id} className="relative pl-8">
                   <div
-                    key={history.id}
-                    className={`border-l-2 pl-4 ${
-                      index === 0 ? 'border-primary' : 'border-gray-300'
-                    }`}
-                  >
-                    <p className="text-sm font-medium">
-                      <StatusBadge status={history.status} />
+                    className={`absolute left-0 top-1.5 h-4 w-4 rounded-full border-2 border-white ${idx === 0 ? 'bg-primary' : 'bg-gray-300'}`}
+                  />
+                  <div>
+                    <span className="text-xs font-bold uppercase text-gray-500 block">
+                      {h.status}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {formatDate(h.createdAt, locale, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
                     </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {formatDateTime(history.createdAt, locale)}
-                    </p>
-                    {history.comment && (
-                      <p className="mt-1 text-sm text-gray-600">
-                        {history.comment}
+                    {h.comment && (
+                      <p className="text-xs text-gray-600 mt-1 italic">
+                        {h.comment}
                       </p>
                     )}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

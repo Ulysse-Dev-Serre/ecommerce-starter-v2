@@ -39,9 +39,27 @@ export default async function OrderDetailPage({
 
   let order;
   try {
+    // Try to find by ID first (typical behavior)
     order = await getOrderById(id, user.id);
   } catch {
-    notFound();
+    // If not found by ID, try to find by OrderNumber
+    try {
+      const orderByNumber = await prisma.order.findUnique({
+        where: { orderNumber: id },
+        include: {
+          items: true,
+          payments: true,
+          shipments: true,
+        },
+      });
+
+      if (!orderByNumber || orderByNumber.userId !== user.id) {
+        notFound();
+      }
+      order = orderByNumber;
+    } catch {
+      notFound();
+    }
   }
 
   // --- LOGIQUE RÉCUPÉRATION IMAGE PRODUIT ---

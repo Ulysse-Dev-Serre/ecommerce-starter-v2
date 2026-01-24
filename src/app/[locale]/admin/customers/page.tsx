@@ -1,17 +1,25 @@
 import Link from 'next/link';
 import { Users, UserPlus, Search } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 
 export const dynamic = 'force-dynamic';
 
 interface CustomersPageProps {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{ q?: string }>;
 }
 
 export default async function CustomersPage({
+  params,
   searchParams,
 }: CustomersPageProps) {
+  const { locale } = await params;
   const { q: query } = await searchParams;
+  const t = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.customers',
+  });
 
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -45,28 +53,28 @@ export default async function CustomersPage({
 
   const stats = [
     {
-      title: 'Total Clients',
+      title: t('stats.total'),
       value: totalCount,
       icon: Users,
       color: 'text-blue-600',
       bg: 'bg-blue-100',
     },
     {
-      title: "Aujourd'hui",
+      title: t('stats.today'),
       value: newToday,
       icon: UserPlus,
       color: 'text-green-600',
       bg: 'bg-green-100',
     },
     {
-      title: '7 derniers jours',
+      title: t('stats.last7Days'),
       value: newWeek,
       icon: UserPlus,
       color: 'text-purple-600',
       bg: 'bg-purple-100',
     },
     {
-      title: '30 derniers jours',
+      title: t('stats.last30Days'),
       value: newMonth,
       icon: UserPlus,
       color: 'text-orange-600',
@@ -77,19 +85,14 @@ export default async function CustomersPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Gérez vos comptes clients et consultez leur historique
-        </p>
+        <h1 className="admin-page-title">{t('title')}</h1>
+        <p className="admin-page-subtitle">{t('subtitle')}</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-4">
         {stats.map(stat => (
-          <div
-            key={stat.title}
-            className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
-          >
+          <div key={stat.title} className="admin-card">
             <div className="flex items-center gap-4">
               <div className={`rounded-lg ${stat.bg} p-3`}>
                 <stat.icon className={`h-6 w-6 ${stat.color}`} />
@@ -106,7 +109,7 @@ export default async function CustomersPage({
       </div>
 
       {/* Table Section */}
-      <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="admin-card p-0 overflow-hidden">
         <div className="border-b border-gray-200 p-4">
           <form className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -114,22 +117,24 @@ export default async function CustomersPage({
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="Rechercher par nom ou email..."
-              className="w-full rounded-md border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder={t('table.searchPlaceholder')}
+              className="admin-input pl-10"
             />
           </form>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-700">
+        <div className="admin-table-container">
+          <table className="admin-table">
+            <thead className="admin-table-thead">
               <tr>
-                <th className="px-6 py-4 font-semibold">Client</th>
-                <th className="px-6 py-4 font-semibold">Email</th>
-                <th className="px-6 py-4 font-semibold">
-                  Date d&apos;inscription
+                <th className="admin-table-th">{t('table.client')}</th>
+                <th className="admin-table-th">{t('table.email')}</th>
+                <th className="admin-table-th">
+                  {t('table.registrationDate')}
                 </th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                <th className="admin-table-th text-right">
+                  {t('table.actions')}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -139,38 +144,37 @@ export default async function CustomersPage({
                     colSpan={4}
                     className="px-6 py-10 text-center text-gray-500"
                   >
-                    Aucun client trouvé
+                    {t('table.noCustomers')}
                   </td>
                 </tr>
               ) : (
                 customers.map(customer => (
-                  <tr
-                    key={customer.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
+                  <tr key={customer.id} className="admin-table-tr">
+                    <td className="admin-table-td">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600">
                           {customer.firstName?.[0] ||
                             customer.email[0].toUpperCase()}
                         </div>
-                        <span className="font-medium text-gray-900 text-sm">
+                        <span className="font-medium text-gray-900">
                           {customer.firstName} {customer.lastName}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
+                    <td className="admin-table-td text-gray-600">
                       {customer.email}
                     </td>
-                    <td className="px-6 py-4 text-gray-600">
-                      {customer.createdAt.toLocaleDateString('fr-FR')}
+                    <td className="admin-table-td text-gray-600">
+                      {customer.createdAt.toLocaleDateString(
+                        locale === 'fr' ? 'fr-FR' : 'en-US'
+                      )}
                     </td>
-                    <td className="px-6 py-4 text-right text-sm">
+                    <td className="admin-table-td text-right">
                       <Link
-                        href={`/admin/customers/${customer.id}`}
-                        className="text-primary hover:text-primary/80 font-medium"
+                        href={`/${locale}/admin/customers/${customer.id}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
                       >
-                        Voir détails
+                        {t('table.viewDetails')}
                       </Link>
                     </td>
                   </tr>

@@ -61,6 +61,9 @@ const serverSchema = z.object({
     .default('development'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
   TEST_API_KEY: z.string().optional(),
+
+  // Custom
+  CAD_TO_USD_RATE: z.coerce.number().optional().default(0.72),
 });
 
 // Schéma pour les variables côté client (exposées via NEXT_PUBLIC_)
@@ -161,6 +164,7 @@ export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   LOG_LEVEL: process.env.LOG_LEVEL,
   TEST_API_KEY: process.env.TEST_API_KEY,
+  CAD_TO_USD_RATE: Number(process.env.CAD_TO_USD_RATE || 0.72),
 
   // Storage
   STORAGE_PROVIDER:

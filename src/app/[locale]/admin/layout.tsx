@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db/prisma';
 import { UserRole } from '@/generated/prisma';
 import { AdminSidebar } from '@/components/admin/layout/admin-sidebar';
 import { AdminHeader } from '@/components/admin/layout/admin-header';
+import '@/styles/themes/admin.css';
 
 export const metadata: Metadata = {
   robots: {
@@ -39,12 +40,12 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="admin-layout">
       <AdminSidebar />
       <AdminHeader />
 
-      <main className="ml-64 pt-16">
-        <div className="p-6">{children}</div>
+      <main className="admin-main">
+        <div className="admin-content">{children}</div>
       </main>
     </div>
   );

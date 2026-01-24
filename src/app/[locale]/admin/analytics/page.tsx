@@ -1,10 +1,21 @@
 import { prisma } from '@/lib/db/prisma';
 import { ConversionFunnel } from '@/components/admin/analytics/conversion-funnel';
 import { SourceTable } from '@/components/admin/analytics/source-table';
+import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AnalyticsPage() {
+interface AnalyticsPageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.analytics',
+  });
+
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -13,8 +24,6 @@ export default async function AnalyticsPage() {
     await Promise.all([
       prisma.analyticsEvent.count({
         where: { eventType: 'page_view', createdAt: { gte: thirtyDaysAgo } },
-        // Note: Prisma doesn't support easy distinct count in count(), so we'd normally use groupBY
-        // but for simplicity in this V1 and small data, we'll fetch unique counts for stages
       }),
       prisma.analyticsEvent.count({
         where: { eventType: 'view_item', createdAt: { gte: thirtyDaysAgo } },
@@ -37,32 +46,31 @@ export default async function AnalyticsPage() {
     ]);
 
   const funnelData = [
-    { stage: 'Sessions', count: sessions, percentage: 100 },
+    { stage: t('stages.sessions'), count: sessions, percentage: 100 },
     {
-      stage: 'Produits vus',
+      stage: t('stages.productViews'),
       count: productViews,
       percentage:
         sessions > 0 ? Math.round((productViews / sessions) * 100) : 0,
     },
     {
-      stage: 'Paniers',
+      stage: t('stages.carts'),
       count: cartAdds,
       percentage: sessions > 0 ? Math.round((cartAdds / sessions) * 100) : 0,
     },
     {
-      stage: 'Checkouts',
+      stage: t('stages.checkouts'),
       count: checkouts,
       percentage: sessions > 0 ? Math.round((checkouts / sessions) * 100) : 0,
     },
     {
-      stage: 'Achats',
+      stage: t('stages.purchases'),
       count: purchases,
       percentage: sessions > 0 ? Math.round((purchases / sessions) * 100) : 0,
     },
   ];
 
   // 2. Fetch Source Data
-  // We'll group orders by utmSource
   const sourceStats = await prisma.order.groupBy({
     by: ['utmSource'],
     _count: { _all: true },
@@ -70,7 +78,6 @@ export default async function AnalyticsPage() {
     where: { createdAt: { gte: thirtyDaysAgo } },
   });
 
-  // To get visitors per source, we use AnalyticsEvent
   const sourceVisitors = await prisma.analyticsEvent.groupBy({
     by: ['utmSource'],
     _count: { _all: true },
@@ -84,7 +91,9 @@ export default async function AnalyticsPage() {
       const orders = stats?._count._all || 0;
       const revenue = Number(stats?._sum.totalAmount || 0);
       return {
-        source: v.utmSource || 'Direct / Organic',
+        source:
+          v.utmSource ||
+          (locale === 'fr' ? 'Direct / Organique' : 'Direct / Organic'),
         visitors,
         orders,
         revenue,
@@ -97,43 +106,41 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Analytique</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Suivez la performance de votre boutique et vos conversions
-        </p>
+        <h1 className="admin-page-title">{t('title')}</h1>
+        <p className="admin-page-subtitle">{t('subtitle')}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Conversion Funnel */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <h3 className="text-lg font-semibold text-gray-900 mb-6 underline decoration-sky-500/30 underline-offset-8">
-            Tunnel de conversion (30j)
+            {t('conversionFunnel')}
           </h3>
           <ConversionFunnel data={funnelData} />
         </div>
 
         {/* Source breakdown */}
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <h3 className="text-lg font-semibold text-gray-900 mb-6 underline decoration-sky-500/30 underline-offset-8">
-            Performance par source (30j)
+            {t('sourcePerformance')}
           </h3>
           <SourceTable data={tableData} />
         </div>
       </div>
 
-      {/* Placeholder for more advanced metrics */}
+      {/* Stats */}
       <div className="grid gap-6 md:grid-cols-3">
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <p className="text-sm font-medium text-gray-500">
-            Taux de conversion global
+            {t('overallConversion')}
           </p>
           <p className="mt-2 text-3xl font-bold text-gray-900">
             {sessions > 0 ? ((purchases / sessions) * 100).toFixed(2) : 0}%
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <p className="text-sm font-medium text-gray-500">
-            Valeur moyenne de commande
+            {t('avgOrderValue')}
           </p>
           <p className="mt-2 text-3xl font-bold text-gray-900">
             $
@@ -145,9 +152,9 @@ export default async function AnalyticsPage() {
               : 0}
           </p>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="admin-card">
           <p className="text-sm font-medium text-gray-500">
-            Sessions totales (30j)
+            {t('totalSessions')}
           </p>
           <p className="mt-2 text-3xl font-bold text-gray-900">{sessions}</p>
         </div>

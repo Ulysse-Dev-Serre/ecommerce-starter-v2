@@ -120,6 +120,10 @@
       "version": "Admin Dashboard v1.0",
       "backToSite": "Back to site"
     },
+    "header": {
+      "welcome": "Welcome back",
+      "notifications": "Notifications"
+    },
     "products": {
       "title": "Products",
       "newProduct": "New Product",
@@ -139,6 +143,21 @@
       "status": "Status",
       "featured": "Featured product",
       "sortOrder": "Sort Order",
+      "shippingCustoms": "Shipping & Customs",
+      "shippingOrigin": "Shipping Origin",
+      "selectOrigin": "Select a location...",
+      "shippingOriginHelp": "Select the warehouse or supplier where this product ships from.",
+      "originCountry": "Country of Manufacture (ISO 2-char)",
+      "originCountryHelp": "Required for customs (if different from shipping origin).",
+      "hsCode": "HS Code",
+      "hsCodeHelp": "Harmonized System Code for customs declaration.",
+      "searchHSCodes": "Search HS Codes",
+      "exportExplanation": "Export Explanation",
+      "exportExplanationHelp": "Brief description of goods for customs (overrides global default).",
+      "incotermOverride": "Incoterm Override",
+      "incotermHelp": "Force specific Incoterm for this product.",
+      "weightKg": "Weight (kg)",
+      "dimensionsCm": "Dimensions (L x W x H cm)",
       "productName": "Product Name",
       "shortDescription": "Short Description",
       "shortDescriptionPlaceholder": "Brief product description",
@@ -194,7 +213,42 @@
       "uploading": "Uploading...",
       "primary": "Primary",
       "deleteMediaConfirm": "Are you sure you want to delete this image?",
-      "dragToReorderMedia": "Drag and drop images to reorder them"
+      "dragToReorderMedia": "Drag and drop images to reorder them",
+      "unnamedProduct": "Unnamed Product",
+      "productImage": "Product image",
+      "noVariantsAdded": "No variants added. Click \"Add variant\" to start.",
+      "validSlug": "Valid slug",
+      "invalidSlug": "Invalid slug",
+      "productNotFound": "Product not found",
+      "validation": {
+        "slugRequired": "Product slug is required",
+        "slugInvalid": "Invalid slug (lowercase, numbers and hyphens only)",
+        "nameRequired": "Product name is required",
+        "variantRequired": "At least one variant is required",
+        "variantNameRequired": "Variant {{index}}: EN and FR names are required",
+        "variantPriceRequired": "Variant {{index}}: at least one price (CAD or USD) is required"
+      },
+      "messages": {
+        "productCreated": "Product created successfully!",
+        "productUpdated": "Product updated successfully!",
+        "productDeleted": "Product deleted successfully!",
+        "variantsAdded": "New variants added successfully!",
+        "variantUpdated": "Variant updated successfully!",
+        "variantDeleted": "Variant deleted successfully!",
+        "mediaUploaded": "Images uploaded successfully!",
+        "mediaDeleted": "Image deleted successfully!",
+        "mediaReordered": "Media order saved successfully!",
+        "errorCreatingProduct": "Failed to create product",
+        "errorUpdatingProduct": "Failed to update product",
+        "errorDeletingProduct": "Failed to delete product",
+        "errorLoadingProduct": "Failed to load product",
+        "errorLoadingVariants": "Failed to load variants",
+        "errorLoadingMedia": "Failed to load media",
+        "errorUploadingMedia": "Failed to upload images",
+        "errorReorderingMedia": "Failed to save media order",
+        "errorReorderingProducts": "Failed to save product order",
+        "orderSaved": "Order saved successfully"
+      }
     },
     "logistics": {
       "title": "Logistics",
@@ -438,5 +492,105 @@
     "visitors": "Visitors",
     "orders": "Orders",
     "revenue": "Revenue"
+  },
+  "CheckoutSuccess": {
+    "processing": "Processing your payment...",
+    "title": "Payment Successful!",
+    "message": "Your order has been confirmed and is being processed.",
+    "orderNumber": "Order Number",
+    "sessionId": "Transaction ID",
+    "waitMessage": "Please wait while we confirm your order...",
+    "backToShop": "Back to shop",
+    "error": "An error occurred while verifying the order.",
+    "timeout": "Order verification timeout. Please check your email for confirmation.",
+    "noId": "No session or payment ID provided."
+  },
+  "adminDashboard": {
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Track your store performance and conversions",
+      "conversionFunnel": "Conversion Funnel (30d)",
+      "sourcePerformance": "Source Performance (30d)",
+      "overallConversion": "Overall Conversion Rate",
+      "avgOrderValue": "Average Order Value",
+      "totalSessions": "Total Sessions (30d)",
+      "stages": {
+        "sessions": "Sessions",
+        "productViews": "Product Views",
+        "carts": "Carts",
+        "checkouts": "Checkouts",
+        "purchases": "Purchases"
+      }
+    },
+    "orders": {
+      "title": "Orders",
+      "subtitle": "Manage and track customer orders",
+      "table": {
+        "order": "Order",
+        "customer": "Customer",
+        "date": "Date",
+        "total": "Total",
+        "status": "Status",
+        "payment": "Payment",
+        "actions": "Actions",
+        "view": "View",
+        "noOrders": "No orders found"
+      },
+      "detail": {
+        "orderItems": "Order Items",
+        "paymentInfo": "Payment Information",
+        "shippingAddress": "Shipping Address",
+        "placedOn": "Placed on {date}",
+        "summary": {
+          "subtotal": "Subtotal",
+          "tax": "Tax",
+          "shipping": "Shipping",
+          "discount": "Discount",
+          "total": "Total"
+        },
+        "payment": {
+          "method": "Method",
+          "status": "Status",
+          "amount": "Amount",
+          "transactionId": "Transaction ID",
+          "processedAt": "Processed At"
+        },
+        "history": "Status History"
+      }
+    },
+    "customers": {
+      "title": "Customers",
+      "subtitle": "Manage customer accounts and view their history",
+      "stats": {
+        "total": "Total Customers",
+        "today": "Today",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days"
+      },
+      "table": {
+        "client": "Customer",
+        "email": "Email",
+        "registrationDate": "Registration Date",
+        "actions": "Actions",
+        "viewDetails": "View details",
+        "noCustomers": "No customers found",
+        "searchPlaceholder": "Search by name or email..."
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Overview of your store performance",
+      "stats": {
+        "revenue": "Revenue",
+        "orders": "Orders",
+        "products": "Products",
+        "customers": "Registered Customers"
+      },
+      "recentOrders": "Recent Orders",
+      "viewAll": "View All",
+      "noRecentOrders": "No orders",
+      "revenueOverview": "Revenue Overview",
+      "last7Days": "Last 7 days"
+    }
   }
 }

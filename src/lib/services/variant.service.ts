@@ -51,8 +51,12 @@ export interface CreateVariantData {
 export interface UpdateVariantData {
   sku?: string;
   barcode?: string;
-  weight?: number;
-  dimensions?: { length?: number; width?: number; height?: number };
+  weight?: number | null;
+  dimensions?: {
+    length?: number | null;
+    width?: number | null;
+    height?: number | null;
+  } | null;
   pricing?: VariantPricing;
   pricingCAD?: VariantPricing;
   pricingUSD?: VariantPricing;
@@ -606,7 +610,8 @@ export async function updateVariant(
   if (updateData.barcode !== undefined)
     variantUpdate.barcode = updateData.barcode;
   if (updateData.weight !== undefined) {
-    variantUpdate.weight = new Prisma.Decimal(updateData.weight);
+    variantUpdate.weight =
+      updateData.weight !== null ? new Prisma.Decimal(updateData.weight) : null;
   }
   if (updateData.dimensions !== undefined) {
     variantUpdate.dimensions = updateData.dimensions as Prisma.InputJsonValue;

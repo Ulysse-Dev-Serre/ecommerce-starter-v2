@@ -39,6 +39,22 @@ export const ProductTranslationSchema = z.object({
     .nullable(),
 });
 
+export const DimensionsSchema = z.object({
+  length: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
+    .optional()
+    .nullable(),
+  width: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
+    .optional()
+    .nullable(),
+  height: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
+    .optional()
+    .nullable(),
+  unit: z.string().optional(),
+});
+
 export const CreateProductSchema = z.object({
   slug: z
     .string()
@@ -65,6 +81,12 @@ export const CreateProductSchema = z.object({
   hsCode: z.string().optional().nullable(),
   exportExplanation: z.string().optional().nullable(),
   incoterm: z.string().optional().nullable(),
+  shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
+  weight: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
+    .optional()
+    .nullable(),
+  dimensions: DimensionsSchema.optional().nullable(),
   translations: z
     .array(ProductTranslationSchema)
     .min(1, 'At least one translation is required')
@@ -91,16 +113,11 @@ export const UpdateProductSchema = z.object({
   shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
   exportExplanation: z.string().optional().nullable(),
   incoterm: z.string().optional().nullable(),
-  weight: z.number().optional().nullable(),
-  dimensions: z
-    .object({
-      length: z.string().or(z.number()),
-      width: z.string().or(z.number()),
-      height: z.string().or(z.number()),
-      unit: z.string().optional(),
-    })
+  weight: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
     .optional()
     .nullable(),
+  dimensions: DimensionsSchema.optional().nullable(),
   translations: z.array(ProductTranslationSchema).optional(),
 });
 
@@ -144,6 +161,11 @@ export const CreateVariantSchema = z.object({
     .regex(/^[A-Z0-9-]+$/, 'SKU must be uppercase alphanumeric with hyphens'),
   pricing: VariantPricingSchema,
   inventory: VariantInventorySchema.optional(),
+  weight: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
+    .optional()
+    .nullable(),
+  dimensions: DimensionsSchema.optional().nullable(),
   attributeValueIds: z.array(z.string().cuid()).optional(),
 });
 
@@ -156,6 +178,11 @@ export const UpdateVariantSchema = z.object({
     .optional(),
   pricing: VariantPricingSchema.partial().optional(),
   inventory: VariantInventorySchema.partial().optional(),
+  weight: z
+    .union([z.number(), z.string().transform(val => parseFloat(val))])
+    .optional()
+    .nullable(),
+  dimensions: DimensionsSchema.optional().nullable(),
 });
 
 export const CreateVariantsManualSchema = z.object({

@@ -484,11 +484,12 @@ export interface CreateProductData {
   hsCode?: string;
   exportExplanation?: string;
   incoterm?: string;
+  shippingOriginId?: string;
   weight?: number;
   dimensions?: {
-    length?: number;
-    width?: number;
-    height?: number;
+    length?: number | null;
+    width?: number | null;
+    height?: number | null;
   };
   translations?: {
     language: Language;
@@ -512,9 +513,9 @@ export interface UpdateProductData {
   incoterm?: string | null;
   weight?: number | null;
   dimensions?: {
-    length?: number;
-    width?: number;
-    height?: number;
+    length?: number | null;
+    width?: number | null;
+    height?: number | null;
   } | null;
   translations?: {
     language: Language;
@@ -588,6 +589,7 @@ export async function createProduct(
       hsCode: productData.hsCode,
       exportExplanation: productData.exportExplanation,
       incoterm: productData.incoterm,
+      shippingOriginId: productData.shippingOriginId,
       weight:
         productData.weight != null
           ? new Prisma.Decimal(productData.weight)

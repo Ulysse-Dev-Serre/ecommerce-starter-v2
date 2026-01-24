@@ -120,6 +120,10 @@
       "version": "Tableau de bord Admin v1.0",
       "backToSite": "Retour au site"
     },
+    "header": {
+      "welcome": "Bon retour",
+      "notifications": "Notifications"
+    },
     "products": {
       "title": "Produits",
       "newProduct": "Nouveau produit",
@@ -139,6 +143,21 @@
       "status": "Statut",
       "featured": "Produit vedette",
       "sortOrder": "Ordre de tri",
+      "shippingCustoms": "Expédition et Douanes",
+      "shippingOrigin": "Origine de l'expédition",
+      "selectOrigin": "Sélectionner un emplacement...",
+      "shippingOriginHelp": "Sélectionnez l'entrepôt ou le fournisseur d'où ce produit est expédié.",
+      "originCountry": "Pays de fabrication (ISO 2 car.)",
+      "originCountryHelp": "Requis pour les douanes (si différent de l'origine d'expédition).",
+      "hsCode": "Code SH",
+      "hsCodeHelp": "Code du Système Harmonisé pour la déclaration en douane.",
+      "searchHSCodes": "Rechercher les codes SH",
+      "exportExplanation": "Explication d'exportation",
+      "exportExplanationHelp": "Brève description des marchandises pour les douanes (remplace la valeur par défaut).",
+      "incotermOverride": "Remplacement de l'Incoterm",
+      "incotermHelp": "Forcer un Incoterm spécifique pour ce produit.",
+      "weightKg": "Poids (kg)",
+      "dimensionsCm": "Dimensions (L x l x H cm)",
       "productName": "Nom du produit",
       "shortDescription": "Description courte",
       "shortDescriptionPlaceholder": "Brève description du produit",
@@ -194,7 +213,42 @@
       "uploading": "Téléversement...",
       "primary": "Principale",
       "deleteMediaConfirm": "Êtes-vous sûr de vouloir supprimer cette image ?",
-      "dragToReorderMedia": "Glissez-déposez les images pour les réorganiser"
+      "dragToReorderMedia": "Glissez-déposez les images pour les réorganiser",
+      "unnamedProduct": "Produit sans nom",
+      "productImage": "Image du produit",
+      "noVariantsAdded": "Aucune variante ajoutée. Cliquez sur \"Ajouter une variante\" pour commencer.",
+      "validSlug": "Slug valide",
+      "invalidSlug": "Slug invalide",
+      "productNotFound": "Produit non trouvé",
+      "validation": {
+        "slugRequired": "Le slug du produit est requis",
+        "slugInvalid": "Le slug doit être valide (minuscules, chiffres et tirets uniquement)",
+        "nameRequired": "Le nom du produit est requis",
+        "variantRequired": "Au moins une variante est requise",
+        "variantNameRequired": "Variante {{index}} : les noms EN et FR sont requis",
+        "variantPriceRequired": "Variante {{index}} : au moins un prix (CAD ou USD) est requis"
+      },
+      "messages": {
+        "productCreated": "Produit créé avec succès !",
+        "productUpdated": "Produit mis à jour avec succès !",
+        "productDeleted": "Produit supprimé avec succès !",
+        "variantsAdded": "Nouvelles variantes ajoutées avec succès !",
+        "variantUpdated": "Variante mise à jour avec succès !",
+        "variantDeleted": "Variante supprimée avec succès !",
+        "mediaUploaded": "Images téléchargées avec succès !",
+        "mediaDeleted": "Image supprimée avec succès !",
+        "mediaReordered": "Ordre des médias enregistré avec succès !",
+        "errorCreatingProduct": "Échec de la création du produit",
+        "errorUpdatingProduct": "Échec de la mise à jour du produit",
+        "errorDeletingProduct": "Échec de la suppression du produit",
+        "errorLoadingProduct": "Échec du chargement du produit",
+        "errorLoadingVariants": "Échec du chargement des variantes",
+        "errorLoadingMedia": "Échec du chargement des médias",
+        "errorUploadingMedia": "Échec du téléchargement des images",
+        "errorReorderingMedia": "Échec de l'enregistrement de l'ordre des médias",
+        "errorReorderingProducts": "Échec de l'enregistrement de l'ordre des produits",
+        "orderSaved": "Ordre enregistré avec succès"
+      }
     },
     "logistics": {
       "title": "Logistique",
@@ -438,5 +492,105 @@
     "visitors": "Visiteurs",
     "orders": "Commandes",
     "revenue": "Revenus"
+  },
+  "CheckoutSuccess": {
+    "processing": "Traitement de votre paiement en cours...",
+    "title": "Paiement réussi !",
+    "message": "Votre commande a été confirmée et est en cours de traitement.",
+    "orderNumber": "Numéro de commande",
+    "sessionId": "ID de transaction",
+    "waitMessage": "Veuillez patienter pendant que nous confirmons votre commande...",
+    "backToShop": "Retour à la boutique",
+    "error": "Une erreur est survenue lors de la vérification de la commande.",
+    "timeout": "Délai d'attente dépassé pour la vérification de la commande. Veuillez vérifier vos emails pour la confirmation.",
+    "noId": "Aucun identifiant de session ou de paiement fourni."
+  },
+  "adminDashboard": {
+    "analytics": {
+      "title": "Analytique",
+      "subtitle": "Suivez la performance de votre boutique et vos conversions",
+      "conversionFunnel": "Tunnel de conversion (30j)",
+      "sourcePerformance": "Performance par source (30j)",
+      "overallConversion": "Taux de conversion global",
+      "avgOrderValue": "Valeur moyenne de commande",
+      "totalSessions": "Sessions totales (30j)",
+      "stages": {
+        "sessions": "Sessions",
+        "productViews": "Produits vus",
+        "carts": "Paniers",
+        "checkouts": "Checkouts",
+        "purchases": "Achats"
+      }
+    },
+    "orders": {
+      "title": "Commandes",
+      "subtitle": "Gérez et suivez les commandes clients",
+      "table": {
+        "order": "Commande",
+        "customer": "Client",
+        "date": "Date",
+        "total": "Total",
+        "status": "Statut",
+        "payment": "Paiement",
+        "actions": "Actions",
+        "view": "Voir",
+        "noOrders": "Aucune commande trouvée"
+      },
+      "detail": {
+        "orderItems": "Articles de la commande",
+        "paymentInfo": "Informations de paiement",
+        "shippingAddress": "Adresse de livraison",
+        "placedOn": "Passée le {date}",
+        "summary": {
+          "subtotal": "Sous-total",
+          "tax": "Taxe",
+          "shipping": "Livraison",
+          "discount": "Réduction",
+          "total": "Total"
+        },
+        "payment": {
+          "method": "Méthode",
+          "status": "Statut",
+          "amount": "Montant",
+          "transactionId": "ID Transaction",
+          "processedAt": "Traité le"
+        },
+        "history": "Historique des statuts"
+      }
+    },
+    "customers": {
+      "title": "Clients",
+      "subtitle": "Gérez vos comptes clients et consultez leur historique",
+      "stats": {
+        "total": "Total Clients",
+        "today": "Aujourd'hui",
+        "last7Days": "7 derniers jours",
+        "last30Days": "30 derniers jours"
+      },
+      "table": {
+        "client": "Client",
+        "email": "Email",
+        "registrationDate": "Date d'inscription",
+        "actions": "Actions",
+        "viewDetails": "Voir détails",
+        "noCustomers": "Aucun client trouvé",
+        "searchPlaceholder": "Rechercher par nom ou email..."
+      }
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "subtitle": "Vue d'ensemble de la performance de votre boutique",
+      "stats": {
+        "revenue": "Chiffre d'affaires",
+        "orders": "Commandes",
+        "products": "Produits",
+        "customers": "Clients enregistrés"
+      },
+      "recentOrders": "Commandes récentes",
+      "viewAll": "Voir tout",
+      "noRecentOrders": "Aucune commande",
+      "revenueOverview": "Aperçu des revenus",
+      "last7Days": "7 derniers jours"
+    }
   }
 }

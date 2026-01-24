@@ -102,6 +102,7 @@ export function CheckoutClient({
       body: JSON.stringify({
         cartId,
         currency,
+        locale, // Ajout du locale pour les e-mails transactionnels
         directItem, // Ajout du paramètre optionnel pour achat direct
       }),
     })

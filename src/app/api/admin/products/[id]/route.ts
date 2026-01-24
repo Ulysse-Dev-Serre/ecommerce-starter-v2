@@ -11,6 +11,7 @@ import {
   UpdateProductSchema,
   formatZodErrors,
 } from '../../../../../lib/schemas/product.schema';
+import { Language } from '../../../../../generated/prisma';
 import {
   getProductByIdSimple,
   updateProduct,
@@ -161,13 +162,6 @@ async function updateProductHandler(
     }
 
     const validatedData = validation.data;
-    // START MANUAL EXTENSION
-    const manualData = body as any;
-    const finalData: any = { ...validatedData };
-    if (manualData.weight !== undefined) finalData.weight = manualData.weight;
-    if (manualData.dimensions !== undefined)
-      finalData.dimensions = manualData.dimensions;
-    // END MANUAL EXTENSION
 
     logger.info(
       {
@@ -207,29 +201,39 @@ async function updateProductHandler(
 
     const updateData: UpdateProductData = {};
 
-    if (finalData.slug !== undefined) updateData.slug = finalData.slug;
-    if (finalData.status !== undefined) updateData.status = finalData.status;
-    if (finalData.isFeatured !== undefined)
-      updateData.isFeatured = finalData.isFeatured;
-    if (finalData.sortOrder !== undefined)
-      updateData.sortOrder = finalData.sortOrder;
-    if (finalData.originCountry !== undefined)
-      updateData.originCountry = finalData.originCountry;
-    if (finalData.hsCode !== undefined) updateData.hsCode = finalData.hsCode;
-    if (finalData.shippingOriginId !== undefined)
-      updateData.shippingOriginId = finalData.shippingOriginId || null;
-    if (finalData.exportExplanation !== undefined)
-      updateData.exportExplanation = finalData.exportExplanation;
-    if (finalData.incoterm !== undefined)
-      updateData.incoterm = finalData.incoterm;
-    if (finalData.weight !== undefined) updateData.weight = finalData.weight;
-    if (finalData.dimensions !== undefined)
-      updateData.dimensions = finalData.dimensions;
+    if (validatedData.slug !== undefined) updateData.slug = validatedData.slug;
+    if (validatedData.status !== undefined)
+      updateData.status = validatedData.status;
+    if (validatedData.isFeatured !== undefined)
+      updateData.isFeatured = validatedData.isFeatured;
+    if (validatedData.sortOrder !== undefined)
+      updateData.sortOrder = validatedData.sortOrder;
+    if (validatedData.originCountry !== undefined)
+      updateData.originCountry = validatedData.originCountry;
+    if (validatedData.hsCode !== undefined)
+      updateData.hsCode = validatedData.hsCode;
+    if (validatedData.shippingOriginId !== undefined)
+      updateData.shippingOriginId = validatedData.shippingOriginId || null;
+    if (validatedData.exportExplanation !== undefined)
+      updateData.exportExplanation = validatedData.exportExplanation;
+    if (validatedData.incoterm !== undefined)
+      updateData.incoterm = validatedData.incoterm;
+    if (validatedData.weight !== undefined)
+      updateData.weight = validatedData.weight;
+    if (validatedData.dimensions !== undefined) {
+      updateData.dimensions = validatedData.dimensions
+        ? {
+            length: validatedData.dimensions.length,
+            width: validatedData.dimensions.width,
+            height: validatedData.dimensions.height,
+          }
+        : null;
+    }
 
     // Handle translations update
-    if (finalData.translations && finalData.translations.length > 0) {
-      updateData.translations = finalData.translations.map((t: any) => ({
-        language: t.language,
+    if (validatedData.translations && validatedData.translations.length > 0) {
+      updateData.translations = validatedData.translations.map((t: any) => ({
+        language: t.language.toUpperCase() as Language, // Convert 'en'/'fr' to Language enum 'EN'/'FR'
         name: t.name,
         description: t.description || null,
         shortDescription: t.shortDescription || null,

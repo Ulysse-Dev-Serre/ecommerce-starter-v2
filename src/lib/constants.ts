@@ -45,3 +45,9 @@ export const SITE_CURRENCY = env.NEXT_PUBLIC_CURRENCY as DbCurrency;
  */
 export const SITE_DEFAULT_LOCALE =
   env.NEXT_PUBLIC_DEFAULT_LOCALE as SupportedLocale;
+
+/**
+ * Manual exchange rate for shipping calculations (Shippo returns CAD, site uses USD).
+ * This acts as a fallback/override since we don't query live exchange rates.
+ */
+export const CAD_TO_USD_RATE = env.CAD_TO_USD_RATE;

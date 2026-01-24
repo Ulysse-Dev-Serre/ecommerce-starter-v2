@@ -10,6 +10,7 @@ import { siteConfig } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
 import { prisma } from '@/lib/db/prisma';
 import { Navbar } from '@/components/layout/navbar';
+import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
 import { ConditionalFooter } from '@/components/layout/conditional-footer';
 import GoogleTagManager from '@/components/analytics/GoogleTagManager';
 import CookieConsentComponent from '@/components/analytics/CookieConsent';
@@ -140,7 +141,7 @@ export default async function RootLayout({
             </Suspense>
             <ToastProvider>
               <CartMergeHandler />
-              <Navbar locale={locale} userRole={userRole} />
+              <ConditionalNavbar locale={locale} userRole={userRole} />
               {children}
               <ConditionalFooter locale={locale} />
             </ToastProvider>

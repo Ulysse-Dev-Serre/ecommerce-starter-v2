@@ -66,34 +66,19 @@ function getPriceForCurrency(
 }
 
 /**
- * Récupère le prix avec fallback sur l'autre devise si nécessaire
+ * Récupère le prix d'une variante pour une devise donnée (STRICT)
  */
-function getPriceWithFallback(
+function getPrice(
   pricing: { price: any; currency: string }[],
   preferredCurrency: Currency
 ): { price: Decimal; currency: Currency } | null {
-  // Essayer la devise préférée
-  const preferredPrice = getPriceForCurrency(pricing, preferredCurrency);
-  if (preferredPrice !== null) {
-    return { price: preferredPrice, currency: preferredCurrency };
-  }
+  const priceEntry = pricing.find(p => p.currency === preferredCurrency);
 
-  // Fallback sur l'autre devise
-  const fallbackCurrency: Currency =
-    preferredCurrency === DB_CURRENCIES[0]
-      ? DB_CURRENCIES[1]
-      : DB_CURRENCIES[0];
-  const fallbackPrice = getPriceForCurrency(pricing, fallbackCurrency);
-  if (fallbackPrice !== null) {
-    logger.warn(
-      {
-        action: 'price_fallback',
-        preferredCurrency,
-        fallbackCurrency,
-      },
-      `Price not found for ${preferredCurrency}, falling back to ${fallbackCurrency}`
-    );
-    return { price: fallbackPrice, currency: fallbackCurrency };
+  if (priceEntry) {
+    return {
+      price: new Decimal(priceEntry.price.toString()),
+      currency: preferredCurrency,
+    };
   }
 
   return null;
@@ -113,7 +98,7 @@ export function calculateCart(
   let itemCount = 0;
 
   for (const item of cart.items) {
-    const priceData = getPriceWithFallback(item.variant.pricing, currency);
+    const priceData = getPrice(item.variant.pricing, currency);
 
     if (!priceData) {
       logger.error(
@@ -122,8 +107,9 @@ export function calculateCart(
           cartId: cart.id,
           variantId: item.variantId,
           sku: item.variant.sku,
+          currency,
         },
-        `No price found for variant ${item.variant.sku}`
+        `No price found for variant ${item.variant.sku} in ${currency}`
       );
       continue;
     }
@@ -192,9 +178,9 @@ export function validateCartForCheckout(
 
   for (const item of cart.items) {
     // Vérifier le prix
-    const priceData = getPriceWithFallback(item.variant.pricing, currency);
+    const priceData = getPrice(item.variant.pricing, currency);
     if (!priceData) {
-      errors.push(`No price available for ${item.variant.sku}`);
+      errors.push(`No price available for ${item.variant.sku} in ${currency}`);
     }
 
     // Vérifier le stock
