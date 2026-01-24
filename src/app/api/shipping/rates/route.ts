@@ -11,27 +11,7 @@ import {
   ShippingRequestInput,
 } from '@/lib/validators/shipping';
 
-// Default warehouse address (Fallback)
-const WAREHOUSE_ADDRESS: Address = {
-  name: 'AgTechNest Warehouse',
-  street1: '546 rue leclerc',
-  street2: 'app 7',
-  city: 'Repentigny',
-  state: 'QC',
-  zip: 'J6A 7R3',
-  country: 'CA',
-  phone: env.SHIPPO_FROM_PHONE || '',
-};
-
-const DEFAULT_PARCEL: Parcel = {
-  length: '40',
-  width: '20',
-  height: '20',
-  distanceUnit: 'cm',
-  weight: '3.2',
-  massUnit: 'kg',
-};
-
+// Initializing defaults (Will be overridden by DB values if found)
 async function handler(
   req: NextRequest,
   _context: unknown,
@@ -57,16 +37,25 @@ async function handler(
       'Attempting to fetch cart for shipping info'
     );
 
-    let totalWeight = 1; // Default fallback
-    let parcelLength = '20'; // Default fallback
-    let parcelWidth = '15'; // Default fallback
-    let parcelHeight = '10'; // Default fallback
+    let parcelLength = '';
+    let parcelWidth = '';
+    let parcelHeight = '';
 
     let customsDeclaration = undefined;
 
     // Determine Origin Address
-    // Priority: 1. Product specific origin, 2. Default Local Stock, 3. Hardcoded Fallback
-    let originAddress = WAREHOUSE_ADDRESS;
+    // Priority: 1. Product specific origin, 2. Default Local Stock, 3. Environment Variables
+    let originAddress: Address = {
+      name: env.SHIPPO_FROM_NAME || '',
+      street1: env.SHIPPO_FROM_STREET1 || '',
+      street2: '',
+      city: env.SHIPPO_FROM_CITY || '',
+      state: env.SHIPPO_FROM_STATE || '',
+      zip: env.SHIPPO_FROM_ZIP || '',
+      country: env.SHIPPO_FROM_COUNTRY || '',
+      phone: env.SHIPPO_FROM_PHONE || '',
+      email: env.SHIPPO_FROM_EMAIL || '',
+    };
     let usedSupplierId = null;
 
     let originIncoterm = 'DDU'; // Default

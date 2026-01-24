@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SUPPORTED_LOCALES } from '../constants';
 
 export const createLocationSchema = z.object({
   name: z.string().min(1),
@@ -26,7 +27,7 @@ export const createAttributeSchema = z.object({
   translations: z
     .array(
       z.object({
-        language: z.enum(['EN', 'FR']),
+        language: z.enum(SUPPORTED_LOCALES),
         name: z.string().min(1),
         description: z.string().optional(),
       })

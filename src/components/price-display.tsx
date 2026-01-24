@@ -7,6 +7,7 @@ import {
 } from '@/hooks/use-currency';
 import { formatPrice } from '@/lib/utils/currency';
 import { useLocale } from 'next-intl';
+import { SupportedCurrency } from '@/lib/types/currency';
 
 interface PriceDisplayProps {
   pricing: Array<{ price: string; currency: string }>;
@@ -37,7 +38,7 @@ export function PriceDisplay({
 
   const formattedPrice = formatPrice(
     parseFloat(price),
-    displayCurrency as 'CAD' | 'USD',
+    displayCurrency as SupportedCurrency,
     currentLocale
   );
 

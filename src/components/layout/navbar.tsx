@@ -14,7 +14,6 @@ import { useTranslations } from 'next-intl';
 import React, { useState, type MouseEvent } from 'react';
 
 import { logger } from '../../lib/logger';
-import { useCurrency, type Currency } from '../../hooks/use-currency';
 import { i18n } from '../../lib/i18n/config';
 import { siteConfig } from '@/lib/config/site';
 
@@ -31,7 +30,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   // Wait, I should have removed `messages` logic entirely.
   // Previous view of Navbar (Step 840) showed explicit logic.
   // I will just add the hooks for now to fix the error.
-  const { currency, setCurrency } = useCurrency();
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 
@@ -67,22 +65,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
       },
       'User clicked navigation link'
     );
-  };
-
-  // Fonction pour changer de devise
-  const handleCurrencyChange = (newCurrency: Currency): void => {
-    logger.info(
-      {
-        action: 'currency_change',
-        from: currency,
-        to: newCurrency,
-        locale,
-        component: 'navbar',
-      },
-      'User changed currency'
-    );
-
-    setCurrency(newCurrency);
   };
 
   return (
@@ -164,30 +146,6 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                   {loc}
                 </button>
               ))}
-            </div>
-
-            {/* Sélecteur de devise */}
-            <div className="flex items-center space-x-2 border-l pl-4 ml-2">
-              <button
-                onClick={() => handleCurrencyChange('CAD')}
-                className={`px-2 py-1 text-sm rounded transition-colors ${
-                  currency === 'CAD'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                $ CAD
-              </button>
-              <button
-                onClick={() => handleCurrencyChange('USD')}
-                className={`px-2 py-1 text-sm rounded transition-colors ${
-                  currency === 'USD'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-foreground hover:bg-muted'
-                }`}
-              >
-                $ USD
-              </button>
             </div>
           </nav>
 

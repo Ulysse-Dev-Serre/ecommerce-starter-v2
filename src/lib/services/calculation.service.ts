@@ -3,7 +3,10 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { logger } from '../logger';
 import { CartProjection } from './cart.service';
 
-export type Currency = 'CAD' | 'USD';
+import { DB_CURRENCIES } from '../constants';
+import { SupportedCurrency } from '../types/currency';
+
+export type Currency = SupportedCurrency;
 
 export interface CalculatedLineItem {
   cartItemId: string;
@@ -77,7 +80,9 @@ function getPriceWithFallback(
 
   // Fallback sur l'autre devise
   const fallbackCurrency: Currency =
-    preferredCurrency === 'CAD' ? 'USD' : 'CAD';
+    preferredCurrency === DB_CURRENCIES[0]
+      ? DB_CURRENCIES[1]
+      : DB_CURRENCIES[0];
   const fallbackPrice = getPriceForCurrency(pricing, fallbackCurrency);
   if (fallbackPrice !== null) {
     logger.warn(

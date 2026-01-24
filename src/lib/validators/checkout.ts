@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { DB_CURRENCIES } from '../constants';
 
 export const createIntentSchema = z
   .object({
     cartId: z.string().optional(),
-    currency: z.enum(['CAD', 'USD']).optional().default('CAD'),
+    currency: z.enum(DB_CURRENCIES).optional(), // We accept it but backend MUST ignore it or validate against SITE_CURRENCY
     locale: z.string().optional(),
     directItem: z
       .object({
@@ -19,7 +20,7 @@ export const createIntentSchema = z
 
 export const updateIntentSchema = z.object({
   paymentIntentId: z.string().min(1),
-  currency: z.enum(['CAD', 'USD']).default('CAD'),
+  currency: z.enum(DB_CURRENCIES).optional(),
   shippingRate: z
     .object({
       object_id: z.string().optional(),

@@ -15,10 +15,11 @@ import {
   createPaymentIntent,
   type CheckoutCurrency,
 } from '../../../../lib/stripe/checkout';
+import { SITE_CURRENCY } from '@/lib/constants';
 import { i18n } from '@/lib/i18n/config';
 import {
   createIntentSchema,
-  CreateIntentInput,
+  type CreateIntentInput,
 } from '@/lib/validators/checkout';
 
 async function createIntentHandler(
@@ -33,23 +34,14 @@ async function createIntentHandler(
   const {
     cartId: bodyCartId,
     directItem,
-    currency: validatedCurrency,
+    // currency: validatedCurrency, // <- We ignore this for security
     locale: validatedLocale,
   } = data;
 
-  // Récupérer la devise depuis le cookie ou utiliser la request
-  // Note: le validateur a déjà géré la devise du body, on check le cookie en fallback si besoin
-  // Mais ici 'data.currency' a une valeur par défaut 'CAD' via Zod, donc on peut simplifier.
-  // Cependant, pour respecter la logique existante (priorité body > cookie > default), on garde cookie check ?
-  // Zod default s'applique si undefined. Donc si body.currency est absent, c'est CAD.
-  // Si on veut supporter cookie, on devrait peut-être le faire *avant* ou accepter que body prévaut.
-  // Gardons la logique simple: on utilise ce qui est validé.
-
-  // Petite subtilité: l'original prenait cookie si body absent. Zod prend 'CAD' si body absent.
-  // Pour supporter cookie, il faudrait que Zod ne mette pas de default, ou qu'on check cookie ici.
-  // On va simplifier: on utilise data.currency. (Si le frontend envoie currency, c'est bon).
-
-  const currency: CheckoutCurrency = validatedCurrency as CheckoutCurrency;
+  // SECURITY ENFORCEMENT:
+  // We strictly use the server-side configured SITE_CURRENCY.
+  // We ignore whatever the client sent in 'currency' to prevent rate arbitrage attacks.
+  const currency: CheckoutCurrency = SITE_CURRENCY;
 
   let cartItems: { variantId: string; quantity: number }[] = [];
   let cartIdForIntent: string | undefined = undefined;

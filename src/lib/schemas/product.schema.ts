@@ -5,14 +5,13 @@
 
 import { z } from 'zod';
 
-const LANGUAGES = ['EN', 'FR', 'ES', 'DE', 'IT'] as const;
-const PRODUCT_STATUSES = ['DRAFT', 'ACTIVE', 'INACTIVE', 'ARCHIVED'] as const;
+import { SUPPORTED_LOCALES, PRODUCT_STATUSES } from '../constants';
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const ProductTranslationSchema = z.object({
-  language: z.enum(LANGUAGES, {
-    message: 'Language must be EN, FR, ES, DE, or IT',
+  language: z.enum(SUPPORTED_LOCALES, {
+    message: 'Language must be a supported locale',
   }),
   name: z
     .string()
