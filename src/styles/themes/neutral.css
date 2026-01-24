@@ -1,27 +1,41 @@
 /**
  * Thème Neutral - Boutique générique
  * Palette équilibrée pour n'importe quel type de produit
+
+ PETITE NOTE POUR LE CHECKOUT JE VAIS M'INSPIRER DE CE SITE https://www.clearly.ca/en-ca/checkout/shipping
  */
 
 :root {
   /* Brand Colors */
-  --primary: #3b82f6; /* blue-500 */
-  --primary-hover: #2563eb; /* blue-600 */
-  --secondary: #64748b; /* slate-500 */
-  --accent: #f1f5f9; /* slate-100 */
+  --primary: #3b82f6;
+  /* blue-500 */
+  --primary-hover: #2563eb;
+  /* blue-600 */
+  --secondary: #64748b;
+  /* slate-500 */
+  --accent: #f1f5f9;
+  /* slate-100 */
 
   /* UI States */
-  --success: #10b981; /* green-500 */
-  --error: #ef4444; /* red-500 */
-  --warning: #f59e0b; /* orange-500 */
-  --info: #3b82f6; /* blue-500 */
+  --success: #10b981;
+  /* green-500 */
+  --error: #ef4444;
+  /* red-500 */
+  --warning: #f59e0b;
+  /* orange-500 */
+  --info: #3b82f6;
+  /* blue-500 */
 
   /* Neutrals */
   --background: #ffffff;
-  --foreground: #0f172a; /* slate-900 */
-  --muted: #f8fafc; /* slate-50 */
-  --muted-foreground: #64748b; /* slate-500 */
-  --border: #e2e8f0; /* slate-200 */
+  --foreground: #0f172a;
+  /* slate-900 */
+  --muted: #f8fafc;
+  /* slate-50 */
+  --muted-foreground: #64748b;
+  /* slate-500 */
+  --border: #e2e8f0;
+  /* slate-200 */
 
   /* Typography */
   --font-heading: 'Inter', sans-serif;

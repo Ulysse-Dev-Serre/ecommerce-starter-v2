@@ -14,6 +14,7 @@ import {
   updateIntentSchema,
   UpdateIntentInput,
 } from '@/lib/validators/checkout';
+import { env } from '@/lib/env';
 
 async function updateIntentHandler(
   request: NextRequest,
@@ -121,7 +122,7 @@ async function updateIntentHandler(
 
     let updatedIntent;
 
-    if (process.env.STRIPE_AUTOMATIC_TAX === 'true') {
+    if (env.STRIPE_AUTOMATIC_TAX) {
       try {
         // Try with tax enabled
         updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
@@ -135,7 +136,7 @@ async function updateIntentHandler(
             {
               paymentIntentId,
               automaticTaxStatus: (updatedIntent as any).automatic_tax,
-              envVar: process.env.STRIPE_AUTOMATIC_TAX,
+              envVar: env.STRIPE_AUTOMATIC_TAX,
             },
             '🚨 STRIPE SILENTLY IGNORED TAX REQUEST 🚨 - Tax integration not available on this account/mode?'
           );

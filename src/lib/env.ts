@@ -26,15 +26,41 @@ const serverSchema = z.object({
   SHIPPO_UPS_ACCOUNT_ID: z.string().optional(),
   SHIPPO_FROM_PHONE: z.string().optional(),
   SHIPPO_WEBHOOK_SECRET: z.string().optional(),
+  SHIPPO_EXPORT_B13A_OPTION: z.string().optional(),
+  SHIPPO_EXPORT_B13A_NUMBER: z.string().optional(),
+  SHIPPO_FROM_NAME: z.string().optional(),
+  SHIPPO_FROM_COMPANY: z.string().optional(),
+  SHIPPO_FROM_STREET1: z.string().optional(),
+  SHIPPO_FROM_CITY: z.string().optional(),
+  SHIPPO_FROM_STATE: z.string().optional(),
+  SHIPPO_FROM_ZIP: z.string().optional(),
+  SHIPPO_FROM_COUNTRY: z.string().optional(),
+  SHIPPO_FROM_EMAIL: z.string().optional(),
 
   // External Services
   SLACK_WEBHOOK_URL: z.string().url().optional(),
+
+  // Storage (Local & S3)
+  STORAGE_PROVIDER: z.enum(['local', 's3', 'cloudinary']).default('local'),
+  STORAGE_LOCAL_UPLOAD_DIR: z.string().default('public/uploads'),
+  STORAGE_LOCAL_PUBLIC_PATH: z.string().default('/uploads'),
+  // S3 (Optionnel - pour référence future)
+  STORAGE_S3_BUCKET: z.string().optional(),
+  STORAGE_S3_REGION: z.string().optional(),
+  STORAGE_S3_ACCESS_KEY_ID: z.string().optional(),
+  STORAGE_S3_SECRET_ACCESS_KEY: z.string().optional(),
+  STORAGE_S3_ENDPOINT: z.string().optional(),
+  // Cloudinary (Optionnel)
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
 
   // Environment
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+  TEST_API_KEY: z.string().optional(),
 });
 
 // Schéma pour les variables côté client (exposées via NEXT_PUBLIC_)
@@ -121,9 +147,36 @@ export const env = {
   SHIPPO_UPS_ACCOUNT_ID: process.env.SHIPPO_UPS_ACCOUNT_ID,
   SHIPPO_FROM_PHONE: process.env.SHIPPO_FROM_PHONE,
   SHIPPO_WEBHOOK_SECRET: process.env.SHIPPO_WEBHOOK_SECRET,
+  SHIPPO_EXPORT_B13A_OPTION: process.env.SHIPPO_EXPORT_B13A_OPTION,
+  SHIPPO_EXPORT_B13A_NUMBER: process.env.SHIPPO_EXPORT_B13A_NUMBER,
+  SHIPPO_FROM_NAME: process.env.SHIPPO_FROM_NAME,
+  SHIPPO_FROM_COMPANY: process.env.SHIPPO_FROM_COMPANY,
+  SHIPPO_FROM_STREET1: process.env.SHIPPO_FROM_STREET1,
+  SHIPPO_FROM_CITY: process.env.SHIPPO_FROM_CITY,
+  SHIPPO_FROM_STATE: process.env.SHIPPO_FROM_STATE,
+  SHIPPO_FROM_ZIP: process.env.SHIPPO_FROM_ZIP,
+  SHIPPO_FROM_COUNTRY: process.env.SHIPPO_FROM_COUNTRY,
+  SHIPPO_FROM_EMAIL: process.env.SHIPPO_FROM_EMAIL,
   SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
   NODE_ENV: process.env.NODE_ENV || 'development',
   LOG_LEVEL: process.env.LOG_LEVEL,
+  TEST_API_KEY: process.env.TEST_API_KEY,
+
+  // Storage
+  STORAGE_PROVIDER:
+    (process.env.STORAGE_PROVIDER as 'local' | 's3' | 'cloudinary') || 'local',
+  STORAGE_LOCAL_UPLOAD_DIR:
+    process.env.STORAGE_LOCAL_UPLOAD_DIR || 'public/uploads',
+  STORAGE_LOCAL_PUBLIC_PATH:
+    process.env.STORAGE_LOCAL_PUBLIC_PATH || '/uploads',
+  STORAGE_S3_BUCKET: process.env.STORAGE_S3_BUCKET,
+  STORAGE_S3_REGION: process.env.STORAGE_S3_REGION,
+  STORAGE_S3_ACCESS_KEY_ID: process.env.STORAGE_S3_ACCESS_KEY_ID,
+  STORAGE_S3_SECRET_ACCESS_KEY: process.env.STORAGE_S3_SECRET_ACCESS_KEY,
+  STORAGE_S3_ENDPOINT: process.env.STORAGE_S3_ENDPOINT,
+  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 
   // Variables Client (Dispos partout)
   NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME!,

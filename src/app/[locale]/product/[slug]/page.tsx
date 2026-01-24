@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
 import { Language, ProductStatus } from '@/generated/prisma';
+import { env } from '@/lib/env';
 import { ImageGallery } from '@/components/product/image-gallery';
 import { JsonLd } from '@/components/seo/json-ld';
 import { prisma } from '@/lib/db/prisma';
@@ -130,7 +131,7 @@ export default async function ProductPage({
     })),
   }));
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
   const productUrl = `${siteUrl}/${locale}/product/${product.slug}`;
   const imageUrl = images[0]?.url || '';
 

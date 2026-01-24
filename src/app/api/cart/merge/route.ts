@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '../../../../lib/logger';
 import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
+import { env } from '@/lib/env';
 import { mergeAnonymousCartToUser } from '../../../../lib/services/cart.service';
 
 async function mergeCartHandler(
@@ -82,7 +83,7 @@ async function mergeCartHandler(
   response.cookies.set('cart_anonymous_id', '', {
     path: '/',
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 0,
     expires: new Date(0),

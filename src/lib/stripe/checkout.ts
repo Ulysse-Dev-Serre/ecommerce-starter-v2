@@ -1,11 +1,13 @@
+import { env } from '@/lib/env';
 import Stripe from 'stripe';
+import { SupportedCurrency } from '../types/currency';
 
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 import { toStripeAmount } from '../utils/currency';
 import { stripe } from './client';
 
-export type CheckoutCurrency = 'CAD' | 'USD';
+export type CheckoutCurrency = SupportedCurrency;
 
 export interface CreateCheckoutSessionParams {
   items: Array<{ variantId: string; quantity: number }>;
@@ -117,7 +119,7 @@ export async function createCheckoutSession({
 
   // Stripe Tax nécessite une adresse d'origine configurée dans le dashboard
   // https://dashboard.stripe.com/settings/tax
-  const enableAutomaticTax = process.env.STRIPE_AUTOMATIC_TAX === 'true';
+  const enableAutomaticTax = env.STRIPE_AUTOMATIC_TAX;
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
@@ -266,9 +268,7 @@ export async function createPaymentIntent({
     },
     // Activer Stripe Tax si configuré
     // automatic_tax will be enabled in update-intent when we have the address
-    // ...(process.env.STRIPE_AUTOMATIC_TAX === 'true' && {
-    //   automatic_tax: { enabled: true },
-    // }),
+    // automatic_tax will be enabled in update-intent when we have the address
   });
 
   return paymentIntent;

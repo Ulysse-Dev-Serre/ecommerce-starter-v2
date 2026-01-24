@@ -20,7 +20,7 @@
  * Exemple d'utilisation dans les tests:
  * ```javascript
  * const response = await client.get('/api/admin/attributes', {
- *   headers: { 'x-test-api-key': process.env.TEST_API_KEY }
+ *   headers: { 'x-test-api-key': env.TEST_API_KEY }
  * });
  * ```
  *
@@ -30,6 +30,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import { env } from '@/lib/env';
 
 import { UserRole } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
@@ -54,75 +55,6 @@ export function withAuth(handler: ApiHandler) {
   ) => {
     try {
       // Pour les routes dynamiques, on doit passer routeContext entre request et authContext
-      // ============================================
-      // 🧪 BYPASS POUR LES TESTS (NON-PRODUCTION SEULEMENT)
-      // ============================================
-      // Vérifie si une API key de test est fournie dans les headers
-      // Cela permet aux tests d'intégration de contourner l'authentification Clerk
-      const testApiKey = request.headers.get('x-test-api-key');
-      const testUserId = request.headers.get('x-test-user-id');
-
-      logger.info(
-        {
-          action: 'test_bypass_check',
-          hasTestApiKey: !!testApiKey,
-          hasEnvKey: !!process.env.TEST_API_KEY,
-          keysMatch: testApiKey === process.env.TEST_API_KEY,
-          nodeEnv: process.env.NODE_ENV,
-          testUserId: testUserId || 'default',
-        },
-        '🧪 Checking test bypass conditions'
-      );
-
-      if (
-        testApiKey &&
-        process.env.TEST_API_KEY &&
-        testApiKey === process.env.TEST_API_KEY &&
-        process.env.NODE_ENV !== 'production'
-      ) {
-        // Priorité au header x-test-user-id, sinon config .env
-        const clerkTestUserId = testUserId || process.env.CLERK_TEST_USER_ID;
-
-        if (!clerkTestUserId) {
-          logger.error({}, 'CLERK_TEST_USER_ID not configured');
-          return NextResponse.json(
-            { success: false, error: 'Test configuration error' },
-            { status: 500 }
-          );
-        }
-
-        const testUser = await prisma.user.findUnique({
-          where: { clerkId: clerkTestUserId },
-          select: {
-            id: true,
-            clerkId: true,
-            email: true,
-            role: true,
-          },
-        });
-
-        if (testUser) {
-          const authContext: AuthContext = {
-            userId: testUser.id,
-            clerkId: testUser.clerkId,
-            email: testUser.email,
-            role: testUser.role,
-          };
-
-          logger.info(
-            {
-              action: 'test_api_key_used',
-              userId: testUser.id,
-              email: testUser.email,
-            },
-            '🧪 Test API key authentication used'
-          );
-
-          return routeContext?.params
-            ? handler(request, routeContext, authContext)
-            : handler(request, authContext);
-        }
-      }
       // ============================================
       // FIN DU BYPASS DE TEST
       // ============================================
@@ -216,7 +148,7 @@ export function withAuth(handler: ApiHandler) {
           success: false,
           error: 'Internal server error',
           message:
-            process.env.NODE_ENV === 'development'
+            env.NODE_ENV === 'development'
               ? errorMessage
               : 'Something went wrong',
           timestamp: new Date().toISOString(),
@@ -298,84 +230,6 @@ export function withOptionalAuth(handler: ApiHandler) {
   ) => {
     try {
       // Pour les routes dynamiques, on doit passer routeContext entre request et authContext
-      const testApiKey = request.headers.get('x-test-api-key');
-      const testUserId = request.headers.get('x-test-user-id');
-      const testAnonymousId = request.headers.get('x-test-anonymous-id');
-
-      // ============================================
-      // 🧪 BYPASS POUR LES TESTS (NON-PRODUCTION SEULEMENT)
-      // ============================================
-      if (
-        testApiKey &&
-        process.env.TEST_API_KEY &&
-        testApiKey === process.env.TEST_API_KEY &&
-        process.env.NODE_ENV !== 'production'
-      ) {
-        // Test mode: simuler utilisateur OU anonyme
-        if (testAnonymousId) {
-          // Simuler un utilisateur anonyme
-          const authContext: OptionalAuthContext = {
-            anonymousId: testAnonymousId,
-            isAuthenticated: false,
-          };
-
-          logger.info(
-            {
-              action: 'test_anonymous_used',
-              anonymousId: testAnonymousId,
-            },
-            '🧪 Test anonymous ID used'
-          );
-
-          // Pour routes dynamiques: passer routeContext, sinon juste authContext
-          return routeContext?.params
-            ? handler(request, routeContext, authContext)
-            : handler(request, authContext);
-        }
-
-        // Simuler un utilisateur authentifié
-        const clerkTestUserId = testUserId || process.env.CLERK_TEST_USER_ID;
-
-        if (!clerkTestUserId) {
-          logger.error({}, 'CLERK_TEST_USER_ID not configured');
-          return NextResponse.json(
-            { success: false, error: 'Test configuration error' },
-            { status: 500 }
-          );
-        }
-
-        const testUser = await prisma.user.findUnique({
-          where: { clerkId: clerkTestUserId },
-          select: {
-            id: true,
-            clerkId: true,
-            email: true,
-            role: true,
-          },
-        });
-
-        if (testUser) {
-          const authContext: OptionalAuthContext = {
-            userId: testUser.id,
-            clerkId: testUser.clerkId,
-            email: testUser.email,
-            role: testUser.role,
-            isAuthenticated: true,
-          };
-
-          logger.info(
-            {
-              action: 'test_api_key_used',
-              userId: testUser.id,
-            },
-            '🧪 Test API key authentication used (optional auth)'
-          );
-
-          return routeContext?.params
-            ? handler(request, routeContext, authContext)
-            : handler(request, authContext);
-        }
-      }
       // ============================================
       // FIN DU BYPASS DE TEST
       // ============================================
@@ -450,7 +304,7 @@ export function withOptionalAuth(handler: ApiHandler) {
           success: false,
           error: 'Internal server error',
           message:
-            process.env.NODE_ENV === 'development'
+            env.NODE_ENV === 'development'
               ? errorMessage
               : 'Something went wrong',
           timestamp: new Date().toISOString(),

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { env } from '@/lib/env';
 
 import { logger } from '../../../../lib/logger';
 import { withError } from '../../../../lib/middleware/withError';
@@ -16,7 +17,7 @@ async function healthCheck(): Promise<NextResponse> {
       connected: true,
       userCount,
     },
-    environment: process.env.NODE_ENV,
+    environment: env.NODE_ENV,
     version: process.env.npm_package_version ?? '0.1.0',
   };
 

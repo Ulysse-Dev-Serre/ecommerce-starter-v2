@@ -12,6 +12,7 @@ import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { RevenueChart } from '@/components/admin/analytics/revenue-chart';
 import { formatPrice, type SupportedCurrency } from '@/lib/utils/currency';
 import { formatDate } from '@/lib/utils/date';
+import { env } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ interface AdminDashboardProps {
 
 export default async function AdminDashboard({ params }: AdminDashboardProps) {
   const { locale } = await params;
-  const currency = process.env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
+  const currency = env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(now.getDate() - 7);

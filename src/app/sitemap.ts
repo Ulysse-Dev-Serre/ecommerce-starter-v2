@@ -2,12 +2,15 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db/prisma';
 import { i18n } from '@/lib/i18n/config';
 
+import { env } from '@/lib/env';
+
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  ).replace(/\/$/, '');
+  const baseUrl = (env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(
+    /\/$/,
+    ''
+  );
 
   // 1. Récupérer les produits actifs
   const products = await prisma.product.findMany({

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { env } from '@/lib/env';
 
 import { logger } from '../logger';
 
@@ -26,7 +27,7 @@ export function withError(handler: ApiHandler) {
           success: false,
           error: 'Internal server error',
           message:
-            process.env.NODE_ENV === 'development'
+            env.NODE_ENV === 'development'
               ? errorMessage
               : 'Something went wrong',
           timestamp: new Date().toISOString(),

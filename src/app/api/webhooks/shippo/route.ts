@@ -5,7 +5,10 @@ import { updateOrderStatus } from '@/lib/services/order.service';
 import { OrderStatus } from '@/generated/prisma';
 import { env } from '@/lib/env';
 
-export async function POST(request: NextRequest) {
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { withError } from '@/lib/middleware/withError';
+
+async function handleShippoWebhook(request: NextRequest) {
   const requestId = crypto.randomUUID();
 
   // 1. Vérification de sécurité (Secret Token)
@@ -118,3 +121,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export const POST = withError(
+  withRateLimit(handleShippoWebhook, RateLimits.WEBHOOK)
+);

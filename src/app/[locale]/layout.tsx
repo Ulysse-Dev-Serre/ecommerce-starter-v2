@@ -1,4 +1,5 @@
 // src/app/[locale]/layout.tsx
+import { env } from '@/lib/env';
 import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
@@ -37,7 +38,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'Metadata' });
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const baseUrl = env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return {
     title: {
@@ -74,7 +75,7 @@ export default async function RootLayout({
   const { locale } = await params;
 
   // Vérifier si on a une vraie clé Clerk (pas une clé mock pour CI)
-  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const clerkKey = env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
   const hasValidClerkKey =
     clerkKey?.startsWith('pk_live_') ||
@@ -98,7 +99,7 @@ export default async function RootLayout({
             <ConditionalFooter locale={locale} />
           </ToastProvider>
           <Script
-            src={`https://maps.googleapis.com/maps/api/js?key=${clerkKey ? process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''}&libraries=places&loading=async`}
+            src={`https://maps.googleapis.com/maps/api/js?key=${clerkKey ? env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''}&libraries=places&loading=async`}
             strategy="afterInteractive"
           />
         </body>
@@ -144,7 +145,7 @@ export default async function RootLayout({
               <ConditionalFooter locale={locale} />
             </ToastProvider>
             <Script
-              src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly&loading=async`}
+              src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly&loading=async`}
               strategy="afterInteractive"
             />
           </NextIntlClientProvider>

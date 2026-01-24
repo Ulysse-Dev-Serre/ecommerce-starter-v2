@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getMessages } from 'next-intl/server';
 
 import { cookies } from 'next/headers';
 
@@ -22,6 +22,8 @@ export default async function CheckoutPage({
   const { directVariantId, directQuantity } = await searchParams;
 
   const t = await getTranslations({ locale, namespace: 'Checkout' });
+  const messages = await getMessages({ locale });
+  const geography = (messages as any).geography;
   const { userId: clerkId } = await auth();
 
   // Résolution du User ID local (Prisma) à partir du Clerk ID
@@ -184,6 +186,7 @@ export default async function CheckoutPage({
     validation: {
       phone: t('validation.phone'),
     },
+    geography: geography,
   };
 
   return (

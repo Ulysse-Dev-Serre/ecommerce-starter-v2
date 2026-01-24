@@ -1,10 +1,11 @@
+import { env } from '../env';
 import { logger } from '../logger';
 
 /**
  * Send message to Slack webhook
  */
 async function sendSlackAlert(message: string): Promise<void> {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  const webhookUrl = env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
     logger.warn({}, 'SLACK_WEBHOOK_URL not configured, skipping Slack alert');

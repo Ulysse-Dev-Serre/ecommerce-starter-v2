@@ -3,6 +3,7 @@ import { getShippingRates, Address, Parcel } from '@/lib/services/shippo';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { env } from '@/lib/env';
 import { withError } from '@/lib/middleware/withError';
 import { withValidation } from '@/lib/middleware/withValidation';
 import {
@@ -19,7 +20,7 @@ const WAREHOUSE_ADDRESS: Address = {
   state: 'QC',
   zip: 'J6A 7R3',
   country: 'CA',
-  phone: process.env.SHIPPO_FROM_PHONE || '',
+  phone: env.SHIPPO_FROM_PHONE || '',
 };
 
 const DEFAULT_PARCEL: Parcel = {
@@ -31,7 +32,11 @@ const DEFAULT_PARCEL: Parcel = {
   massUnit: 'kg',
 };
 
-async function handler(req: NextRequest, data: ShippingRequestInput) {
+async function handler(
+  req: NextRequest,
+  _context: unknown,
+  data: ShippingRequestInput
+) {
   try {
     // Data is already validated by withValidation
     const { addressTo, cartId: bodyCartId } = data;
@@ -202,8 +207,8 @@ async function handler(req: NextRequest, data: ShippingRequestInput) {
             firstProduct?.exportExplanation || 'Merchandise';
 
           // Determine B13A (Env > Default)
-          const b13aOption = process.env.SHIPPO_EXPORT_B13A_OPTION;
-          const b13aNumber = process.env.SHIPPO_EXPORT_B13A_NUMBER;
+          const b13aOption = env.SHIPPO_EXPORT_B13A_OPTION;
+          const b13aNumber = env.SHIPPO_EXPORT_B13A_NUMBER;
           logger.info(
             { b13aOption, b13aNumber },
             'DEBUG: B13A Values from Env'

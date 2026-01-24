@@ -13,10 +13,11 @@ import AddressAutocomplete from './AddressAutocomplete';
 import { trackEvent } from '@/lib/analytics/tracker';
 import { formatPrice } from '@/lib/utils/currency';
 
+import { env } from '@/lib/env';
+import { siteTokens } from '@/styles/themes/tokens';
+
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
-);
+const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface CheckoutClientProps {
   cartId: string;
@@ -50,6 +51,10 @@ interface CheckoutClientProps {
     statePlaceholder: string;
     validation: {
       phone: string;
+    };
+    geography: {
+      CA: Record<string, string>;
+      US: Record<string, string>;
     };
   };
   userEmail?: string | null | undefined;
@@ -90,15 +95,7 @@ export function CheckoutClient({
           }
         : undefined;
 
-    // TODO: Créer une route API dédiée pour initier l'intention de paiement custom
-    // Pour l'instant on va simuler ou appeler l'existante si compatible
-
-    // NOTE: C'est ici que la stratégie change. Avec "AddressElement", on a besoin d'un PaymentIntent
-    // ou d'un SetupIntent dès le début sur le serveur.
-
-    // On va devoir modifier /api/checkout/create-session ou en créer une nouvelle /api/checkout/create-intent
-    // car 'create-session' crée une session Stripe Checkout (page hébergée), pas un Intent pour Elements custom.
-
+    // Create intent
     void fetch('/api/checkout/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -131,21 +128,21 @@ export function CheckoutClient({
         appearance: {
           theme: 'stripe',
           variables: {
-            colorPrimary: '#0f172a', // slate-900 like
-            colorText: '#1e293b', // slate-800
-            colorDanger: '#ef4444',
+            colorPrimary: siteTokens.colors.primary,
+            colorText: siteTokens.colors.text,
+            colorDanger: siteTokens.colors.error,
             fontFamily: 'system-ui, sans-serif',
             spacingUnit: '4px',
             borderRadius: '8px',
           },
           rules: {
             '.Label': {
-              color: '#334155', // slate-700
+              color: siteTokens.colors.mutedForeground,
               fontWeight: '500',
             },
             '.Input': {
-              borderColor: '#e2e8f0', // slate-200
-              color: '#1e293b',
+              borderColor: siteTokens.colors.border,
+              color: siteTokens.colors.text,
             },
           },
         },
@@ -198,6 +195,10 @@ interface CheckoutFormProps {
     statePlaceholder: string;
     validation: {
       phone: string;
+    };
+    geography: {
+      CA: Record<string, string>;
+      US: Record<string, string>;
     };
   };
   userEmail?: string | null | undefined;
@@ -320,8 +321,6 @@ function CheckoutForm({
         email: userEmail,
       };
 
-      console.log('Sending update-intent with details:', finalShippingDetails);
-
       const res = await fetch('/api/checkout/update-intent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -333,9 +332,6 @@ function CheckoutForm({
         }),
       });
       const data = await res.json();
-      if (data.success && data.amount) {
-        console.log('Payment intent updated with new total:', data.amount);
-      }
     } catch (err) {
       console.error('Failed to update shipping cost', err);
     }
@@ -566,19 +562,11 @@ function CheckoutForm({
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
                     >
                       <option value="">{t.selectState}</option>
-                      <option value="AB">Alberta</option>
-                      <option value="BC">Colombie-Britannique</option>
-                      <option value="MB">Manitoba</option>
-                      <option value="NB">Nouveau-Brunswick</option>
-                      <option value="NL">Terre-Neuve-et-Labrador</option>
-                      <option value="NS">Nouvelle-Écosse</option>
-                      <option value="NT">Territoires du Nord-Ouest</option>
-                      <option value="NU">Nunavut</option>
-                      <option value="ON">Ontario</option>
-                      <option value="PE">Île-du-Prince-Édouard</option>
-                      <option value="QC">Québec</option>
-                      <option value="SK">Saskatchewan</option>
-                      <option value="YT">Yukon</option>
+                      {Object.entries(t.geography.CA).map(([code, name]) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
                     </select>
                   ) : tempAddress?.country === 'US' ? (
                     <select
@@ -592,57 +580,11 @@ function CheckoutForm({
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
                     >
                       <option value="">{t.selectState}</option>
-                      <option value="AL">Alabama</option>
-                      <option value="AK">Alaska</option>
-                      <option value="AZ">Arizona</option>
-                      <option value="AR">Arkansas</option>
-                      <option value="CA">California</option>
-                      <option value="CO">Colorado</option>
-                      <option value="CT">Connecticut</option>
-                      <option value="DE">Delaware</option>
-                      <option value="DC">District Of Columbia</option>
-                      <option value="FL">Florida</option>
-                      <option value="GA">Georgia</option>
-                      <option value="HI">Hawaii</option>
-                      <option value="ID">Idaho</option>
-                      <option value="IL">Illinois</option>
-                      <option value="IN">Indiana</option>
-                      <option value="IA">Iowa</option>
-                      <option value="KS">Kansas</option>
-                      <option value="KY">Kentucky</option>
-                      <option value="LA">Louisiana</option>
-                      <option value="ME">Maine</option>
-                      <option value="MD">Maryland</option>
-                      <option value="MA">Massachusetts</option>
-                      <option value="MI">Michigan</option>
-                      <option value="MN">Minnesota</option>
-                      <option value="MS">Mississippi</option>
-                      <option value="MO">Missouri</option>
-                      <option value="MT">Montana</option>
-                      <option value="NE">Nebraska</option>
-                      <option value="NV">Nevada</option>
-                      <option value="NH">New Hampshire</option>
-                      <option value="NJ">New Jersey</option>
-                      <option value="NM">New Mexico</option>
-                      <option value="NY">New York</option>
-                      <option value="NC">North Carolina</option>
-                      <option value="ND">North Dakota</option>
-                      <option value="OH">Ohio</option>
-                      <option value="OK">Oklahoma</option>
-                      <option value="OR">Oregon</option>
-                      <option value="PA">Pennsylvania</option>
-                      <option value="RI">Rhode Island</option>
-                      <option value="SC">South Carolina</option>
-                      <option value="SD">South Dakota</option>
-                      <option value="TN">Tennessee</option>
-                      <option value="TX">Texas</option>
-                      <option value="UT">Utah</option>
-                      <option value="VT">Vermont</option>
-                      <option value="VA">Virginia</option>
-                      <option value="WA">Washington</option>
-                      <option value="WV">West Virginia</option>
-                      <option value="WI">Wisconsin</option>
-                      <option value="WY">Wyoming</option>
+                      {Object.entries(t.geography.US).map(([code, name]) => (
+                        <option key={code} value={code}>
+                          {name}
+                        </option>
+                      ))}
                     </select>
                   ) : (
                     <input

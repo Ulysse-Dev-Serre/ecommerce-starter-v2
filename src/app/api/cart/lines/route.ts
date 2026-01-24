@@ -7,6 +7,7 @@ import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '../../../../lib/middleware/withAuth';
+import { env } from '@/lib/env';
 import { withValidation } from '../../../../lib/middleware/withValidation';
 import {
   withRateLimit,
@@ -76,7 +77,7 @@ async function addToCartHandler(
     if (!userId && anonymousId) {
       response.cookies.set('cart_anonymous_id', anonymousId, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60,
       });

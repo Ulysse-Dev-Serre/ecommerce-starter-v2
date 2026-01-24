@@ -1,11 +1,12 @@
-'use client';
+import { env } from '@/lib/env';
+import { SupportedCurrency } from '@/lib/types/currency';
 
-export type Currency = 'CAD' | 'USD';
+export type Currency = SupportedCurrency;
 
 const DEFAULT_CURRENCY: Currency = 'CAD';
 
 function getCurrencyFromEnv(): Currency {
-  const envCurrency = process.env.NEXT_PUBLIC_CURRENCY;
+  const envCurrency = env.NEXT_PUBLIC_CURRENCY;
   return envCurrency === 'CAD' || envCurrency === 'USD'
     ? envCurrency
     : DEFAULT_CURRENCY;

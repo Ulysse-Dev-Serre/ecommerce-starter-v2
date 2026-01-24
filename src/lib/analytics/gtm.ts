@@ -1,4 +1,6 @@
-export const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+import { env } from '@/lib/env';
+
+export const GTM_ID = env.NEXT_PUBLIC_GTM_ID;
 
 type WindowWithDataLayer = Window & {
   dataLayer: Record<string, any>[];

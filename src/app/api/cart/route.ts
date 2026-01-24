@@ -8,6 +8,7 @@ import {
   withOptionalAuth,
 } from '../../../lib/middleware/withAuth';
 import { getOrCreateCart } from '../../../lib/services/cart.service';
+import { env } from '@/lib/env';
 
 async function getCartHandler(
   request: NextRequest,
@@ -72,7 +73,7 @@ async function getCartHandler(
   if (newAnonymousId) {
     response.cookies.set('cart_anonymous_id', newAnonymousId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60, // 30 jours
     });

@@ -23,100 +23,105 @@ import {
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { env } from '../../../../lib/env';
+import { withError } from '../../../../lib/middleware/withError';
+
+// ... (imports remain)
 
 async function handler(request: NextRequest): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-
   let stripeEvent: Stripe.Event | undefined;
 
-  try {
-    const body = await request.text();
+  // REMOVED: Top-level try-catch block is now handled by withError
 
-    // LOG TOTAL: RAW BODY (Tronqué à 5000 chars pour éviter le spam, mais suffisant pour le début)
-    logger.info(
-      {
-        rawBodyPreview: body.substring(0, 5000),
-        length: body.length,
-      },
-      'DEBUG: STRIPE WEBHOOK RAW BODY'
+  const body = await request.text();
+
+  // LOG TOTAL: RAW BODY
+  logger.info(
+    {
+      rawBodyPreview: body.substring(0, 5000),
+      length: body.length,
+    },
+    'DEBUG: STRIPE WEBHOOK RAW BODY'
+  );
+
+  const signature = request.headers.get('stripe-signature');
+
+  if (!signature) {
+    logger.error({ requestId }, 'Missing stripe-signature header');
+    await alertInvalidSignature({
+      source: 'stripe',
+      signature: 'MISSING',
+      error: 'stripe-signature header not provided',
+      timestamp: new Date(),
+    });
+    return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
+  }
+
+  const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    logger.error({ requestId }, 'STRIPE_WEBHOOK_SECRET not configured');
+    // Using 500 triggers retry, which is correct for config error
+    return NextResponse.json(
+      { error: 'Webhook not configured' },
+      { status: 500 }
     );
+  }
 
-    const signature = request.headers.get('stripe-signature');
+  try {
+    stripeEvent = validateWebhookSignature(body, signature, webhookSecret);
+  } catch (error) {
+    await alertInvalidSignature({
+      source: 'stripe',
+      signature: signature.substring(0, 20),
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date(),
+    });
+    return NextResponse.json(
+      { error: 'Invalid webhook signature' },
+      { status: 400 }
+    );
+  }
 
-    if (!signature) {
-      logger.error({ requestId }, 'Missing stripe-signature header');
-      await alertInvalidSignature({
+  logger.info(
+    {
+      requestId,
+      eventId: stripeEvent.id,
+      eventType: stripeEvent.type,
+    },
+    'Webhook event received'
+  );
+
+  const payloadHash = generatePayloadHash(body);
+  const existingEvent = await prisma.webhookEvent.findUnique({
+    where: {
+      source_eventId: {
         source: 'stripe',
-        signature: 'MISSING',
-        error: 'stripe-signature header not provided',
-        timestamp: new Date(),
-      });
-      return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
-    }
+        eventId: stripeEvent.id,
+      },
+    },
+  });
 
-    const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
-    if (!webhookSecret) {
-      logger.error({ requestId }, 'STRIPE_WEBHOOK_SECRET not configured');
-      return NextResponse.json(
-        { error: 'Webhook not configured' },
-        { status: 500 }
-      );
-    }
-
-    try {
-      stripeEvent = validateWebhookSignature(body, signature, webhookSecret);
-    } catch (error) {
-      await alertInvalidSignature({
-        source: 'stripe',
-        signature: signature.substring(0, 20),
-        error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date(),
-      });
-      return NextResponse.json(
-        { error: 'Invalid webhook signature' },
-        { status: 400 }
-      );
-    }
-
+  if (existingEvent?.processed) {
     logger.info(
-      {
-        requestId,
+      { requestId, eventId: stripeEvent.id },
+      'Webhook already processed, skipping'
+    );
+    return NextResponse.json({ received: true });
+  }
+
+  if (!existingEvent) {
+    await prisma.webhookEvent.create({
+      data: {
+        source: 'stripe',
         eventId: stripeEvent.id,
         eventType: stripeEvent.type,
-      },
-      'Webhook event received'
-    );
-
-    const payloadHash = generatePayloadHash(body);
-    const existingEvent = await prisma.webhookEvent.findUnique({
-      where: {
-        source_eventId: {
-          source: 'stripe',
-          eventId: stripeEvent.id,
-        },
+        payloadHash,
+        processed: false,
       },
     });
+  }
 
-    if (existingEvent?.processed) {
-      logger.info(
-        { requestId, eventId: stripeEvent.id },
-        'Webhook already processed, skipping'
-      );
-      return NextResponse.json({ received: true });
-    }
-
-    if (!existingEvent) {
-      await prisma.webhookEvent.create({
-        data: {
-          source: 'stripe',
-          eventId: stripeEvent.id,
-          eventType: stripeEvent.type,
-          payloadHash,
-          processed: false,
-        },
-      });
-    }
-
+  try {
     switch (stripeEvent.type) {
       case 'checkout.session.completed': {
         const session = stripeEvent.data.object as Stripe.Checkout.Session;
@@ -164,6 +169,11 @@ async function handler(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ received: true });
   } catch (error) {
+    // Business logic error handling (DB updates, Alerts)
+    // We bubble this up if we want standard 500, OR we handle it here if we need specific alert logic.
+    // The original code handled retries and alerts here. We should KEEP this inner try/catch
+    // for the business logic alerts, but rely on withError for anything that slips through.
+
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 
     logger.error(
@@ -176,43 +186,23 @@ async function handler(request: NextRequest): Promise<NextResponse> {
       'Webhook processing failed'
     );
 
-    // Update webhook event with error details if event exists
     if (stripeEvent?.id) {
       const webhookEvent = await prisma.webhookEvent.findUnique({
         where: {
-          source_eventId: {
-            source: 'stripe',
-            eventId: stripeEvent.id,
-          },
+          source_eventId: { source: 'stripe', eventId: stripeEvent.id },
         },
       });
 
       if (webhookEvent) {
         const updatedEvent = await prisma.webhookEvent.update({
-          where: {
-            source_eventId: {
-              source: 'stripe',
-              eventId: stripeEvent.id,
-            },
-          },
+          where: { id: webhookEvent.id },
           data: {
             retryCount: { increment: 1 },
             lastError: errorMsg,
           },
         });
 
-        // Check if max retries reached
         if (updatedEvent.retryCount >= updatedEvent.maxRetries) {
-          logger.error(
-            {
-              requestId,
-              eventId: stripeEvent.id,
-              retryCount: updatedEvent.retryCount,
-              maxRetries: updatedEvent.maxRetries,
-            },
-            'Webhook max retries reached, alerting'
-          );
-
           await alertWebhookFailure({
             webhookId: webhookEvent.id,
             source: 'stripe',
@@ -223,29 +213,18 @@ async function handler(request: NextRequest): Promise<NextResponse> {
             maxRetries: updatedEvent.maxRetries,
             timestamp: new Date(),
           });
-
-          // Return 200 to stop Stripe from retrying
-          return NextResponse.json({ received: true });
+          return NextResponse.json({ received: true }); // Stop retrying
         }
-
-        // Return 500 to trigger Stripe retry
-        return NextResponse.json(
-          { error: errorMsg, retryCount: updatedEvent.retryCount },
-          { status: 500 }
-        );
+        // Trigger retry
+        return NextResponse.json({ error: errorMsg }, { status: 500 });
       }
     }
-
-    return NextResponse.json(
-      {
-        error: errorMsg,
-      },
-      { status: 400 }
-    );
+    // If no event found to update, still error out
+    throw error; // Let withError handle the final fallback
   }
 }
 
-export const POST = withRateLimit(handler, RateLimits.WEBHOOK);
+export const POST = withError(withRateLimit(handler, RateLimits.WEBHOOK));
 
 // Helper pour extraire l'adresse de Stripe
 function extractShippingAddress(

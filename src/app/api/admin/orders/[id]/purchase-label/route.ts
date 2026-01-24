@@ -5,6 +5,7 @@ import { withError } from '@/lib/middleware/withError';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import type { AuthContext } from '@/lib/middleware/withAuth';
+import { env } from '@/lib/env';
 
 async function purchaseLabelHandler(
   request: Request,
@@ -97,15 +98,15 @@ async function purchaseLabelHandler(
         }
 
         const addressFrom = {
-          name: process.env.SHIPPO_FROM_NAME || 'AgTechNest Warehouse',
-          company: process.env.SHIPPO_FROM_COMPANY || 'AgTechNest',
-          street1: process.env.SHIPPO_FROM_STREET1 || '123 Tech Blvd',
-          city: process.env.SHIPPO_FROM_CITY || 'Montreal',
-          state: process.env.SHIPPO_FROM_STATE || 'QC',
-          zip: process.env.SHIPPO_FROM_ZIP || 'H2X 1Y6',
-          country: process.env.SHIPPO_FROM_COUNTRY || 'CA',
-          email: process.env.SHIPPO_FROM_EMAIL || 'admin@agtechnest.com',
-          phone: process.env.SHIPPO_FROM_PHONE || '',
+          name: env.SHIPPO_FROM_NAME || '',
+          company: env.SHIPPO_FROM_COMPANY || '',
+          street1: env.SHIPPO_FROM_STREET1 || '',
+          city: env.SHIPPO_FROM_CITY || '',
+          state: env.SHIPPO_FROM_STATE || '',
+          zip: env.SHIPPO_FROM_ZIP || '',
+          country: env.SHIPPO_FROM_COUNTRY || 'CA',
+          email: env.SHIPPO_FROM_EMAIL || '',
+          phone: env.SHIPPO_FROM_PHONE || '',
         };
 
         const addressTo = {

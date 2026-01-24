@@ -1,6 +1,7 @@
 import { StorageProvider, StorageProviderType, StorageConfig } from './types';
 import { LocalStorageProvider } from './providers/local.provider';
 import { S3StorageProvider } from './providers/s3.provider';
+import { env } from '../env';
 
 /**
  * Factory pour créer le bon provider de stockage selon la configuration
@@ -55,8 +56,7 @@ export class StorageService {
    * Charge la configuration depuis les variables d'environnement
    */
   private static getConfig(): StorageConfig {
-    const provider = (process.env.STORAGE_PROVIDER ||
-      'local') as StorageProviderType;
+    const provider = env.STORAGE_PROVIDER;
 
     const config: StorageConfig = {
       provider,
@@ -65,28 +65,28 @@ export class StorageService {
     // Configuration locale
     if (provider === 'local') {
       config.local = {
-        uploadDir: process.env.STORAGE_LOCAL_UPLOAD_DIR || 'public/uploads',
-        publicPath: process.env.STORAGE_LOCAL_PUBLIC_PATH || '/uploads',
+        uploadDir: env.STORAGE_LOCAL_UPLOAD_DIR,
+        publicPath: env.STORAGE_LOCAL_PUBLIC_PATH,
       };
     }
 
     // Configuration S3
     if (provider === 's3') {
       config.s3 = {
-        bucket: process.env.STORAGE_S3_BUCKET || '',
-        region: process.env.STORAGE_S3_REGION || 'us-east-1',
-        accessKeyId: process.env.STORAGE_S3_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.STORAGE_S3_SECRET_ACCESS_KEY || '',
-        endpoint: process.env.STORAGE_S3_ENDPOINT,
+        bucket: env.STORAGE_S3_BUCKET || '',
+        region: env.STORAGE_S3_REGION || 'us-east-1',
+        accessKeyId: env.STORAGE_S3_ACCESS_KEY_ID || '',
+        secretAccessKey: env.STORAGE_S3_SECRET_ACCESS_KEY || '',
+        endpoint: env.STORAGE_S3_ENDPOINT,
       };
     }
 
     // Configuration Cloudinary
     if (provider === 'cloudinary') {
       config.cloudinary = {
-        cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
-        apiKey: process.env.CLOUDINARY_API_KEY || '',
-        apiSecret: process.env.CLOUDINARY_API_SECRET || '',
+        cloudName: env.CLOUDINARY_CLOUD_NAME || '',
+        apiKey: env.CLOUDINARY_API_KEY || '',
+        apiSecret: env.CLOUDINARY_API_SECRET || '',
       };
     }
 
