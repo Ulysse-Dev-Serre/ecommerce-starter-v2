@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import React from 'react';
 
 interface PageProps {
@@ -6,26 +7,24 @@ interface PageProps {
 
 export default async function PrivacyPage({ params }: PageProps) {
   const { locale } = await params;
-  // Dynamic import of the dictionary based on locale
-  const dictionary = (await import(`@/lib/i18n/dictionaries/${locale}.json`))
-    .default;
+  const t = await getTranslations({ locale, namespace: 'legal' });
 
-  const t = dictionary.legal.privacyPolicy;
-  const lastUpdated = dictionary.legal.lastUpdated.replace(
-    '{date}',
-    new Date().toLocaleDateString(locale)
-  );
+  const lastUpdated = t('lastUpdated', {
+    date: new Date().toLocaleDateString(locale),
+  });
 
   return (
     <div className="space-y-6">
       <div className="border-b pb-4">
-        <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {t('privacyPolicy.title')}
+        </h1>
         <p className="text-muted-foreground mt-2">{lastUpdated}</p>
       </div>
 
       <div className="prose prose-stone dark:prose-invert max-w-none">
         <p className="whitespace-pre-line text-lg leading-relaxed">
-          {t.content}
+          {t('privacyPolicy.content')}
         </p>
 
         {/* Placeholder real content structure for visual validation */}

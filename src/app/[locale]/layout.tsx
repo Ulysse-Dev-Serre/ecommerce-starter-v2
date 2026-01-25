@@ -74,84 +74,61 @@ export default async function RootLayout({
   params,
 }: RootLayoutProps): Promise<React.ReactElement> {
   const { locale } = await params;
+  const messages = await getMessages({ locale });
 
   // Vérifier si on a une vraie clé Clerk (pas une clé mock pour CI)
   const clerkKey = env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
   const hasValidClerkKey =
     clerkKey?.startsWith('pk_live_') ||
     (clerkKey?.startsWith('pk_test_') &&
       clerkKey !== 'pk_test_mock_key_for_ci_build_only');
 
-  if (!hasValidClerkKey) {
-    // Mode CI/build sans Clerk
-    return (
-      <html lang={locale}>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
-        >
+  // Récupérer le rôle de l'utilisateur si Clerk est actif
+  let userRole: string | undefined;
+  if (hasValidClerkKey) {
+    try {
+      const { userId: clerkId } = await auth();
+      if (clerkId) {
+        const user = await prisma.user.findUnique({
+          where: { clerkId },
+          select: { role: true },
+        });
+        userRole = user?.role;
+      }
+    } catch (error) {
+      userRole = undefined;
+    }
+  }
+
+  const content = (
+    <html lang={locale}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+      >
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleTagManager />
           <CookieConsentComponent />
           <Suspense fallback={null}>
             <AnalyticsTracker />
           </Suspense>
           <ToastProvider>
-            {children}
+            <CartMergeHandler />
+            <ConditionalNavbar locale={locale} userRole={userRole} />
+            <main className="flex-grow">{children}</main>
             <ConditionalFooter locale={locale} />
           </ToastProvider>
           <Script
-            src={`https://maps.googleapis.com/maps/api/js?key=${clerkKey ? env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY : ''}&libraries=places&loading=async`}
+            src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly&loading=async`}
             strategy="afterInteractive"
           />
-        </body>
-      </html>
-    );
-  }
-
-  // Récupérer le rôle de l'utilisateur
-  let userRole: string | undefined;
-  try {
-    const { userId: clerkId } = await auth();
-    if (clerkId) {
-      const user = await prisma.user.findUnique({
-        where: { clerkId },
-        select: { role: true },
-      });
-      userRole = user?.role;
-    }
-  } catch (error) {
-    // Ignorer les erreurs (utilisateur non connecté, etc.)
-    userRole = undefined;
-  }
-
-  // Mode normal avec Clerk
-  const messages = await getMessages({ locale });
-
-  return (
-    <ClerkProvider>
-      <html lang={locale}>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
-        >
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <GoogleTagManager />
-            <CookieConsentComponent />
-            <Suspense fallback={null}>
-              <AnalyticsTracker />
-            </Suspense>
-            <ToastProvider>
-              <CartMergeHandler />
-              <ConditionalNavbar locale={locale} userRole={userRole} />
-              {children}
-              <ConditionalFooter locale={locale} />
-            </ToastProvider>
-            <Script
-              src={`https://maps.googleapis.com/maps/api/js?key=${env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places&v=weekly&loading=async`}
-              strategy="afterInteractive"
-            />
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
+
+  if (!hasValidClerkKey) {
+    return content;
+  }
+
+  return <ClerkProvider>{content}</ClerkProvider>;
 }

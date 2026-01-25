@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ContactPage({ params }: Props) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'contact' });
+  const t = await getTranslations({ locale, namespace: 'common' });
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">

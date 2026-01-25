@@ -15,7 +15,7 @@ jobs:
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_mock_key_for_ci_build_only
       CLERK_SECRET_KEY: sk_test_mock_key_for_ci_build_only
       CLERK_WEBHOOK_SECRET: whsec_mock_key_for_ci
-      NEXT_PUBLIC_CORS_ORIGIN: '*'
+      NEXT_PUBLIC_CORS_ORIGIN: 'http://localhost:3000'
       DATABASE_URL: postgresql://user:password@localhost:5432/ci_db?schema=public
       NEXT_PUBLIC_SITE_NAME: 'AgTechNest CI'
       NEXT_PUBLIC_SITE_URL: 'http://localhost:3000'
