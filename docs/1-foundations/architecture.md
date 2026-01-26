@@ -277,7 +277,7 @@ export function withAdmin(handler: ApiHandler) {
 
 L'architecture en couches facilite les tests unitaires et d'intégration. Les services sont isolés et mockables.
 
-**Pour plus de détails** : [Documentation Tests](../6-test/)
+**Pour plus de détails** : [Documentation Tests](../14-test/)
 
 ---
 
@@ -291,7 +291,7 @@ L'application implémente plusieurs mesures de sécurité :
 - **Webhook Security** : Vérification signatures (Clerk + Stripe)
 - **SQL Injection** : Protection native Prisma (parameterized queries)
 
-**Pour plus de détails** : [Documentation Sécurité](../7-securite/)
+**Pour plus de détails** : [Documentation Sécurité](../8-securite/)
 
 ---
 
@@ -303,7 +303,7 @@ Architecture multilingue avec routing localisé et traductions en base de donné
 - **Traductions UI** : Dictionnaires JSON (`en.json`, `fr.json`)
 - **Contenu DB** : Tables `*_translations` (Product, Category, Attributes)
 
-**Pour plus de détails** : [Configuration i18n](../2-Language_internationalization/language-config.md)
+**Pour plus de détails** : [Configuration i18n](../9-Language_internationalization/i18n-architecture.md)
 
 ---
 
@@ -312,10 +312,10 @@ Architecture multilingue avec routing localisé et traductions en base de donné
 - [Stack Technique](./stack-tech.md) - Technologies utilisées
 - [Setup](./setup.md) - Installation et configuration
 - [Roadmap](./Roadmap.md) - Évolution du projet
-- [Base de données](../4-database-stack/prisma-migrations.md) - Schéma et migrations
-- [Tests](../6-test/) - Stratégie de tests
-- [Sécurité](../7-securite/) - Mesures de sécurité
-- [Internationalisation](../2-Language_internationalization/) - Configuration i18n
+- [Base de données](../3-database-stack/maintenance-and-production.md) - Schéma et migrations
+- [Tests](../14-test/) - Stratégie de tests
+- [Sécurité](../8-securite/) - Mesures de sécurité
+- [Internationalisation](../9-Language_internationalization/) - Configuration i18n
 
 ---
 

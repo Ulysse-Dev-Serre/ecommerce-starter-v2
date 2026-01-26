@@ -78,7 +78,7 @@ npm run sync-clerk sync
 
 Configuration webhooks Clerk pour synchronisation automatique en développement.
 
-**Guide complet** : [Clerk ↔ PostgreSQL Synchronisation](../4-database-stack/clerk-postgres-sync.md)
+**Guide complet** : [Workflow d'Authentification](../4-authentication/authentication-workflow.md)
 
 ---
 
@@ -125,6 +125,6 @@ npm run dev:setup
 ## Prochaines étapes
 
 1. **[Architecture système](architecture.md)** - Comprendre la structure
-2. **[Clerk ↔ PostgreSQL](../4-database-stack/clerk-postgres-sync.md)** - Configuration webhooks détaillée
-3. **[Système i18n](../2-Language_internationalization/language-config.md)** - Ajouter des langues
-4. **[Thèmes CSS](../3-development-tools/theming.md)** - Personnaliser l'apparence
+2. **[Workflow Authentification](../4-authentication/authentication-workflow.md)** - Flux Clerk ↔ Postgres
+3. **[Architecture i18n](../9-Language_internationalization/i18n-architecture.md)** - Multilingue
+4. **[Thèmes CSS](../10-frontend/theming.md)** - Personnaliser l'apparence
