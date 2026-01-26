@@ -3,13 +3,12 @@ import { SupportedCurrency } from '@/lib/types/currency';
 
 export type Currency = SupportedCurrency;
 
-const DEFAULT_CURRENCY: Currency = 'CAD';
+const DEFAULT_CURRENCY: Currency =
+  (env.NEXT_PUBLIC_CURRENCY as Currency) || 'CAD';
 
 function getCurrencyFromEnv(): Currency {
   const envCurrency = env.NEXT_PUBLIC_CURRENCY;
-  return envCurrency === 'CAD' || envCurrency === 'USD'
-    ? envCurrency
-    : DEFAULT_CURRENCY;
+  return (envCurrency as Currency) || DEFAULT_CURRENCY;
 }
 
 export function useCurrency() {
@@ -35,20 +34,22 @@ export function getPriceForCurrency(
   const cadPrice = prices.priceCAD != null ? String(prices.priceCAD) : null;
   const usdPrice = prices.priceUSD != null ? String(prices.priceUSD) : null;
 
-  if (currency === 'USD') {
-    if (usdPrice && parseFloat(usdPrice) > 0) {
-      return { price: usdPrice, currency: 'USD', isFallback: false };
-    }
-    if (cadPrice && parseFloat(cadPrice) > 0) {
-      return { price: cadPrice, currency: 'CAD', isFallback: true };
-    }
-  } else {
-    if (cadPrice && parseFloat(cadPrice) > 0) {
-      return { price: cadPrice, currency: 'CAD', isFallback: false };
-    }
-    if (usdPrice && parseFloat(usdPrice) > 0) {
-      return { price: usdPrice, currency: 'USD', isFallback: true };
-    }
+  // 1. Essayer la devise demandée
+  const requestedPrice = currency === 'USD' ? prices.priceUSD : prices.priceCAD;
+  if (requestedPrice != null && parseFloat(String(requestedPrice)) > 0) {
+    return { price: String(requestedPrice), currency, isFallback: false };
+  }
+
+  // 2. Fallback sur l'autre devise principale (CAD <-> USD)
+  const fallbackCurrency = currency === 'USD' ? 'CAD' : 'USD';
+  const fallbackPrice = currency === 'USD' ? prices.priceCAD : prices.priceUSD;
+
+  if (fallbackPrice != null && parseFloat(String(fallbackPrice)) > 0) {
+    return {
+      price: String(fallbackPrice),
+      currency: fallbackCurrency,
+      isFallback: true,
+    };
   }
 
   return { price: '0', currency: currency, isFallback: false };

@@ -9,10 +9,8 @@ import {
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { stripe } from '../../../../lib/stripe/client';
-import {
-  toStripeAmount,
-  SupportedCurrency,
-} from '../../../../lib/utils/currency';
+import { toStripeAmount } from '../../../../lib/utils/currency';
+import { SupportedCurrency } from '@/lib/types/currency';
 import {
   updateIntentSchema,
   UpdateIntentInput,

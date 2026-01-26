@@ -2,14 +2,14 @@
 // GLOBAL DEFINITIONS (What the system supports fully in DB/Admin)
 // -----------------------------------------------------------------------------
 
+import { env } from '@/lib/env';
+
 /**
  * All currencies supported by the database and admin interface.
  * Used for product pricing entry and multi-currency storage.
  */
-export const DB_CURRENCIES = ['CAD', 'USD'] as const;
-export type DbCurrency = (typeof DB_CURRENCIES)[number];
-
-import { env } from '@/lib/env';
+export const DB_CURRENCIES = env.NEXT_PUBLIC_SUPPORTED_CURRENCIES as string[];
+export type DbCurrency = string;
 
 /**
  * All locales supported by the application.

@@ -86,7 +86,8 @@ const clientSchema = z.object({
   // i18n & Currency
   NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default('en'),
   NEXT_PUBLIC_LOCALES: z.string().default('fr,en'),
-  NEXT_PUBLIC_CURRENCY: z.string().default('CAD'),
+  NEXT_PUBLIC_CURRENCY: z.string().optional(),
+  NEXT_PUBLIC_SUPPORTED_CURRENCIES: z.string().default('CAD,USD'),
 });
 
 // Fusion des schémas pour inférence de type
@@ -104,6 +105,8 @@ const _clientEnv = clientSchema.safeParse({
   NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
   NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES,
   NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
+  NEXT_PUBLIC_SUPPORTED_CURRENCIES:
+    process.env.NEXT_PUBLIC_SUPPORTED_CURRENCIES,
 });
 
 const _serverEnv = serverSchema.safeParse(process.env);
@@ -194,5 +197,8 @@ export const env = {
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
   NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'en',
   NEXT_PUBLIC_LOCALES: (process.env.NEXT_PUBLIC_LOCALES || 'fr,en').split(','),
-  NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY || 'CAD',
+  NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
+  NEXT_PUBLIC_SUPPORTED_CURRENCIES: (
+    process.env.NEXT_PUBLIC_SUPPORTED_CURRENCIES || 'CAD,USD'
+  ).split(','),
 } as const;

@@ -1,8 +1,8 @@
 import type { Decimal } from '@prisma/client/runtime/library';
 
-export type SupportedCurrency = 'CAD' | 'USD';
+import { SupportedCurrency } from '../types/currency';
 
-export const CURRENCY_DECIMALS: Record<SupportedCurrency, number> = {
+export const CURRENCY_DECIMALS: Record<string, number> = {
   CAD: 2,
   USD: 2,
 };
@@ -34,11 +34,12 @@ export function formatPrice(
         ? parseFloat(amount)
         : amount;
 
+  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
   const options: Intl.NumberFormatOptions = {
     style: 'currency',
     currency,
-    minimumFractionDigits: CURRENCY_DECIMALS[currency],
-    maximumFractionDigits: CURRENCY_DECIMALS[currency],
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   };
 
   if (!showCurrencyCode) {
@@ -67,7 +68,7 @@ export function toStripeAmount(
   if (!currency) throw new Error('toStripeAmount: currency is required');
   const numericAmount =
     typeof amount === 'string' ? parseFloat(amount) : amount;
-  const decimals = CURRENCY_DECIMALS[currency];
+  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
   return Math.round(numericAmount * Math.pow(10, decimals));
 }
 
@@ -79,6 +80,6 @@ export function fromStripeAmount(
   currency: SupportedCurrency
 ): number {
   if (!currency) throw new Error('fromStripeAmount: currency is required');
-  const decimals = CURRENCY_DECIMALS[currency];
+  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
   return stripeAmount / Math.pow(10, decimals);
 }

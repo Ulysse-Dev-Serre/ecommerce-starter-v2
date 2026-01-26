@@ -8,9 +8,9 @@ import { env } from '@/lib/env';
 const { locales, defaultLocale } = i18n;
 
 const CURRENCY_COOKIE_NAME = 'currency';
-const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;
-type Currency = (typeof SUPPORTED_CURRENCIES)[number];
-const DEFAULT_CURRENCY: Currency = 'CAD';
+const SUPPORTED_CURRENCIES = env.NEXT_PUBLIC_SUPPORTED_CURRENCIES as string[];
+type Currency = string;
+const DEFAULT_CURRENCY = env.NEXT_PUBLIC_CURRENCY as Currency;
 
 function detectCurrencyFromCountry(countryCode: string | null): Currency {
   if (!countryCode) return DEFAULT_CURRENCY;
