@@ -368,9 +368,12 @@
       "statusRefundRequested": "Refund Requested",
       "tracking": "Tracking",
       "trackPackage": "Track Package",
-      "apartment": "Apt / Suite"
+      "apartment": "Apt / Suite",
+      "productFallback": "Product",
+      "standardShipping": "Standard Shipping"
     },
     "refund": {
+      "clientFallback": "Customer",
       "requestTitle": "Request a Refund",
       "requestDescription": "If you have any issues with your order, you can send us a refund request. Please explain the reason and attach a photo if necessary.",
       "reasonLabel": "Reason for your request",
@@ -534,7 +537,26 @@
         "payment": "Payment",
         "actions": "Actions",
         "view": "View",
+        "viewDetails": "View details",
         "noOrders": "No orders found"
+      },
+      "statusActions": {
+        "title": "Admin Actions",
+        "help": "* Automatic Stripe/Shippo status. Fallback buttons only.",
+        "markShipped": "MARK AS SHIPPED",
+        "generateReturnLabel": "GENERATE RETURN LABEL",
+        "confirmRefund": "CONFIRM REFUND",
+        "refund": "REFUND",
+        "confirmShipped": "Have you shipped the package?",
+        "confirmRefundMessage": "Are you sure you want to refund order {orderNumber} for {amount} {currency} to customer {customerName}?\n\nIf yes, we will send an email to the customer to inform them that the refund has been initiated.",
+        "confirmReturnLabel": "The cheapest rate found is {amount} {currency} via {provider}.\n\nDo you want to generate and purchase this return label immediately?",
+        "statusChangedByAdmin": "Status changed to {status} by administrator.",
+        "statusUpdated": "Status updated: {status}",
+        "labelGenerated": "Label generated and sent by email!",
+        "errorRates": "Unable to fetch rates",
+        "errorLabel": "Failed to generate label",
+        "errorUpdate": "Failed to update status",
+        "errorUnknown": "An error occurred"
       },
       "detail": {
         "orderItems": "Order Items",
@@ -555,7 +577,29 @@
           "transactionId": "Transaction ID",
           "processedAt": "Processed At"
         },
-        "history": "Status History"
+        "history": "Status History",
+        "unnamedProduct": "Unnamed Product",
+        "noPaymentData": "No payment data found",
+        "noShippingAddress": "No shipping address provided",
+        "sku": "SKU",
+        "na": "N/A"
+      },
+      "shipping": {
+        "title": "Shipping Management",
+        "actionRequired": "Action Required: Shipping Label",
+        "rateNotFound": "Shipping rate ID not found in metadata. Clicking \"Generate\" will recalculate the best rate based on the customer's selection.",
+        "generateLabel": "Generate Label (Recalculate)",
+        "customerSelection": "Customer Selection",
+        "carrierDefault": "Carrier",
+        "tracking": "Tracking",
+        "standardShipping": "Standard Shipping (Calculated via Shippo)",
+        "labelGenerated": "Label Generated",
+        "pendingAction": "Pending Action",
+        "trackPackage": "Track Package",
+        "printLabel": "Print Label",
+        "purchaseLabel": "Purchase & Generate Label",
+        "successPurchase": "Label purchased successfully",
+        "errorPurchase": "Failed to purchase label"
       }
     },
     "customers": {

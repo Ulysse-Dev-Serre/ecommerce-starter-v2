@@ -368,9 +368,12 @@
       "statusRefundRequested": "Remboursement demandé",
       "tracking": "Suivi de colis",
       "trackPackage": "Suivre le colis",
-      "apartment": "App. / Bureau"
+      "apartment": "App. / Bureau",
+      "productFallback": "Produit",
+      "standardShipping": "Livraison Standard"
     },
     "refund": {
+      "clientFallback": "Client",
       "requestTitle": "Demander un remboursement",
       "requestDescription": "Si vous rencontrez un problème avec votre commande, vous pouvez nous envoyer une demande de remboursement. Merci d'expliquer la raison et de joindre une photo si nécessaire.",
       "reasonLabel": "Raison de votre demande",
@@ -534,7 +537,26 @@
         "payment": "Paiement",
         "actions": "Actions",
         "view": "Voir",
+        "viewDetails": "Voir détails",
         "noOrders": "Aucune commande trouvée"
+      },
+      "statusActions": {
+        "title": "Actions Admin",
+        "help": "* Statuts Stripe/Shippo automatiques. Boutons de secours uniquement.",
+        "markShipped": "MARQUER EXPÉDIÉE",
+        "generateReturnLabel": "GÉNÉRER ÉTIQUETTE RETOUR",
+        "confirmRefund": "CONFIRMER REMBOURSEMENT",
+        "refund": "REMBOURSER",
+        "confirmShipped": "Avez-vous expédié le colis ?",
+        "confirmRefundMessage": "Êtes-vous sûr de faire le remboursement de la commande {orderNumber} au prix de {amount} {currency} au client {customerName} ?\n\nSi oui, nous allons envoyer un email au client pour lui dire qu'on a initié le remboursement.",
+        "confirmReturnLabel": "Le tarif le moins cher trouvé est de {amount} {currency} via {provider}.\n\nVoulez-vous générer et acheter cette étiquette de retour immédiatement ?",
+        "statusChangedByAdmin": "Statut changé vers {status} par l'administrateur.",
+        "statusUpdated": "Statut mis à jour : {status}",
+        "labelGenerated": "Étiquette générée et envoyée par email !",
+        "errorRates": "Impossible de récupérer les tarifs",
+        "errorLabel": "Échec de la génération de l'étiquette",
+        "errorUpdate": "Échec de la mise à jour du statut",
+        "errorUnknown": "Une erreur est survenue"
       },
       "detail": {
         "orderItems": "Articles de la commande",
@@ -555,7 +577,29 @@
           "transactionId": "ID Transaction",
           "processedAt": "Traité le"
         },
-        "history": "Historique des statuts"
+        "history": "Historique des statuts",
+        "unnamedProduct": "Produit sans nom",
+        "noPaymentData": "Aucune donnée de paiement trouvée",
+        "noShippingAddress": "Aucune adresse de livraison fournie",
+        "sku": "SKU",
+        "na": "N/D"
+      },
+      "shipping": {
+        "title": "Gestion de l'expédition",
+        "actionRequired": "Action requise : Étiquette d'expédition",
+        "rateNotFound": "ID de tarif d'expédition introuvable. Cliquer sur 'Générer' recalculera le meilleur tarif basé sur le choix du client.",
+        "generateLabel": "Générer l'étiquette (Recalculer)",
+        "customerSelection": "Sélection du client",
+        "carrierDefault": "Transporteur",
+        "tracking": "Suivi",
+        "standardShipping": "Livraison Standard (Calculé via Shippo)",
+        "labelGenerated": "Étiquette générée",
+        "pendingAction": "Action en attente",
+        "trackPackage": "Suivre le colis",
+        "printLabel": "Imprimer l'étiquette",
+        "purchaseLabel": "Acheter & Générer l'étiquette",
+        "successPurchase": "Étiquette achetée avec succès",
+        "errorPurchase": "Échec de l'achat de l'étiquette"
       }
     },
     "customers": {

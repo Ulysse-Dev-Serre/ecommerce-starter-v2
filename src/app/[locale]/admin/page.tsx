@@ -270,7 +270,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
                           locale
                         )}
                       </span>
-                      <StatusBadge status={order.status} />
+                      <StatusBadge status={order.status} locale={locale} />
                     </div>
                   </Link>
                 );

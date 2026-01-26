@@ -189,6 +189,12 @@
   color: var(--admin-text-muted);
 }
 
+.admin-text-tiny {
+  font-size: 0.625rem;
+  color: var(--admin-text-muted);
+  line-height: 1.25;
+}
+
 .admin-card {
   background-color: var(--admin-card-bg);
   border: 1px solid var(--admin-border);
@@ -200,6 +206,26 @@
 
 .admin-card:hover {
   box-shadow: var(--admin-shadow);
+}
+
+.admin-alert-error {
+  border-radius: 0.5rem;
+  background-color: #fef2f2;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--admin-error);
+  border: 1px solid #fee2e2;
+  font-style: italic;
+}
+
+.admin-alert-success {
+  border-radius: 0.5rem;
+  background-color: #f0fdf4;
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--admin-success);
+  border: 1px solid #dcfce7;
+  font-weight: 700;
 }
 
 .admin-input {
@@ -261,9 +287,53 @@
   text-decoration: none;
 }
 
-.admin-btn-secondary:hover {
+.admin-btn-secondary:hover:not(:disabled) {
   background-color: #f9fafb;
   border-color: #d1d5db;
+}
+
+.admin-btn-danger {
+  background-color: var(--admin-error);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+}
+
+.admin-btn-info {
+  background-color: var(--admin-info);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.admin-btn-info:hover:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
 }
 
 /* --- Table Design --- */

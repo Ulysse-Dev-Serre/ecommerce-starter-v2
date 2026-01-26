@@ -222,9 +222,8 @@ async function updateVariantHandler(
     if (body.pricing !== undefined) updateData.pricing = body.pricing;
     if (body.inventory !== undefined) updateData.inventory = body.inventory;
 
-    // Support pour les mises à jour CAD/USD séparées
-    if (body.pricingCAD !== undefined) updateData.pricingCAD = body.pricingCAD;
-    if (body.pricingUSD !== undefined) updateData.pricingUSD = body.pricingUSD;
+    // Support pour les mises à jour génériques de prix
+    if (body.prices !== undefined) updateData.prices = body.prices;
 
     const updatedVariant = await updateVariant(variantId, updateData);
 

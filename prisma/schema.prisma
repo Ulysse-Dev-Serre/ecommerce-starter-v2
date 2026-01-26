@@ -277,7 +277,7 @@ model ProductVariantPricing {
   variantId   String
   priceType   String   @default("base") // base, sale, wholesale, etc.
   price       Decimal  @db.Decimal(10, 2)
-  currency    String   @default("CAD") @db.Char(3)
+  currency    String   @db.Char(3)
   validFrom   DateTime @default(now())
   validUntil  DateTime?
   isActive    Boolean  @default(true)
@@ -395,7 +395,7 @@ model Cart {
   userId      String?    // Optionnel pour invités
   anonymousId String?    // Cookie ID pour invités
   status      CartStatus @default(ACTIVE)
-  currency    String     @default("CAD") @db.Char(3)
+  currency    String     @db.Char(3)
   expiresAt   DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -429,7 +429,7 @@ model Order {
   orderNumber      String      @unique // Numéro de commande public
   userId           String
   status           OrderStatus @default(PENDING)
-  currency         String      @default("CAD") @db.Char(3)
+  currency         String      @db.Char(3)
   subtotalAmount   Decimal     @db.Decimal(10, 2)
   taxAmount        Decimal     @db.Decimal(10, 2)
   shippingAmount   Decimal     @db.Decimal(10, 2)
@@ -704,7 +704,7 @@ model Supplier {
   address      Json?       // Adresse du fournisseur
   
   // Configuration métier
-  defaultCurrency      String  @default("CAD") @db.Char(3)
+  defaultCurrency      String  @db.Char(3)
   incoterm             String  @default("DDU") // DDP or DDU
   defaultShippingDays  Int     @default(7)
   minimumOrderAmount   Decimal @default(0) @db.Decimal(10, 2)
@@ -732,7 +732,7 @@ model SupplierProduct {
   supplierSku     String  // SKU chez le fournisseur
   supplierTitle   String  // Nom du produit chez le fournisseur
   supplierPrice   Decimal @db.Decimal(10, 2)
-  currency        String  @default("CAD") @db.Char(3)
+  currency        String  @db.Char(3)
   
   // Informations produit
   description     String?
@@ -788,7 +788,7 @@ model SupplierOrder {
   shippingAmount Decimal @db.Decimal(10, 2) @default(0)
   taxAmount      Decimal @db.Decimal(10, 2) @default(0)
   totalAmount    Decimal @db.Decimal(10, 2)
-  currency       String  @default("CAD") @db.Char(3)
+  currency       String  @db.Char(3)
   
   // Adresses
   shippingAddress Json    // Où livrer (votre adresse ou client direct)

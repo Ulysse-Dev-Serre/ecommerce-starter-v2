@@ -5,13 +5,17 @@ import { SupportedCurrency } from '../constants';
 export const CURRENCY_DECIMALS: Record<string, number> = {
   CAD: 2,
   USD: 2,
+  EUR: 2,
+  GBP: 2,
+  JPY: 0,
+  CLP: 0,
 };
 
 /**
  * Formate un prix de manière localisée.
  * @param amount - Montant (number, string ou Decimal Prisma)
- * @param currency - Devise (CAD ou USD) - OBLIGATOIRE pour éviter les erreurs de déploiement
- * @param locale - Langue (défaut: 'en')
+ * @param currency - Devise (ex: CAD, USD, EUR)
+ * @param locale - Langue (ex: 'fr', 'en')
  * @param showCurrencyCode - Si true, affiche le code (ex: CAD 10.00)
  */
 export function formatPrice(
@@ -22,7 +26,7 @@ export function formatPrice(
 ): string {
   if (!currency) {
     throw new Error(
-      'CURRENCY_ERROR: La devise est manquante dans formatPrice. Vérifiez NEXT_PUBLIC_CURRENCY dans votre .env'
+      `CURRENCY_ERROR: La devise est manquante dans formatPrice. Vérifiez la configuration.`
     );
   }
 
@@ -51,8 +55,9 @@ export function formatPrice(
   );
 
   if (!showCurrencyCode) {
-    // Supprime les identifiants de pays superflus (ex: "CA$", "US$") pour ne garder que "$"
-    return formatted.replace(/\s?(USD|CAD|US|CA)\s?/g, '').trim();
+    // Supprime les codes pays/devise superflus (ex: "CA$", "US$", "CLP$") pour ne garder que le symbole
+    // Cette regex cherche des séquences de 2-3 lettres majuscules collées au symbole ou séparées par un espace
+    return formatted.replace(/[A-Z]{2,3}\s?\$|\$\s?[A-Z]{2,3}/g, '$').trim();
   }
 
   return formatted;

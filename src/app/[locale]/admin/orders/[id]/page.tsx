@@ -17,6 +17,7 @@ import { formatPrice } from '@/lib/utils/currency';
 import { SupportedCurrency } from '@/lib/constants';
 import { formatDate } from '@/lib/utils/date';
 import { StatusActions } from '@/components/admin/orders/status-actions';
+import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,23 @@ export default async function OrderDetailPage({
     include: {
       items: {
         include: {
-          variant: true,
+          variant: {
+            include: {
+              media: true,
+              product: {
+                include: {
+                  media: true,
+                  translations: true,
+                },
+              },
+            },
+          },
+          product: {
+            include: {
+              media: true,
+              translations: true,
+            },
+          },
         },
       },
       user: true,
@@ -73,7 +90,7 @@ export default async function OrderDetailPage({
           <div>
             <div className="flex items-center gap-3">
               <h1 className="admin-page-title">{order.orderNumber}</h1>
-              <StatusBadge status={order.status} />
+              <StatusBadge status={order.status} locale={locale} />
             </div>
             <p className="admin-page-subtitle">
               {t('placedOn', {
@@ -94,7 +111,6 @@ export default async function OrderDetailPage({
             totalAmount={order.totalAmount.toString()}
             currency={order.currency}
             currentStatus={order.status}
-            onStatusChange={() => {}} // This is a server component, so we don't need a real callback here, just for TS
           />
         </div>
       </div>
@@ -113,17 +129,62 @@ export default async function OrderDetailPage({
             <div className="divide-y divide-gray-200">
               {order.items.map(item => {
                 const snapshot = item.productSnapshot as any;
-                const productName =
-                  snapshot?.name?.[locale] ||
-                  snapshot?.name?.en ||
-                  'Unnamed product';
+
+                // Name resolution
+                let productName = t('unnamedProduct');
+
+                if (typeof snapshot?.name === 'string') {
+                  productName = snapshot.name;
+                } else if (snapshot?.name?.[locale]) {
+                  productName = snapshot.name[locale];
+                } else if (snapshot?.name?.en) {
+                  productName = snapshot.name.en;
+                } else {
+                  // Fallback to live product/variant data
+                  const liveProduct = item.product || item.variant?.product;
+                  if (liveProduct) {
+                    const translation = (liveProduct as any).translations?.find(
+                      (tr: any) => tr.language === locale.toUpperCase()
+                    );
+                    const enTranslation = (
+                      liveProduct as any
+                    ).translations?.find((tr: any) => tr.language === 'EN');
+
+                    productName =
+                      translation?.name ||
+                      enTranslation?.name ||
+                      liveProduct.slug ||
+                      t('unnamedProduct');
+                  }
+                }
+
+                // Image resolution
+                let imageUrl = snapshot?.image;
+                if (!imageUrl) {
+                  // Try variant media first
+                  const variantMedia =
+                    item.variant?.media?.find((m: any) => m.isPrimary) ||
+                    item.variant?.media?.[0];
+                  if (variantMedia) {
+                    imageUrl = variantMedia.url;
+                  } else {
+                    // Try product media
+                    const liveProduct = item.product || item.variant?.product;
+                    const productMedia =
+                      liveProduct?.media?.find((m: any) => m.isPrimary) ||
+                      liveProduct?.media?.[0];
+                    if (productMedia) {
+                      imageUrl = productMedia.url;
+                    }
+                  }
+                }
 
                 return (
                   <div key={item.id} className="px-6 py-4 flex items-center">
                     <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
-                      {snapshot?.image && (
+                      {imageUrl && (
                         <img
-                          src={snapshot.image}
+                          src={imageUrl}
                           alt={productName}
                           className="h-full w-full object-cover"
                         />
@@ -132,7 +193,7 @@ export default async function OrderDetailPage({
                     <div className="ml-4 flex-1">
                       <p className="font-medium text-gray-900">{productName}</p>
                       <p className="text-sm text-gray-500">
-                        SKU: {item.variant?.sku || 'N/A'}
+                        {t('sku')}: {item.variant?.sku || t('na')}
                       </p>
                     </div>
                     <div className="text-right ml-4">
@@ -225,7 +286,7 @@ export default async function OrderDetailPage({
             </div>
             <div className="p-6">
               {order.payments.length === 0 ? (
-                <p className="text-sm text-gray-500">No payment data found</p>
+                <p className="text-sm text-gray-500">{t('noPaymentData')}</p>
               ) : (
                 <div className="grid gap-6 md:grid-cols-2">
                   {order.payments.map((p, idx) => (
@@ -285,6 +346,15 @@ export default async function OrderDetailPage({
               )}
             </div>
           </div>
+
+          <ShippingManagement
+            orderId={order.id}
+            shipment={order.shipments[0]}
+            shippingCost={Number(order.shippingAmount)}
+            currency={order.currency}
+            shippingRateId={((order as any).metadata as any)?.shipping_rate_id}
+            debugMetadata={(order as any).metadata}
+          />
         </div>
 
         {/* Sidebar - 1 column */}
@@ -350,7 +420,7 @@ export default async function OrderDetailPage({
               </div>
             ) : (
               <p className="text-sm text-gray-400 italic">
-                No shipping address provided
+                {t('noShippingAddress')}
               </p>
             )}
           </div>

@@ -6,7 +6,11 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/db/prisma';
 import { getOrderById } from '@/lib/services/order.service';
 import { RefundRequestForm } from '@/components/orders/refund-request-form';
-import { getTranslations, getMessages } from 'next-intl/server';
+import {
+  getTranslations,
+  getMessages,
+  setRequestLocale,
+} from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
@@ -22,6 +26,7 @@ export default async function OrderDetailPage({
   params,
 }: OrderDetailPageProps): Promise<React.ReactElement> {
   const { locale, id } = await params;
+  setRequestLocale(locale);
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
@@ -100,16 +105,14 @@ export default async function OrderDetailPage({
     {} as Record<string, { image?: string; slug: string; name?: string }>
   );
 
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <OrderDetailContent
-        order={order}
-        locale={locale}
-        productData={productData}
-      />
-    </NextIntlClientProvider>
+    <OrderDetailContent
+      order={order}
+      locale={locale}
+      productData={productData}
+    />
   );
 }
 
@@ -166,7 +169,7 @@ async function OrderDetailContent({
       return snapshot.name;
     }
 
-    return 'Product';
+    return t('productFallback');
   };
 
   const currentStep = ['PAID', 'SHIPPED', 'IN_TRANSIT', 'DELIVERED'].indexOf(
@@ -270,7 +273,7 @@ async function OrderDetailContent({
                         name:
                           order.user?.firstName ||
                           (order.shippingAddress as any)?.name?.split(' ')[0] ||
-                          'Client',
+                          tRefund('clientFallback'),
                         amount: formatPrice(
                           order.totalAmount,
                           order.currency as any,
@@ -284,6 +287,7 @@ async function OrderDetailContent({
                           order.currency as any,
                           locale
                         ),
+                        currency: order.currency,
                       })}
                 </div>
               </div>
@@ -305,7 +309,7 @@ async function OrderDetailContent({
                     >
                       <div>
                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                          {shipment.carrier || 'Standard Shipping'}
+                          {shipment.carrier || t('standardShipping')}
                         </p>
                         <p className="font-mono text-lg text-foreground tracking-wide select-all">
                           {shipment.trackingCode}

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { SITE_CURRENCY } from '@/lib/constants';
 
 import { Language, ProductStatus } from '@/generated/prisma';
 import { env } from '@/lib/env';
@@ -146,7 +147,7 @@ export default async function ProductPage({
     offers: {
       '@type': 'Offer',
       price: variants[0]?.pricing[0]?.price || '0',
-      priceCurrency: variants[0]?.pricing[0]?.currency || 'CAD',
+      priceCurrency: variants[0]?.pricing[0]?.currency || SITE_CURRENCY,
       availability:
         (variants[0]?.stock || 0) > 0
           ? 'https://schema.org/InStock'

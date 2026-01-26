@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-
 import { auth } from '@clerk/nextjs/server';
+import { SITE_CURRENCY, SUPPORTED_CURRENCIES } from '@/lib/constants';
 
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
@@ -33,13 +33,15 @@ async function calculateCartHandler(
   const currencyParam = searchParams.get('currency');
   const currencyCookie = cookieStore.get('currency')?.value;
   const currency: Currency =
-    (currencyParam as Currency) || (currencyCookie as Currency) || 'CAD';
+    (currencyParam as Currency) ||
+    (currencyCookie as Currency) ||
+    (SITE_CURRENCY as Currency);
 
-  if (currency !== 'CAD' && currency !== 'USD') {
+  if (!SUPPORTED_CURRENCIES.includes(currency)) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Invalid currency. Must be CAD or USD.',
+        error: `Invalid currency. Supported: ${SUPPORTED_CURRENCIES.join(', ')}`,
         requestId,
       },
       { status: 400 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Truck, ExternalLink, Printer, Box } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ShippingManagementProps {
   orderId: string;
@@ -28,6 +29,7 @@ export function ShippingManagement({
   debugMetadata,
 }: ShippingManagementProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations('adminDashboard.orders.shipping');
 
   // Si on a déjà une URL d'étiquette, c'est que l'expédition est gérée
   const hasLabel = !!shipment?.labelUrl;
@@ -42,10 +44,10 @@ export function ShippingManagement({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to purchase label');
+        throw new Error(data.error || t('errorPurchase'));
       }
 
-      alert('Label purchased successfully');
+      alert(t('successPurchase'));
       // Rafraîchir la page pour voir les changements
       window.location.reload();
     } catch (error: any) {
@@ -60,19 +62,13 @@ export function ShippingManagement({
       <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6">
         <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-yellow-800">
           <Truck className="h-5 w-5" />
-          Action Required: Shipping Label
+          {t('actionRequired')}
         </h2>
-        <p className="text-gray-900 font-medium mb-4">
-          Shipping rate ID not found in metadata. Clicking &quot;Generate&quot;
-          will recalculate the best rate based on the customer&apos;s choice.
-        </p>
+        <p className="text-gray-900 font-medium mb-4">{t('rateNotFound')}</p>
         <div className="flex gap-4">
-          <button
-            onClick={handlePurchaseLabel}
-            className="rounded bg-black px-4 py-2 text-white hover:bg-gray-800 font-medium text-sm flex items-center gap-2"
-          >
+          <button onClick={handlePurchaseLabel} className="admin-btn-primary">
             <Truck className="h-4 w-4" />
-            Generate Label (Recalculate)
+            {t('generateLabel')}
           </button>
         </div>
       </div>
@@ -80,11 +76,11 @@ export function ShippingManagement({
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-        <Truck className="h-5 w-5" />
-        Shipping Management
-      </h2>
+    <div className="admin-card">
+      <h3 className="font-semibold text-gray-900 flex items-center gap-2 mb-4">
+        <Truck className="h-4 w-4 text-gray-500" />
+        {t('title')}
+      </h3>
 
       <div className="space-y-4">
         {/* Résumé du choix client */}
@@ -95,13 +91,13 @@ export function ShippingManagement({
               <div>
                 <p className="font-medium text-gray-900">
                   {hasLabel
-                    ? shipment?.carrier || 'Carrier'
-                    : 'Customer Selection'}
+                    ? shipment?.carrier || t('carrierDefault')
+                    : t('customerSelection')}
                 </p>
                 <p className="text-sm text-gray-500">
                   {hasLabel
-                    ? `Tracking: ${shipment?.trackingCode || 'N/A'}`
-                    : 'Standard Shipping (Calculated via Shippo)'}
+                    ? `${t('tracking')}: ${shipment?.trackingCode || 'N/A'}`
+                    : t('standardShipping')}
                 </p>
               </div>
             </div>
@@ -113,11 +109,11 @@ export function ShippingManagement({
               )}
               {hasLabel ? (
                 <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                  Label Generated
+                  {t('labelGenerated')}
                 </span>
               ) : (
                 <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
-                  Pending Action
+                  {t('pendingAction')}
                 </span>
               )}
             </div>
@@ -133,11 +129,10 @@ export function ShippingManagement({
                   href={`https://parcelsapp.com/en/tracking/${shipment.trackingCode}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  // Pour l'instant on utilise un site tiers ou le lien provider si dispo
+                  className="admin-btn-secondary"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Track Package
+                  {t('trackPackage')}
                 </a>
               )}
 
@@ -145,24 +140,24 @@ export function ShippingManagement({
                 href={shipment?.labelUrl || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+                className="admin-btn-primary"
               >
                 <Printer className="h-4 w-4" />
-                Print Label
+                {t('printLabel')}
               </a>
             </div>
           ) : (
             <button
               onClick={handlePurchaseLabel}
               disabled={isLoading}
-              className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              className="admin-btn-primary"
             >
               {isLoading ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <Truck className="h-4 w-4" />
               )}
-              Purchase & Generate Label
+              {t('purchaseLabel')}
             </button>
           )}
         </div>

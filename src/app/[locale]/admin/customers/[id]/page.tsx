@@ -16,6 +16,7 @@ import { prisma } from '@/lib/db/prisma';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { env } from '@/lib/env';
+import { SITE_CURRENCY } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +59,7 @@ export default async function CustomerDetailPage({
   // Note: Since orders could theoretically be in different currencies (even if env is fixed)
   // we use a safe currency for display in the stats, or just use 'CAD' as fallback.
   // Given the user's strategy, it's consistent with their CURRENT_CURRENCY.
-  const displayCurrency = (env.NEXT_PUBLIC_CURRENCY as any) || 'CAD';
+  const displayCurrency = (env.NEXT_PUBLIC_CURRENCY as any) || SITE_CURRENCY;
 
   const totalOrders = customer.orders.length;
 
@@ -170,7 +171,7 @@ export default async function CustomerDetailPage({
                         </td>
 
                         <td className="px-6 py-4">
-                          <StatusBadge status={order.status} />
+                          <StatusBadge status={order.status} locale={locale} />
                         </td>
                         <td className="px-6 py-4 text-right">
                           {order.shipments?.[0]?.trackingCode ? (

@@ -5,7 +5,11 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save, X, Plus, Trash2, Check } from 'lucide-react';
 import Link from 'next/link';
 import { i18n } from '@/lib/i18n/config';
-import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/constants';
+import {
+  SUPPORTED_LOCALES,
+  SupportedLocale,
+  SUPPORTED_CURRENCIES,
+} from '@/lib/constants';
 
 interface Translation {
   language: SupportedLocale;
@@ -18,8 +22,7 @@ interface SimpleVariant {
   id: string;
   nameEN: string;
   nameFR: string;
-  priceCAD: string;
-  priceUSD: string;
+  prices: Record<string, string>; // { CAD: "10", USD: "8" }
   stock: string;
 }
 
@@ -115,12 +118,16 @@ export default function NewProductPage() {
   };
 
   const handleAddVariant = () => {
+    const initialPrices: Record<string, string> = {};
+    SUPPORTED_CURRENCIES.forEach(curr => {
+      initialPrices[curr] = '';
+    });
+
     const newVariant: SimpleVariant = {
       id: crypto.randomUUID(),
       nameEN: '',
       nameFR: '',
-      priceCAD: '',
-      priceUSD: '',
+      prices: initialPrices,
       stock: '0',
     };
     setVariants([...variants, newVariant]);
@@ -128,11 +135,21 @@ export default function NewProductPage() {
 
   const handleVariantChange = (
     id: string,
-    field: 'nameEN' | 'nameFR' | 'priceCAD' | 'priceUSD' | 'stock',
-    value: string
+    field: string,
+    value: string,
+    currency?: string
   ) => {
     setVariants(
-      variants.map(v => (v.id === id ? { ...v, [field]: value } : v))
+      variants.map(v => {
+        if (v.id !== id) return v;
+        if (field === 'price' && currency) {
+          return {
+            ...v,
+            prices: { ...v.prices, [currency]: value },
+          };
+        }
+        return { ...v, [field as keyof SimpleVariant]: value } as SimpleVariant;
+      })
     );
   };
 
@@ -183,9 +200,10 @@ export default function NewProductPage() {
             )
           );
         }
-        const hasCAD = v.priceCAD && parseFloat(v.priceCAD) >= 0;
-        const hasUSD = v.priceUSD && parseFloat(v.priceUSD) >= 0;
-        if (!hasCAD && !hasUSD) {
+        const hasPrice = Object.values(v.prices).some(
+          p => p && parseFloat(p) >= 0
+        );
+        if (!hasPrice) {
           throw new Error(
             t.validation.variantPriceRequired.replace(
               '{{index}}',
@@ -214,13 +232,19 @@ export default function NewProductPage() {
 
       // Step 2: Create simple variants
       const variantsPayload = {
-        variants: variants.map(v => ({
-          nameEN: v.nameEN,
-          nameFR: v.nameFR,
-          priceCAD: v.priceCAD ? parseFloat(v.priceCAD) : null,
-          priceUSD: v.priceUSD ? parseFloat(v.priceUSD) : null,
-          stock: parseInt(v.stock) || 0,
-        })),
+        variants: variants.map(v => {
+          const processedPrices: Record<string, number | null> = {};
+          Object.entries(v.prices).forEach(([curr, val]) => {
+            processedPrices[curr] = val ? parseFloat(val) : null;
+          });
+
+          return {
+            nameEN: v.nameEN,
+            nameFR: v.nameFR,
+            prices: processedPrices,
+            stock: parseInt(v.stock) || 0,
+          };
+        }),
       };
 
       const variantsResponse = await fetch(
@@ -578,47 +602,29 @@ export default function NewProductPage() {
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            {t.price} ($ CAD)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={variant.priceCAD}
-                            onChange={e =>
-                              handleVariantChange(
-                                variant.id,
-                                'priceCAD',
-                                e.target.value
-                              )
-                            }
-                            placeholder="49.99"
-                            className="admin-input"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            {t.price} ($ USD)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            value={variant.priceUSD}
-                            onChange={e =>
-                              handleVariantChange(
-                                variant.id,
-                                'priceUSD',
-                                e.target.value
-                              )
-                            }
-                            placeholder="36.99"
-                            className="admin-input"
-                          />
-                        </div>
+                        {SUPPORTED_CURRENCIES.map(curr => (
+                          <div key={curr}>
+                            <label className="block text-sm font-medium text-gray-700">
+                              {t.price} ({curr})
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={variant.prices[curr] || ''}
+                              onChange={e =>
+                                handleVariantChange(
+                                  variant.id,
+                                  'price',
+                                  e.target.value,
+                                  curr
+                                )
+                              }
+                              placeholder="0.00"
+                              className="admin-input"
+                            />
+                          </div>
+                        ))}
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
@@ -641,11 +647,7 @@ export default function NewProductPage() {
 
                         <div className="md:col-span-2">
                           <p className="text-xs text-gray-500">
-                            💡{' '}
-                            {t.validation.variantPriceRequired.replace(
-                              '{{index}}',
-                              ''
-                            )}
+                            💡 Au moins un prix est requis
                           </p>
                         </div>
                       </div>

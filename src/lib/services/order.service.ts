@@ -13,6 +13,7 @@ import { OrderConfirmationEmail } from '../../components/emails/order-confirmati
 import { render } from '@react-email/render';
 import { i18n } from '../i18n/config';
 import { env } from '@/lib/env';
+import { SITE_CURRENCY } from '../constants';
 
 import fr from '../i18n/dictionaries/fr.json';
 import en from '../i18n/dictionaries/en.json';
@@ -738,7 +739,7 @@ export async function createReturnLabel(
           netWeight: '1',
           massUnit: 'kg' as const,
           valueAmount: '50.00',
-          valueCurrency: 'CAD',
+          valueCurrency: SITE_CURRENCY,
           originCountry: 'CA',
         },
       ],

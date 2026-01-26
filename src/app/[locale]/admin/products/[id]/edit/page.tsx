@@ -32,7 +32,11 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { i18n } from '@/lib/i18n/config';
-import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/constants';
+import {
+  SUPPORTED_LOCALES,
+  SupportedLocale,
+  SUPPORTED_CURRENCIES,
+} from '@/lib/constants';
 
 interface Translation {
   id: string;
@@ -91,8 +95,7 @@ interface NewVariant {
   id: string;
   nameEN: string;
   nameFR: string;
-  priceCAD: string;
-  priceUSD: string;
+  prices: Record<string, string>; // { CAD: "10", USD: "8" }
   stock: string;
   weight: string;
   length: string;
@@ -557,8 +560,7 @@ export default function EditProductPage({
   const handleUpdateVariant = async (
     variantId: string,
     updates: {
-      priceCAD?: string;
-      priceUSD?: string;
+      prices?: Record<string, number>;
       stock?: number;
       weight?: number;
       dimensions?: { length?: number; width?: number; height?: number };
@@ -569,18 +571,8 @@ export default function EditProductPage({
     try {
       const payload: any = {};
 
-      if (updates.priceCAD !== undefined) {
-        payload.pricingCAD = {
-          price: parseFloat(updates.priceCAD),
-          currency: 'CAD',
-        };
-      }
-
-      if (updates.priceUSD !== undefined) {
-        payload.pricingUSD = {
-          price: parseFloat(updates.priceUSD),
-          currency: 'USD',
-        };
+      if (updates.prices) {
+        payload.prices = updates.prices;
       }
 
       if (updates.stock !== undefined) {
@@ -657,12 +649,16 @@ export default function EditProductPage({
   };
 
   const handleAddNewVariant = () => {
+    const initialPrices: Record<string, string> = {};
+    SUPPORTED_CURRENCIES.forEach(curr => {
+      initialPrices[curr] = '';
+    });
+
     const newVariant: NewVariant = {
       id: crypto.randomUUID(),
       nameEN: '',
       nameFR: '',
-      priceCAD: '',
-      priceUSD: '',
+      prices: initialPrices,
       stock: '0',
       weight: '',
       length: '',
@@ -674,20 +670,21 @@ export default function EditProductPage({
 
   const handleNewVariantChange = (
     id: string,
-    field:
-      | 'nameEN'
-      | 'nameFR'
-      | 'priceCAD'
-      | 'priceUSD'
-      | 'stock'
-      | 'weight'
-      | 'length'
-      | 'width'
-      | 'height',
-    value: string
+    field: string,
+    value: string,
+    currency?: string
   ) => {
     setNewVariants(
-      newVariants.map(v => (v.id === id ? { ...v, [field]: value } : v))
+      newVariants.map(v => {
+        if (v.id !== id) return v;
+        if (field === 'price' && currency) {
+          return {
+            ...v,
+            prices: { ...v.prices, [currency]: value },
+          };
+        }
+        return { ...v, [field]: value };
+      })
     );
   };
 
@@ -700,17 +697,23 @@ export default function EditProductPage({
 
     try {
       const variantsPayload = {
-        variants: newVariants.map(v => ({
-          nameEN: v.nameEN,
-          nameFR: v.nameFR,
-          priceCAD: v.priceCAD ? parseFloat(v.priceCAD) : null,
-          priceUSD: v.priceUSD ? parseFloat(v.priceUSD) : null,
-          stock: parseInt(v.stock) || 0,
-          weight: v.weight ? parseFloat(v.weight) : null,
-          length: v.length ? parseFloat(v.length) : null,
-          width: v.width ? parseFloat(v.width) : null,
-          height: v.height ? parseFloat(v.height) : null,
-        })),
+        variants: newVariants.map(v => {
+          const processedPrices: Record<string, number | null> = {};
+          Object.entries(v.prices).forEach(([curr, val]) => {
+            processedPrices[curr] = val ? parseFloat(val) : null;
+          });
+
+          return {
+            nameEN: v.nameEN,
+            nameFR: v.nameFR,
+            prices: processedPrices,
+            stock: parseInt(v.stock) || 0,
+            weight: v.weight ? parseFloat(v.weight) : null,
+            length: v.length ? parseFloat(v.length) : null,
+            width: v.width ? parseFloat(v.width) : null,
+            height: v.height ? parseFloat(v.height) : null,
+          };
+        }),
       };
 
       const response = await fetch(
@@ -1294,8 +1297,11 @@ export default function EditProductPage({
                 <tr>
                   <th className="admin-table-th">{t.variant}</th>
                   <th className="admin-table-th">{t.sku}</th>
-                  <th className="admin-table-th">{t.price} CAD</th>
-                  <th className="admin-table-th">{t.price} USD</th>
+                  {SUPPORTED_CURRENCIES.map(curr => (
+                    <th key={curr} className="admin-table-th">
+                      {t.price} {curr}
+                    </th>
+                  ))}
                   <th className="admin-table-th">{t.stock}</th>
                   <th className="admin-table-th text-right">{t.actions}</th>
                 </tr>
@@ -1309,42 +1315,26 @@ export default function EditProductPage({
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
                       {variant.sku}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <input
-                        type="number"
-                        step="0.01"
-                        defaultValue={
-                          variant.pricing.find(p => p.currency === 'CAD')
-                            ?.price || ''
-                        }
-                        placeholder="—"
-                        onBlur={e =>
-                          e.target.value &&
-                          handleUpdateVariant(variant.id, {
-                            priceCAD: e.target.value,
-                          })
-                        }
-                        className="w-24 admin-input py-1"
-                      />
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3">
-                      <input
-                        type="number"
-                        step="0.01"
-                        defaultValue={
-                          variant.pricing.find(p => p.currency === 'USD')
-                            ?.price || ''
-                        }
-                        placeholder="—"
-                        onBlur={e =>
-                          e.target.value &&
-                          handleUpdateVariant(variant.id, {
-                            priceUSD: e.target.value,
-                          })
-                        }
-                        className="w-24 admin-input py-1"
-                      />
-                    </td>
+                    {SUPPORTED_CURRENCIES.map(curr => (
+                      <td key={curr} className="whitespace-nowrap px-4 py-3">
+                        <input
+                          type="number"
+                          step="0.01"
+                          defaultValue={
+                            variant.pricing.find(p => p.currency === curr)
+                              ?.price || ''
+                          }
+                          placeholder="—"
+                          onBlur={e =>
+                            e.target.value &&
+                            handleUpdateVariant(variant.id, {
+                              prices: { [curr]: parseFloat(e.target.value) },
+                            })
+                          }
+                          className="w-24 admin-input py-1"
+                        />
+                      </td>
+                    ))}
                     <td className="whitespace-nowrap px-4 py-3">
                       <input
                         type="number"
@@ -1459,47 +1449,29 @@ export default function EditProductPage({
                       />
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {t.price} ($ CAD)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={variant.priceCAD}
-                        onChange={e =>
-                          handleNewVariantChange(
-                            variant.id,
-                            'priceCAD',
-                            e.target.value
-                          )
-                        }
-                        placeholder="49.99"
-                        className="admin-input"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {t.price} ($ USD)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={variant.priceUSD}
-                        onChange={e =>
-                          handleNewVariantChange(
-                            variant.id,
-                            'priceUSD',
-                            e.target.value
-                          )
-                        }
-                        placeholder="36.99"
-                        className="admin-input"
-                      />
-                    </div>
+                    {SUPPORTED_CURRENCIES.map(curr => (
+                      <div key={curr}>
+                        <label className="block text-sm font-medium text-gray-700">
+                          {t.price} ({curr})
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={variant.prices[curr] || ''}
+                          onChange={e =>
+                            handleNewVariantChange(
+                              variant.id,
+                              'price',
+                              e.target.value,
+                              curr
+                            )
+                          }
+                          placeholder="0.00"
+                          className="admin-input"
+                        />
+                      </div>
+                    ))}
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
@@ -1522,7 +1494,7 @@ export default function EditProductPage({
 
                     <div className="lg:col-span-4">
                       <p className="text-xs text-gray-500">
-                        💡 Au moins un prix (CAD ou USD) est requis
+                        💡 Au moins un prix est requis
                       </p>
                     </div>
                   </div>

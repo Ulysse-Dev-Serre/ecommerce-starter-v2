@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { OrderStatus } from '@/generated/prisma';
 import { Package, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface StatusActionsProps {
   orderId: string;
@@ -11,19 +13,8 @@ interface StatusActionsProps {
   totalAmount: string;
   currency: string;
   currentStatus: string;
-  onStatusChange: (newStatus: string) => void;
+  onStatusChange?: (newStatus: string) => void;
 }
-
-const STATUS_LABELS: Record<string, string> = {
-  [OrderStatus.PENDING]: 'En attente',
-  [OrderStatus.PAID]: 'Payée',
-  [OrderStatus.SHIPPED]: 'Expédiée',
-  [OrderStatus.IN_TRANSIT]: 'En route',
-  [OrderStatus.DELIVERED]: 'Livrée',
-  [OrderStatus.CANCELLED]: 'Annulée',
-  [OrderStatus.REFUNDED]: 'Confirmé Remboursé',
-  [OrderStatus.REFUND_REQUESTED]: 'Demande de Remboursement',
-};
 
 export function StatusActions({
   orderId,
@@ -34,18 +25,50 @@ export function StatusActions({
   currentStatus,
   onStatusChange,
 }: StatusActionsProps) {
+  const router = useRouter();
+  const t = useTranslations('adminDashboard.orders.statusActions');
+  const tStatus = useTranslations('Orders.detail');
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case OrderStatus.PENDING:
+        return tStatus('statusPending');
+      case OrderStatus.PAID:
+        return tStatus('statusPaid');
+      case OrderStatus.SHIPPED:
+        return tStatus('statusShipped');
+      case OrderStatus.IN_TRANSIT:
+        return tStatus('statusInTransit');
+      case OrderStatus.DELIVERED:
+        return tStatus('statusDelivered');
+      case OrderStatus.CANCELLED:
+        return tStatus('statusCancelled');
+      case OrderStatus.REFUNDED:
+        return tStatus('statusRefunded');
+      case OrderStatus.REFUND_REQUESTED:
+        return tStatus('statusRefundRequested');
+      default:
+        return status;
+    }
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     // Confirmations spécifiques
     if (newStatus === OrderStatus.SHIPPED) {
-      if (!window.confirm('Avez-vous expédié le colis ?')) return;
+      if (!window.confirm(t('confirmShipped'))) return;
     }
 
     if (newStatus === OrderStatus.REFUNDED) {
-      const confirmMsg = `Êtes-vous sûr de faire le remboursement de la commande ${orderNumber} au prix de ${totalAmount} ${currency} au client ${customerName} ?\n\nSi oui, nous allons envoyer un email au client pour lui dire qu'on a initié le remboursement.`;
+      const confirmMsg = t('confirmRefundMessage', {
+        orderNumber,
+        amount: totalAmount,
+        currency,
+        customerName,
+      });
       if (!window.confirm(confirmMsg)) return;
     }
 
@@ -54,6 +77,7 @@ export function StatusActions({
     setSuccess(null);
 
     try {
+      const statusLabel = getStatusLabel(newStatus);
       const response = await fetch(`/api/admin/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
@@ -61,19 +85,23 @@ export function StatusActions({
         },
         body: JSON.stringify({
           status: newStatus,
-          comment: `Statut changé vers ${STATUS_LABELS[newStatus]} par l'administrateur.`,
+          comment: t('statusChangedByAdmin', { status: statusLabel }),
         }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || 'Failed to update order status');
+        throw new Error(data.message || t('errorUpdate'));
       }
 
-      onStatusChange(newStatus);
-      setSuccess(`Statut mis à jour : ${STATUS_LABELS[newStatus]}`);
+      if (onStatusChange) {
+        onStatusChange(newStatus);
+      } else {
+        router.refresh();
+      }
+      setSuccess(t('statusUpdated', { status: statusLabel }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
+      const message = err instanceof Error ? err.message : t('errorUnknown');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -96,14 +124,18 @@ export function StatusActions({
 
       if (!previewRes.ok) {
         const data = await previewRes.json();
-        throw new Error(data.message || 'Impossible de récupérer les tarifs');
+        throw new Error(data.message || t('errorRates'));
       }
 
       const { data: previewData } = await previewRes.json();
       const { amount, currency, provider } = previewData;
 
       // Step 2: Show confirmation with price
-      const confirmMsg = `Le tarif le moins cher trouvé est de ${amount} ${currency} via ${provider}.\n\nVoulez-vous générer et acheter cette étiquette de retour immédiatement ?`;
+      const confirmMsg = t('confirmReturnLabel', {
+        amount,
+        currency,
+        provider,
+      });
 
       if (!window.confirm(confirmMsg)) {
         setIsLoading(false);
@@ -120,15 +152,12 @@ export function StatusActions({
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(
-          data.message || "Échec de la génération de l'étiquette"
-        );
+        throw new Error(data.message || t('errorLabel'));
       }
 
-      setSuccess('Étiquette générée et envoyée par email !');
+      setSuccess(t('labelGenerated'));
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Une erreur est survenue';
+      const message = err instanceof Error ? err.message : t('errorUnknown');
       setError(message);
     } finally {
       setIsLoading(false);
@@ -164,30 +193,22 @@ export function StatusActions({
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
         <AlertTriangle className="h-3.5 w-3.5" />
-        Actions Admin
+        {t('title')}
       </div>
 
-      {error && (
-        <div className="rounded-lg bg-red-50 p-2 text-xs text-red-700 border border-red-100 italic">
-          {error}
-        </div>
-      )}
+      {error && <div className="admin-alert-error">{error}</div>}
 
-      {success && (
-        <div className="rounded-lg bg-green-50 p-2 text-xs text-green-700 border border-green-100 font-bold">
-          {success}
-        </div>
-      )}
+      {success && <div className="admin-alert-success">{success}</div>}
 
       <div className="grid gap-2">
         {canShip && (
           <button
             onClick={() => handleStatusChange(OrderStatus.SHIPPED)}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-all disabled:opacity-50 active:scale-[0.98]"
+            className="admin-btn-info w-full"
           >
             <Package className="h-4 w-4" />
-            MARQUER EXPÉDIÉE
+            {t('markShipped')}
           </button>
         )}
 
@@ -195,10 +216,10 @@ export function StatusActions({
           <button
             onClick={handleCreateReturnLabel}
             disabled={isLoading}
-            className="flex items-center justify-center gap-2 rounded-lg bg-white border border-gray-200 px-4 py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-gray-50 transition-all disabled:opacity-50 active:scale-[0.98]"
+            className="admin-btn-secondary w-full"
           >
-            <RefreshCcw className="h-4 w-4 text-indigo-500" />
-            GÉNÉRER ÉTIQUETTE RETOUR
+            <RefreshCcw className="h-4 w-4 text-primary" />
+            {t('generateReturnLabel')}
           </button>
         )}
 
@@ -206,23 +227,21 @@ export function StatusActions({
           <button
             onClick={() => handleStatusChange(OrderStatus.REFUNDED)}
             disabled={isLoading}
-            className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all disabled:opacity-50 active:scale-[0.98] ${
+            className={`w-full ${
               currentStatus === OrderStatus.REFUND_REQUESTED
-                ? 'bg-red-600 text-white hover:bg-red-700 shadow-md ring-2 ring-red-100'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-red-200 hover:text-red-700'
+                ? 'admin-btn-danger'
+                : 'admin-btn-secondary'
             }`}
           >
             <RefreshCcw className="h-4 w-4" />
             {currentStatus === OrderStatus.REFUND_REQUESTED
-              ? 'CONFIRMER REMBOURSEMENT'
-              : 'REMBOURSER'}
+              ? t('confirmRefund')
+              : t('refund')}
           </button>
         )}
       </div>
 
-      <p className="text-[10px] text-gray-400 leading-tight">
-        * Statuts Stripe/Shippo automatiques. Boutons de secours uniquement.
-      </p>
+      <p className="admin-text-tiny">{t('help')}</p>
     </div>
   );
 }

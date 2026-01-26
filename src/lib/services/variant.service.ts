@@ -1,6 +1,7 @@
 import { Prisma, Language } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
+import { SITE_CURRENCY } from '../constants';
 
 // ============================================
 // TYPES
@@ -9,8 +10,7 @@ import { logger } from '../logger';
 export interface SimpleVariantData {
   nameEN: string;
   nameFR: string;
-  priceCAD?: number | null;
-  priceUSD?: number | null;
+  prices: Record<string, number>; // { CAD: 10, USD: 8, ... }
   stock: number;
   weight?: number | null;
   length?: number | null;
@@ -44,7 +44,8 @@ export interface CreateVariantData {
   weight?: number;
   dimensions?: { length?: number; width?: number; height?: number };
   attributeValueIds: string[]; // Exactement 1 ID
-  pricing: VariantPricing;
+  prices?: Record<string, number>; // New generic pricing
+  pricing?: VariantPricing; // Legacy / Fallback
   inventory?: VariantInventory;
 }
 
@@ -57,9 +58,8 @@ export interface UpdateVariantData {
     width?: number | null;
     height?: number | null;
   } | null;
-  pricing?: VariantPricing;
-  pricingCAD?: VariantPricing;
-  pricingUSD?: VariantPricing;
+  pricing?: VariantPricing; // Legacy / Fallback
+  prices?: Record<string, number>; // New generic format
   inventory?: VariantInventory;
 }
 
@@ -300,7 +300,7 @@ export async function createSimpleVariants(
     // Générer le SKU
     const sku = `${product.slug.toUpperCase()}-${valueKey.toUpperCase()}`;
 
-    // Préparer les prix (CAD et/ou USD)
+    // Préparer les prix dynamiquement
     const pricingData: Array<{
       price: Prisma.Decimal;
       currency: string;
@@ -308,27 +308,20 @@ export async function createSimpleVariants(
       isActive: boolean;
     }> = [];
 
-    if (variantData.priceCAD != null && variantData.priceCAD >= 0) {
-      pricingData.push({
-        price: new Prisma.Decimal(variantData.priceCAD),
-        currency: 'CAD',
-        priceType: 'base',
-        isActive: true,
-      });
-    }
-
-    if (variantData.priceUSD != null && variantData.priceUSD >= 0) {
-      pricingData.push({
-        price: new Prisma.Decimal(variantData.priceUSD),
-        currency: 'USD',
-        priceType: 'base',
-        isActive: true,
-      });
-    }
+    Object.entries(variantData.prices).forEach(([currency, price]) => {
+      if (price != null && price >= 0) {
+        pricingData.push({
+          price: new Prisma.Decimal(price),
+          currency,
+          priceType: 'base',
+          isActive: true,
+        });
+      }
+    });
 
     if (pricingData.length === 0) {
       throw new Error(
-        `Variante "${variantData.nameEN}": au moins un prix (CAD ou USD) est requis`
+        `Variante "${variantData.nameEN}": au moins un prix est requis`
       );
     }
 
@@ -457,12 +450,28 @@ export async function createVariants(
 
           // Créer le pricing
           pricing: {
-            create: {
-              price: new Prisma.Decimal(variantData.pricing.price),
-              currency: variantData.pricing.currency ?? 'CAD',
-              priceType: variantData.pricing.priceType ?? 'base',
-              isActive: variantData.pricing.isActive ?? true,
-            },
+            create: [
+              ...(variantData.pricing
+                ? [
+                    {
+                      price: new Prisma.Decimal(variantData.pricing.price),
+                      currency: variantData.pricing.currency ?? SITE_CURRENCY,
+                      priceType: variantData.pricing.priceType ?? 'base',
+                      isActive: variantData.pricing.isActive ?? true,
+                    },
+                  ]
+                : []),
+              ...(variantData.prices
+                ? Object.entries(variantData.prices).map(
+                    ([currency, price]) => ({
+                      price: new Prisma.Decimal(price),
+                      currency,
+                      priceType: 'base',
+                      isActive: true,
+                    })
+                  )
+                : []),
+            ],
           },
 
           // Créer l'inventaire si fourni
@@ -646,58 +655,30 @@ export async function updateVariant(
       });
     }
 
-    // Mise à jour du pricing CAD
-    if (updateData.pricingCAD) {
-      const cadPricing = variant.pricing.find(p => p.currency === 'CAD');
-      if (cadPricing) {
-        await tx.productVariantPricing.update({
-          where: { id: cadPricing.id },
-          data: {
-            price: new Prisma.Decimal(updateData.pricingCAD.price),
-          },
-        });
-      } else {
-        await tx.productVariantPricing.create({
-          data: {
-            variantId,
-            price: new Prisma.Decimal(updateData.pricingCAD.price),
-            currency: 'CAD',
-            priceType: 'base',
-            isActive: true,
-          },
-        });
-      }
-    }
-
-    // Mise à jour du pricing USD
-    if (updateData.pricingUSD) {
-      const usdPricing = variant.pricing.find(p => p.currency === 'USD');
-      logger.info(
-        {
-          variantId,
-          usdPricing: !!usdPricing,
-          price: updateData.pricingUSD.price,
-        },
-        'Updating USD pricing'
-      );
-      if (usdPricing) {
-        await tx.productVariantPricing.update({
-          where: { id: usdPricing.id },
-          data: {
-            price: new Prisma.Decimal(updateData.pricingUSD.price),
-          },
-        });
-      } else {
-        await tx.productVariantPricing.create({
-          data: {
-            variantId,
-            price: new Prisma.Decimal(updateData.pricingUSD.price),
-            currency: 'USD',
-            priceType: 'base',
-            isActive: true,
-          },
-        });
-        logger.info({ variantId }, 'Created new USD pricing entry');
+    // Mise à jour des prix générique
+    if (updateData.prices) {
+      for (const [currency, price] of Object.entries(updateData.prices)) {
+        const currentPricing = variant.pricing.find(
+          p => p.currency === currency
+        );
+        if (currentPricing) {
+          await tx.productVariantPricing.update({
+            where: { id: currentPricing.id },
+            data: {
+              price: new Prisma.Decimal(price),
+            },
+          });
+        } else {
+          await tx.productVariantPricing.create({
+            data: {
+              variantId,
+              price: new Prisma.Decimal(price),
+              currency,
+              priceType: 'base',
+              isActive: true,
+            },
+          });
+        }
       }
     }
 

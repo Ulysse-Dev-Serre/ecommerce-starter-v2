@@ -1,5 +1,5 @@
 import { env } from '@/lib/env';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency, SITE_CURRENCY } from '@/lib/constants';
 
 export type Currency = SupportedCurrency;
 
@@ -22,51 +22,72 @@ export function useCurrency() {
   return { currency, setCurrency, isLoaded: true };
 }
 
+/**
+ * Interface pour les données de prix structurées par code de devise.
+ * Exemple: { CAD: 10, USD: 8 }
+ */
 export interface PriceData {
-  priceCAD?: string | number | null;
-  priceUSD?: string | number | null;
+  [currencyCode: string]: string | number | null | undefined;
 }
 
+/**
+ * Récupère le prix pour une devise donnée avec logique de fallback.
+ */
 export function getPriceForCurrency(
   prices: PriceData,
-  currency: Currency
+  requestedCurrency: Currency
 ): { price: string; currency: Currency; isFallback: boolean } {
-  const cadPrice = prices.priceCAD != null ? String(prices.priceCAD) : null;
-  const usdPrice = prices.priceUSD != null ? String(prices.priceUSD) : null;
-
   // 1. Essayer la devise demandée
-  const requestedPrice = currency === 'USD' ? prices.priceUSD : prices.priceCAD;
+  const requestedPrice = prices[requestedCurrency];
   if (requestedPrice != null && parseFloat(String(requestedPrice)) > 0) {
-    return { price: String(requestedPrice), currency, isFallback: false };
+    return {
+      price: String(requestedPrice),
+      currency: requestedCurrency,
+      isFallback: false,
+    };
   }
 
-  // 2. Fallback sur l'autre devise principale (CAD <-> USD)
-  const fallbackCurrency = currency === 'USD' ? 'CAD' : 'USD';
-  const fallbackPrice = currency === 'USD' ? prices.priceCAD : prices.priceUSD;
-
-  if (fallbackPrice != null && parseFloat(String(fallbackPrice)) > 0) {
+  // 2. Fallback sur la devise par défaut du site s'il y a un prix
+  if (
+    requestedCurrency !== SITE_CURRENCY &&
+    prices[SITE_CURRENCY] != null &&
+    parseFloat(String(prices[SITE_CURRENCY])) > 0
+  ) {
     return {
-      price: String(fallbackPrice),
-      currency: fallbackCurrency,
+      price: String(prices[SITE_CURRENCY]),
+      currency: SITE_CURRENCY as Currency,
       isFallback: true,
     };
   }
 
-  return { price: '0', currency: currency, isFallback: false };
+  // 3. Fallback sur n'importe quel premier prix disponible
+  const availableCurrencies = Object.keys(prices).filter(
+    curr => prices[curr] != null && parseFloat(String(prices[curr])) > 0
+  );
+
+  if (availableCurrencies.length > 0) {
+    const firstCurrency = availableCurrencies[0];
+    return {
+      price: String(prices[firstCurrency]),
+      currency: firstCurrency as Currency,
+      isFallback: true,
+    };
+  }
+
+  return { price: '0', currency: requestedCurrency, isFallback: false };
 }
 
+/**
+ * Utilitaire pour extraire le prix depuis un tableau de prix (format Prisma)
+ */
 export function getPriceFromPricingArray(
-  pricing: Array<{ price: string; currency: string }>,
-  currency: Currency
+  pricing: Array<{ price: any; currency: string }>,
+  requestedCurrency: Currency
 ): { price: string; currency: Currency; isFallback: boolean } {
-  const cadPricing = pricing.find(p => p.currency === 'CAD');
-  const usdPricing = pricing.find(p => p.currency === 'USD');
+  const priceMap: PriceData = {};
+  pricing.forEach(p => {
+    priceMap[p.currency] = p.price;
+  });
 
-  return getPriceForCurrency(
-    {
-      priceCAD: cadPricing?.price,
-      priceUSD: usdPricing?.price,
-    },
-    currency
-  );
+  return getPriceForCurrency(priceMap, requestedCurrency);
 }

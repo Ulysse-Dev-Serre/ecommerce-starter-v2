@@ -1,6 +1,7 @@
 import { CartStatus } from '../../generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
+import { SITE_CURRENCY } from '../constants';
 
 export interface AddToCartInput {
   variantId: string;
@@ -128,7 +129,7 @@ export async function getOrCreateCart(
         userId: userId ?? null,
         anonymousId: anonymousId ?? null,
         status: CartStatus.ACTIVE,
-        currency: 'CAD',
+        currency: SITE_CURRENCY,
         expiresAt: userId
           ? null
           : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 jours pour invités

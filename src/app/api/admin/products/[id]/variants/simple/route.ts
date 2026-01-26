@@ -73,15 +73,16 @@ async function createSimpleVariantsHandler(
           { status: 400 }
         );
       }
-      const hasCAD = v.priceCAD != null && v.priceCAD >= 0;
-      const hasUSD = v.priceUSD != null && v.priceUSD >= 0;
-      if (!hasCAD && !hasUSD) {
+      const hasPrice =
+        v.prices &&
+        Object.values(v.prices).some(p => p != null && Number(p) >= 0);
+      if (!hasPrice) {
         return NextResponse.json(
           {
             success: false,
             requestId,
             error: 'Données invalides',
-            message: `Variante ${i + 1}: au moins un prix (CAD ou USD) est requis`,
+            message: `Variante ${i + 1}: au moins un prix est requis`,
             timestamp: new Date().toISOString(),
           },
           { status: 400 }
