@@ -1,6 +1,6 @@
 import { env } from '@/lib/env';
 import Stripe from 'stripe';
-import { SupportedCurrency } from '../types/currency';
+import { SupportedCurrency } from '../constants';
 
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';

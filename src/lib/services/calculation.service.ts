@@ -3,8 +3,8 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { logger } from '../logger';
 import { CartProjection } from './cart.service';
 
-import { DB_CURRENCIES } from '../constants';
-import { SupportedCurrency } from '../types/currency';
+import { SUPPORTED_CURRENCIES } from '../constants';
+import { SupportedCurrency } from '../constants';
 
 export type Currency = SupportedCurrency;
 

@@ -14,7 +14,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { StatusBadge } from '@/components/admin/orders/status-badge';
 import { formatPrice } from '@/lib/utils/currency';
-import { SupportedCurrency } from '@/lib/types/currency';
+import { SupportedCurrency } from '@/lib/constants';
 import { formatDate } from '@/lib/utils/date';
 import { StatusActions } from '@/components/admin/orders/status-actions';
 

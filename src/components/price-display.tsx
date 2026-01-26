@@ -7,7 +7,7 @@ import {
 } from '@/hooks/use-currency';
 import { formatPrice } from '@/lib/utils/currency';
 import { useLocale } from 'next-intl';
-import { SupportedCurrency } from '@/lib/types/currency';
+import { SupportedCurrency } from '@/lib/constants';
 
 interface PriceDisplayProps {
   pricing: Array<{ price: string; currency: string }>;

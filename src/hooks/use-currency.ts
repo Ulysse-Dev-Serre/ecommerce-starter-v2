@@ -1,5 +1,5 @@
 import { env } from '@/lib/env';
-import { SupportedCurrency } from '@/lib/types/currency';
+import { SupportedCurrency } from '@/lib/constants';
 
 export type Currency = SupportedCurrency;
 

@@ -10,7 +10,7 @@ import {
 } from '../../../../lib/middleware/withRateLimit';
 import { stripe } from '../../../../lib/stripe/client';
 import { toStripeAmount } from '../../../../lib/utils/currency';
-import { SupportedCurrency } from '@/lib/types/currency';
+import { SupportedCurrency } from '@/lib/constants';
 import {
   updateIntentSchema,
   UpdateIntentInput,

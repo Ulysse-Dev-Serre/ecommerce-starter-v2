@@ -1,6 +1,6 @@
 import type { Decimal } from '@prisma/client/runtime/library';
 
-import { SupportedCurrency } from '../types/currency';
+import { SupportedCurrency } from '../constants';
 
 export const CURRENCY_DECIMALS: Record<string, number> = {
   CAD: 2,

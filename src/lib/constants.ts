@@ -1,27 +1,35 @@
-// -----------------------------------------------------------------------------
-// GLOBAL DEFINITIONS (What the system supports fully in DB/Admin)
-// -----------------------------------------------------------------------------
-
 import { env } from '@/lib/env';
 
 /**
- * All currencies supported by the database and admin interface.
- * Used for product pricing entry and multi-currency storage.
+ * =============================================================================
+ * I18N & CURRENCY CONFIGURATION
+ * =============================================================================
+ * Single source of truth for internationalization and monetary settings.
  */
-export const DB_CURRENCIES = env.NEXT_PUBLIC_SUPPORTED_CURRENCIES as string[];
-export type DbCurrency = string;
 
-/**
- * All locales supported by the application.
- * Dynamically pulled from the environment (NEXT_PUBLIC_LOCALES).
- * In a multi-tenant setup, each deployment defines its own active languages.
- */
+// --- LOCALES ---
 export const SUPPORTED_LOCALES = env.NEXT_PUBLIC_LOCALES as string[];
 export type SupportedLocale = string;
+export const DEFAULT_LOCALE = env.NEXT_PUBLIC_DEFAULT_LOCALE as SupportedLocale;
+
+// --- CURRENCIES ---
+export const SUPPORTED_CURRENCIES =
+  env.NEXT_PUBLIC_SUPPORTED_CURRENCIES as string[];
+export type SupportedCurrency = string;
+export const DEFAULT_CURRENCY = env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
 
 /**
- * Product statuses available for management.
+ * Site-wide active currency for this specific deployment.
+ * Use this for checkout and primary price displays.
  */
+export const SITE_CURRENCY = DEFAULT_CURRENCY;
+
+/**
+ * =============================================================================
+ * PRODUCT & BUSINESS CONSTANTS
+ * =============================================================================
+ */
+
 export const PRODUCT_STATUSES = [
   'DRAFT',
   'ACTIVE',
@@ -30,26 +38,8 @@ export const PRODUCT_STATUSES = [
 ] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
-// -----------------------------------------------------------------------------
-// ACTIVE SITE CONFIGURATION (What this specific deployment uses)
-// -----------------------------------------------------------------------------
-
 /**
- * The single active currency for this deployment.
- * Determined by NEXT_PUBLIC_CURRENCY env var.
- * Example: 'CAD' for site.ca, 'USD' for site.com
- */
-export const SITE_CURRENCY = env.NEXT_PUBLIC_CURRENCY as DbCurrency;
-
-/**
- * Only used if you wanted to restrict site languages per domain,
- * but currently both domains support both languages.
- */
-export const SITE_DEFAULT_LOCALE =
-  env.NEXT_PUBLIC_DEFAULT_LOCALE as SupportedLocale;
-
-/**
- * Manual exchange rate for shipping calculations (Shippo returns CAD, site uses USD).
- * This acts as a fallback/override since we don't query live exchange rates.
+ * Manual exchange rate fallback.
+ * Used primarily for shipping calculations between Shippo (CAD) and site currency.
  */
 export const CAD_TO_USD_RATE = env.CAD_TO_USD_RATE;
