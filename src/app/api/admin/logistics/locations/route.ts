@@ -9,6 +9,8 @@ import {
   CreateLocationInput,
 } from '@/lib/validators/admin';
 
+import { SITE_CURRENCY } from '@/lib/constants';
+
 async function createLocationHandler(
   req: NextRequest,
   authContext: any,
@@ -24,6 +26,7 @@ async function createLocationHandler(
       incoterm,
       address: address as any, // Stored as JSON
       isActive: true,
+      defaultCurrency: SITE_CURRENCY,
     },
   });
 
