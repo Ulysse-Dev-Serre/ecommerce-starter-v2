@@ -73,10 +73,15 @@ export default clerkMiddleware((auth, req: NextRequest) => {
   // Ignorer les fichiers statiques silencieusement
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
     pathname.includes('.') ||
     pathname === '/favicon.ico'
   ) {
+    return NextResponse.next();
+  }
+
+  // NE PAS rediriger les routes API vers une locale
+  // On les laisse passer pour que Clerk puisse les traiter, mais on arrête le middleware ici
+  if (pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 

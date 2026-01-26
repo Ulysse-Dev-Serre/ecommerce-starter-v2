@@ -32,10 +32,11 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { i18n } from '@/lib/i18n/config';
+import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/constants';
 
 interface Translation {
   id: string;
-  language: 'EN' | 'FR';
+  language: SupportedLocale;
   name: string;
   description: string | null;
   shortDescription: string | null;
@@ -195,17 +196,29 @@ export default function EditProductPage({
     height: '',
   });
 
-  const [enTranslation, setEnTranslation] = useState({
-    name: '',
-    description: '',
-    shortDescription: '',
-  });
+  const [translations, setTranslations] = useState<
+    Record<
+      string,
+      {
+        name: string;
+        description: string;
+        shortDescription: string;
+      }
+    >
+  >({});
 
-  const [frTranslation, setFrTranslation] = useState({
-    name: '',
-    description: '',
-    shortDescription: '',
-  });
+  useEffect(() => {
+    // Initialize translations state once SUPPORTED_LOCALES is available
+    const initialTranslations: Record<string, any> = {};
+    SUPPORTED_LOCALES.forEach(lang => {
+      initialTranslations[lang] = {
+        name: '',
+        description: '',
+        shortDescription: '',
+      };
+    });
+    setTranslations(initialTranslations);
+  }, []);
 
   // Media upload states
   const [media, setMedia] = useState<any[]>([]);
@@ -283,28 +296,16 @@ export default function EditProductPage({
           : '',
       });
 
-      const enTrans = productData.translations.find(
-        (t: Translation) => t.language === 'EN'
-      );
-      const frTrans = productData.translations.find(
-        (t: Translation) => t.language === 'FR'
-      );
-
-      if (enTrans) {
-        setEnTranslation({
-          name: enTrans.name || '',
-          description: enTrans.description || '',
-          shortDescription: enTrans.shortDescription || '',
-        });
-      }
-
-      if (frTrans) {
-        setFrTranslation({
-          name: frTrans.name || '',
-          description: frTrans.description || '',
-          shortDescription: frTrans.shortDescription || '',
-        });
-      }
+      const updatedTranslations = { ...translations };
+      productData.translations.forEach((t: any) => {
+        const langCode = t.language.toLowerCase();
+        updatedTranslations[langCode] = {
+          name: t.name || '',
+          description: t.description || '',
+          shortDescription: t.shortDescription || '',
+        };
+      });
+      setTranslations(updatedTranslations);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load product');
     } finally {
@@ -510,20 +511,12 @@ export default function EditProductPage({
       // Préparer les données avec les traductions
       const payload = {
         ...formData,
-        translations: [
-          {
-            language: 'EN' as const,
-            name: enTranslation.name,
-            description: enTranslation.description || null,
-            shortDescription: enTranslation.shortDescription || null,
-          },
-          {
-            language: 'FR' as const,
-            name: frTranslation.name,
-            description: frTranslation.description || null,
-            shortDescription: frTranslation.shortDescription || null,
-          },
-        ],
+        translations: Object.entries(translations).map(([lang, data]) => ({
+          language: lang,
+          name: data.name,
+          description: data.description || null,
+          shortDescription: data.shortDescription || null,
+        })),
         weight: formData.weight ? parseFloat(formData.weight) : null,
         dimensions: {
           length: formData.length ? parseFloat(formData.length) : null,
@@ -828,7 +821,7 @@ export default function EditProductPage({
           <div>
             <h1 className="admin-page-title">{t.editProduct}</h1>
             <p className="admin-page-subtitle">
-              {enTranslation.name || t.productInfo}
+              {translations['en']?.name || t.productInfo}
             </p>
           </div>
         </div>
@@ -1215,122 +1208,76 @@ export default function EditProductPage({
 
         {/* Colonne droite - Traductions */}
         <div className="space-y-6">
-          {/* English Translation */}
-          <div className="admin-card">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              🇬🇧 {t.english}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.productName} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={enTranslation.name}
-                  onChange={e =>
-                    setEnTranslation({ ...enTranslation, name: e.target.value })
-                  }
-                  className="admin-input"
-                  required
-                />
-              </div>
+          {SUPPORTED_LOCALES.map(lang => (
+            <div key={lang} className="admin-card">
+              <h2 className="mb-4 text-lg font-semibold text-gray-900 border-b pb-2">
+                {lang.toUpperCase()}
+                {lang === 'en' && <span className="ml-1 text-red-500">*</span>}
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t.productName}{' '}
+                    {lang === 'en' && <span className="text-red-500">*</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={translations[lang]?.name || ''}
+                    onChange={e =>
+                      setTranslations({
+                        ...translations,
+                        [lang]: { ...translations[lang], name: e.target.value },
+                      })
+                    }
+                    className="admin-input"
+                    required={lang === 'en'}
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.shortDescription}
-                </label>
-                <input
-                  type="text"
-                  value={enTranslation.shortDescription}
-                  onChange={e =>
-                    setEnTranslation({
-                      ...enTranslation,
-                      shortDescription: e.target.value,
-                    })
-                  }
-                  placeholder={t.shortDescriptionPlaceholder}
-                  className="admin-input"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t.shortDescription}
+                  </label>
+                  <input
+                    type="text"
+                    value={translations[lang]?.shortDescription || ''}
+                    onChange={e =>
+                      setTranslations({
+                        ...translations,
+                        [lang]: {
+                          ...translations[lang],
+                          shortDescription: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder={t.shortDescriptionPlaceholder}
+                    className="admin-input"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.fullDescription}
-                </label>
-                <textarea
-                  value={enTranslation.description}
-                  onChange={e =>
-                    setEnTranslation({
-                      ...enTranslation,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder={t.fullDescriptionPlaceholder}
-                  rows={6}
-                  className="admin-input"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t.fullDescription}
+                  </label>
+                  <textarea
+                    value={translations[lang]?.description || ''}
+                    onChange={e =>
+                      setTranslations({
+                        ...translations,
+                        [lang]: {
+                          ...translations[lang],
+                          description: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder={t.fullDescriptionPlaceholder}
+                    rows={6}
+                    className="admin-input"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* French Translation */}
-          <div className="admin-card">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
-              🇫🇷 {t.french}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.productName}
-                </label>
-                <input
-                  type="text"
-                  value={frTranslation.name}
-                  onChange={e =>
-                    setFrTranslation({ ...frTranslation, name: e.target.value })
-                  }
-                  className="admin-input"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.shortDescription}
-                </label>
-                <input
-                  type="text"
-                  value={frTranslation.shortDescription}
-                  onChange={e =>
-                    setFrTranslation({
-                      ...frTranslation,
-                      shortDescription: e.target.value,
-                    })
-                  }
-                  placeholder={t.shortDescriptionPlaceholder}
-                  className="admin-input"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.fullDescription}
-                </label>
-                <textarea
-                  value={frTranslation.description}
-                  onChange={e =>
-                    setFrTranslation({
-                      ...frTranslation,
-                      description: e.target.value,
-                    })
-                  }
-                  placeholder={t.fullDescriptionPlaceholder}
-                  rows={6}
-                  className="admin-input"
-                />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 

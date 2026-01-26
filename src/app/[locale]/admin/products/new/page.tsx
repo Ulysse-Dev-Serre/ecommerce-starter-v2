@@ -5,9 +5,10 @@ import { useRouter, useParams } from 'next/navigation';
 import { ArrowLeft, Save, X, Plus, Trash2, Check } from 'lucide-react';
 import Link from 'next/link';
 import { i18n } from '@/lib/i18n/config';
+import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/constants';
 
 interface Translation {
-  language: 'EN' | 'FR';
+  language: SupportedLocale;
   name: string;
   description: string;
   shortDescription: string;
@@ -40,20 +41,12 @@ export default function NewProductPage() {
     slug: '',
     status: 'DRAFT' as 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED',
     isFeatured: false,
-    translations: [
-      {
-        language: 'EN' as const,
-        name: '',
-        description: '',
-        shortDescription: '',
-      },
-      {
-        language: 'FR' as const,
-        name: '',
-        description: '',
-        shortDescription: '',
-      },
-    ],
+    translations: SUPPORTED_LOCALES.map(loc => ({
+      language: loc,
+      name: '',
+      description: '',
+      shortDescription: '',
+    })),
   });
 
   const [variants, setVariants] = useState<SimpleVariant[]>([]);
@@ -105,7 +98,12 @@ export default function NewProductPage() {
   };
 
   const handleEnglishNameChange = (name: string) => {
-    handleTranslationChange(0, 'name', name);
+    // On trouve l'index de 'en' dynamiquement
+    const enIndex = formData.translations.findIndex(t => t.language === 'en');
+    if (enIndex !== -1) {
+      handleTranslationChange(enIndex, 'name', name);
+    }
+
     if (!formData.slug) {
       const newSlug = generateSlug(name);
       setFormData(prev => ({
@@ -153,8 +151,9 @@ export default function NewProductPage() {
       return;
     }
 
-    const enTranslation = formData.translations[0];
-    if (!enTranslation.name) {
+    // On valide que le nom anglais est présent (requis pour le SEO/Slug par défaut)
+    const enTranslation = formData.translations.find(t => t.language === 'en');
+    if (!enTranslation || !enTranslation.name) {
       setError(t.validation.nameRequired);
       return;
     }
@@ -396,10 +395,8 @@ export default function NewProductPage() {
               {formData.translations.map((translation, index) => (
                 <div key={translation.language} className="admin-card">
                   <h2 className="mb-4 text-lg font-semibold text-gray-900">
-                    {translation.language === 'EN'
-                      ? `🇬🇧 ${t.english}`
-                      : `🇫🇷 ${t.french}`}
-                    {translation.language === 'EN' && (
+                    {translation.language.toUpperCase()}
+                    {translation.language === 'en' && (
                       <span className="ml-2 text-sm font-normal text-red-500">
                         *
                       </span>
@@ -410,7 +407,7 @@ export default function NewProductPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">
                         {t.productName}
-                        {translation.language === 'EN' && (
+                        {translation.language === 'en' && (
                           <span className="text-red-500"> *</span>
                         )}
                       </label>
@@ -418,7 +415,7 @@ export default function NewProductPage() {
                         type="text"
                         value={translation.name}
                         onChange={e =>
-                          translation.language === 'EN'
+                          translation.language === 'en'
                             ? handleEnglishNameChange(e.target.value)
                             : handleTranslationChange(
                                 index,
@@ -428,7 +425,7 @@ export default function NewProductPage() {
                         }
                         placeholder={t.productName}
                         className="admin-input"
-                        required={translation.language === 'EN'}
+                        required={translation.language === 'en'}
                       />
                     </div>
 

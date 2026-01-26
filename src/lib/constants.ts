@@ -9,12 +9,15 @@
 export const DB_CURRENCIES = ['CAD', 'USD'] as const;
 export type DbCurrency = (typeof DB_CURRENCIES)[number];
 
+import { env } from '@/lib/env';
+
 /**
  * All locales supported by the application.
- * Used for i18n routing, translations, and database localized fields.
+ * Dynamically pulled from the environment (NEXT_PUBLIC_LOCALES).
+ * In a multi-tenant setup, each deployment defines its own active languages.
  */
-export const SUPPORTED_LOCALES = ['en', 'fr'] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+export const SUPPORTED_LOCALES = env.NEXT_PUBLIC_LOCALES as string[];
+export type SupportedLocale = string;
 
 /**
  * Product statuses available for management.
@@ -30,7 +33,6 @@ export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 // -----------------------------------------------------------------------------
 // ACTIVE SITE CONFIGURATION (What this specific deployment uses)
 // -----------------------------------------------------------------------------
-import { env } from '@/lib/env';
 
 /**
  * The single active currency for this deployment.
