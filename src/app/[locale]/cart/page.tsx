@@ -64,9 +64,9 @@ export default async function CartPage({
   const t = await getTranslations({ locale, namespace: 'cart' });
 
   return (
-    <div className="flex-1 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
+    <div className="vibe-section-py flex-1">
+      <div className="vibe-layout-container">
+        <h1 className="vibe-page-header">{t('title')}</h1>
         <CartClient cart={serializedCart} locale={locale} />
       </div>
     </div>

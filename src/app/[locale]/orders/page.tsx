@@ -83,8 +83,8 @@ async function OrdersListContent({
   };
 
   return (
-    <div className="flex-1 py-12 animate-in fade-in duration-700">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex-1 vibe-section-py animate-in fade-in duration-700">
+      <div className="vibe-layout-container max-w-4xl">
         <h1 className="text-4xl font-extrabold tracking-tight text-foreground mb-12">
           {t('title')}
         </h1>

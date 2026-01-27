@@ -38,12 +38,8 @@ export function PaymentSection({
       </div>
 
       <button
-        className={`w-full mt-8 py-4 px-8 rounded-xl font-bold text-lg shadow-xl transition-all transform active:scale-[0.98]
-          ${
-            !stripe || !elements || !selectedRate
-              ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border shadow-none'
-              : 'bg-primary text-primary-foreground hover:bg-primary-hover hover:scale-[1.02] shadow-primary/20 hover:shadow-primary/30'
-          }`}
+        className={`vibe-button-primary w-full mt-8 h-12 uppercase tracking-wide
+          ${!stripe || !elements || !selectedRate ? 'opacity-50 cursor-not-allowed shadow-none' : ''}`}
         disabled={!stripe || !elements || !selectedRate}
         onClick={onPay}
       >

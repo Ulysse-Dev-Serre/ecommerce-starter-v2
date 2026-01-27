@@ -53,6 +53,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map(toast => (
           <div
             key={toast.id}
+            role="alert"
+            aria-live="assertive"
             className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in-right ${
               toast.type === 'success'
                 ? 'bg-success text-white'

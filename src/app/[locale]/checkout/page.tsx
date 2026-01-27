@@ -68,7 +68,7 @@ export default async function CheckoutPage({
   // Le client devra initialiser Stripe Elements
 
   return (
-    <div className="bg-background min-h-screen pb-12">
+    <div className="flex-1">
       <CheckoutClient
         cartId={currentCartId}
         locale={locale}

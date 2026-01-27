@@ -123,7 +123,7 @@ export function AddressSection({
               });
             }}
             value={tempAddress?.line1 || ''}
-            placeholder={t('addressLine1')}
+            placeholder={t('addressPlaceholder')}
             className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
             // Restrict Google Autocomplete to the instance country code (lower case for API)
             countryRestriction={instanceCountryCode.toLowerCase()}
@@ -210,11 +210,11 @@ export function AddressSection({
         <button
           onClick={onCalculateShipping}
           disabled={!isAddressReady || isLoading || !phone}
-          className={`w-full py-4 px-6 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-[0.98]
+          className={`vibe-button-primary w-full h-12
             ${
               isAddressReady && !isLoading && phone
-                ? 'bg-primary hover:bg-primary-hover hover:shadow-primary/20'
-                : 'bg-muted text-muted-foreground cursor-not-allowed border border-border shadow-none'
+                ? ''
+                : 'opacity-50 cursor-not-allowed shadow-none'
             }`}
         >
           {isLoading ? (

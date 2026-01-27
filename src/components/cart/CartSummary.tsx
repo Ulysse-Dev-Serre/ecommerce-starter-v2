@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 import { PriceTotal } from '@/components/price-display';
+import Link from 'next/link';
 import { SignInButton } from '@clerk/nextjs';
 import { ShieldCheck } from 'lucide-react';
 
@@ -38,12 +39,12 @@ export function CartSummary({ items, locale, isSignedIn }: CartSummaryProps) {
         </div>
 
         {isSignedIn ? (
-          <a
+          <Link
             href={`/${locale}/checkout`}
             className="vibe-button-primary w-full h-12"
           >
             {t('checkout')}
-          </a>
+          </Link>
         ) : (
           <SignInButton mode="modal">
             <button className="vibe-button-primary w-full h-12">

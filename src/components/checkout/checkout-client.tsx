@@ -72,7 +72,7 @@ export function CheckoutClient({
       .then(res => res.json())
       .then(data => {
         if (data.clientSecret) setClientSecret(data.clientSecret);
-        else setError('Failed to init payment');
+        else setError(t('errorInit'));
       });
   }, [cartId, currency, directVariantId, directQuantity]);
 
@@ -210,7 +210,7 @@ export function CheckoutForm({
       const paymentIntentId = clientSecret.split('_secret_')[0];
 
       const detailsToSend = shippingDetailsArg || {
-        name: tempName || 'Customer',
+        name: tempName || t('anonymousCustomer'),
         street1: tempAddress.line1,
         street2: tempAddress.line2 || '',
         city: tempAddress.city,
@@ -260,14 +260,14 @@ export function CheckoutForm({
       const addressPayload = {
         cartId: cartId,
         addressTo: {
-          name: tempName || 'Customer',
+          name: tempName || t('anonymousCustomer'),
           street1: tempAddress.line1,
           street2: tempAddress.line2 || '',
           city: tempAddress.city,
           state: tempAddress.state,
           zip: tempAddress.postal_code,
           country: tempAddress.country,
-          email: userEmail || 'customer@example.com',
+          email: userEmail || '',
           phone: formattedPhone,
         },
       };
@@ -303,7 +303,7 @@ export function CheckoutForm({
       : `1${cleanPhone}`;
 
     await updatePaymentIntent(rate, {
-      name: tempName || 'Customer',
+      name: tempName || t('anonymousCustomer'),
       street1: tempAddress.line1,
       street2: tempAddress.line2 || '',
       city: tempAddress.city,
@@ -332,10 +332,8 @@ export function CheckoutForm({
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-8">
-      <h1 className="text-4xl font-extrabold mb-10 text-foreground">
-        {t('title')}
-      </h1>
+    <div className="vibe-layout-container vibe-section-py">
+      <h1 className="vibe-page-header">{t('title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
         {/* Left Column: Address & Shipping */}

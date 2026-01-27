@@ -20,7 +20,7 @@ export const DEFAULT_LOCALE = 'en' as SupportedLocale;
 // --- CURRENCIES ---
 export const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
-export const DEFAULT_CURRENCY = 'USD' as SupportedCurrency;
+export const DEFAULT_CURRENCY = 'CAD' as SupportedCurrency;
 
 /**
  * Mapping of Country Codes (ISO 3166-1 alpha-2) to Currencies.

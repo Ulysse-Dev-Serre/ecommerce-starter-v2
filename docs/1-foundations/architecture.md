@@ -124,61 +124,75 @@ Blocs UI réutilisables organisés par domaine.
 ```
 src/components
 ├── admin
-│   ├── analytics
-│   │   ├── conversion-funnel.tsx
-│   │   ├── revenue-chart.tsx
-│   │   └── source-table.tsx
-│   ├── customers
-│   ├── layout
-│   │   ├── admin-header.tsx
-│   │   └── admin-sidebar.tsx
-│   ├── logistics
-│   │   ├── add-location-modal.tsx
-│   │   └── logistics-client.tsx
-│   └── orders
-│       ├── filters.tsx
-│       ├── order-detail-client.tsx
-│       ├── shipping-management.tsx
-│       └── status-actions.tsx
+│   ├── analytics
+│   │   ├── analytics-stats-grid.tsx
+│   │   ├── conversion-funnel.tsx
+│   │   ├── revenue-chart.tsx
+│   │   └── source-table.tsx
+│   ├── customers
+│   │   ├── customer-acquisition-card.tsx
+│   │   ├── ... (tables, listes, stats)
+│   ├── dashboard
+│   │   ├── dashboard-stats-grid.tsx
+│   │   └── recent-orders-list.tsx
+│   ├── layout
+│   │   ├── admin-header.tsx
+│   │   └── admin-sidebar.tsx
+│   ├── logistics
+│   │   ├── add-location-modal.tsx
+│   │   └── logistics-client.tsx
+│   ├── orders
+│   │   ├── filters.tsx
+│   │   ├── order-detail-client.tsx
+│   │   ├── shipping-management.tsx
+│   │   └── status-actions.tsx
+│   └── products
+│       ├── product-form.tsx
+│       ├── product-media-manager.tsx
+│       └── products-list.tsx
 ├── analytics
-│   ├── AnalyticsTracker.tsx
-│   ├── CookieConsent.tsx
-│   └── GoogleTagManager.tsx
+│   ├── AnalyticsTracker.tsx
+│   ├── CookieConsent.tsx
+│   └── GoogleTagManager.tsx
 ├── cart
-│   ├── add-to-cart-button.tsx
-│   ├── cart-merge-handler.tsx
-│   ├── product-actions.tsx
-│   └── quantity-selector.tsx
+│   ├── add-to-cart-button.tsx
+│   ├── cart-merge-handler.tsx
+│   ├── CartItem.tsx
+│   ├── CartSummary.tsx
+│   ├── product-actions.tsx
+│   └── quantity-selector.tsx
 ├── checkout
-│   ├── AddressAutocomplete.tsx
-│   ├── checkout-client.tsx
-│   └── checkout-success-client.tsx
+│   ├── AddressAutocomplete.tsx
+│   ├── checkout-client.tsx
+│   ├── checkout-success-client.tsx
+│   └── ... (sections: Address, Payment, Shipping)
+├── contact (Nouveau !)
+│   ├── ContactForm.tsx
+│   └── ContactInfo.tsx
 ├── emails
-│   ├── admin-new-order.tsx
-│   ├── order-confirmation.tsx
-│   ├── order-delivered.tsx
-│   ├── order-refunded.tsx
-│   ├── order-return-label.tsx
-│   ├── order-shipped.tsx
-│   ├── refund-request-admin.tsx
-│   └── styles.ts
+│   ├── admin-new-order.tsx
+│   ├── ... (confirmation, shipped, delivered, refunded)
+│   └── styles.ts
 ├── layout
-│   ├── conditional-footer.tsx
-│   ├── conditional-navbar.tsx
-│   ├── footer.tsx
-│   └── navbar.tsx
+│   ├── conditional-footer.tsx
+│   ├── conditional-navbar.tsx
+│   ├── footer.tsx
+│   └── navbar.tsx
+├── legal (Nouveau !)
+│   └── LegalPageTemplate.tsx
 ├── orders
-│   └── refund-request-form.tsx
+│   └── refund-request-form.tsx
 ├── product
-│   ├── image-gallery.tsx
-│   ├── product-card.tsx
-│   └── related-products.tsx
+│   ├── image-gallery.tsx
+│   ├── product-card.tsx
+│   └── related-products.tsx
 ├── seo
-│   └── json-ld.tsx
+│   └── json-ld.tsx
 ├── ui
-│   ├── status-badge.tsx
-│   └── toast-provider.tsx
-└── price-display.tsx
+│   ├── status-badge.tsx
+│   ├── toast-provider.tsx
+│   └── ... (alert, card, input, select, loading-state)
+└── price-display.tsx (Composant racine)
 ```
 
 ### 2. BACKEND

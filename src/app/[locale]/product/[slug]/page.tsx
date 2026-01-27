@@ -140,11 +140,11 @@ export default async function ProductPage({
   };
 
   return (
-    <div className="flex-1 py-8 animate-in fade-in duration-700">
+    <div className="flex-1 vibe-section-py animate-in fade-in duration-700">
       <JsonLd data={productJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="vibe-layout-container">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <ImageGallery
             images={images}

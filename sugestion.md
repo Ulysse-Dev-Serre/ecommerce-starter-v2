@@ -64,3 +64,19 @@ Je te demande de ne rien modifier, de simplement analyser ce que tu vois et de m
 
 ### Cohérence Architecturale
 *   Généraliser l'usage de la couche "Service" pour toute la logique d'accès aux données, sur le modèle de ce qui est fait pour le Checkout.
+
+
+
+# sugestion 2
+
+## Synthèse de l'Analyse (Points à corriger)
+
+| Point d'attention | État actuel | Recommandation |
+| :--- | :--- | :--- |
+| **Texte en dur** | Présent dans les fallbacks (`'Customer'`) et les messages d'erreur API/Client. | Déplacer ces chaînes techniques dans les dictionnaires i18n (`common.json` ou `errors.json`). |
+| **CSS en dur** | Très présent dans les structures de pages (`grid-cols-12`, `gap-10`, `py-12`). | Continuer d'étendre le système "Vibe" (commencé dans `globals.css`) pour créer des classes comme `.vibe-layout-container`, `.vibe-section-py`, etc. |
+| **Cohérence Server/Client** | **Excellent**. | Respecté partout. Les données sont fetchées côté serveur et envoyées proprement aux composants clients. |
+| **Modularity** | **Très bonne**. | Les pages sont légères et délèguent soit à des composants métiers (`CartItem`), soit à des templates (`LegalPageTemplate`). |
+
+**Conclusion de l'analyse :** La structure est saine. L'effort principal à fournir concerne le remplacement des classes Tailwind "structurelles" par des utilitaires CSS centralisés (comme pour l'admin avec `admin.css`) et le nettoyage des derniers fallbacks textuels anglais.
+

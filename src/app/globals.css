@@ -157,6 +157,18 @@ body {
   padding: 2.5rem;
 }
 
+.vibe-page-header {
+  @apply text-3xl font-bold mb-8;
+}
+
+.vibe-layout-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.vibe-section-py {
+  @apply py-8 lg:py-12;
+}
+
 .vibe-info-box {
   @apply bg-muted/30 border border-dashed border-border text-center transition-all duration-300;
   border-radius: var(--radius-xl);

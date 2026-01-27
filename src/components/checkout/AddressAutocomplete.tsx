@@ -27,7 +27,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   onAddressSelect,
   onInputChange,
   value,
-  placeholder = 'Start typing your address...',
+  placeholder = '',
   className = '',
   countryRestriction = ['ca', 'us'],
 }) => {

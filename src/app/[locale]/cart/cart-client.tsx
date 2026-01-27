@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 
 import { CartItem } from '@/components/cart/CartItem';
@@ -68,9 +69,9 @@ export function CartClient({ cart, locale }: CartClientProps) {
       <div className="cart-empty-state">
         <div className="cart-empty-state-icon">{t('emptyCartIcon')}</div>
         <p className="cart-empty-state-title">{t('emptyCart')}</p>
-        <a href={`/${locale}/shop`} className="cart-empty-state-button">
+        <Link href={`/${locale}/shop`} className="cart-empty-state-button">
           {t('continueShopping')}
-        </a>
+        </Link>
       </div>
     );
   }

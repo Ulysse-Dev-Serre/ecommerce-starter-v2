@@ -51,7 +51,7 @@ export default async function ShopPage({
   );
 
   return (
-    <div className="container mx-auto px-4 py-12 animate-in fade-in duration-700">
+    <div className="vibe-layout-container vibe-section-py animate-in fade-in duration-700">
       <div className="mb-12 border-b border-border pb-8">
         <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
           {t('title')}

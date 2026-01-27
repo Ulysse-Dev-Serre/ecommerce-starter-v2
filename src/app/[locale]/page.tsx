@@ -3,9 +3,8 @@ import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 
 import { Language, ProductStatus } from '@/generated/prisma';
-import { ProductActions } from '@/components/cart/product-actions';
-import { PriceDisplay } from '@/components/price-display';
 import { getProducts } from '@/lib/services/product.service';
+import { ProductCard } from '@/components/product/product-card';
 import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/constants';
 
 // Disable static generation for this page (requires DB)
@@ -59,8 +58,8 @@ export default async function Home({
 
   return (
     <div className="flex-1">
-      <section className="bg-gradient-to-r from-muted/50 to-background py-24 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="bg-gradient-to-r from-muted/50 to-background border-b border-border vibe-section-py">
+        <div className="vibe-layout-container text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground">
             {t('heroTitle')}
           </h1>
@@ -78,8 +77,8 @@ export default async function Home({
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="vibe-section-py">
+        <div className="vibe-layout-container">
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-bold text-foreground">
@@ -103,76 +102,15 @@ export default async function Home({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {featuredProducts.map((product, idx) => {
-                const translation = product.translations[0];
-                const primaryImage = product.media?.find(m => m.isPrimary);
-                const firstVariant = product.variants?.[0];
-                const pricing = firstVariant?.pricing ?? [];
-
-                return (
-                  <div
-                    key={product.id}
-                    className="vibe-card group"
-                    style={{ animationDelay: `${idx * 100}ms` }}
-                  >
-                    <Link href={`/${locale}/product/${product.slug}`}>
-                      <div className="aspect-square bg-muted rounded-xl relative overflow-hidden mb-6">
-                        {primaryImage ? (
-                          <img
-                            src={primaryImage.url}
-                            alt={primaryImage.alt || translation?.name || ''}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-5xl">
-                            📦
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                    <div className="space-y-2">
-                      <Link href={`/${locale}/product/${product.slug}`}>
-                        <h3 className="font-bold text-xl text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                          {translation?.name || product.slug}
-                        </h3>
-                      </Link>
-
-                      {pricing.length > 0 && (
-                        <PriceDisplay
-                          pricing={pricing.map(p => ({
-                            price: p.price.toString(),
-                            currency: p.currency,
-                          }))}
-                          className="text-lg font-bold text-primary"
-                          locale={locale}
-                        />
-                      )}
-
-                      <div className="pt-4">
-                        {firstVariant &&
-                          (product.variants.length > 1 ? (
-                            <Link
-                              href={`/${locale}/product/${product.slug}`}
-                              className="w-full inline-block text-center bg-muted text-foreground py-3 px-4 rounded-xl font-bold hover:bg-border transition-colors"
-                            >
-                              {tShop('viewOptions')}
-                            </Link>
-                          ) : (
-                            <ProductActions
-                              variantId={firstVariant.id}
-                              locale={locale}
-                              disabled={!firstVariant.id}
-                              compact={true}
-                              showQuantitySelector={false}
-                              maxQuantity={firstVariant.inventory?.stock || 99}
-                              productName={translation?.name || product.slug}
-                            />
-                          ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {featuredProducts.map((product, idx) => (
+                <div
+                  key={product.id}
+                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  <ProductCard product={product} locale={locale} />
+                </div>
+              ))}
             </div>
           )}
         </div>
