@@ -1,11 +1,13 @@
 import { formatPrice } from '@/lib/utils/currency';
 import { useTranslations } from 'next-intl';
 
+import { ShippingRate } from '@/lib/types/checkout';
+
 interface ShippingSectionProps {
-  shippingRates: any[];
-  selectedRate: any;
+  shippingRates: ShippingRate[];
+  selectedRate: ShippingRate | null;
   isLoading: boolean;
-  onRateSelect: (rate: any) => void;
+  onRateSelect: (rate: ShippingRate) => void;
   locale: string;
 }
 
@@ -32,7 +34,7 @@ export function ShippingSection({
         </div>
       ) : shippingRates.length > 0 ? (
         <div className="space-y-3">
-          {shippingRates.map((rate: any, index: number) => {
+          {shippingRates.map((rate: ShippingRate, index: number) => {
             const rateId = rate.object_id || rate.objectId;
             const selectedId =
               selectedRate?.object_id || selectedRate?.objectId;
@@ -72,7 +74,7 @@ export function ShippingSection({
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-xl text-foreground">
-                      {formatPrice(rate.amount, rate.currency, locale)}
+                      {formatPrice(rate.amount, rate.currency as any, locale)}
                     </div>
                   </div>
                 </div>

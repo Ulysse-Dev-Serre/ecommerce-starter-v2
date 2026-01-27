@@ -12,6 +12,12 @@ import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { Order, OrderItem, Payment } from '@/generated/prisma';
+
+type UserOrder = Order & {
+  items: OrderItem[];
+  payments: Pick<Payment, 'status' | 'method'>[];
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -65,7 +71,7 @@ async function OrdersListContent({
   orders,
   locale,
 }: {
-  orders: any[];
+  orders: UserOrder[];
   locale: string;
 }) {
   const t = await getTranslations({ locale, namespace: 'Orders.list' });

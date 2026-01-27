@@ -13,6 +13,13 @@ import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { Order, OrderItem, Payment, Shipment } from '@/generated/prisma';
+
+type OrderDetail = Order & {
+  items: OrderItem[];
+  payments: Payment[];
+  shipments: Shipment[];
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +58,7 @@ export default async function OrderDetailPage({
 
   const user = await prisma.user.findUnique({
     where: { clerkId },
-    select: { id: true },
+    select: { id: true, firstName: true, email: true },
   });
 
   if (!user) {
@@ -82,8 +89,8 @@ export default async function OrderDetailPage({
   }
 
   const productIds = order.items
-    .map((item: any) => item.productId)
-    .filter((id: string | null): id is string => !!id);
+    .map(item => item.productId)
+    .filter((id): id is string => !!id);
 
   const products = await prisma.product.findMany({
     where: { id: { in: productIds } },
@@ -118,6 +125,7 @@ export default async function OrderDetailPage({
   return (
     <OrderDetailContent
       order={order}
+      user={user}
       locale={locale}
       productData={productData}
     />
@@ -131,10 +139,12 @@ import { OrderSummary } from '@/components/orders/order-summary';
 
 async function OrderDetailContent({
   order,
+  user,
   locale,
   productData,
 }: {
-  order: any;
+  order: OrderDetail;
+  user: { firstName: string | null; email: string };
   locale: string;
   productData: Record<string, { image?: string; slug: string; name?: string }>;
 }) {
@@ -220,7 +230,7 @@ async function OrderDetailContent({
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingMessage', {
                         name:
-                          order.user?.firstName ||
+                          user.firstName ||
                           shippingAddr?.name?.split(' ')[0] ||
                           tRefund('clientFallback'),
                         amount: formatPrice(
@@ -260,7 +270,7 @@ async function OrderDetailContent({
               orderNumber={order.orderNumber}
               locale={locale}
               status={order.status}
-              hasLabel={order.shipments.some((s: any) => !!s.labelUrl)}
+              hasLabel={order.shipments.some(s => !!s.labelUrl)}
             />
           </div>
 

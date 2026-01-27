@@ -11,6 +11,7 @@ import { formatPrice } from '@/lib/utils/currency';
 
 import { env } from '@/lib/env';
 import { siteTokens } from '@/styles/themes/tokens';
+import { CheckoutAddress, ShippingRate } from '@/lib/types/checkout';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -154,8 +155,8 @@ export function CheckoutForm({
   const t = useTranslations('Checkout');
   const stripe = useStripe();
   const elements = useElements();
-  const [shippingRates, setShippingRates] = useState<any[]>([]);
-  const [selectedRate, setSelectedRate] = useState<any>(null);
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -167,7 +168,7 @@ export function CheckoutForm({
     useState(false);
 
   // States for address and contact
-  const [tempAddress, setTempAddress] = useState<any>({
+  const [tempAddress, setTempAddress] = useState<CheckoutAddress>({
     line1: '',
     line2: '',
     city: '',
@@ -204,7 +205,10 @@ export function CheckoutForm({
     }
   }, [selectedRate, initialTotal]);
 
-  const updatePaymentIntent = async (rate: any, shippingDetailsArg?: any) => {
+  const updatePaymentIntent = async (
+    rate: ShippingRate,
+    shippingDetailsArg?: any
+  ) => {
     try {
       setSelectedRate(rate);
       const paymentIntentId = clientSecret.split('_secret_')[0];
@@ -296,7 +300,7 @@ export function CheckoutForm({
     }
   };
 
-  const handleRateSelect = async (rate: any) => {
+  const handleRateSelect = async (rate: ShippingRate) => {
     const cleanPhone = phone.replace(/\D/g, '');
     const stripePhone = cleanPhone.startsWith('1')
       ? cleanPhone

@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getFormatter } from 'next-intl/server';
 import { LegalPageTemplate } from '@/components/legal/LegalPageTemplate';
 
 interface PageProps {
@@ -12,12 +12,13 @@ export default async function TermsPage({ params }: PageProps) {
     namespace: 'legal.termsOfService',
   });
   const tLegal = await getTranslations({ locale, namespace: 'legal' });
+  const format = await getFormatter({ locale });
 
   return (
     <LegalPageTemplate
       title={t('title')}
       lastUpdated={tLegal('lastUpdated', {
-        date: new Date().toLocaleDateString(locale),
+        date: format.dateTime(new Date(), { dateStyle: 'long' }),
       })}
       content={t('content')}
     />

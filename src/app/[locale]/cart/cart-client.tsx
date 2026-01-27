@@ -82,7 +82,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
   }));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+    <div className="vibe-grid-layout">
       <div className="lg:col-span-8 space-y-6">
         <div className="flex flex-col gap-4">
           {cart.items.map(item => (

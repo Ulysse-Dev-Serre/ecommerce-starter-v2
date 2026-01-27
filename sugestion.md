@@ -80,3 +80,18 @@ Je te demande de ne rien modifier, de simplement analyser ce que tu vois et de m
 
 **Conclusion de l'analyse :** La structure est saine. L'effort principal à fournir concerne le remplacement des classes Tailwind "structurelles" par des utilitaires CSS centralisés (comme pour l'admin avec `admin.css`) et le nettoyage des derniers fallbacks textuels anglais.
 
+
+
+# sugestion 3 
+Centralisation CSS (Design System "Vibe") :
+Vous avez commencé à implémenter un système avec les classes vibe-. Il faudrait généraliser cela pour remplacer les blocs Tailwind complexes restants, notamment dans 
+contact/page.tsx
+ (le conteneur du formulaire) et 
+cart/cart-client.tsx
+ (la grille principale).
+Date Formatting :
+Standardiser l'affichage des dates dans les pages légales via les utilitaires de next-intl plutôt que toLocaleDateString natif.
+Propreté du code :
+Globalement, le code est très propre, modulaire et respecte bien la distinction Server/Client Components. Il n'y a pas de texte "hardcoded" visible (tout passe par 
+t()
+), l'objectif semble donc atteint sur ce point spécifique.

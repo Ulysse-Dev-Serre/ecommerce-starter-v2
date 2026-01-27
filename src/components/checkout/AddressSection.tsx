@@ -7,11 +7,12 @@ import { useTranslations } from 'next-intl';
 
 import AddressAutocomplete from './AddressAutocomplete';
 import { Loader2 } from 'lucide-react';
+import { CheckoutAddress } from '@/lib/types/checkout';
 import { SITE_CURRENCY, COUNTRY_TO_CURRENCY } from '@/lib/constants';
 
 interface AddressSectionProps {
-  tempAddress: any;
-  setTempAddress: (address: any) => void;
+  tempAddress: CheckoutAddress;
+  setTempAddress: (address: CheckoutAddress) => void;
   tempName: string;
   setTempName: (name: string) => void;
   phone: string;
