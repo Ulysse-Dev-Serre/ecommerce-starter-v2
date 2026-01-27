@@ -3,16 +3,12 @@ import { SupportedCurrency, SITE_CURRENCY } from '@/lib/constants';
 
 export type Currency = SupportedCurrency;
 
-const DEFAULT_CURRENCY: Currency =
-  (env.NEXT_PUBLIC_CURRENCY as Currency) || 'CAD';
-
 function getCurrencyFromEnv(): Currency {
-  const envCurrency = env.NEXT_PUBLIC_CURRENCY;
-  return (envCurrency as Currency) || DEFAULT_CURRENCY;
+  return SITE_CURRENCY;
 }
 
 export function useCurrency() {
-  const currency = getCurrencyFromEnv();
+  const currency = SITE_CURRENCY;
 
   const setCurrency = (newCurrency: Currency) => {
     document.cookie = `currency=${newCurrency}; path=/; max-age=31536000`; // 1 year

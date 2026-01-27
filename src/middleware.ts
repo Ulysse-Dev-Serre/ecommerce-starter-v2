@@ -1,4 +1,3 @@
-// src/middleware.ts
 import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -6,23 +5,6 @@ import { i18n } from '@/lib/i18n/config';
 import { env } from '@/lib/env';
 
 const { locales, defaultLocale } = i18n;
-
-const CURRENCY_COOKIE_NAME = 'currency';
-const SUPPORTED_CURRENCIES = env.NEXT_PUBLIC_SUPPORTED_CURRENCIES as string[];
-type Currency = string;
-const DEFAULT_CURRENCY = env.NEXT_PUBLIC_CURRENCY as Currency;
-
-function detectCurrencyFromCountry(countryCode: string | null): Currency {
-  if (!countryCode) return DEFAULT_CURRENCY;
-
-  switch (countryCode.toUpperCase()) {
-    case 'US':
-      return 'USD';
-    case 'CA':
-    default:
-      return 'CAD';
-  }
-}
 
 // Fonction simple pour générer un ID unique compatible Edge Runtime
 function generateRequestId(): string {
@@ -117,42 +99,6 @@ export default clerkMiddleware((auth, req: NextRequest) => {
   // Ajouter requestId à toutes les réponses sans logger
   const response = NextResponse.next();
   response.headers.set('x-request-id', requestId);
-
-  // Gestion du cookie currency (géolocalisation → devise)
-  const existingCurrency = req.cookies.get(CURRENCY_COOKIE_NAME)?.value;
-
-  if (
-    !existingCurrency ||
-    !SUPPORTED_CURRENCIES.includes(existingCurrency as Currency)
-  ) {
-    // Détecter le pays via headers (Vercel, Cloudflare, ou autre CDN)
-    const countryCode =
-      req.headers.get('x-vercel-ip-country') ??
-      req.headers.get('cf-ipcountry') ??
-      req.headers.get('x-country-code') ??
-      null;
-
-    const detectedCurrency = detectCurrencyFromCountry(countryCode);
-
-    response.cookies.set(CURRENCY_COOKIE_NAME, detectedCurrency, {
-      httpOnly: false, // Accessible côté client pour le sélecteur
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 365, // 1 an
-      path: '/',
-    });
-
-    logMiddleware(
-      'INFO',
-      {
-        requestId,
-        action: 'currency_detected',
-        countryCode: countryCode ?? 'unknown',
-        currency: detectedCurrency,
-      },
-      'Currency detected from geolocation'
-    );
-  }
 
   return response;
 });

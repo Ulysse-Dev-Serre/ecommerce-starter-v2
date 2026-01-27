@@ -100,10 +100,14 @@
   "cart": {
     "title": "Panier",
     "empty": "Votre panier est vide",
+    "emptyCart": "Votre panier est vide",
     "total": "Total",
+    "sku": "SKU",
     "quantity": "Quantité",
-    "checkout": "Paiement",
-    "continueShopping": "Continuer les achats"
+    "remove": "Retirer",
+    "checkout": "Passer commande",
+    "signInToCheckout": "Se connecter pour commander",
+    "continueShopping": "Continuer mes achats"
   },
   "admin": {
     "sidebar": {
@@ -248,6 +252,27 @@
         "errorReorderingMedia": "Échec de l'enregistrement de l'ordre des médias",
         "errorReorderingProducts": "Échec de l'enregistrement de l'ordre des produits",
         "orderSaved": "Ordre enregistré avec succès"
+      },
+      "orderMode": "Mode commande",
+      "searchPlaceholder": "Rechercher un produit (nom, SKU)...",
+      "filters": {
+        "all": "Tous",
+        "ACTIVE": "Actif",
+        "DRAFT": "Brouillon",
+        "ARCHIVED": "Archivé",
+        "INACTIVE": "Inactif"
+      },
+      "table": {
+        "product": "Produit",
+        "status": "Statut",
+        "price": "Prix",
+        "inventory": "Stock",
+        "actions": "Actions"
+      },
+      "stats": {
+        "total": "Total Produits",
+        "stock": "Valeur du Stock",
+        "units": "Unités en Stock"
       }
     },
     "logistics": {

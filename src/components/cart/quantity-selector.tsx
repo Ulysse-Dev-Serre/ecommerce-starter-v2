@@ -104,8 +104,8 @@ export function QuantitySelector({
         type="button"
         onClick={decrement}
         disabled={quantity <= 1 || isLoading}
-        className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        aria-label={t('quantity')} // Simplified for now or add specific keys
+        className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-accent active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-foreground font-bold text-lg"
+        aria-label={t('quantity')}
       >
         −
       </button>
@@ -114,7 +114,7 @@ export function QuantitySelector({
         value={quantity}
         onChange={handleInputChange}
         disabled={isLoading}
-        className="w-16 h-8 text-center border border-gray-300 rounded disabled:opacity-50"
+        className="w-14 h-10 text-center border border-border bg-background rounded-lg disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-primary transition-shadow font-medium"
         min="1"
         max={maxQuantity}
       />
@@ -122,7 +122,7 @@ export function QuantitySelector({
         type="button"
         onClick={increment}
         disabled={quantity >= maxQuantity || isLoading}
-        className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-accent active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-foreground font-bold text-lg"
         aria-label={t('quantity')}
       >
         +

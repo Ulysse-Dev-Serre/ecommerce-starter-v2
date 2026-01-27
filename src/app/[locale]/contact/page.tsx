@@ -2,6 +2,9 @@ import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Mail, MapPin } from 'lucide-react';
+import { SITE_EMAIL, SITE_ADDRESS } from '@/lib/constants';
+import { ContactForm } from '@/components/contact/ContactForm';
+import { Alert } from '@/components/ui/alert';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -29,11 +32,11 @@ export default async function ContactPage({ params }: Props) {
     <div className="container mx-auto px-4 py-12 max-w-4xl">
       <h1 className="text-3xl font-bold mb-8 text-center">{t('title')}</h1>
 
-      <div className="bg-card rounded-lg shadow-sm border p-8">
+      <div className="bg-card rounded-lg shadow-sm border border-border p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h2 className="text-xl font-semibold mb-4">{t('title')}</h2>
-            <p className="text-gray-600 mb-6">{t('description')}</p>
+            <p className="text-muted-foreground mb-6">{t('description')}</p>
 
             <div className="space-y-4">
               <div className="flex items-start gap-3">
@@ -41,12 +44,14 @@ export default async function ContactPage({ params }: Props) {
                   <Mail className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">{t('emailLabel')}</p>
+                  <p className="font-medium text-foreground">
+                    {t('emailLabel')}
+                  </p>
                   <a
-                    href="mailto:support@agtechnest.com"
-                    className="text-primary hover:underline"
+                    href={`mailto:${SITE_EMAIL}`}
+                    className="text-primary hover:underline transition-colors"
                   >
-                    support@agtechnest.com
+                    {SITE_EMAIL}
                   </a>
                 </div>
               </div>
@@ -56,89 +61,35 @@ export default async function ContactPage({ params }: Props) {
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">{t('addressLabel')}</p>
-                  <p className="text-gray-600">
-                    Montreal, QC
-                    <br />
-                    Canada
+                  <p className="font-medium text-foreground">
+                    {t('addressLabel')}
+                  </p>
+                  <p className="text-muted-foreground whitespace-pre-line">
+                    {SITE_ADDRESS}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-              <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
-                {t('refundTitle')}
-              </h3>
-              <p className="text-sm text-yellow-800">
+            <div className="mt-8">
+              <Alert variant="info" title={t('refundTitle')}>
                 {t.rich('refundText', {
                   link: chunks => (
                     <Link
                       href={`/${locale}/orders`}
-                      className="font-bold underline"
+                      className="font-bold underline hover:opacity-80 transition-opacity"
                     >
                       {chunks}
                     </Link>
                   ),
                 })}
-              </p>
+              </Alert>
             </div>
           </div>
 
-          <form className="space-y-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t('formName')}
-              </label>
-              <input
-                type="text"
-                id="name"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder={t('formNamePlaceholder')}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t('formEmail')}
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder={t('formEmailPlaceholder')}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="message"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t('formMessage')}
-              </label>
-              <textarea
-                id="message"
-                rows={4}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
-                placeholder={t('formMessagePlaceholder')}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary-hover transition-colors"
-              disabled
-            >
-              {t('formSubmit')}
-            </button>
-          </form>
+          <div className="bg-background/50 p-6 rounded-xl border border-border/50">
+            <ContactForm />
+          </div>
         </div>
       </div>
     </div>

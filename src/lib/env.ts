@@ -44,7 +44,7 @@ const serverSchema = z.object({
   STORAGE_PROVIDER: z.enum(['local', 's3', 'cloudinary']).default('local'),
   STORAGE_LOCAL_UPLOAD_DIR: z.string().default('public/uploads'),
   STORAGE_LOCAL_PUBLIC_PATH: z.string().default('/uploads'),
-  // S3 (Optionnel - pour référence future)
+  // S3 (Optionnel)
   STORAGE_S3_BUCKET: z.string().optional(),
   STORAGE_S3_REGION: z.string().optional(),
   STORAGE_S3_ACCESS_KEY_ID: z.string().optional(),
@@ -61,15 +61,11 @@ const serverSchema = z.object({
     .default('development'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
   TEST_API_KEY: z.string().optional(),
-
-  // Custom
-  CAD_TO_USD_RATE: z.coerce.number().optional().default(0.72),
 });
 
 // Schéma pour les variables côté client (exposées via NEXT_PUBLIC_)
 const clientSchema = z.object({
-  // Site Config
-  NEXT_PUBLIC_SITE_NAME: z.string().min(1),
+  // Instance Identity (URLs change between environments)
   NEXT_PUBLIC_SITE_URL: z.string().url(),
   NEXT_PUBLIC_CORS_ORIGIN: z.string().url(),
 
@@ -82,18 +78,10 @@ const clientSchema = z.object({
   // Google & Analytics
   NEXT_PUBLIC_GTM_ID: z.string().optional(),
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
-
-  // i18n & Currency
-  NEXT_PUBLIC_DEFAULT_LOCALE: z.string().default('en'),
-  NEXT_PUBLIC_LOCALES: z.string().default('fr,en'),
-  NEXT_PUBLIC_CURRENCY: z.string().optional(),
-  NEXT_PUBLIC_SUPPORTED_CURRENCIES: z.string().default('CAD,USD'),
 });
 
-// Fusion des schémas pour inférence de type
-// Note: On sépare la validation client/serveur pour éviter les erreurs lors du build frontend
+// Validation
 const _clientEnv = clientSchema.safeParse({
-  NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_CORS_ORIGIN: process.env.NEXT_PUBLIC_CORS_ORIGIN,
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
@@ -102,17 +90,11 @@ const _clientEnv = clientSchema.safeParse({
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
   NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID,
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
-  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES,
-  NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
-  NEXT_PUBLIC_SUPPORTED_CURRENCIES:
-    process.env.NEXT_PUBLIC_SUPPORTED_CURRENCIES,
 });
 
 const _serverEnv = serverSchema.safeParse(process.env);
 
 // En production, on veut bloquer le build si une variable manque.
-// En dev, on log juste une erreur pour ne pas bloquer si on travaille sur autre chose.
 if (!_clientEnv.success) {
   console.error(
     '❌ Invalid CLIENT environment variables:',
@@ -123,7 +105,6 @@ if (!_clientEnv.success) {
   }
 }
 
-// On ne valide le serveur que si on est côté serveur (runtime check)
 const isServer = typeof window === 'undefined';
 if (isServer && !_serverEnv.success) {
   console.error(
@@ -137,7 +118,7 @@ if (isServer && !_serverEnv.success) {
 
 // Helper pour exporter les variables propres
 export const env = {
-  // Variables Serveur (Uniquement dispos côté serveur)
+  // Variables Serveur
   DATABASE_URL: process.env.DATABASE_URL!,
   CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY!,
   CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET!,
@@ -167,7 +148,6 @@ export const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   LOG_LEVEL: process.env.LOG_LEVEL,
   TEST_API_KEY: process.env.TEST_API_KEY,
-  CAD_TO_USD_RATE: Number(process.env.CAD_TO_USD_RATE || 0.72),
 
   // Storage
   STORAGE_PROVIDER:
@@ -185,8 +165,7 @@ export const env = {
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
 
-  // Variables Client (Dispos partout)
-  NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME!,
+  // Variables Client
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL!,
   NEXT_PUBLIC_CORS_ORIGIN: process.env.NEXT_PUBLIC_CORS_ORIGIN!,
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
@@ -195,10 +174,4 @@ export const env = {
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
   NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID,
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'en',
-  NEXT_PUBLIC_LOCALES: (process.env.NEXT_PUBLIC_LOCALES || 'fr,en').split(','),
-  NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
-  NEXT_PUBLIC_SUPPORTED_CURRENCIES: (
-    process.env.NEXT_PUBLIC_SUPPORTED_CURRENCIES || 'CAD,USD'
-  ).split(','),
 } as const;

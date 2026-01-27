@@ -10,7 +10,7 @@ import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/db/prisma';
 import { RevenueChart } from '@/components/admin/analytics/revenue-chart';
 import { formatPrice } from '@/lib/utils/currency';
-import { SupportedCurrency } from '@/lib/constants';
+import { SITE_CURRENCY, SupportedCurrency } from '@/lib/constants';
 import { formatDate } from '@/lib/utils/date';
 import { env } from '@/lib/env';
 import { DashboardStatsGrid } from '@/components/admin/dashboard/dashboard-stats-grid';
@@ -29,7 +29,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
     namespace: 'adminDashboard.dashboard',
   });
 
-  const currency = env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
+  const currency = SITE_CURRENCY;
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(now.getDate() - 7);

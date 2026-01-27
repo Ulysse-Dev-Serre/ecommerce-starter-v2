@@ -48,7 +48,7 @@ export default async function CustomerDetailPage({
     (sum, order) => sum + Number(order.totalAmount),
     0
   );
-  const displayCurrency = (env.NEXT_PUBLIC_CURRENCY as any) || SITE_CURRENCY;
+  const displayCurrency = SITE_CURRENCY;
   const totalOrders = customer.orders.length;
 
   return (

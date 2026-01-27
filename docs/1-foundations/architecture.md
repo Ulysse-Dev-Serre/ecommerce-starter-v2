@@ -84,6 +84,7 @@ src/app/[locale]
 │   │   └── page.tsx
 │   ├── layout.tsx
 │   └── page.tsx
+│ 
 ├── cart
 │   ├── cart-client.tsx
 │   └── page.tsx

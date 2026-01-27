@@ -6,12 +6,13 @@
 
 ### Philosophie
 
-Base technique solide et modulaire, pas une boutique figée :
+Base technique solide et modulaire pour déployer des **boutiques dédiées** par marché :
 
-- **Multi-pays** : Taxes locales, devises, zones d'expédition configurables
+- **Un Site = Un Pays** : Chaque déploiement cible un marché spécifique avec sa propre devise et configuration fiscale.
+- **Architecture Duplicable** : Le même code source peut propulser `mon-shop.ca` (CAD) et `mon-shop.fr` (EUR) simplement en changeant la configuration.
 - **Multi-niches** : Animaux, plantes, jouets, vêtements, électronique...
-- **Multi-langues** : Français/Anglais par défaut, extensible à d'autres langues
-- **Déploiement rapide** : De l'idée à la boutique en ligne en quelques jours
+- **Multi-langues** : Support bilingue (ex: FR/EN au Canada) mais devises fixes par instance.
+- **Déploiement rapide** : De l'idée à la boutique en ligne en quelques jours.
 
 ---
 
@@ -41,9 +42,9 @@ npm run dev
 
 ### International par design
 
-- Support multi-pays (Canada/USA/France)
-- URLs bilingues (`/fr/`, `/en/`) avec SEO optimisé
-- Calculs taxes et expédition localisés
+- **Architecture Multi-Marchés** : Conçu pour gérer des déploiements distincts (ex: USA vs Canada).
+- **URLs bilingues** : `/fr/` et `/en/` gérés nativement pour les pays bilingues.
+- **Localisation Statique** : Calculs de taxes et expédition calibrés pour le pays de l'instance.
 
 ### Production-ready
 
@@ -71,6 +72,13 @@ npm run dev
 - **Paiements** : Stripe
 - **Traductions** : next-intl (FR/EN)
 - **Déploiement** : Vercel/Railway/DigitalOcean
+- **Données** : Base de données PostgreSQL centralisée (Neon)
+
+### Architecture des Données
+
+- **Base de Données Unique** : Tous les sites/pays se connectent à la même base de données.
+- **Produits Centralisés** : Les produits sont définis une seule fois avec des traductions (`ProductTranslation`) pour chaque langue.
+- **Prix Multi-Devises** : Chaque variante a des prix spécifiques par devise (`ProductVariantPricing`), permettant des stratégies de prix indépendantes par marché (ex: 100 CAD != 72 USD).
 
 ---
 

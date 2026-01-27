@@ -1,4 +1,9 @@
-import { env } from '@/lib/env';
+/**
+ * =============================================================================
+ * SITE IDENTITY
+ * =============================================================================
+ */
+export const SITE_NAME = 'AgTechNest';
 
 /**
  * =============================================================================
@@ -8,15 +13,26 @@ import { env } from '@/lib/env';
  */
 
 // --- LOCALES ---
-export const SUPPORTED_LOCALES = env.NEXT_PUBLIC_LOCALES as string[];
-export type SupportedLocale = string;
-export const DEFAULT_LOCALE = env.NEXT_PUBLIC_DEFAULT_LOCALE as SupportedLocale;
+export const SUPPORTED_LOCALES = ['en', 'fr'] as const;
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+export const DEFAULT_LOCALE = 'en' as SupportedLocale;
 
 // --- CURRENCIES ---
-export const SUPPORTED_CURRENCIES =
-  env.NEXT_PUBLIC_SUPPORTED_CURRENCIES as string[];
-export type SupportedCurrency = string;
-export const DEFAULT_CURRENCY = env.NEXT_PUBLIC_CURRENCY as SupportedCurrency;
+export const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;
+export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
+export const DEFAULT_CURRENCY = 'USD' as SupportedCurrency;
+
+/**
+ * Mapping of Country Codes (ISO 3166-1 alpha-2) to Currencies.
+ * Used for auto-detection in middleware.
+ */
+export const COUNTRY_TO_CURRENCY: Record<string, SupportedCurrency> = {
+  US: 'USD',
+  CA: 'CAD',
+  // Add other countries here:
+  // FR: 'EUR',
+  // GB: 'GBP',
+};
 
 /**
  * Site-wide active currency for this specific deployment.
@@ -39,7 +55,15 @@ export const PRODUCT_STATUSES = [
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
 /**
+ * =============================================================================
+ * SITE INFORMATION
+ * =============================================================================
+ */
+export const SITE_EMAIL = 'agtechnest@gmail.com';
+export const SITE_ADDRESS = 'Montreal, QC\nCanada';
+
+/**
  * Manual exchange rate fallback.
  * Used primarily for shipping calculations between Shippo (CAD) and site currency.
  */
-export const CAD_TO_USD_RATE = env.CAD_TO_USD_RATE;
+export const CAD_TO_USD_RATE = 0.72;

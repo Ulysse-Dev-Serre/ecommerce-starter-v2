@@ -4,7 +4,9 @@ import { SUPPORTED_CURRENCIES } from '../constants';
 export const createIntentSchema = z
   .object({
     cartId: z.string().optional(),
-    currency: z.enum(SUPPORTED_CURRENCIES as [string, ...string[]]).optional(), // We accept it but backend MUST ignore it or validate against SITE_CURRENCY
+    currency: z
+      .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]])
+      .optional(), // We accept it but backend MUST ignore it or validate against SITE_CURRENCY
     locale: z.string().optional(),
     directItem: z
       .object({
@@ -20,7 +22,9 @@ export const createIntentSchema = z
 
 export const updateIntentSchema = z.object({
   paymentIntentId: z.string().min(1),
-  currency: z.enum(SUPPORTED_CURRENCIES as [string, ...string[]]).optional(),
+  currency: z
+    .enum(SUPPORTED_CURRENCIES as unknown as [string, ...string[]])
+    .optional(),
   shippingRate: z
     .object({
       object_id: z.string().optional(),

@@ -100,9 +100,13 @@
   "cart": {
     "title": "Cart",
     "empty": "Your cart is empty",
+    "emptyCart": "Your cart is empty",
     "total": "Total",
+    "sku": "SKU",
     "quantity": "Quantity",
+    "remove": "Remove",
     "checkout": "Checkout",
+    "signInToCheckout": "Sign in to checkout",
     "continueShopping": "Continue shopping"
   },
   "admin": {
@@ -248,6 +252,27 @@
         "errorReorderingMedia": "Failed to save media order",
         "errorReorderingProducts": "Failed to save product order",
         "orderSaved": "Order saved successfully"
+      },
+      "orderMode": "Order Mode",
+      "searchPlaceholder": "Search products (name, SKU)...",
+      "filters": {
+        "all": "All",
+        "ACTIVE": "Active",
+        "DRAFT": "Draft",
+        "ARCHIVED": "Archived",
+        "INACTIVE": "Inactive"
+      },
+      "table": {
+        "product": "Product",
+        "status": "Status",
+        "price": "Price",
+        "inventory": "Stock",
+        "actions": "Actions"
+      },
+      "stats": {
+        "total": "Total Products",
+        "stock": "Inventory Value",
+        "units": "Units in Stock"
       }
     },
     "logistics": {

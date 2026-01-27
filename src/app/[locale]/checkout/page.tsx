@@ -182,7 +182,7 @@ export default async function CheckoutPage({
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-12">
+    <div className="bg-background min-h-screen pb-12">
       <CheckoutClient
         cartId={currentCartId}
         locale={locale}
