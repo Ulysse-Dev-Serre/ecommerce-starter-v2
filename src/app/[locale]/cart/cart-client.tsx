@@ -65,15 +65,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="text-center py-24 bg-card rounded-2xl border border-dashed border-border animate-in fade-in zoom-in duration-500">
-        <div className="mb-6 text-6xl">🛒</div>
-        <p className="text-2xl font-bold text-foreground mb-4">
-          {t('emptyCart')}
-        </p>
-        <a
-          href={`/${locale}/shop`}
-          className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all shadow-md shadow-primary/10"
-        >
+      <div className="cart-empty-state">
+        <div className="cart-empty-state-icon">{t('emptyCartIcon')}</div>
+        <p className="cart-empty-state-title">{t('emptyCart')}</p>
+        <a href={`/${locale}/shop`} className="cart-empty-state-button">
           {t('continueShopping')}
         </a>
       </div>

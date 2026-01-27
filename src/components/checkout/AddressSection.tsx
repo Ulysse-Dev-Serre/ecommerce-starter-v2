@@ -1,6 +1,9 @@
+'use client';
+
 import { useEffect, useMemo } from 'react';
 import { FormInput } from '@/components/ui/form-input';
 import { FormSelect } from '@/components/ui/form-select';
+import { useTranslations } from 'next-intl';
 
 import AddressAutocomplete from './AddressAutocomplete';
 import { Loader2 } from 'lucide-react';
@@ -16,7 +19,6 @@ interface AddressSectionProps {
   isAddressReady: boolean;
   isLoading: boolean;
   onCalculateShipping: () => void;
-  translations: any;
 }
 
 export function AddressSection({
@@ -29,8 +31,9 @@ export function AddressSection({
   isAddressReady,
   isLoading,
   onCalculateShipping,
-  translations: t,
 }: AddressSectionProps) {
+  const t = useTranslations('Checkout');
+  const g = useTranslations('geography');
   // Determine the target country for this instance based on SITE_CURRENCY
   // Example: If SITE_CURRENCY is 'USD', we look for keys in COUNTRY_TO_CURRENCY where value is 'USD' -> returns 'US'
   const instanceCountryCode = useMemo(() => {
@@ -53,8 +56,7 @@ export function AddressSection({
 
   // Dynamic State/Province options based on the active instance country
   const provinceOptions = useMemo(() => {
-    const regionKey = instanceCountryCode as keyof typeof t.geography;
-    const regions = t.geography[regionKey];
+    const regions = g.raw(instanceCountryCode) as Record<string, string>;
 
     if (!regions) return [];
 
@@ -62,18 +64,18 @@ export function AddressSection({
       value: code,
       label: name,
     }));
-  }, [instanceCountryCode, t.geography]);
+  }, [instanceCountryCode, g]);
 
   return (
     <section className="bg-card p-6 rounded-xl shadow-sm border border-border">
       <h2 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2 border-b border-border pb-4">
-        {t.shippingAddress}
+        {t('shippingAddress')}
       </h2>
       <div className="space-y-4">
         {/* Name & Phone */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
-            label={t.fullName}
+            label={t('fullName')}
             required
             value={tempName}
             onChange={e => setTempName(e.target.value)}
@@ -81,7 +83,7 @@ export function AddressSection({
 
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.phone} <span className="text-error ml-1">*</span>
+              {t('phone')} <span className="text-error ml-1">*</span>
             </label>
             <div className="flex">
               <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm">
@@ -100,7 +102,7 @@ export function AddressSection({
         {/* Address Line 1 (Autocomplete restricted to instance Country) */}
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
-            {t.addressLine1} <span className="text-error ml-1">*</span>
+            {t('addressLine1')} <span className="text-error ml-1">*</span>
           </label>
           <AddressAutocomplete
             onAddressSelect={selected => {
@@ -121,7 +123,7 @@ export function AddressSection({
               });
             }}
             value={tempAddress?.line1 || ''}
-            placeholder={t.addressLine1}
+            placeholder={t('addressLine1')}
             className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
             // Restrict Google Autocomplete to the instance country code (lower case for API)
             countryRestriction={instanceCountryCode.toLowerCase()}
@@ -130,7 +132,7 @@ export function AddressSection({
 
         {/* Address Line 2 */}
         <FormInput
-          label={t.addressLine2}
+          label={t('addressLine2')}
           value={tempAddress?.line2 || ''}
           onChange={e =>
             setTempAddress({ ...tempAddress, line2: e.target.value })
@@ -142,11 +144,8 @@ export function AddressSection({
           <div className="md:col-span-1">
             {/* Display Country as Read-Only Input since it's fixed per instance */}
             <FormInput
-              label={t.country}
-              value={
-                t.geography.countries?.[instanceCountryCode] ||
-                instanceCountryCode
-              } // Try to find localized name, fallback to code
+              label={t('country')}
+              value={instanceCountryCode} // Display code since localized name map not found in dict
               disabled
               readOnly
               className="bg-muted text-muted-foreground opacity-100 cursor-not-allowed" // Style to look fixed but readable
@@ -154,7 +153,7 @@ export function AddressSection({
           </div>
 
           <FormInput
-            label={t.city}
+            label={t('city')}
             required
             value={tempAddress?.city || ''}
             onChange={e =>
@@ -167,7 +166,7 @@ export function AddressSection({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {provinceOptions.length > 0 ? (
             <FormSelect
-              label={t.state}
+              label={t('state')}
               required
               value={tempAddress?.state || ''}
               onChange={e =>
@@ -177,11 +176,11 @@ export function AddressSection({
                 })
               }
               options={provinceOptions}
-              placeholder={t.selectState}
+              placeholder={t('selectState')}
             />
           ) : (
             <FormInput
-              label={t.state}
+              label={t('state')}
               required
               value={tempAddress?.state || ''}
               onChange={e =>
@@ -194,7 +193,7 @@ export function AddressSection({
           )}
 
           <FormInput
-            label={t.zipCode}
+            label={t('zipCode')}
             required
             value={tempAddress?.postal_code || ''}
             onChange={e =>
@@ -221,10 +220,10 @@ export function AddressSection({
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" />
-              {t.calculating}
+              {t('calculating')}
             </div>
           ) : (
-            t.confirmAddress
+            t('confirmAddress')
           )}
         </button>
       </div>

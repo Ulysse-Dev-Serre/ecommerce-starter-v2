@@ -5,13 +5,15 @@
  * Pour créer un nouveau thème : dupliquer themes/neutral.css
  * Pour activer un thème : modifier la ligne ci-dessous
  */
-@import '../styles/themes/neutral.css'; /* ← Thème actif */
+@import '../styles/themes/neutral.css';
+/* ← Thème actif */
 
 @theme inline {
   /* Tailwind color mapping to our CSS vars */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
@@ -23,6 +25,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-border-focus: var(--border-focus);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
   /* Shadow mapping */
   --shadow-sm: var(--shadow);
@@ -107,6 +111,7 @@ body {
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -115,4 +120,90 @@ body {
 
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
+}
+
+/* 🛒 CART & EMPTY STATES */
+.cart-empty-state {
+  @apply text-center py-24 bg-card rounded-2xl border border-dashed border-border opacity-0 transition-opacity duration-500;
+}
+
+.cart-empty-state-icon {
+  @apply mb-6 text-6xl;
+}
+
+.cart-empty-state-title {
+  @apply text-2xl font-bold text-foreground mb-4;
+}
+
+.cart-empty-state-button {
+  @apply inline-block bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all shadow-md shadow-primary/10;
+}
+
+/* ✨ VIBE SYSTEM - REUSABLE UI PATTERNS */
+.vibe-card {
+  @apply bg-card border border-border transition-all duration-300;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+.vibe-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.vibe-container {
+  @apply bg-card border border-border shadow-sm;
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+}
+
+.vibe-info-box {
+  @apply bg-muted/30 border border-dashed border-border text-center transition-all duration-300;
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+}
+
+/* 🧱 SEMANTIC COMPONENTS */
+.vibe-button-primary {
+  @apply bg-primary text-primary-foreground flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  border-radius: var(--radius-button);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-button);
+}
+
+.vibe-button-primary:hover:not(:disabled) {
+  @apply bg-primary-hover;
+}
+
+.vibe-button-secondary {
+  @apply bg-secondary text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  border-radius: var(--radius-button);
+  font-weight: var(--font-weight-bold);
+}
+
+.vibe-input {
+  @apply w-full border border-border bg-background transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50;
+  border-radius: var(--radius-sm);
+  height: 2.5rem;
+  padding: 0 0.75rem;
+}
+
+.vibe-badge {
+  @apply px-2.5 py-0.5 text-xs transition-colors;
+  font-weight: var(--font-weight-bold);
+  border-radius: 9999px;
+}
+
+.vibe-pagination-item {
+  @apply inline-flex items-center justify-center w-10 h-10 text-sm transition-all duration-300;
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-md);
+}
+
+.vibe-pagination-active {
+  @apply bg-primary text-primary-foreground shadow-md;
+}
+
+.vibe-pagination-inactive {
+  @apply bg-card border border-border text-muted-foreground hover:border-primary/50 hover:text-primary;
 }

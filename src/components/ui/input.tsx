@@ -10,7 +10,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-muted-foreground mb-1.5">
+          <label className="block text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
             {label}
             {props.required && <span className="text-error ml-1">*</span>}
           </label>
@@ -18,17 +18,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={`
-            w-full px-4 py-2.5 bg-background border rounded-xl outline-none transition-all
-            placeholder:text-muted-foreground/50
-            focus:ring-2 focus:ring-primary focus:border-primary
-            disabled:opacity-50 disabled:bg-muted
-            ${error ? 'border-error ring-1 ring-error' : 'border-border'}
+            vibe-input
+            ${error ? 'border-error focus:ring-error/20 focus:border-error' : ''}
             ${className || ''}
           `}
           {...props}
         />
         {error && (
-          <p className="mt-1.5 text-xs text-error font-medium">{error}</p>
+          <p className="mt-1.5 text-xs text-error font-bold">{error}</p>
         )}
       </div>
     );

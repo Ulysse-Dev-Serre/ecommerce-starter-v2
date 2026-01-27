@@ -1,13 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-
-import { ShoppingCart, Zap } from 'lucide-react';
+import { ShoppingCart, Zap, Plus, Minus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-
 import { useToast } from '../ui/toast-provider';
-
 import { trackEvent } from '@/lib/analytics/tracker';
 
 interface ProductActionsProps {
@@ -36,8 +33,6 @@ export function ProductActions({
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
-
-  /* translations object removed */
 
   const t = useTranslations('products');
   const tCommon = useTranslations('common');
@@ -80,7 +75,6 @@ export function ProductActions({
         { variantId, quantity, productName, type: 'direct' },
         productName
       );
-      // Redirection vers le checkout avec les paramètres pour l'achat direct
       router.push(
         `/${locale}/checkout?directVariantId=${variantId}&directQuantity=${quantity}`
       );
@@ -92,67 +86,69 @@ export function ProductActions({
   };
 
   const incrementQuantity = () => {
-    if (quantity < maxQuantity) {
-      setQuantity(quantity + 1);
-    }
+    if (quantity < maxQuantity) setQuantity(quantity + 1);
   };
 
   const decrementQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
+    if (quantity > 1) setQuantity(quantity - 1);
   };
 
   return (
-    <div className={`space-y-4 ${compact ? 'space-y-2' : ''}`}>
+    <div className={`space-y-6 ${compact ? 'space-y-3' : ''}`}>
       {showQuantitySelector && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {!compact && (
-            <span className="text-sm font-medium text-foreground">
-              {tCommon('quantity')}:
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              {tCommon('quantity')}
             </span>
           )}
-          <div className="flex items-center border border-border rounded-lg">
+          <div className="flex items-center bg-muted rounded-lg p-1 border border-border/50">
             <button
               onClick={decrementQuantity}
               disabled={disabled || quantity <= 1}
-              className="px-3 py-2 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed text-foreground"
             >
-              -
+              <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="px-4 py-2 min-w-12 text-center font-medium">
+            <span className="w-10 text-center font-bold text-foreground">
               {quantity}
             </span>
             <button
               onClick={incrementQuantity}
               disabled={disabled || quantity >= maxQuantity}
-              className="px-3 py-2 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed text-foreground"
             >
-              +
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       )}
 
-      <div
-        className={`flex gap-3 ${compact ? 'flex-col' : 'flex-row'} ${compact ? 'w-full' : ''}`}
-      >
+      <div className={`flex gap-3 ${compact ? 'flex-col' : 'flex-row'}`}>
         <button
           onClick={handleAddToCart}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className={`flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 rounded-lg font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
+          className={`vibe-button-primary flex-1 h-12 ${compact ? 'h-10 text-xs' : ''}`}
         >
-          {!compact && <ShoppingCart className="w-5 h-5" />}
-          {isAddingToCart ? t('adding') : t('addToCart')}
+          {isAddingToCart ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <ShoppingCart className="h-5 w-5" />
+          )}
+          <span>{isAddingToCart ? t('adding') : t('addToCart')}</span>
         </button>
 
         <button
           onClick={handleBuyNow}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className={`flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 py-3 rounded-lg font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
+          className={`vibe-button-secondary flex-1 h-12 bg-foreground text-background hover:opacity-90 ${compact ? 'h-10 text-xs' : ''}`}
         >
-          {!compact && <Zap className="w-5 h-5" />}
-          {isBuyingNow ? t('buying') : t('buyNow')}
+          {isBuyingNow ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Zap className="h-5 w-5 fill-current" />
+          )}
+          <span>{isBuyingNow ? t('buying') : t('buyNow')}</span>
         </button>
       </div>
     </div>

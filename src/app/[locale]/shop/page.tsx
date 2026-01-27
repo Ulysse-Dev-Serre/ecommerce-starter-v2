@@ -3,6 +3,8 @@ import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import { ProductCard } from '@/components/product/product-card';
+import { cn } from '@/lib/utils/cn';
+import { SUPPORTED_LOCALES } from '@/lib/constants';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -17,16 +19,14 @@ export async function generateMetadata({
 
   return {
     title: t('title'),
+    description: t('description'),
     alternates: {
       canonical: `/${locale}/shop`,
-      languages: {
-        fr: '/fr/shop',
-        en: '/en/shop',
-      },
+      languages: Object.fromEntries(
+        SUPPORTED_LOCALES.map(loc => [loc, `/${loc}/shop`])
+      ),
     },
-    openGraph: {
-      title: t('title'),
-    },
+    openGraph: { title: t('title') },
   };
 }
 
@@ -51,35 +51,48 @@ export default async function ShopPage({
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
+    <div className="container mx-auto px-4 py-12 animate-in fade-in duration-700">
+      <div className="mb-12 border-b border-border pb-8">
+        <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+          {t('title')}
+        </h1>
+        <p className="text-muted-foreground mt-2 text-lg">{t('description')}</p>
+      </div>
 
       {products.length === 0 ? (
-        <div className="text-center py-20 bg-muted/50 rounded-lg">
-          <p className="text-xl text-muted-foreground">
-            {t('noProducts') || 'No products found'}
+        <div className="vibe-info-box">
+          <div className="text-5xl mb-4">🔍</div>
+          <p className="text-xl text-muted-foreground font-medium">
+            {t('noProducts')}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product: any) => (
-            <ProductCard key={product.id} product={product} locale={locale} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {products.map((product: any, idx: number) => (
+            <div
+              key={product.id}
+              className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+              style={{ animationDelay: `${idx * 50}ms` }}
+            >
+              <ProductCard product={product} locale={locale} />
+            </div>
           ))}
         </div>
       )}
 
       {pagination.totalPages > 1 && (
-        <div className="mt-12 flex justify-center gap-2">
+        <div className="mt-20 flex justify-center gap-3">
           {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
             p => (
               <a
                 key={p}
                 href={`/${locale}/shop?page=${p}${category ? `&category=${category}` : ''}`}
-                className={`px-4 py-2 rounded-md font-medium transition-colors ${
+                className={cn(
+                  'vibe-pagination-item',
                   p === pagination.page
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-border text-foreground'
-                }`}
+                    ? 'vibe-pagination-active'
+                    : 'vibe-pagination-inactive'
+                )}
               >
                 {p}
               </a>

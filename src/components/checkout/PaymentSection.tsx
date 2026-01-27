@@ -3,13 +3,13 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
+import { useTranslations } from 'next-intl';
 
 interface PaymentSectionProps {
   stripe: any;
   elements: any;
   selectedRate: any;
   onPay: () => void;
-  translations: any;
   userEmail?: string | null;
 }
 
@@ -18,12 +18,12 @@ export function PaymentSection({
   elements,
   selectedRate,
   onPay,
-  translations: t,
   userEmail,
 }: PaymentSectionProps) {
+  const t = useTranslations('Checkout');
   return (
     <div className="mt-8 pt-8 border-t border-border animate-in fade-in duration-700">
-      <h3 className="text-xl font-bold mb-6 text-foreground">{t.payment}</h3>
+      <h3 className="text-xl font-bold mb-6 text-foreground">{t('payment')}</h3>
 
       <div className="bg-background p-4 rounded-xl border border-border shadow-inner">
         <PaymentElement
@@ -63,7 +63,7 @@ export function PaymentSection({
               />
             </svg>
           )}
-          {t.payNow}
+          {t('payNow')}
         </div>
       </button>
 
@@ -75,7 +75,7 @@ export function PaymentSection({
         >
           <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
         </svg>
-        {t.securePayment}
+        {t('securePayment')}
       </p>
     </div>
   );

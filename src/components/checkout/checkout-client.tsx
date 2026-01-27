@@ -1,14 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
+import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useTranslations } from 'next-intl';
 import AddressAutocomplete from './AddressAutocomplete';
 import { trackEvent } from '@/lib/analytics/tracker';
 import { formatPrice } from '@/lib/utils/currency';
@@ -24,39 +20,6 @@ interface CheckoutClientProps {
   locale: string;
   initialTotal: number;
   currency: string;
-  translations: {
-    title: string;
-    shippingAddress: string;
-    shippingMethod: string;
-    payment: string;
-    payNow: string;
-    loading: string;
-    error: string;
-    orderSummary: string;
-    subtotal: string;
-    shipping: string;
-    totalToPay: string;
-    confirmAddress: string;
-    calculating: string;
-    securePayment: string;
-    fullName: string;
-    phone: string;
-    addressLine1: string;
-    addressLine2: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    selectState: string;
-    statePlaceholder: string;
-    validation: {
-      phone: string;
-    };
-    geography: {
-      CA: Record<string, string>;
-      US: Record<string, string>;
-    };
-  };
   userEmail?: string | null | undefined;
   summaryItems?: Array<{
     name: string;
@@ -72,10 +35,10 @@ export function CheckoutClient({
   locale,
   initialTotal,
   currency,
-  translations: t,
   userEmail,
   summaryItems,
 }: CheckoutClientProps) {
+  const t = useTranslations('Checkout');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -116,10 +79,10 @@ export function CheckoutClient({
   if (error)
     return (
       <div className="p-4 text-red-500">
-        {t.error}: {error}
+        {t('error')}: {error}
       </div>
     );
-  if (!clientSecret) return <div className="p-4">{t.loading}</div>;
+  if (!clientSecret) return <div className="p-4">{t('loading')}</div>;
 
   return (
     <Elements
@@ -153,7 +116,6 @@ export function CheckoutClient({
       <CheckoutForm
         clientSecret={clientSecret}
         currency={currency}
-        translations={t}
         locale={locale}
         initialTotal={initialTotal}
         userEmail={userEmail}
@@ -169,39 +131,6 @@ interface CheckoutFormProps {
   currency: string;
   locale: string;
   initialTotal: number;
-  translations: {
-    title: string;
-    shippingAddress: string;
-    shippingMethod: string;
-    payment: string;
-    payNow: string;
-    loading: string;
-    error: string;
-    orderSummary: string;
-    subtotal: string;
-    shipping: string;
-    totalToPay: string;
-    confirmAddress: string;
-    calculating: string;
-    securePayment: string;
-    fullName: string;
-    phone: string;
-    addressLine1: string;
-    addressLine2: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    selectState: string;
-    statePlaceholder: string;
-    validation: {
-      phone: string;
-    };
-    geography: {
-      CA: Record<string, string>;
-      US: Record<string, string>;
-    };
-  };
   userEmail?: string | null | undefined;
   cartId: string;
   summaryItems?: Array<{
@@ -218,11 +147,11 @@ export function CheckoutForm({
   currency,
   locale,
   initialTotal,
-  translations: t,
   userEmail,
   cartId,
   summaryItems,
 }: CheckoutFormProps) {
+  const t = useTranslations('Checkout');
   const stripe = useStripe();
   const elements = useElements();
   const [shippingRates, setShippingRates] = useState<any[]>([]);
@@ -315,7 +244,7 @@ export function CheckoutForm({
     if (!isAddressReady || !tempAddress) return;
 
     if (!phone || phone.length < 10) {
-      alert(t.validation.phone);
+      alert(t('validation.phone'));
       return;
     }
 
@@ -404,8 +333,8 @@ export function CheckoutForm({
 
   return (
     <div className="max-w-7xl mx-auto p-4 lg:p-8">
-      <h1 className="text-4xl font-extrabold mb-10 text-foreground animate-in fade-in slide-in-from-left-4 duration-500">
-        {t.title}
+      <h1 className="text-4xl font-extrabold mb-10 text-foreground">
+        {t('title')}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
@@ -421,7 +350,6 @@ export function CheckoutForm({
             isAddressReady={isAddressReady}
             isLoading={isLoading}
             onCalculateShipping={handleCalculateShipping}
-            translations={t}
           />
 
           {hasAttemptedShippingRatesFetch && (
@@ -430,7 +358,6 @@ export function CheckoutForm({
               selectedRate={selectedRate}
               isLoading={isLoading}
               onRateSelect={handleRateSelect}
-              translations={t}
               locale={locale}
             />
           )}
@@ -445,7 +372,6 @@ export function CheckoutForm({
               total={total}
               currency={currency}
               locale={locale}
-              translations={t}
               selectedRate={selectedRate}
             />
 
@@ -455,7 +381,6 @@ export function CheckoutForm({
                 elements={elements}
                 selectedRate={selectedRate}
                 onPay={handlePay}
-                translations={t}
                 userEmail={userEmail}
               />
             </div>

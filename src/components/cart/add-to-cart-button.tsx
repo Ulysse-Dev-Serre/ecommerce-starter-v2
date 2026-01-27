@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Loader2, ShoppingCart } from 'lucide-react';
 
 interface AddToCartButtonProps {
   variantId: string;
@@ -56,9 +56,14 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={disabled || isLoading}
-      className={`bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded text-sm disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors ${fullWidth ? 'w-full py-3 px-6 rounded-lg text-base' : ''}`}
+      className={`vibe-button-primary ${fullWidth ? 'w-full h-12' : 'h-10 px-6'}`}
     >
-      {isLoading ? tProducts('adding') : label}
+      {isLoading ? (
+        <Loader2 className="h-5 w-5 animate-spin" />
+      ) : (
+        <ShoppingCart className="h-5 w-5" />
+      )}
+      <span>{isLoading ? tProducts('adding') : label}</span>
     </button>
   );
 }

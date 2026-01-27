@@ -1,8 +1,10 @@
 {
   "home": {
     "heroTitle": "Your Store",
+    "heroSubtitle": "Discover our exclusive selection of products.",
     "featuredProducts": "Featured Products",
-    "noFeaturedProducts": "No featured products at the moment."
+    "noFeaturedProducts": "No featured products at the moment.",
+    "viewAll": "View all"
   },
   "common": {
     "signIn": "Sign in",
@@ -93,6 +95,7 @@
   },
   "shop": {
     "title": "Shop",
+    "description": "Browse our full catalog of high-quality products.",
     "addToCart": "Add",
     "viewOptions": "View options",
     "noImage": "No image"
@@ -101,6 +104,7 @@
     "title": "Cart",
     "empty": "Your cart is empty",
     "emptyCart": "Your cart is empty",
+    "emptyCartIcon": "🛒",
     "total": "Total",
     "sku": "SKU",
     "quantity": "Quantity",

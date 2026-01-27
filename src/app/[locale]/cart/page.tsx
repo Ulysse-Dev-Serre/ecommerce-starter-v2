@@ -4,9 +4,9 @@ import { getTranslations } from 'next-intl/server';
 
 import { auth } from '@clerk/nextjs/server';
 
-import { Language } from '@/generated/prisma';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { getCartPageData } from '@/lib/services/cart.service';
 
 import { CartClient } from './cart-client';
 
@@ -27,7 +27,6 @@ export default async function CartPage({
   params,
 }: CartPageProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const language = locale.toUpperCase() as Language;
 
   const { userId: clerkId } = await auth();
   const cookieStore = await cookies();
@@ -51,73 +50,16 @@ export default async function CartPage({
     userId = user?.id;
   }
 
-  const cart =
-    userId || anonymousId
-      ? await prisma.cart.findFirst({
-          where: userId
-            ? { userId, status: 'ACTIVE' }
-            : { anonymousId, status: 'ACTIVE' },
-          include: {
-            items: {
-              include: {
-                variant: {
-                  include: {
-                    pricing: {
-                      where: { isActive: true, priceType: 'base' },
-                    },
-                    product: {
-                      include: {
-                        translations: {
-                          where: { language },
-                        },
-                        media: {
-                          where: { isPrimary: true },
-                          take: 1,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
-      : null;
+  const serializedCart = await getCartPageData(userId, anonymousId, locale);
 
   logger.info(
     {
       action: 'cart_query_result',
-      cartId: cart?.id ?? null,
-      cartStatus: cart?.status ?? null,
-      itemsCount: cart?.items?.length ?? 0,
+      cartId: serializedCart?.id ?? null,
+      itemsCount: serializedCart?.items?.length ?? 0,
     },
     'Cart query completed'
   );
-
-  const serializedCart = cart
-    ? {
-        ...cart,
-        items: cart.items.map(item => ({
-          ...item,
-          variant: {
-            ...item.variant,
-            // Serialize variant Decimal & JSON fields
-            weight: item.variant.weight ? Number(item.variant.weight) : null,
-            pricing: item.variant.pricing.map(p => ({
-              ...p,
-              price: p.price.toString(),
-            })),
-            product: {
-              ...item.variant.product,
-              // Serialize product Decimal & JSON fields
-              weight: item.variant.product.weight
-                ? Number(item.variant.product.weight)
-                : null,
-            },
-          },
-        })),
-      }
-    : null;
 
   const t = await getTranslations({ locale, namespace: 'cart' });
 

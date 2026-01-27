@@ -1,8 +1,10 @@
 {
   "home": {
     "heroTitle": "Votre Boutique",
+    "heroSubtitle": "Découvrez notre sélection exclusive de produits.",
     "featuredProducts": "Produits en vedette",
-    "noFeaturedProducts": "Aucun produit en vedette pour le moment."
+    "noFeaturedProducts": "Aucun produit en vedette pour le moment.",
+    "viewAll": "Tout voir"
   },
   "common": {
     "signIn": "Se connecter",
@@ -93,6 +95,7 @@
   },
   "shop": {
     "title": "Boutique",
+    "description": "Découvrez notre catalogue complet de produits de haute qualité.",
     "addToCart": "Ajouter",
     "viewOptions": "Voir les options",
     "noImage": "Pas d'image"
@@ -101,6 +104,7 @@
     "title": "Panier",
     "empty": "Votre panier est vide",
     "emptyCart": "Votre panier est vide",
+    "emptyCartIcon": "🛒",
     "total": "Total",
     "sku": "SKU",
     "quantity": "Quantité",

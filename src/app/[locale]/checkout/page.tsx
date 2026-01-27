@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
-import { getTranslations, getMessages } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 
 import { cookies } from 'next/headers';
 
@@ -21,8 +21,6 @@ export default async function CheckoutPage({
   const { directVariantId, directQuantity } = await searchParams;
 
   const t = await getTranslations({ locale, namespace: 'Checkout' });
-  const messages = await getMessages({ locale });
-  const geography = (messages as any).geography;
   const { userId: clerkId } = await auth();
 
   // Résolution du User ID local (Prisma) à partir du Clerk ID
@@ -69,37 +67,6 @@ export default async function CheckoutPage({
   // On prépare les props pour le client
   // Le client devra initialiser Stripe Elements
 
-  const clientTranslations = {
-    title: t('title'),
-    shippingAddress: t('shippingAddress'),
-    shippingMethod: t('shippingMethod'),
-    payment: t('payment'),
-    payNow: t('payNow'),
-    loading: t('loading'),
-    error: t('error'),
-    orderSummary: t('orderSummary'),
-    subtotal: t('subtotal'),
-    shipping: t('shipping'),
-    totalToPay: t('totalToPay'),
-    confirmAddress: t('confirmAddress'),
-    calculating: t('calculating'),
-    securePayment: t('securePayment'),
-    fullName: t('fullName'),
-    phone: t('phone'),
-    addressLine1: t('addressLine1'),
-    addressLine2: t('addressLine2'),
-    city: t('city'),
-    state: t('state'),
-    zipCode: t('zipCode'),
-    country: t('country'),
-    selectState: t('selectState'),
-    statePlaceholder: t('statePlaceholder'),
-    validation: {
-      phone: t('validation.phone'),
-    },
-    geography: geography,
-  };
-
   return (
     <div className="bg-background min-h-screen pb-12">
       <CheckoutClient
@@ -107,7 +74,6 @@ export default async function CheckoutPage({
         locale={locale}
         initialTotal={initialTotal}
         currency={currency}
-        translations={clientTranslations}
         userEmail={userEmail}
         summaryItems={summaryItems}
       />

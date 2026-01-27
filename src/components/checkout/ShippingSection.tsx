@@ -1,11 +1,11 @@
 import { formatPrice } from '@/lib/utils/currency';
+import { useTranslations } from 'next-intl';
 
 interface ShippingSectionProps {
   shippingRates: any[];
   selectedRate: any;
   isLoading: boolean;
   onRateSelect: (rate: any) => void;
-  translations: any;
   locale: string;
 }
 
@@ -14,20 +14,20 @@ export function ShippingSection({
   selectedRate,
   isLoading,
   onRateSelect,
-  translations: t,
   locale,
 }: ShippingSectionProps) {
+  const t = useTranslations('Checkout');
   return (
     <section className="bg-card p-6 rounded-xl shadow-sm border border-border animate-in slide-in-from-bottom-4 duration-500">
       <h2 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2 border-b border-border pb-4">
-        {t.shippingMethod}
+        {t('shippingMethod')}
       </h2>
 
       {isLoading ? (
         <div className="text-center py-12 bg-muted/50 rounded-xl border border-border/50 animate-pulse">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
           <p className="text-muted-foreground font-medium">
-            Calcul des frais de port...
+            {t('calculating')}
           </p>
         </div>
       ) : shippingRates.length > 0 ? (
@@ -86,11 +86,10 @@ export function ShippingSection({
             📍
           </div>
           <p className="text-muted-foreground max-w-sm mx-auto">
-            Veuillez saisir une adresse complète pour voir les options de
-            livraison.
+            {t('enterAddressToSeeShipping')}
           </p>
           <p className="text-xs text-muted-foreground/60 mt-2">
-            (Pays, Rue, Ville, Province, Code Postal)
+            {t('addressRequiredFields')}
           </p>
         </div>
       )}

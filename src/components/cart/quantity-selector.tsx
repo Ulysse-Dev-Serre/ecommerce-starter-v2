@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Minus, Plus, Loader2 } from 'lucide-react';
 
 interface QuantitySelectorProps {
   cartItemId?: string;
@@ -96,37 +96,49 @@ export function QuantitySelector({
     }
   };
 
-  const t = useTranslations('cart'); // or common
+  const t = useTranslations('cart');
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={decrement}
-        disabled={quantity <= 1 || isLoading}
-        className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-accent active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-foreground font-bold text-lg"
-        aria-label={t('quantity')}
-      >
-        −
-      </button>
-      <input
-        type="number"
-        value={quantity}
-        onChange={handleInputChange}
-        disabled={isLoading}
-        className="w-14 h-10 text-center border border-border bg-background rounded-lg disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-primary transition-shadow font-medium"
-        min="1"
-        max={maxQuantity}
-      />
-      <button
-        type="button"
-        onClick={increment}
-        disabled={quantity >= maxQuantity || isLoading}
-        className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-accent active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-foreground font-bold text-lg"
-        aria-label={t('quantity')}
-      >
-        +
-      </button>
+      <div className="flex items-center bg-muted/50 rounded-lg p-1 border border-border/50 h-9">
+        <button
+          type="button"
+          onClick={decrement}
+          disabled={quantity <= 1 || isLoading}
+          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
+          aria-label={t('quantity')}
+        >
+          {isLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Minus className="h-3.5 w-3.5" />
+          )}
+        </button>
+
+        <input
+          type="number"
+          value={quantity}
+          onChange={handleInputChange}
+          disabled={isLoading}
+          className="w-10 text-center border-none focus:ring-0 font-bold text-sm bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          min="1"
+          max={maxQuantity}
+        />
+
+        <button
+          type="button"
+          onClick={increment}
+          disabled={quantity >= maxQuantity || isLoading}
+          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
+          aria-label={t('quantity')}
+        >
+          {isLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Plus className="h-3.5 w-3.5" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

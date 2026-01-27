@@ -1,6 +1,6 @@
 import { formatPrice } from '@/lib/utils/currency';
 import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils/cn';
+import { useTranslations } from 'next-intl';
 
 interface OrderSummaryProps {
   summaryItems?: Array<{
@@ -14,12 +14,6 @@ interface OrderSummaryProps {
   total: number;
   currency: string;
   locale: string;
-  translations: {
-    orderSummary: string;
-    subtotal: string;
-    shipping: string;
-    totalToPay: string;
-  };
   selectedRate: any;
 }
 
@@ -29,13 +23,13 @@ export function OrderSummary({
   total,
   currency,
   locale,
-  translations: t,
   selectedRate,
 }: OrderSummaryProps) {
+  const t = useTranslations('Checkout');
   return (
     <Card className="p-6 animate-in fade-in duration-500 shadow-lg">
       <h2 className="text-xl font-bold mb-6 text-foreground border-b border-border pb-4">
-        {t.orderSummary}
+        {t('orderSummary')}
       </h2>
 
       <div className="space-y-4 text-sm">
@@ -93,13 +87,13 @@ export function OrderSummary({
 
         <div className="space-y-2">
           <div className="flex justify-between text-muted-foreground">
-            <span>{t.subtotal}</span>
+            <span>{t('subtotal')}</span>
             <span className="font-medium text-foreground">
               {formatPrice(initialTotal, currency as any, locale)}
             </span>
           </div>
           <div className="flex justify-between text-muted-foreground">
-            <span>{t.shipping}</span>
+            <span>{t('shipping')}</span>
             <span className="font-medium text-foreground">
               {selectedRate
                 ? formatPrice(
@@ -115,7 +109,7 @@ export function OrderSummary({
         <div className="border-t border-border pt-4 mt-4">
           <div className="flex justify-between items-center">
             <span className="font-bold text-lg text-foreground">
-              {t.totalToPay}
+              {t('totalToPay')}
             </span>
             <span className="font-extrabold text-2xl text-primary">
               {formatPrice(total, currency as any, locale)}

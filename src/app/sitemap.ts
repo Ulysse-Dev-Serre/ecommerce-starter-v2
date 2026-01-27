@@ -1,7 +1,6 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/db/prisma';
-import { i18n } from '@/lib/i18n/config';
-
+import { SUPPORTED_LOCALES } from '@/lib/constants';
 import { env } from '@/lib/env';
 
 export const dynamic = 'force-dynamic';
@@ -14,31 +13,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1. Récupérer les produits actifs
   const products = await prisma.product.findMany({
-    where: { status: 'ACTIVE' },
+    where: { status: 'ACTIVE', deletedAt: null },
     select: { slug: true, updatedAt: true },
   });
 
-  // 2. Définir les routes statiques de base
+  // 2. Définir les routes statiques
   const staticRoutes = ['', '/shop', '/contact'];
-  const locales = i18n.locales;
+  const locales = [...SUPPORTED_LOCALES];
 
-  // Helper to generate alternates
+  // Helper pour générer les alternates hreflang
   const getAlternates = (route: string) => {
-    return locales.reduce(
-      (acc, locale) => {
-        acc[locale] = `${baseUrl}/${locale}${route}`;
-        return acc;
-      },
-      {} as Record<string, string>
+    return Object.fromEntries(
+      locales.map(locale => [locale, `${baseUrl}/${locale}${route}`])
     );
   };
 
-  // 3. Générer les entrées pour les routes statiques (multilingue)
+  // 3. Routes statiques (Multilingue)
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.flatMap(route =>
     locales.map(locale => ({
       url: `${baseUrl}/${locale}${route}`,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'daily' as const,
       priority: route === '' ? 1.0 : 0.8,
       alternates: {
         languages: getAlternates(route),
@@ -46,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
-  // 4. Générer les entrées pour les produits (multilingue)
+  // 4. Routes produits (Multilingue)
   const productEntries: MetadataRoute.Sitemap = products.flatMap(product => {
     const route = `/product/${product.slug}`;
     const alternates = getAlternates(route);
@@ -54,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return locales.map(locale => ({
       url: `${baseUrl}/${locale}${route}`,
       lastModified: product.updatedAt,
-      changeFrequency: 'weekly',
+      changeFrequency: 'weekly' as const,
       priority: 0.9,
       alternates: {
         languages: alternates,

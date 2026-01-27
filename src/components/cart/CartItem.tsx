@@ -36,51 +36,57 @@ export function CartItem({ item, locale, onRemove, isLoading }: CartItemProps) {
   const image = item.variant.product.media[0]?.url;
 
   return (
-    <div className="flex gap-4 border border-border rounded-lg p-4 bg-card shadow-sm animate-in fade-in duration-300">
+    <div className="vibe-card flex flex-col sm:flex-row gap-4 animate-in fade-in duration-300">
       {image && (
-        <div className="w-24 h-24 flex-shrink-0">
+        <div className="w-full sm:w-24 sm:h-24 aspect-square flex-shrink-0 bg-muted rounded-md overflow-hidden border border-border/50">
           <img
             src={image}
             alt={translation?.name || ''}
-            className="w-full h-full object-cover rounded shadow-sm border border-border/50"
+            className="w-full h-full object-cover"
           />
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <Link
-          href={`/${locale}/product/${item.variant.product.slug}`}
-          className="font-semibold text-lg mb-1 block hover:text-primary transition-colors truncate"
-        >
-          {translation?.name || item.variant.sku}
-        </Link>
-        <p className="text-sm text-muted-foreground mb-2">
+        <div className="flex justify-between items-start gap-2">
+          <Link
+            href={`/${locale}/product/${item.variant.product.slug}`}
+            className="font-bold text-lg mb-1 block hover:text-primary transition-colors truncate"
+          >
+            {translation?.name || item.variant.sku}
+          </Link>
+          <button
+            onClick={() => onRemove(item.id)}
+            disabled={isLoading}
+            className="text-muted-foreground hover:text-error transition-colors p-1"
+            aria-label={t('remove')}
+          >
+            <span className="text-xl leading-none">×</span>
+          </button>
+        </div>
+
+        <p className="text-sm text-muted-foreground mb-3">
           {t('sku')}: {item.variant.sku}
         </p>
-        <PriceDisplay
-          pricing={item.variant.pricing}
-          className="text-lg font-bold mb-3 block text-foreground"
-          locale={locale}
-        />
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground">
-            {t('quantity')}:
-          </span>
-          <QuantitySelector
-            cartItemId={item.id}
-            initialQuantity={item.quantity}
-            locale={locale}
-          />
+
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-3">
+            <PriceDisplay
+              pricing={item.variant.pricing}
+              className="text-lg font-bold text-foreground"
+              locale={locale}
+            />
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {t('quantity')}
+              </span>
+              <QuantitySelector
+                cartItemId={item.id}
+                initialQuantity={item.quantity}
+                locale={locale}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="flex flex-col items-end justify-between gap-2">
-        <button
-          onClick={() => onRemove(item.id)}
-          disabled={isLoading}
-          className="text-error hover:text-error/80 text-sm font-medium transition-colors disabled:opacity-50"
-          aria-label={t('remove')} // need to check if 'remove' exists
-        >
-          {t('remove')}
-        </button>
       </div>
     </div>
   );

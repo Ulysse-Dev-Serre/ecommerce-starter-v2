@@ -90,64 +90,62 @@ export function RefundRequestForm({
     }
   };
 
-  // Logic based on status
   const canCancelNow = status === 'PAID';
   const isShipmentInProgress = status === 'SHIPPED' || status === 'IN_TRANSIT';
   const isDelivered = status === 'DELIVERED';
 
   if (isSubmitted) {
     return (
-      <div className="bg-green-50 rounded-xl border border-green-100 p-6 text-center">
+      <div className="bg-success/10 rounded-xl border border-success/20 p-6 text-center">
         <div className="flex justify-center mb-4">
-          <CheckCircle2 className="w-12 h-12 text-green-500" />
+          <CheckCircle2 className="w-12 h-12 text-success" />
         </div>
-        <h3 className="text-lg font-bold text-green-900 mb-2">
+        <h3 className="text-lg font-bold text-success mb-2">
           {t('successTitle')}
         </h3>
-        <p className="text-green-700 text-sm">{t('successMessage')}</p>
+        <p className="text-muted-foreground text-sm font-medium">
+          {t('successMessage')}
+        </p>
       </div>
     );
   }
 
-  // Common "Open" button shown for all states initially
   if (!isOpen) {
-    // Only show if it's potentially refundable/cancellable
     const showButton = canCancelNow || isShipmentInProgress || isDelivered;
     if (!showButton) return null;
 
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-white border-2 border-dashed border-gray-200 rounded-xl text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-all group"
+        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-transparent border-2 border-dashed border-border rounded-xl text-muted-foreground hover:border-primary/50 hover:text-primary transition-all group"
       >
         <AlertCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-        <span className="font-semibold">
+        <span className="font-bold uppercase tracking-wider text-xs">
           {canCancelNow ? t('cancelDelivery') : t('openButton')}
         </span>
       </button>
     );
   }
 
-  // Case 1: Shipment in progress - Warning message
   if (isShipmentInProgress) {
     return (
-      <div className="bg-red-50 rounded-xl border border-red-100 p-6 flex flex-col gap-4">
+      <div className="bg-error/5 rounded-xl border border-error/20 p-6 flex flex-col gap-4">
         <div className="flex gap-4 items-start">
-          <div className="p-2 bg-red-100 rounded-full">
-            <AlertCircle className="w-6 h-6 text-red-600" />
+          <div className="p-2 bg-error/10 rounded-full">
+            <AlertCircle className="w-6 h-6 text-error" />
           </div>
           <div>
-            <h3 className="font-bold text-red-900 mb-1">
+            <h3 className="font-bold text-error mb-1">
               {t('waitDeliveryTitle')}
             </h3>
-            <p className="text-red-700 text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm font-medium leading-relaxed">
               {t('waitDeliveryMessage')}
             </p>
           </div>
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-sm font-bold text-red-900/60 hover:text-red-900 transition-colors self-end"
+          className="text-xs font-bold text-muted-foreground hover:text-foreground transition-colors self-end uppercase tracking-widest"
         >
           {t('cancelButton')}
         </button>
@@ -155,106 +153,102 @@ export function RefundRequestForm({
     );
   }
 
-  // Case 2: Paid but no label - Simple cancellation
   if (canCancelNow) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-2">
+      <div className="vibe-card">
+        <h3 className="text-xl font-black text-foreground mb-2">
           {t('cancelOrder')}
         </h3>
-        <p className="text-sm text-gray-500 mb-4">{t('cancelOrderDesc')}</p>
-        <div className="flex gap-3">
+        <p className="text-sm text-muted-foreground font-medium mb-6">
+          {t('cancelOrderDesc')}
+        </p>
+        <div className="flex gap-4">
           <button
             onClick={() => setIsOpen(false)}
-            className="flex-1 px-4 py-2 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all"
+            className="flex-1 vibe-button-secondary h-12"
           >
             {t('cancelButton')}
           </button>
           <button
             onClick={handleCancelOrder}
             disabled={isSubmitting}
-            className="flex-2 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all disabled:opacity-50"
+            className="flex-[2] vibe-button-primary bg-error hover:bg-error/90 h-12"
           >
             <XCircle className="w-5 h-5" />
-            {isSubmitting ? t('cancelling') : t('cancelOrder')}
+            <span>{isSubmitting ? t('cancelling') : t('cancelOrder')}</span>
           </button>
         </div>
       </div>
     );
   }
 
-  // Case 3: Delivered - Normal Refund Form
   if (isDelivered) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              {t('requestTitle')}
-            </h3>
+      <div className="vibe-card overflow-hidden">
+        <h3 className="text-xl font-black text-foreground mb-2">
+          {t('requestTitle')}
+        </h3>
+        <p className="text-sm text-muted-foreground font-medium mb-8">
+          {t('requestDescription')}
+        </p>
+
+        <form onSubmit={handleSubmitRefund} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              {t('reasonLabel')}
+            </label>
+            <textarea
+              required
+              rows={4}
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              placeholder={t('reasonPlaceholder')}
+              className="vibe-input h-auto py-3 resize-none"
+            />
           </div>
-          <p className="text-sm text-gray-500 mb-6">
-            {t('requestDescription')}
-          </p>
 
-          <form onSubmit={handleSubmitRefund} className="space-y-4">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
-                {t('reasonLabel')}
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={reason}
-                onChange={e => setReason(e.target.value)}
-                placeholder={t('reasonPlaceholder')}
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              {t('imageLabel')}
+            </label>
+            <div className="relative group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={e => setImage(e.target.files?.[0] || null)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">
-                {t('imageLabel')}
-              </label>
-              <div className="relative group">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => setImage(e.target.files?.[0] || null)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                <div className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-200 rounded-lg group-hover:border-gray-300 transition-all">
-                  <div className="p-2 bg-gray-50 rounded-full group-hover:bg-gray-100 transition-all">
-                    <Camera className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
-                  </div>
-                  <span className="text-sm text-gray-500 group-hover:text-gray-700 overflow-hidden text-ellipsis whitespace-nowrap">
-                    {image ? image.name : t('imageLabel')}
-                  </span>
+              <div className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-border rounded-lg group-hover:border-primary/50 transition-all bg-muted/30">
+                <div className="p-2 bg-background rounded-full group-hover:bg-primary/10 transition-all shadow-sm">
+                  <Camera className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
+                <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
+                  {image ? image.name : t('imageLabel')}
+                </span>
               </div>
             </div>
+          </div>
 
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="flex-1 px-4 py-2 text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 rounded-lg transition-all"
-              >
-                {t('cancelButton')}
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || !reason.trim()}
-                className="flex-2 flex items-center justify-center gap-2 px-6 py-2 bg-black text-white text-sm font-bold rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-black transition-all"
-              >
-                <Send
-                  className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : ''}`}
-                />
-                {isSubmitting ? t('submitting') : t('submit')}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="flex gap-4 pt-4 border-t border-border/50">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="flex-1 vibe-button-secondary h-12"
+            >
+              {t('cancelButton')}
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || !reason.trim()}
+              className="flex-[2] vibe-button-primary h-12"
+            >
+              <Send
+                className={`w-4 h-4 ${isSubmitting ? 'animate-pulse' : ''}`}
+              />
+              <span>{isSubmitting ? t('submitting') : t('submit')}</span>
+            </button>
+          </div>
+        </form>
       </div>
     );
   }

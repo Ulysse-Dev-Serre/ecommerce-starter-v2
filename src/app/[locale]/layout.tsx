@@ -32,6 +32,8 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/constants';
+
 export async function generateMetadata({
   params,
 }: {
@@ -51,9 +53,8 @@ export async function generateMetadata({
     alternates: {
       canonical: `/${locale}`,
       languages: {
-        fr: '/fr',
-        en: '/en',
-        'x-default': '/en',
+        ...Object.fromEntries(SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`])),
+        'x-default': `/${DEFAULT_LOCALE}`,
       },
     },
   };

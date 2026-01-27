@@ -39,7 +39,8 @@ export function Alert({
 
   return (
     <div
-      className={`flex gap-3 p-4 rounded-xl border ${container} ${className} animate-in fade-in slide-in-from-top-1 duration-300`}
+      className={`flex gap-3 p-4 border ${container} ${className}`}
+      style={{ borderRadius: 'var(--radius-lg)' }}
     >
       <div className="mt-0.5 shrink-0">{icon}</div>
       <div className="flex-1">

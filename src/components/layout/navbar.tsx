@@ -1,4 +1,3 @@
-// src/components/layout/navbar.tsx
 'use client';
 
 import {
@@ -11,7 +10,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import React, { useState, type MouseEvent } from 'react';
+import React, { type MouseEvent } from 'react';
 
 import { logger } from '../../lib/logger';
 import { i18n } from '../../lib/i18n/config';
@@ -23,21 +22,13 @@ interface NavbarProps {
 }
 
 export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
-  const tNavbar = useTranslations('navbar'); // Ensure this is defined
+  const tNavbar = useTranslations('navbar');
   const tCommon = useTranslations('common');
-
-  const [messages, setMessages] = useState<any | null>(null); // Legacy logic removal in progress?
-  // Wait, I should have removed `messages` logic entirely.
-  // Previous view of Navbar (Step 840) showed explicit logic.
-  // I will just add the hooks for now to fix the error.
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 
-  // Fonction pour changer de langue avec logging
   const handleLanguageChange = (newLocale: string, event: MouseEvent): void => {
     event.preventDefault();
-
-    // Logger le changement de langue
     logger.info(
       {
         action: 'language_change',
@@ -48,12 +39,9 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
       },
       'User changed language'
     );
-
-    // Redirection
     window.location.href = pathname.replace(`/${locale}`, `/${newLocale}`);
   };
 
-  // Fonction pour logger les clics de navigation
   const handleNavigationClick = (destination: string): void => {
     logger.info(
       {
@@ -68,26 +56,25 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   };
 
   return (
-    <header className="bg-background border-b border-border theme-border">
+    <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand */}
+        <div className="flex justify-between items-center h-16 md:h-20">
           <div className="flex items-center">
             <Link
               href={`/${locale}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
+              className="group"
             >
-              <h1 className="text-xl font-bold theme-primary cursor-pointer">
+              <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tighter transition-colors group-hover:text-primary">
                 {siteConfig.name}
               </h1>
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-1">
             <Link
               href={`/${locale}`}
-              className="text-foreground hover:text-primary transition-colors"
+              className={`px-4 py-2 text-sm font-bold transition-all rounded-md ${pathname === `/${locale}` ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
               {tCommon('home')}
@@ -95,7 +82,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             <Link
               href={`/${locale}/shop`}
-              className="text-foreground hover:text-primary transition-colors"
+              className={`px-4 py-2 text-sm font-bold transition-all rounded-md ${pathname.includes('/shop') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => handleNavigationClick(`/${locale}/shop`)}
             >
               {tNavbar('shop')}
@@ -103,44 +90,41 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             <Link
               href={`/${locale}/contact`}
-              className="text-foreground hover:text-primary transition-colors"
+              className={`px-4 py-2 text-sm font-bold transition-all rounded-md ${pathname.includes('/contact') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => handleNavigationClick(`/${locale}/contact`)}
             >
               {tCommon('contact')}
             </Link>
 
-            {/* Mes commandes - Visible pour les utilisateurs connectés */}
             {isSignedIn && (
               <Link
                 href={`/${locale}/orders`}
-                className="text-foreground hover:text-primary transition-colors"
+                className={`px-4 py-2 text-sm font-bold transition-all rounded-md ${pathname.includes('/orders') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                 onClick={() => handleNavigationClick(`/${locale}/orders`)}
               >
                 {tNavbar('orders')}
               </Link>
             )}
 
-            {/* Admin Dashboard - Visible uniquement pour les admins */}
             {isSignedIn && userRole === 'ADMIN' && (
               <Link
                 href={`/${locale}/admin`}
-                className="bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-secondary/80 transition-colors"
+                className="bg-secondary/10 text-secondary px-4 py-2 rounded-md text-sm font-bold hover:bg-secondary/20 transition-all ml-4"
                 onClick={() => handleNavigationClick(`/${locale}/admin`)}
               >
                 📊 Dashboard
               </Link>
             )}
 
-            {/* Sélecteur de langue */}
-            <div className="flex items-center space-x-2 border-l pl-4 ml-4">
+            <div className="flex items-center gap-1 border-l border-border ml-6 pl-6 h-6">
               {i18n.locales.map(loc => (
                 <button
                   key={loc}
                   onClick={e => handleLanguageChange(loc, e)}
-                  className={`px-2 py-1 text-sm rounded transition-colors uppercase ${
+                  className={`w-8 h-8 text-[10px] font-black rounded-md transition-all uppercase ${
                     locale === loc
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted'
+                      ? 'bg-foreground text-background shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                 >
                   {loc}
@@ -149,20 +133,20 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             </div>
           </nav>
 
-          {/* Right side - Auth & Cart */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
+            <Link
+              href={`/${locale}/cart`}
+              className="text-foreground hover:bg-muted p-2 rounded-md transition-all"
+              title={tNavbar('cart')}
+              onClick={() => handleNavigationClick(`/${locale}/cart`)}
+            >
+              🛒
+            </Link>
+
             <SignedOut>
-              <Link
-                href={`/${locale}/cart`}
-                className="text-foreground hover:text-muted-foreground p-2"
-                title={tNavbar('cart')}
-                onClick={() => handleNavigationClick(`/${locale}/cart`)}
-              >
-                🛒
-              </Link>
-              <SignInButton>
+              <SignInButton mode="modal">
                 <button
-                  className="bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"
+                  className="vibe-button-primary h-10 px-6 text-sm"
                   onClick={() => {
                     logger.info(
                       {
@@ -175,22 +159,12 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                     );
                   }}
                 >
-                  {tCommon('signIn')} / {tCommon('signUp')}
+                  {tCommon('signIn')}
                 </button>
               </SignInButton>
             </SignedOut>
             <SignedIn>
-              <div className="flex items-center space-x-2">
-                <Link
-                  href={`/${locale}/cart`}
-                  className="text-foreground hover:text-muted-foreground p-2"
-                  title={tNavbar('cart')}
-                  onClick={() => handleNavigationClick(`/${locale}/cart`)}
-                >
-                  🛒
-                </Link>
-                <UserButton />
-              </div>
+              <UserButton />
             </SignedIn>
           </div>
         </div>
