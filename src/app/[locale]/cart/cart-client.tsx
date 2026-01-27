@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
+import { ShoppingCart } from 'lucide-react';
 
 import { CartItem } from '@/components/cart/CartItem';
 import { CartSummary } from '@/components/cart/CartSummary';
@@ -67,7 +68,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="cart-empty-state">
-        <div className="cart-empty-state-icon">{t('emptyCartIcon')}</div>
+        <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
         <p className="cart-empty-state-title">{t('emptyCart')}</p>
         <Link href={`/${locale}/shop`} className="cart-empty-state-button">
           {t('continueShopping')}

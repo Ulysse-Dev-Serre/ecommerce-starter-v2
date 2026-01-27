@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { PriceDisplay } from '@/components/price-display';
 import { ProductActions } from '@/components/cart/product-actions';
 import { getTranslations } from 'next-intl/server';
+import { Package } from 'lucide-react';
 
 interface ProductCardProps {
   product: any;
@@ -24,14 +26,16 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
         className="block mb-4 overflow-hidden rounded-lg bg-muted aspect-square relative"
       >
         {image ? (
-          <img
+          <Image
             src={image}
             alt={primaryImage?.alt || translation?.name || product.slug}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-500"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground text-4xl">
-            📦
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+            <Package className="w-12 h-12" />
           </div>
         )}
       </Link>

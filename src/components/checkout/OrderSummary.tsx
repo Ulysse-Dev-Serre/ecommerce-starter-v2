@@ -1,5 +1,6 @@
 import { formatPrice } from '@/lib/utils/currency';
 import { Card } from '@/components/ui/card';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 interface OrderSummaryProps {
@@ -45,10 +46,12 @@ export function OrderSummary({
                 {/* Image Container */}
                 <div className="relative h-16 w-16 flex-shrink-0 bg-muted border border-border rounded-lg overflow-hidden">
                   {item.image ? (
-                    <img
+                    <Image
                       src={item.image}
                       alt={item.name}
-                      className="h-full w-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="64px"
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground">

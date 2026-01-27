@@ -1,4 +1,5 @@
-import { UserRole, User } from '../../generated/prisma';
+import { auth } from '@clerk/nextjs/server';
+import { UserRole, User } from '@/generated/prisma';
 import { prisma } from '../db/prisma';
 import { logger } from '../logger';
 
@@ -191,4 +192,24 @@ export async function deleteUserByClerkId(
   }
 
   return result;
+}
+
+/**
+ * Get the current authenticated user with basic info
+ * Returns null if not authenticated or user not found in DB
+ */
+export async function getCurrentUser() {
+  const { userId: clerkId } = await auth();
+  if (!clerkId) return null;
+
+  return prisma.user.findUnique({
+    where: { clerkId },
+    select: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+    },
+  });
 }

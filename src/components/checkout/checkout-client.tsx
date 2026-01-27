@@ -13,6 +13,11 @@ import { env } from '@/lib/env';
 import { siteTokens } from '@/styles/themes/tokens';
 import { CheckoutAddress, ShippingRate } from '@/lib/types/checkout';
 
+import { OrderSummary } from './OrderSummary';
+import { AddressSection } from './AddressSection';
+import { ShippingSection } from './ShippingSection';
+import { PaymentSection } from './PaymentSection';
+
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -392,9 +397,3 @@ export function CheckoutForm({
     </div>
   );
 }
-
-// Sub-components are now in separate files for better maintainability.
-import { OrderSummary } from './OrderSummary';
-import { AddressSection } from './AddressSection';
-import { ShippingSection } from './ShippingSection';
-import { PaymentSection } from './PaymentSection';

@@ -161,16 +161,16 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         autoComplete="off"
       />
       {suggestions.length > 0 && showSuggestions && (
-        <ul className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-60 overflow-auto">
+        <ul className="absolute z-[9999] w-full mt-1 bg-background border border-border rounded-lg shadow-xl max-h-60 overflow-auto">
           {suggestions.map((s, idx) => {
             const prediction = s.placePrediction;
             return (
               <li
                 key={prediction.placeId || idx}
                 onClick={() => handleSelect(s)}
-                className="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b last:border-b-0 border-gray-100 transition-colors"
+                className="px-4 py-3 hover:bg-muted cursor-pointer border-b last:border-b-0 border-border transition-colors"
               >
-                <div className="font-medium text-slate-900">
+                <div className="font-medium text-foreground">
                   {prediction.text.text}
                 </div>
               </li>

@@ -1,5 +1,6 @@
 import { getTranslations, getFormatter } from 'next-intl/server';
 import { LegalPageTemplate } from '@/components/legal/LegalPageTemplate';
+import { LEGAL_LAST_UPDATED } from '@/lib/constants';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -15,7 +16,7 @@ export default async function PrivacyPage({ params }: PageProps) {
     <LegalPageTemplate
       title={t('title')}
       lastUpdated={tLegal('lastUpdated', {
-        date: format.dateTime(new Date(), { dateStyle: 'long' }),
+        date: format.dateTime(LEGAL_LAST_UPDATED, { dateStyle: 'long' }),
       })}
       content={t('content')}
     />

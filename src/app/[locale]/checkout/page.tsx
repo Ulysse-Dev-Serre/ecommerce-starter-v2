@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 
 import { CheckoutService } from '@/lib/services/checkout.service';
 import { CheckoutClient } from '@/components/checkout/checkout-client';
-import { prisma } from '@/lib/db/prisma';
+import { getCurrentUser } from '@/lib/services/user.service';
 
 interface CheckoutPageProps {
   params: Promise<{ locale: string }>;
@@ -21,25 +21,10 @@ export default async function CheckoutPage({
   const { directVariantId, directQuantity } = await searchParams;
 
   const t = await getTranslations({ locale, namespace: 'Checkout' });
-  const { userId: clerkId } = await auth();
 
-  // Résolution du User ID local (Prisma) à partir du Clerk ID
-  let userId: string | undefined;
-  if (clerkId) {
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
-      select: { id: true, email: true },
-    });
-    userId = user?.id;
-  }
-  let userEmail: string | undefined;
-  if (userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    });
-    userEmail = user?.email || undefined;
-  }
+  const user = await getCurrentUser();
+  const userId = user?.id;
+  const userEmail = user?.email; // Use email directly from user object
 
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get('cart_anonymous_id')?.value;

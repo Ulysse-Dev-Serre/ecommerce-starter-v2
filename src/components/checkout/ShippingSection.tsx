@@ -2,6 +2,7 @@ import { formatPrice } from '@/lib/utils/currency';
 import { useTranslations } from 'next-intl';
 
 import { ShippingRate } from '@/lib/types/checkout';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ShippingSectionProps {
   shippingRates: ShippingRate[];
@@ -26,11 +27,22 @@ export function ShippingSection({
       </h2>
 
       {isLoading ? (
-        <div className="text-center py-12 bg-muted/50 rounded-xl border border-border/50 animate-pulse">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
-          <p className="text-muted-foreground font-medium">
-            {t('calculating')}
-          </p>
+        <div className="space-y-3">
+          {[1, 2].map(i => (
+            <div
+              key={i}
+              className="p-5 border-2 border-border/50 rounded-xl flex justify-between items-center"
+            >
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-6 h-6 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              </div>
+              <Skeleton className="h-6 w-16" />
+            </div>
+          ))}
         </div>
       ) : shippingRates.length > 0 ? (
         <div className="space-y-3">

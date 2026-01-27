@@ -7,6 +7,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
 import { getCartPageData } from '@/lib/services/cart.service';
+import { getCurrentUser } from '@/lib/services/user.service';
 
 import { CartClient } from './cart-client';
 
@@ -41,14 +42,8 @@ export default async function CartPage({
     'Loading cart page'
   );
 
-  let userId: string | undefined;
-  if (clerkId) {
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
-      select: { id: true },
-    });
-    userId = user?.id;
-  }
+  const user = await getCurrentUser();
+  const userId = user?.id;
 
   const serializedCart = await getCartPageData(userId, anonymousId, locale);
 

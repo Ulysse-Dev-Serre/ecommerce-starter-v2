@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
+import { ArrowRight } from 'lucide-react';
 
 import { Language, ProductStatus } from '@/generated/prisma';
 import { getProducts } from '@/lib/services/product.service';
@@ -69,7 +70,7 @@ export default async function Home({
           <div className="mt-10 flex justify-center gap-4">
             <Link
               href={`/${locale}/shop`}
-              className="bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
+              className="vibe-button vibe-button-primary text-lg px-8 py-4"
             >
               {tShop('title')}
             </Link>
@@ -88,9 +89,10 @@ export default async function Home({
             </div>
             <Link
               href={`/${locale}/shop`}
-              className="text-primary font-bold hover:underline underline-offset-4"
+              className="text-primary font-bold hover:underline underline-offset-4 inline-flex items-center"
             >
-              {t('viewAll') || 'View all'} →
+              {t('viewAll') || 'View all'}{' '}
+              <ArrowRight className="inline-block w-4 h-4 ml-1" />
             </Link>
           </div>
 

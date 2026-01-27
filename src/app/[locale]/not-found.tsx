@@ -22,7 +22,7 @@ export default async function NotFound() {
           <div className="pt-8">
             <Link
               href={`/${locale}`}
-              className="inline-flex items-center justify-center bg-primary text-primary-foreground px-10 py-4 rounded-2xl hover:bg-primary-hover transition-all transform hover:scale-105 shadow-xl shadow-primary/20 font-bold text-lg"
+              className="vibe-button vibe-button-primary text-lg px-10 py-4"
             >
               <Home className="mr-3 h-6 w-6" />
               {t('backHome')}

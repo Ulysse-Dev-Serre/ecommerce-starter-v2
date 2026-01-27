@@ -77,7 +77,8 @@
     "cart": "Panier",
     "wishlist": "Liste d'envies",
     "account": "Mon compte",
-    "orders": "Mes commandes"
+    "orders": "Mes commandes",
+    "dashboard": "Tableau de bord"
   },
   "products": {
     "title": "Produits",
@@ -713,7 +714,10 @@
       "viewAll": "Voir tout",
       "noRecentOrders": "Aucune commande",
       "revenueOverview": "Aperçu des revenus",
-      "last7Days": "7 derniers jours"
+      "last7Days": "7 derniers jours",
+      "time": {
+        "daysShort": "j"
+      }
     }
   }
 }

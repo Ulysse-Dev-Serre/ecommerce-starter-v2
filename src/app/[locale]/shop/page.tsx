@@ -5,6 +5,9 @@ import { Metadata } from 'next';
 import { ProductCard } from '@/components/product/product-card';
 import { cn } from '@/lib/utils/cn';
 import { SUPPORTED_LOCALES } from '@/lib/constants';
+import Link from 'next/link';
+import { Search } from 'lucide-react';
+import { ShopPagination } from '@/components/shop/shop-pagination';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -53,15 +56,13 @@ export default async function ShopPage({
   return (
     <div className="vibe-layout-container vibe-section-py animate-in fade-in duration-700">
       <div className="mb-12 border-b border-border pb-8">
-        <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-          {t('title')}
-        </h1>
+        <h1 className="vibe-page-header text-foreground">{t('title')}</h1>
         <p className="text-muted-foreground mt-2 text-lg">{t('description')}</p>
       </div>
 
       {products.length === 0 ? (
         <div className="vibe-info-box">
-          <div className="text-5xl mb-4">🔍</div>
+          <Search className="w-16 h-16 text-muted-foreground/30 mb-4" />
           <p className="text-xl text-muted-foreground font-medium">
             {t('noProducts')}
           </p>
@@ -80,26 +81,12 @@ export default async function ShopPage({
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
-        <div className="mt-20 flex justify-center gap-3">
-          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-            p => (
-              <a
-                key={p}
-                href={`/${locale}/shop?page=${p}${category ? `&category=${category}` : ''}`}
-                className={cn(
-                  'vibe-pagination-item',
-                  p === pagination.page
-                    ? 'vibe-pagination-active'
-                    : 'vibe-pagination-inactive'
-                )}
-              >
-                {p}
-              </a>
-            )
-          )}
-        </div>
-      )}
+      <ShopPagination
+        totalPages={pagination.totalPages}
+        currentPage={pagination.page}
+        locale={locale}
+        categorySlug={category}
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import React, { type MouseEvent } from 'react';
+import { ShoppingCart } from 'lucide-react';
 
 import { logger } from '../../lib/logger';
 import { i18n } from '../../lib/i18n/config';
@@ -112,7 +113,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 className="bg-secondary/10 text-secondary px-4 py-2 rounded-md text-sm font-bold hover:bg-secondary/20 transition-all ml-4"
                 onClick={() => handleNavigationClick(`/${locale}/admin`)}
               >
-                📊 Dashboard
+                📊 {tNavbar('dashboard')}
               </Link>
             )}
 
@@ -140,7 +141,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               title={tNavbar('cart')}
               onClick={() => handleNavigationClick(`/${locale}/cart`)}
             >
-              🛒
+              <ShoppingCart className="w-5 h-5" />
             </Link>
 
             <SignedOut>

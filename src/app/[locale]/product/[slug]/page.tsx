@@ -10,6 +10,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { getProductBySlug } from '@/lib/services/product.service';
 import { ProductClient } from './product-client';
 import { RelatedProducts } from '@/components/product/related-products';
+import { siteConfig } from '@/lib/config/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,7 +109,7 @@ export default async function ProductPage({
           : 'https://schema.org/OutOfStock',
       url: productUrl,
     },
-    brand: { '@type': 'Organization', name: 'AgTechNest' },
+    brand: { '@type': 'Organization', name: siteConfig.name },
   };
 
   const tCommon = await getTranslations({ locale, namespace: 'common' });
@@ -154,7 +155,7 @@ export default async function ProductPage({
 
           <div className="space-y-8">
             <div>
-              <h1 className="text-4xl font-extrabold text-foreground tracking-tight">
+              <h1 className="vibe-page-header text-left">
                 {translation?.name || product.slug}
               </h1>
             </div>

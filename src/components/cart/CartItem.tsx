@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { X } from 'lucide-react';
 import { PriceDisplay } from '@/components/price-display';
 import { QuantitySelector } from '@/components/cart/quantity-selector';
 
@@ -38,11 +40,13 @@ export function CartItem({ item, locale, onRemove, isLoading }: CartItemProps) {
   return (
     <div className="vibe-card flex flex-col sm:flex-row gap-4 animate-in fade-in duration-300">
       {image && (
-        <div className="w-full sm:w-24 sm:h-24 aspect-square flex-shrink-0 bg-muted rounded-md overflow-hidden border border-border/50">
-          <img
+        <div className="w-full sm:w-24 sm:h-24 aspect-square flex-shrink-0 bg-muted rounded-md overflow-hidden border border-border relative">
+          <Image
             src={image}
             alt={translation?.name || ''}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 96px"
           />
         </div>
       )}
@@ -60,7 +64,7 @@ export function CartItem({ item, locale, onRemove, isLoading }: CartItemProps) {
             className="text-muted-foreground hover:text-error transition-colors p-1"
             aria-label={t('remove')}
           >
-            <span className="text-xl leading-none">×</span>
+            <X className="h-5 w-5" />
           </button>
         </div>
 

@@ -67,3 +67,10 @@ export const SITE_ADDRESS = 'Montreal, QC\nCanada';
  * Used primarily for shipping calculations between Shippo (CAD) and site currency.
  */
 export const CAD_TO_USD_RATE = 0.72;
+
+/**
+ * =============================================================================
+ * LEGAL
+ * =============================================================================
+ */
+export const LEGAL_LAST_UPDATED = new Date('2025-01-01');
