@@ -20,7 +20,7 @@ export function StatusBadge({ status, label, className }: StatusBadgeProps) {
       case 'REFUNDED':
         return 'bg-error/10 text-error border-error/20';
       case 'REFUND_REQUESTED':
-        return 'bg-warning/10 text-warning border-warning/20';
+        return 'bg-error text-white animate-pulse shadow-md border-error/80';
       case 'PENDING':
       default:
         return 'bg-muted text-muted-foreground border-border';

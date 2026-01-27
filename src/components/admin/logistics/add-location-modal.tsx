@@ -65,7 +65,7 @@ export function AddLocationModal({
       window.location.reload();
     } catch (err) {
       console.error(err);
-      setError('Erreur lors de la sauvegarde du lieu');
+      setError(t('saveError'));
     } finally {
       setLoading(false);
     }

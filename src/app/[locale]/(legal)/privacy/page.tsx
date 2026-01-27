@@ -26,17 +26,6 @@ export default async function PrivacyPage({ params }: PageProps) {
         <p className="whitespace-pre-line text-lg leading-relaxed">
           {t('privacyPolicy.content')}
         </p>
-
-        {/* Placeholder real content structure for visual validation */}
-        <div className="mt-8 space-y-4 text-muted-foreground text-sm">
-          <p className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded border border-yellow-200 dark:border-yellow-900">
-            <strong>Note:</strong> This page is using translations from{' '}
-            <code>{locale}.json</code>. To edit this content, update the
-            &quot;legal.privacyPolicy.content&quot; key in the translation file,
-            or replace this component&apos;s logic to load from a Markdown file
-            or CMS.
-          </p>
-        </div>
       </div>
     </div>
   );

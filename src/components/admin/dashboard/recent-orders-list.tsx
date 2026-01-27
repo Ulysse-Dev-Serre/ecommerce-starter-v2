@@ -1,0 +1,87 @@
+import Link from 'next/link';
+import { getTranslations, getLocale } from 'next-intl/server';
+import { formatPrice } from '@/lib/utils/currency';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { getOrderStatusKey } from '@/lib/utils/order-status';
+import { SupportedCurrency } from '@/lib/constants';
+
+interface RecentOrdersListProps {
+  orders: any[];
+}
+
+export async function RecentOrdersList({ orders }: RecentOrdersListProps) {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.dashboard',
+  });
+  const tOrders = await getTranslations({
+    locale,
+    namespace: 'Orders.detail',
+  });
+
+  return (
+    <div className="admin-card">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900">
+          {t('recentOrders')}
+        </h3>
+        <Link
+          href={`/${locale}/admin/orders`}
+          className="text-sm text-blue-600 hover:text-blue-800"
+        >
+          {t('viewAll')}
+        </Link>
+      </div>
+      <div className="space-y-4">
+        {orders.length === 0 ? (
+          <p className="text-center text-sm text-gray-500 py-8">
+            {t('noRecentOrders')}
+          </p>
+        ) : (
+          orders.map(order => {
+            const timeAgo = Math.floor(
+              (Date.now() - new Date(order.createdAt).getTime()) / 60000
+            );
+            const displayTime =
+              timeAgo < 60
+                ? `${timeAgo} min`
+                : timeAgo < 1440
+                  ? `${Math.floor(timeAgo / 60)}h`
+                  : `${Math.floor(timeAgo / 1440)}${t('time.daysShort')}`;
+
+            return (
+              <Link
+                key={order.id}
+                href={`/${locale}/admin/orders/${order.id}`}
+                className="flex items-center justify-between border-b border-gray-100 pb-3 hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+              >
+                <div className="min-w-0 pr-2">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {order.orderNumber}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {order.user?.email} • {displayTime}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatPrice(
+                      Number(order.totalAmount),
+                      order.currency as SupportedCurrency,
+                      locale
+                    )}
+                  </span>
+                  <StatusBadge
+                    status={order.status}
+                    label={tOrders(getOrderStatusKey(order.status))}
+                  />
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}

@@ -21,7 +21,7 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete ${name}?`)) {
+    if (confirm(t('deleteConfirm', { name }))) {
       try {
         const res = await fetch(`/api/admin/logistics/locations/${id}`, {
           method: 'DELETE',
@@ -29,11 +29,11 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
         if (res.ok) {
           window.location.reload();
         } else {
-          alert('Failed to delete location');
+          alert(t('deleteError'));
         }
       } catch (err) {
         console.error(err);
-        alert('Error deleting location');
+        alert(t('deleteError'));
       }
     }
   };
@@ -47,10 +47,8 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            {t('title')}
-          </h1>
-          <p className="text-sm text-gray-500">{t('subtitle')}</p>
+          <h1 className="admin-page-title">{t('title')}</h1>
+          <p className="admin-page-subtitle">{t('subtitle')}</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}

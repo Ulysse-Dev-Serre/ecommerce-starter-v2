@@ -1,4 +1,5 @@
 import React from 'react';
+import { getTranslations } from 'next-intl/server';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -6,25 +7,23 @@ interface PageProps {
 
 export default async function RefundPage({ params }: PageProps) {
   const { locale } = await params;
-  const dictionary = (await import(`@/lib/i18n/dictionaries/${locale}.json`))
-    .default;
+  const t = await getTranslations({ locale, namespace: 'legal.refundPolicy' });
+  const tLegal = await getTranslations({ locale, namespace: 'legal' });
 
-  const t = dictionary.legal.refundPolicy;
-  const lastUpdated = dictionary.legal.lastUpdated.replace(
-    '{date}',
-    new Date().toLocaleDateString(locale)
-  );
+  const lastUpdated = tLegal('lastUpdated', {
+    date: new Date().toLocaleDateString(locale),
+  });
 
   return (
     <div className="space-y-6">
       <div className="border-b pb-4">
-        <h1 className="text-3xl font-bold tracking-tight">{t.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
         <p className="text-muted-foreground mt-2">{lastUpdated}</p>
       </div>
 
       <div className="prose prose-stone dark:prose-invert max-w-none">
         <p className="whitespace-pre-line text-lg leading-relaxed">
-          {t.content}
+          {t('content')}
         </p>
       </div>
     </div>

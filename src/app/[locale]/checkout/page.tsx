@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getTranslations, getMessages } from 'next-intl/server';
 
 import { cookies } from 'next/headers';
@@ -107,12 +107,7 @@ export default async function CheckoutPage({
     // Mode Panier Standard
     // On récupère le panier pour avoir le total inital
     if (!userId && !anonymousId) {
-      return (
-        <div className="p-8 text-center">
-          Redirecting to cart...
-          <meta httpEquiv="refresh" content={`0; url = /${locale}/cart`} />
-        </div>
-      );
+      redirect(`/${locale}/cart`);
     }
 
     const cart = await getOrCreateCart(userId, anonymousId);
@@ -121,12 +116,7 @@ export default async function CheckoutPage({
       // Si panier vide, on redirige vers le panier
       // Sauf si on vient d'ajouter un item (race condition?)
       // Pour l'instant on garde la redirection si vide
-      return (
-        <div className="p-8 text-center">
-          Your cart is empty. Redirecting...
-          <meta httpEquiv="refresh" content={`0; url = /${locale}/cart`} />
-        </div>
-      );
+      redirect(`/${locale}/cart`);
     }
 
     currentCartId = cart.id;

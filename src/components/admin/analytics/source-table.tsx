@@ -1,4 +1,6 @@
-'use client';
+import { useTranslations, useLocale } from 'next-intl';
+import { formatPrice } from '@/lib/utils/currency';
+import { SupportedCurrency } from '@/lib/constants';
 
 interface SourceData {
   source: string;
@@ -13,37 +15,40 @@ interface SourceTableProps {
 }
 
 export function SourceTable({ data }: SourceTableProps) {
+  const t = useTranslations('adminDashboard.analytics.sourceTable');
+  const locale = useLocale();
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-gray-100 text-gray-400 font-medium">
-            <th className="py-3 px-4">Source</th>
-            <th className="py-3 px-4 text-right">Visitors</th>
-            <th className="py-3 px-4 text-right">Orders</th>
-            <th className="py-3 px-4 text-right">Revenue</th>
-            <th className="py-3 px-4 text-right">Conv. Rate</th>
+      <table className="admin-table">
+        <thead className="admin-table-thead">
+          <tr>
+            <th className="admin-table-th">{t('source')}</th>
+            <th className="admin-table-th text-right">{t('visitors')}</th>
+            <th className="admin-table-th text-right">{t('orders')}</th>
+            <th className="admin-table-th text-right">{t('revenue')}</th>
+            <th className="admin-table-th text-right">{t('convRate')}</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-gray-200">
           {data.map(item => (
-            <tr
-              key={item.source}
-              className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-            >
-              <td className="py-3 px-4 font-medium text-gray-900">
-                {item.source || 'Direct / Organic'}
+            <tr key={item.source} className="admin-table-tr">
+              <td className="admin-table-td font-medium text-gray-900">
+                {item.source === 'Direct / Organic' ||
+                item.source === 'Direct / Organique'
+                  ? t('directOrganic')
+                  : item.source}
               </td>
-              <td className="py-3 px-4 text-right text-gray-600">
+              <td className="admin-table-td text-right text-gray-600">
                 {item.visitors}
               </td>
-              <td className="py-3 px-4 text-right text-gray-600">
+              <td className="admin-table-td text-right text-gray-600">
                 {item.orders}
               </td>
-              <td className="py-3 px-4 text-right text-gray-900 font-medium">
-                ${item.revenue.toFixed(2)}
+              <td className="admin-table-td text-right text-gray-900 font-medium">
+                {formatPrice(item.revenue, 'CAD' as SupportedCurrency, locale)}
               </td>
-              <td className="py-3 px-4 text-right">
+              <td className="admin-table-td text-right">
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
                   {item.conversionRate}%
                 </span>
@@ -52,8 +57,8 @@ export function SourceTable({ data }: SourceTableProps) {
           ))}
           {data.length === 0 && (
             <tr>
-              <td colSpan={5} className="py-8 text-center text-gray-500">
-                No data available for this period
+              <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                {t('noData')}
               </td>
             </tr>
           )}

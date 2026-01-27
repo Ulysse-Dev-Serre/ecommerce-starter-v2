@@ -189,6 +189,16 @@
   color: var(--admin-text-muted);
 }
 
+.admin-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--admin-text-main);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .admin-text-tiny {
   font-size: 0.625rem;
   color: var(--admin-text-muted);

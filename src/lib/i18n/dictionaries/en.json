@@ -523,6 +523,15 @@
         "carts": "Carts",
         "checkouts": "Checkouts",
         "purchases": "Purchases"
+      },
+      "sourceTable": {
+        "source": "Source",
+        "visitors": "Visitors",
+        "orders": "Orders",
+        "revenue": "Revenue",
+        "convRate": "Conv. Rate",
+        "directOrganic": "Direct / Organic",
+        "noData": "No data available for this period"
       }
     },
     "orders": {
@@ -538,7 +547,11 @@
         "actions": "Actions",
         "view": "View",
         "viewDetails": "View details",
-        "noOrders": "No orders found"
+        "noOrders": "No orders found",
+        "item": "item",
+        "items": "items",
+        "customerUnknown": "Unknown",
+        "noEmail": "No email"
       },
       "statusActions": {
         "title": "Admin Actions",
@@ -618,7 +631,36 @@
         "actions": "Actions",
         "viewDetails": "View details",
         "noCustomers": "No customers found",
-        "searchPlaceholder": "Search by name or email..."
+        "searchPlaceholder": "Search by name or email...",
+        "orderNumber": "Order",
+        "date": "Date",
+        "amount": "Amount",
+        "status": "Status",
+        "tracking": "Tracking"
+      },
+      "detail": {
+        "customerId": "Customer ID",
+        "totalSpent": "Total Spent",
+        "totalOrders": "Total Orders",
+        "orderHistory": "Order History",
+        "noOrders": "This customer hasn't placed any orders yet.",
+        "savedAddresses": "Saved Addresses",
+        "contactInfo": "Contact Info",
+        "noAddresses": "No addresses saved",
+        "joinedOn": "Joined on {date}",
+        "acquisitionSource": "Acquisition",
+        "directUnknown": "Direct / Unknown",
+        "internalNote": "Internal Note",
+        "internalNoteHelper": "These notes are only visible to the team.",
+        "addNotePlaceholder": "Add a note...",
+        "saveNote": "Save Note",
+        "table": {
+          "orderNumber": "Order",
+          "date": "Date",
+          "amount": "Amount",
+          "status": "Status",
+          "tracking": "Tracking"
+        }
       }
     },
     "dashboard": {
@@ -628,6 +670,7 @@
         "revenue": "Revenue",
         "orders": "Orders",
         "products": "Products",
+        "active": "Active",
         "customers": "Registered Customers"
       },
       "recentOrders": "Recent Orders",

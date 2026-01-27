@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 
 import { auth } from '@clerk/nextjs/server';
 
@@ -129,7 +130,7 @@ async function OrdersListContent({
                     className="inline-flex items-center gap-2 text-sm font-bold text-foreground hover:text-primary hover:translate-x-1 transition-all"
                   >
                     {t('viewDetails')}
-                    <span className="text-lg">→</span>
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </div>
               </div>

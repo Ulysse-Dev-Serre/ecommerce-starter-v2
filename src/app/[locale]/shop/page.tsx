@@ -77,7 +77,7 @@ export default async function ShopPage({
                 href={`/${locale}/shop?page=${p}${category ? `&category=${category}` : ''}`}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${
                   p === pagination.page
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-muted hover:bg-border text-foreground'
                 }`}
               >

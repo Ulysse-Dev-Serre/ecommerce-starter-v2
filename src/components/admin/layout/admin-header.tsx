@@ -1,33 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
 import { Bell, Menu } from 'lucide-react';
-import { i18n } from '@/lib/i18n/config';
+import { useTranslations } from 'next-intl';
 
 export function AdminHeader() {
-  const params = useParams();
-  const locale = (params.locale as string) || i18n.defaultLocale;
-  const [messages, setMessages] = useState<any>(null);
-
-  useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const msgs = await import(
-          `../../../lib/i18n/dictionaries/${locale}.json`
-        );
-        setMessages(msgs.default);
-      } catch (error) {
-        console.error('Failed to load translations:', error);
-        const msgs = await import(`../../../lib/i18n/dictionaries/en.json`);
-        setMessages(msgs.default);
-      }
-    };
-    void loadMessages();
-  }, [locale]);
-
-  const t = messages?.admin?.header;
+  const t = useTranslations('admin.header');
 
   return (
     <header className="admin-header">
@@ -41,15 +19,13 @@ export function AdminHeader() {
             <Menu className="h-5 w-5" />
           </button>
 
-          <h2 className="admin-header-welcome">
-            {t?.welcome || 'Welcome back'}
-          </h2>
+          <h2 className="admin-header-welcome">{t('welcome')}</h2>
         </div>
 
         {/* Right side */}
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <button className="admin-header-btn" title={t?.notifications}>
+          <button className="admin-header-btn" title={t('notifications')}>
             <Bell className="h-5 w-5" />
             <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500"></span>
           </button>

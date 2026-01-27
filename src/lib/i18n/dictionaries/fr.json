@@ -283,7 +283,10 @@
       "phone": "Téléphone (Optionnel)",
       "localStock": "Stock Local (Entrepôt)",
       "dropshipper": "Dropshipper",
-      "other": "Autre"
+      "other": "Autre",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer {name} ?",
+      "deleteError": "Échec de la suppression du lieu",
+      "saveError": "Erreur lors de la sauvegarde du lieu"
     }
   },
   "Checkout": {
@@ -523,6 +526,15 @@
         "carts": "Paniers",
         "checkouts": "Checkouts",
         "purchases": "Achats"
+      },
+      "sourceTable": {
+        "source": "Source",
+        "visitors": "Visiteurs",
+        "orders": "Commandes",
+        "revenue": "Revenus",
+        "convRate": "Taux de Conv.",
+        "directOrganic": "Direct / Organique",
+        "noData": "Aucune donnée disponible pour cette période"
       }
     },
     "orders": {
@@ -538,7 +550,11 @@
         "actions": "Actions",
         "view": "Voir",
         "viewDetails": "Voir détails",
-        "noOrders": "Aucune commande trouvée"
+        "noOrders": "Aucune commande trouvée",
+        "item": "article",
+        "items": "articles",
+        "customerUnknown": "Inconnu",
+        "noEmail": "Pas d'email"
       },
       "statusActions": {
         "title": "Actions Admin",
@@ -618,7 +634,36 @@
         "actions": "Actions",
         "viewDetails": "Voir détails",
         "noCustomers": "Aucun client trouvé",
-        "searchPlaceholder": "Rechercher par nom ou email..."
+        "searchPlaceholder": "Rechercher par nom ou email...",
+        "orderNumber": "Commande",
+        "date": "Date",
+        "amount": "Montant",
+        "status": "Statut",
+        "tracking": "Suivi"
+      },
+      "detail": {
+        "customerId": "ID Client",
+        "totalSpent": "Dépenses totales",
+        "totalOrders": "Commandes totales",
+        "orderHistory": "Historique des commandes",
+        "noOrders": "Ce client n'a pas encore passé de commande.",
+        "savedAddresses": "Adresses enregistrées",
+        "contactInfo": "Coordonnées",
+        "noAddresses": "Aucune adresse enregistrée",
+        "joinedOn": "Membre depuis le {date}",
+        "acquisitionSource": "Acquisition",
+        "directUnknown": "Direct / Inconnu",
+        "internalNote": "Note interne",
+        "internalNoteHelper": "Ces notes sont visibles uniquement par l'équipe.",
+        "addNotePlaceholder": "Ajouter une note...",
+        "saveNote": "Enregistrer la note",
+        "table": {
+          "orderNumber": "Commande",
+          "date": "Date",
+          "amount": "Montant",
+          "status": "Statut",
+          "tracking": "Suivi"
+        }
       }
     },
     "dashboard": {
@@ -628,6 +673,7 @@
         "revenue": "Chiffre d'affaires",
         "orders": "Commandes",
         "products": "Produits",
+        "active": "Actifs",
         "customers": "Clients enregistrés"
       },
       "recentOrders": "Commandes récentes",

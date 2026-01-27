@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db/prisma';
 import { ConversionFunnel } from '@/components/admin/analytics/conversion-funnel';
 import { SourceTable } from '@/components/admin/analytics/source-table';
+import { AnalyticsStatsGrid } from '@/components/admin/analytics/analytics-stats-grid';
 import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
@@ -19,7 +20,7 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  // 1. Fetch Funnel Data (Unique users per stage)
+  // 1. Fetch Funnel Data
   const [sessions, productViews, cartAdds, checkouts, purchases] =
     await Promise.all([
       prisma.analyticsEvent.count({
@@ -91,9 +92,7 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
       const orders = stats?._count._all || 0;
       const revenue = Number(stats?._sum.totalAmount || 0);
       return {
-        source:
-          v.utmSource ||
-          (locale === 'fr' ? 'Direct / Organique' : 'Direct / Organic'),
+        source: v.utmSource || t('sourceTable.directOrganic'),
         visitors,
         orders,
         revenue,
@@ -103,6 +102,8 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     })
     .sort((a, b) => b.revenue - a.revenue);
 
+  const totalRevenue = tableData.reduce((acc, curr) => acc + curr.revenue, 0);
+
   return (
     <div className="space-y-6">
       <div>
@@ -111,54 +112,22 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Conversion Funnel */}
         <div className="admin-card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6 underline decoration-sky-500/30 underline-offset-8">
-            {t('conversionFunnel')}
-          </h3>
+          <h3 className="admin-section-title">{t('conversionFunnel')}</h3>
           <ConversionFunnel data={funnelData} />
         </div>
 
-        {/* Source breakdown */}
         <div className="admin-card">
-          <h3 className="text-lg font-semibold text-gray-900 mb-6 underline decoration-sky-500/30 underline-offset-8">
-            {t('sourcePerformance')}
-          </h3>
+          <h3 className="admin-section-title">{t('sourcePerformance')}</h3>
           <SourceTable data={tableData} />
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="admin-card">
-          <p className="text-sm font-medium text-gray-500">
-            {t('overallConversion')}
-          </p>
-          <p className="mt-2 text-3xl font-bold text-gray-900">
-            {sessions > 0 ? ((purchases / sessions) * 100).toFixed(2) : 0}%
-          </p>
-        </div>
-        <div className="admin-card">
-          <p className="text-sm font-medium text-gray-500">
-            {t('avgOrderValue')}
-          </p>
-          <p className="mt-2 text-3xl font-bold text-gray-900">
-            $
-            {purchases > 0
-              ? (
-                  tableData.reduce((acc, curr) => acc + curr.revenue, 0) /
-                  purchases
-                ).toFixed(2)
-              : 0}
-          </p>
-        </div>
-        <div className="admin-card">
-          <p className="text-sm font-medium text-gray-500">
-            {t('totalSessions')}
-          </p>
-          <p className="mt-2 text-3xl font-bold text-gray-900">{sessions}</p>
-        </div>
-      </div>
+      <AnalyticsStatsGrid
+        sessions={sessions}
+        purchases={purchases}
+        totalRevenue={totalRevenue}
+      />
     </div>
   );
 }

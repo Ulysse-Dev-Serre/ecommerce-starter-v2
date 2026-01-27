@@ -134,7 +134,7 @@ export function ProductClient({
                     disabled={false}
                     className={`px-4 py-2 rounded-md border-2 transition cursor-pointer ${
                       isSelected
-                        ? 'border-primary bg-primary text-white'
+                        ? 'border-primary bg-primary text-primary-foreground'
                         : isAvailable
                           ? 'border-border hover:border-border-focus'
                           : 'border-muted text-muted-foreground cursor-not-allowed'
@@ -166,7 +166,7 @@ export function ProductClient({
                   disabled={!isAvailable}
                   className={`px-4 py-2 rounded-md border-2 transition cursor-pointer ${
                     isSelected
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-primary bg-primary text-primary-foreground'
                       : isAvailable
                         ? 'border-border hover:border-border-focus'
                         : 'border-muted text-muted-foreground cursor-not-allowed'

@@ -1,5 +1,12 @@
 import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
+import {
+  ArrowLeft,
+  Check,
+  ExternalLink,
+  Package,
+  RotateCcw,
+} from 'lucide-react';
 
 import { auth } from '@clerk/nextjs/server';
 
@@ -187,9 +194,7 @@ async function OrderDetailContent({
           href={`/${locale}/orders`}
           className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors mb-6 group"
         >
-          <span className="mr-2 group-hover:-translate-x-1 transition-transform">
-            ←
-          </span>
+          <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           {t('backToOrders')}
         </Link>
 
@@ -234,7 +239,11 @@ async function OrderDetailContent({
                               : 'bg-background border-border text-muted-foreground'
                           } ${isCurrent ? 'ring-4 ring-foreground/10' : ''}`}
                         >
-                          {isCompleted ? '✓' : idx + 1}
+                          {isCompleted ? (
+                            <Check className="h-5 w-5" />
+                          ) : (
+                            idx + 1
+                          )}
                         </div>
                         <span
                           className={`text-xs font-bold mt-3 text-center transition-colors ${
@@ -298,7 +307,7 @@ async function OrderDetailContent({
               <div className="bg-background rounded-2xl shadow-sm border border-info/20 overflow-hidden ring-1 ring-info/20">
                 <div className="bg-info/10 px-6 py-4 border-b border-info/20 flex justify-between items-center">
                   <h2 className="font-bold text-info flex items-center gap-2">
-                    📦 {t('tracking')}
+                    <Package className="h-5 w-5" /> {t('tracking')}
                   </h2>
                 </div>
                 <div className="p-6 space-y-4">
@@ -326,7 +335,7 @@ async function OrderDetailContent({
                           className="inline-flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-xl hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20"
                         >
                           {t('trackPackage')}
-                          <span>↗</span>
+                          <ExternalLink className="ml-2 h-4 w-4" />
                         </a>
                       )}
                     </div>
@@ -364,7 +373,7 @@ async function OrderDetailContent({
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
-                            📦
+                            <Package className="h-8 w-8 opacity-50" />
                           </div>
                         )}
                       </div>

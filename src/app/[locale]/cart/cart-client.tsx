@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { useRouter } from 'next/navigation';
 import { useUser, SignInButton } from '@clerk/nextjs';
@@ -45,29 +46,8 @@ export function CartClient({ cart, locale }: CartClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { isSignedIn } = useUser();
 
-  const translations = {
-    fr: {
-      emptyCart: 'Votre panier est vide',
-      continueShopping: 'Continuer vos achats',
-      quantity: 'Quantité',
-      remove: 'Supprimer',
-      total: 'Total',
-      checkout: 'Passer commande',
-      signInToCheckout: 'Connectez-vous pour passer commande',
-    },
-    en: {
-      emptyCart: 'Your cart is empty',
-      continueShopping: 'Continue shopping',
-      quantity: 'Quantity',
-      remove: 'Remove',
-      total: 'Total',
-      checkout: 'Checkout',
-      signInToCheckout: 'Sign in to checkout',
-    },
-  };
-
-  const t =
-    translations[locale as keyof typeof translations] || translations.en;
+  /* Translations now managed by next-intl hook */
+  const t = useTranslations('cart');
 
   const handleRemove = async (itemId: string) => {
     setIsLoading(true);
@@ -91,12 +71,12 @@ export function CartClient({ cart, locale }: CartClientProps) {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-xl text-muted-foreground mb-6">{t.emptyCart}</p>
+        <p className="text-xl text-muted-foreground mb-6">{t('emptyCart')}</p>
         <a
           href={`/${locale}/shop`}
           className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary-hover transition-colors"
         >
-          {t.continueShopping}
+          {t('continueShopping')}
         </a>
       </div>
     );
@@ -140,7 +120,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
                 />
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground">
-                    {t.quantity}:
+                    {t('quantity')}:
                   </span>
                   <QuantitySelector
                     cartItemId={item.id}
@@ -155,7 +135,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
                   disabled={isLoading}
                   className="text-error hover:text-error/80 text-sm disabled:opacity-50"
                 >
-                  {t.remove}
+                  {t('remove')}
                 </button>
               </div>
             </div>
@@ -165,7 +145,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
       <div className="lg:col-span-1">
         <div className="border border-border rounded-lg p-6 sticky top-4">
-          <h2 className="text-xl font-bold mb-4">{t.total}</h2>
+          <h2 className="text-xl font-bold mb-4">{t('total')}</h2>
           <div className="border-t border-border pt-4">
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold">Total</span>
@@ -180,12 +160,12 @@ export function CartClient({ cart, locale }: CartClientProps) {
                 href={`/${locale}/checkout`}
                 className="w-full block text-center bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary-hover transition-colors"
               >
-                {t.checkout}
+                {t('checkout')}
               </a>
             ) : (
               <SignInButton mode="modal">
                 <button className="w-full bg-primary text-primary-foreground py-3 px-6 rounded-lg hover:bg-primary-hover transition-colors">
-                  {t.signInToCheckout}
+                  {t('signInToCheckout')}
                 </button>
               </SignInButton>
             )}
