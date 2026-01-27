@@ -1,4 +1,6 @@
 import { formatPrice } from '@/lib/utils/currency';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils/cn';
 
 interface OrderSummaryProps {
   summaryItems?: Array<{
@@ -31,7 +33,7 @@ export function OrderSummary({
   selectedRate,
 }: OrderSummaryProps) {
   return (
-    <div className="bg-card p-6 rounded-xl shadow-lg border border-border animate-in fade-in duration-500">
+    <Card className="p-6 animate-in fade-in duration-500 shadow-lg">
       <h2 className="text-xl font-bold mb-6 text-foreground border-b border-border pb-4">
         {t.orderSummary}
       </h2>
@@ -56,7 +58,7 @@ export function OrderSummary({
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground">
-                      <span className="text-[10px]">No image</span>
+                      <span className="text-[10px]">IMG</span>
                     </div>
                   )}
                   <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
@@ -121,6 +123,6 @@ export function OrderSummary({
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

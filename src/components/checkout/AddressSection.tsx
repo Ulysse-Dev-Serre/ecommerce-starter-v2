@@ -1,4 +1,10 @@
+import { useEffect, useMemo } from 'react';
+import { FormInput } from '@/components/ui/form-input';
+import { FormSelect } from '@/components/ui/form-select';
+
 import AddressAutocomplete from './AddressAutocomplete';
+import { Loader2 } from 'lucide-react';
+import { SITE_CURRENCY, COUNTRY_TO_CURRENCY } from '@/lib/constants';
 
 interface AddressSectionProps {
   tempAddress: any;
@@ -25,6 +31,39 @@ export function AddressSection({
   onCalculateShipping,
   translations: t,
 }: AddressSectionProps) {
+  // Determine the target country for this instance based on SITE_CURRENCY
+  // Example: If SITE_CURRENCY is 'USD', we look for keys in COUNTRY_TO_CURRENCY where value is 'USD' -> returns 'US'
+  const instanceCountryCode = useMemo(() => {
+    const entry = Object.entries(COUNTRY_TO_CURRENCY).find(
+      ([_, currency]) => currency === SITE_CURRENCY
+    );
+    return entry ? entry[0] : 'CA'; // Fallback to CA if not found, or handle error
+  }, []);
+
+  // Ensure country is set to the instance default on mount or if missing
+  useEffect(() => {
+    if (tempAddress?.country !== instanceCountryCode) {
+      setTempAddress({
+        ...tempAddress,
+        country: instanceCountryCode,
+        state: '', // Reset state if country changed forcefully
+      });
+    }
+  }, [instanceCountryCode, tempAddress, setTempAddress]);
+
+  // Dynamic State/Province options based on the active instance country
+  const provinceOptions = useMemo(() => {
+    const regionKey = instanceCountryCode as keyof typeof t.geography;
+    const regions = t.geography[regionKey];
+
+    if (!regions) return [];
+
+    return Object.entries<string>(regions).map(([code, name]) => ({
+      value: code,
+      label: name,
+    }));
+  }, [instanceCountryCode, t.geography]);
+
   return (
     <section className="bg-card p-6 rounded-xl shadow-sm border border-border">
       <h2 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2 border-b border-border pb-4">
@@ -33,17 +72,13 @@ export function AddressSection({
       <div className="space-y-4">
         {/* Name & Phone */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.fullName} <span className="text-error ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              value={tempName}
-              onChange={e => setTempName(e.target.value)}
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            />
-          </div>
+          <FormInput
+            label={t.fullName}
+            required
+            value={tempName}
+            onChange={e => setTempName(e.target.value)}
+          />
+
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
               {t.phone} <span className="text-error ml-1">*</span>
@@ -52,17 +87,17 @@ export function AddressSection({
               <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm">
                 +1
               </span>
-              <input
+              <FormInput
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                className="w-full px-4 py-2 bg-background border border-border rounded-r-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                className="rounded-l-none"
               />
             </div>
           </div>
         </div>
 
-        {/* Address Line 1 */}
+        {/* Address Line 1 (Autocomplete restricted to instance Country) */}
         <div>
           <label className="block text-sm font-medium text-muted-foreground mb-1">
             {t.addressLine1} <span className="text-error ml-1">*</span>
@@ -75,7 +110,8 @@ export function AddressSection({
                 city: selected.city,
                 state: selected.state,
                 postal_code: selected.postal_code,
-                country: selected.country,
+                // Force country to instance default even if autocomplete returns something else (safety)
+                country: instanceCountryCode,
               });
             }}
             onInputChange={val => {
@@ -87,133 +123,87 @@ export function AddressSection({
             value={tempAddress?.line1 || ''}
             placeholder={t.addressLine1}
             className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            countryRestriction={tempAddress?.country === 'US' ? 'us' : 'ca'}
+            // Restrict Google Autocomplete to the instance country code (lower case for API)
+            countryRestriction={instanceCountryCode.toLowerCase()}
           />
         </div>
 
         {/* Address Line 2 */}
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
-            {t.addressLine2}
-          </label>
-          <input
-            type="text"
-            value={tempAddress?.line2 || ''}
-            onChange={e =>
-              setTempAddress({ ...tempAddress, line2: e.target.value })
-            }
-            className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-          />
-        </div>
+        <FormInput
+          label={t.addressLine2}
+          value={tempAddress?.line2 || ''}
+          onChange={e =>
+            setTempAddress({ ...tempAddress, line2: e.target.value })
+          }
+        />
 
-        {/* Country & City Row */}
+        {/* Country (Read-Only) & City */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.country} <span className="text-error ml-1">*</span>
-            </label>
-            <select
-              value={tempAddress?.country || 'CA'}
-              onChange={e => {
-                setTempAddress({
-                  ...tempAddress,
-                  country: e.target.value,
-                  state: '',
-                });
-              }}
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            >
-              <option value="CA">Canada (CA)</option>
-              <option value="US">États-Unis (US)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.city} <span className="text-error ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              value={tempAddress?.city || ''}
-              onChange={e =>
-                setTempAddress({ ...tempAddress, city: e.target.value })
-              }
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+          <div className="md:col-span-1">
+            {/* Display Country as Read-Only Input since it's fixed per instance */}
+            <FormInput
+              label={t.country}
+              value={
+                t.geography.countries?.[instanceCountryCode] ||
+                instanceCountryCode
+              } // Try to find localized name, fallback to code
+              disabled
+              readOnly
+              className="bg-muted text-muted-foreground opacity-100 cursor-not-allowed" // Style to look fixed but readable
             />
           </div>
+
+          <FormInput
+            label={t.city}
+            required
+            value={tempAddress?.city || ''}
+            onChange={e =>
+              setTempAddress({ ...tempAddress, city: e.target.value })
+            }
+          />
         </div>
 
         {/* State & Zip Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.state} <span className="text-error ml-1">*</span>
-            </label>
-            {tempAddress?.country === 'CA' ? (
-              <select
-                value={tempAddress?.state || ''}
-                onChange={e =>
-                  setTempAddress({
-                    ...tempAddress,
-                    state: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-              >
-                <option value="">{t.selectState}</option>
-                {Object.entries<string>(t.geography.CA).map(([code, name]) => (
-                  <option key={code} value={code}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            ) : tempAddress?.country === 'US' ? (
-              <select
-                value={tempAddress?.state || ''}
-                onChange={e =>
-                  setTempAddress({
-                    ...tempAddress,
-                    state: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-              >
-                <option value="">{t.selectState}</option>
-                {Object.entries<string>(t.geography.US).map(([code, name]) => (
-                  <option key={code} value={code}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={tempAddress?.state || ''}
-                onChange={e =>
-                  setTempAddress({
-                    ...tempAddress,
-                    state: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-              />
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.zipCode} <span className="text-error ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              value={tempAddress?.postal_code || ''}
+          {provinceOptions.length > 0 ? (
+            <FormSelect
+              label={t.state}
+              required
+              value={tempAddress?.state || ''}
               onChange={e =>
                 setTempAddress({
                   ...tempAddress,
-                  postal_code: e.target.value,
+                  state: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              options={provinceOptions}
+              placeholder={t.selectState}
             />
-          </div>
+          ) : (
+            <FormInput
+              label={t.state}
+              required
+              value={tempAddress?.state || ''}
+              onChange={e =>
+                setTempAddress({
+                  ...tempAddress,
+                  state: e.target.value,
+                })
+              }
+            />
+          )}
+
+          <FormInput
+            label={t.zipCode}
+            required
+            value={tempAddress?.postal_code || ''}
+            onChange={e =>
+              setTempAddress({
+                ...tempAddress,
+                postal_code: e.target.value,
+              })
+            }
+          />
         </div>
       </div>
 
@@ -230,7 +220,7 @@ export function AddressSection({
         >
           {isLoading ? (
             <div className="flex items-center justify-center gap-2">
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              <Loader2 className="w-5 h-5 animate-spin" />
               {t.calculating}
             </div>
           ) : (

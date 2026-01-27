@@ -531,7 +531,8 @@
     "backToShop": "Back to shop",
     "error": "An error occurred while verifying the order.",
     "timeout": "Order verification timeout. Please check your email for confirmation.",
-    "noId": "No session or payment ID provided."
+    "noId": "No session or payment ID provided.",
+    "redirecting": "Redirecting..."
   },
   "adminDashboard": {
     "analytics": {
