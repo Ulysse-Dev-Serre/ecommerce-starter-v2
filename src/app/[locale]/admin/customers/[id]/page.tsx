@@ -28,13 +28,7 @@ export default async function CustomerDetailPage({
       orders: {
         orderBy: { createdAt: 'desc' },
         include: {
-          shipments: {
-            select: {
-              trackingCode: true,
-              carrier: true,
-              status: true,
-            },
-          },
+          shipments: true,
         },
       },
     },

@@ -5,9 +5,12 @@ import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
+import { Order, Shipment } from '@/generated/prisma';
+
+type OrderWithRelations = Order & { shipments: Shipment[] };
 
 interface CustomerOrderTableProps {
-  orders: any[];
+  orders: OrderWithRelations[];
 }
 
 export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
@@ -39,7 +42,7 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-6 py-10 text-center text-gray-500 italic"
+                  className="px-6 py-10 text-center admin-text-subtle italic"
                 >
                   {t('noOrders')}
                 </td>
@@ -55,7 +58,7 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
                       {order.orderNumber}
                     </Link>
                   </td>
-                  <td className="admin-table-td text-gray-600">
+                  <td className="admin-table-td admin-text-subtle">
                     {formatDate(order.createdAt, locale)}
                   </td>
                   <td className="admin-table-td font-medium text-gray-900">

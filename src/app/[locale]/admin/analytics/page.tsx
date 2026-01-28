@@ -114,7 +114,10 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="admin-card">
           <h3 className="admin-section-title">{t('conversionFunnel')}</h3>
-          <ConversionFunnel data={funnelData} />
+          <ConversionFunnel
+            data={funnelData}
+            labels={{ visitors: t('stages.sessions') }}
+          />
         </div>
 
         <div className="admin-card">

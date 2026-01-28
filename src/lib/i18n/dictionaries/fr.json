@@ -20,6 +20,7 @@
     "edit": "Modifier",
     "add": "Ajouter",
     "upload": "Téléverser",
+    "uploading": "Téléversement...",
     "search": "Rechercher",
     "filter": "Filtrer",
     "sort": "Trier",
@@ -121,7 +122,9 @@
     "signInToCheckout": "Se connecter pour commander",
     "increaseQuantity": "Augmenter la quantité",
     "decreaseQuantity": "Diminuer la quantité",
-    "continueShopping": "Continuer mes achats"
+    "continueShopping": "Continuer mes achats",
+    "itemRemoved": "Article retiré du panier",
+    "errorRemovingItem": "Erreur lors du retrait de l'article"
   },
   "admin": {
     "sidebar": {
@@ -710,6 +713,9 @@
         "noAddresses": "Aucune adresse enregistrée",
         "joinedOn": "Membre depuis le {date}",
         "acquisitionSource": "Acquisition",
+        "source": "Source",
+        "medium": "Support",
+        "campaign": "Campagne",
         "directUnknown": "Direct / Inconnu",
         "internalNote": "Note interne",
         "internalNoteHelper": "Ces notes sont visibles uniquement par l'équipe.",

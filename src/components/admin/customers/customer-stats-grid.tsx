@@ -29,9 +29,7 @@ export function CustomerStatsGrid({ stats }: CustomerStatsGridProps) {
                 <Icon className={`h-6 w-6 ${color}`} />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  {stat.title}
-                </p>
+                <p className="admin-text-subtle">{stat.title}</p>
                 <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
               </div>
             </div>

@@ -1,5 +1,3 @@
-'use client';
-
 import { UserButton } from '@clerk/nextjs';
 import { Bell, Menu } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -25,9 +23,12 @@ export function AdminHeader() {
         {/* Right side */}
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <button className="admin-header-btn" title={t('notifications')}>
+          <button
+            className="admin-header-btn relative"
+            title={t('notifications')}
+          >
             <Bell className="h-5 w-5" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full admin-badge-danger"></span>
           </button>
 
           {/* User menu */}

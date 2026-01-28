@@ -6,6 +6,7 @@ import { Package, RefreshCcw, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
+import { API_ROUTES } from '@/lib/config/api-routes';
 
 interface StatusActionsProps {
   orderId: string;
@@ -79,7 +80,7 @@ export function StatusActions({
 
     try {
       const statusLabel = getStatusLabel(newStatus);
-      const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(API_ROUTES.ADMIN.ORDERS.STATUS(orderId), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +118,7 @@ export function StatusActions({
     try {
       // Step 1: Fetch cheapest rate for preview
       const previewRes = await fetch(
-        `/api/admin/orders/${orderId}/return-label?preview=true`,
+        `${API_ROUTES.ADMIN.ORDERS.RETURN_LABEL(orderId)}?preview=true`,
         {
           method: 'POST',
         }
@@ -145,7 +146,7 @@ export function StatusActions({
 
       // Step 3: Purchase the label
       const response = await fetch(
-        `/api/admin/orders/${orderId}/return-label`,
+        API_ROUTES.ADMIN.ORDERS.RETURN_LABEL(orderId),
         {
           method: 'POST',
         }

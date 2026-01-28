@@ -14,4 +14,34 @@ export const API_ROUTES = {
     VERIFY: '/api/orders/verify',
     REFUND_REQUEST: '/api/orders/refund-request',
   },
+  PRODUCTS: {
+    LIST: '/api/products',
+  },
+  ADMIN: {
+    PRODUCTS: {
+      BASE: '/api/admin/products',
+      ITEM: (id: string) => `/api/admin/products/${id}`,
+      REORDER: '/api/admin/products/reorder',
+      VARIANTS: (id: string) => `/api/admin/products/${id}/variants`,
+      VARIANT_ITEM: (id: string, variantId: string) =>
+        `/api/admin/products/${id}/variants/${variantId}`,
+      VARIANTS_SIMPLE: (id: string) =>
+        `/api/admin/products/${id}/variants/simple`,
+    },
+    MEDIA: {
+      BASE: '/api/admin/media',
+      ITEM: (id: string) => `/api/admin/media/${id}`,
+      UPLOAD: '/api/admin/media/upload',
+      REORDER: '/api/admin/media/reorder',
+    },
+    LOGISTICS: {
+      BASE: '/api/admin/logistics/locations',
+      ITEM: (id: string) => `/api/admin/logistics/locations/${id}`,
+    },
+    ORDERS: {
+      STATUS: (id: string) => `/api/admin/orders/${id}/status`,
+      PURCHASE_LABEL: (id: string) => `/api/admin/orders/${id}/purchase-label`,
+      RETURN_LABEL: (id: string) => `/api/admin/orders/${id}/return-label`,
+    },
+  },
 };

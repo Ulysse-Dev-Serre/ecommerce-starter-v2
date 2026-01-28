@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, MapPin } from 'lucide-react';
 import { Address } from '@/lib/integrations/shippo';
 import { useTranslations } from 'next-intl';
+import { API_ROUTES } from '@/lib/config/api-routes';
 
 interface AddLocationModalProps {
   onClose: () => void;
@@ -45,8 +46,8 @@ export function AddLocationModal({
 
     try {
       const url = initialData
-        ? `/api/admin/logistics/locations/${initialData.id}`
-        : '/api/admin/logistics/locations';
+        ? API_ROUTES.ADMIN.LOGISTICS.ITEM(initialData.id)
+        : API_ROUTES.ADMIN.LOGISTICS.BASE;
 
       const method = initialData ? 'PUT' : 'POST';
 
@@ -59,10 +60,11 @@ export function AddLocationModal({
       });
 
       if (!res.ok) {
-        throw new Error('Failed to save location');
+        throw new Error(t('saveError'));
       }
 
-      window.location.reload();
+      router.refresh();
+      onClose();
     } catch (err) {
       console.error(err);
       setError(t('saveError'));
@@ -85,29 +87,32 @@ export function AddLocationModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            {initialData ? t('editLocation') : <Plus className="h-5 w-5" />}
-            {initialData ? '' : t('addLocation')}
+          <h2 className="admin-section-title flex items-center gap-2">
+            {initialData ? (
+              <MapPin className="h-5 w-5" />
+            ) : (
+              <Plus className="h-5 w-5" />
+            )}
+            {initialData ? t('editLocation') : t('addLocation')}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Section 1: Types & Nom */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('locationName')}
               </label>
               <input
@@ -117,12 +122,12 @@ export function AddLocationModal({
                 onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Mon Entrepôt"
+                className="admin-input"
+                placeholder={t('locationName')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('locationType')}
               </label>
               <select
@@ -131,7 +136,7 @@ export function AddLocationModal({
                 onChange={e =>
                   setFormData({ ...formData, type: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black sm:text-sm bg-white"
+                className="admin-input"
               >
                 <option value="LOCAL_STOCK">{t('localStock')}</option>
                 <option value="DROPSHIPPER">{t('dropshipper')}</option>
@@ -142,13 +147,13 @@ export function AddLocationModal({
 
           <div className="border-t border-gray-100 pt-6">
             <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-4 w-4 admin-text-subtle" />
               {t('originAddress')}
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('street')}
                 </label>
                 <input
@@ -156,13 +161,13 @@ export function AddLocationModal({
                   required
                   value={formData.address.street1}
                   onChange={e => updateAddress('street1', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
                   placeholder={t('streetPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('city')}
                 </label>
                 <input
@@ -170,13 +175,13 @@ export function AddLocationModal({
                   required
                   value={formData.address.city}
                   onChange={e => updateAddress('city', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
                   placeholder={t('cityPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('state')}
                 </label>
                 <input
@@ -184,13 +189,13 @@ export function AddLocationModal({
                   required
                   value={formData.address.state}
                   onChange={e => updateAddress('state', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
                   placeholder={t('statePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('zip')}
                 </label>
                 <input
@@ -198,13 +203,13 @@ export function AddLocationModal({
                   required
                   value={formData.address.zip}
                   onChange={e => updateAddress('zip', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
                   placeholder={t('zipPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('country')}
                 </label>
                 <input
@@ -215,50 +220,51 @@ export function AddLocationModal({
                   onChange={e =>
                     updateAddress('country', e.target.value.toUpperCase())
                   }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
                   placeholder={t('countryPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('email')}
                 </label>
                 <input
                   type="email"
                   value={formData.address.email || ''}
                   onChange={e => updateAddress('email', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
                   placeholder={t('emailPlaceholder')}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('phone')}
                 </label>
                 <input
                   type="text"
                   value={formData.address.phone || ''}
                   onChange={e => updateAddress('phone', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                  className="admin-input text-sm"
+                  placeholder={t('phone')}
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="admin-btn-secondary px-6"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 disabled:opacity-50"
+              className="admin-btn-primary px-8"
             >
               {loading ? t('loading') : t('save')}
             </button>

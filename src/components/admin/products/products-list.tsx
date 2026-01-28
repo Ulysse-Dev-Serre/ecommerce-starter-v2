@@ -20,6 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 import { useTranslations, useLocale } from 'next-intl';
 import { formatPrice } from '@/lib/utils/currency';
+import { API_ROUTES } from '@/lib/config/api-routes';
 import { ProductStatsGrid } from './product-stats-grid';
 import { SortableProductRow } from './product-row';
 
@@ -56,10 +57,10 @@ export interface LocalProduct {
 }
 
 const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-800',
-  ACTIVE: 'bg-green-100 text-green-800',
-  INACTIVE: 'bg-yellow-100 text-yellow-800',
-  ARCHIVED: 'bg-red-100 text-red-800',
+  DRAFT: 'admin-badge-neutral',
+  ACTIVE: 'admin-badge-success',
+  INACTIVE: 'admin-badge-warning',
+  ARCHIVED: 'admin-badge-danger',
 };
 
 interface ProductsListProps {
@@ -93,7 +94,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
         language: locale.toUpperCase(),
         ...(status !== 'all' && { status: status }),
       });
-      const response = await fetch(`/api/products?${params}`);
+      const response = await fetch(`${API_ROUTES.PRODUCTS.LIST}?${params}`);
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
       const sorted = (data.data || []).sort(
@@ -162,7 +163,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     if (!confirm(t('deleteConfirm'))) return;
     setDeletingId(productId);
     try {
-      const response = await fetch(`/api/admin/products/${productId}`, {
+      const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.ITEM(productId), {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error('Delete failed');
@@ -198,7 +199,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
           sortOrder: p.sortOrder,
         })),
       };
-      const response = await fetch('/api/admin/products/reorder', {
+      const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.REORDER, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -238,7 +239,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
         <h1 className="admin-page-title">{t('title')}</h1>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 shadow-sm">
-            <span className="text-xs font-medium text-gray-500">
+            <span className="admin-text-tiny">
               {isSavingOrder ? t('saving') : t('orderMode')}
             </span>
             <div
@@ -283,11 +284,11 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
               <button
                 key={status}
                 onClick={() => handleStatusChange(status)}
-                className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                className={
                   statusFilter === status
-                    ? 'bg-admin-primary text-white shadow-md'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
-                }`}
+                    ? 'admin-btn-primary px-4 py-2'
+                    : 'admin-btn-secondary px-4 py-2'
+                }
               >
                 {t(`filters.${status}`)}
               </button>
@@ -323,7 +324,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
                     <tr>
                       <td
                         colSpan={6}
-                        className="py-10 text-center text-gray-500"
+                        className="py-10 text-center admin-text-subtle"
                       >
                         {t('loading')}
                       </td>
@@ -332,7 +333,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
                     <tr>
                       <td
                         colSpan={6}
-                        className="py-10 text-center text-gray-500"
+                        className="py-10 text-center admin-text-subtle"
                       >
                         {t('noProducts')}
                       </td>

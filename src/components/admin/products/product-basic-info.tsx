@@ -50,9 +50,7 @@ export function ProductBasicInfo({
   return (
     <div className="space-y-6">
       <div className="admin-card">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          {t('basicInfo')}
-        </h2>
+        <h2 className="admin-section-title">{t('basicInfo')}</h2>
 
         <div className="space-y-4">
           <div>
@@ -84,7 +82,7 @@ export function ProductBasicInfo({
                 )}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500">{t('slugHelp')}</p>
+            <p className="mt-1 text-xs admin-text-subtle">{t('slugHelp')}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -112,11 +110,6 @@ export function ProductBasicInfo({
                 <option value="INACTIVE">{t('inactive')}</option>
                 <option value="ARCHIVED">{t('archived')}</option>
               </select>
-              {!isEditMode && (
-                <p className="text-xs text-gray-500 mt-1">
-                  * Statut initial forcé à BROUILLON.
-                </p>
-              )}
             </div>
 
             <div className="flex items-end pb-2">

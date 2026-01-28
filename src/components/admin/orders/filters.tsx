@@ -10,17 +10,6 @@ export function OrderFilters({ locale }: { locale: string }) {
   const currentStatus = searchParams.get('status') || '';
   const currentSearch = searchParams.get('search') || '';
 
-  const handleStatusChange = (status: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (status) {
-      params.set('status', status);
-    } else {
-      params.delete('status');
-    }
-    params.delete('page'); // Reset to page 1
-    router.push(`/${locale}/admin/orders?${params.toString()}`);
-  };
-
   return (
     <div className="flex gap-4">
       <div className="flex-1">
@@ -29,13 +18,13 @@ export function OrderFilters({ locale }: { locale: string }) {
           method="get"
           className="relative"
         >
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             name="search"
             defaultValue={currentSearch}
             placeholder="Search by order number or email..."
-            className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="admin-input pl-10"
           />
           {currentStatus && (
             <input type="hidden" name="status" value={currentStatus} />
@@ -46,8 +35,6 @@ export function OrderFilters({ locale }: { locale: string }) {
     </div>
   );
 }
-
-// Sub-component to handle translations cleanly
 
 function OrderStatusFilter({
   locale,
@@ -76,7 +63,7 @@ function OrderStatusFilter({
       name="status"
       value={currentStatus}
       onChange={e => handleStatusChange(e.target.value)}
-      className="rounded-lg border border-gray-300 px-4 py-2 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+      className="admin-input w-48"
     >
       <option value="">{t('status')}</option>
       <option value="PENDING">{t('statusPending')}</option>

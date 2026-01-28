@@ -1,4 +1,4 @@
-import { useTranslations, useLocale } from 'next-intl';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { formatPrice } from '@/lib/utils/currency';
 import { SupportedCurrency } from '@/lib/config/site';
 
@@ -14,9 +14,12 @@ interface SourceTableProps {
   data: SourceData[];
 }
 
-export function SourceTable({ data }: SourceTableProps) {
-  const t = useTranslations('adminDashboard.analytics.sourceTable');
-  const locale = useLocale();
+export async function SourceTable({ data }: SourceTableProps) {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: 'adminDashboard.analytics.sourceTable',
+  });
 
   return (
     <div className="overflow-x-auto">
@@ -34,30 +37,32 @@ export function SourceTable({ data }: SourceTableProps) {
           {data.map(item => (
             <tr key={item.source} className="admin-table-tr">
               <td className="admin-table-td font-medium text-gray-900">
-                {item.source === 'Direct / Organic' ||
-                item.source === 'Direct / Organique'
+                {['Direct / Organic', 'Direct / Organique'].includes(
+                  item.source
+                )
                   ? t('directOrganic')
                   : item.source}
               </td>
-              <td className="admin-table-td text-right text-gray-600">
+              <td className="admin-table-td text-right admin-text-subtle">
                 {item.visitors}
               </td>
-              <td className="admin-table-td text-right text-gray-600">
+              <td className="admin-table-td text-right admin-text-subtle">
                 {item.orders}
               </td>
-              <td className="admin-table-td text-right text-gray-900 font-medium">
+              <td className="admin-table-td text-right font-medium text-gray-900">
                 {formatPrice(item.revenue, 'CAD' as SupportedCurrency, locale)}
               </td>
               <td className="admin-table-td text-right">
-                <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700">
-                  {item.conversionRate}%
-                </span>
+                <span className="admin-badge-info">{item.conversionRate}%</span>
               </td>
             </tr>
           ))}
           {data.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+              <td
+                colSpan={5}
+                className="px-6 py-8 text-center admin-text-subtle"
+              >
                 {t('noData')}
               </td>
             </tr>
