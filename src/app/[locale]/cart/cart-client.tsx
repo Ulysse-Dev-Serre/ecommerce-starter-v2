@@ -23,14 +23,14 @@ interface CartClientProps {
 
 export function CartClient({ cart, locale }: CartClientProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
   const { isSignedIn } = useUser();
   const t = useTranslations('cart');
 
   const { showToast } = useToast();
 
   const handleRemove = async (itemId: string) => {
-    setIsLoading(true);
+    setLoadingItems(prev => new Set(prev).add(itemId));
     try {
       const response = await fetch(API_ROUTES.CART.LINES(itemId), {
         method: 'DELETE',
@@ -45,7 +45,11 @@ export function CartClient({ cart, locale }: CartClientProps) {
     } catch (error) {
       showToast(t('errorRemovingItem'), 'error');
     } finally {
-      setIsLoading(false);
+      setLoadingItems(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
   };
 
@@ -79,7 +83,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
               item={item}
               locale={locale}
               onRemove={handleRemove}
-              isLoading={isLoading}
+              isLoading={loadingItems.has(item.id)}
             />
           ))}
         </div>

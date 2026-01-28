@@ -10,4 +10,8 @@ export const API_ROUTES = {
   SHIPPING: {
     RATES: '/api/shipping/rates',
   },
+  ORDERS: {
+    VERIFY: '/api/orders/verify',
+    REFUND_REQUEST: '/api/orders/refund-request',
+  },
 };

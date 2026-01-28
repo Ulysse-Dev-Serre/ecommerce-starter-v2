@@ -11,6 +11,7 @@ import { getCurrentUser } from '@/lib/services/user.service';
 
 import { CartClient } from './cart-client';
 import { Cart } from '@/lib/types/cart';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +33,7 @@ export default async function CartPage({
 
   const { userId: clerkId } = await auth();
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   logger.info(
     {

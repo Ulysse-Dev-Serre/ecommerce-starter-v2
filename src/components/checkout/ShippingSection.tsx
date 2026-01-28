@@ -10,6 +10,7 @@ import { useTranslations } from 'next-intl';
 
 import { ShippingRate } from '@/lib/types/checkout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { MapPin } from 'lucide-react';
 
 interface ShippingSectionProps {
   shippingRates: ShippingRate[];
@@ -152,7 +153,9 @@ export function ShippingSection({
         </div>
       ) : (
         <div className={`${VIBE_HOVER_GROUP} vibe-empty-placeholder`}>
-          <div className="vibe-empty-icon">📍</div>
+          <div className="vibe-empty-icon">
+            <MapPin className="vibe-icon-xl" />
+          </div>
           <p className="vibe-text-xs-muted vibe-container-sm">
             {t('enterAddressToSeeShipping')}
           </p>

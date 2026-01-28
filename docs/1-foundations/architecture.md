@@ -188,6 +188,8 @@ src/components
 │   └── related-products.tsx
 ├── seo
 │   └── json-ld.tsx
+├── shop
+│   └── shop-pagination.tsx
 ├── ui
 │   ├── status-badge.tsx
 │   ├── toast-provider.tsx

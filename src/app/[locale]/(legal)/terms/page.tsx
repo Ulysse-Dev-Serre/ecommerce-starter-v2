@@ -1,5 +1,5 @@
 import { getTranslations, getFormatter } from 'next-intl/server';
-import { LegalPageTemplate } from '@/components/legal/LegalPageTemplate';
+import { LegalPageTemplate } from '@/components/legal/legal-page-template';
 import { LEGAL_LAST_UPDATED } from '@/lib/config/site';
 import { Metadata } from 'next';
 

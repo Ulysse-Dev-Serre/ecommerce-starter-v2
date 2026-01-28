@@ -8,7 +8,11 @@ import { useTranslations } from 'next-intl';
 import AddressAutocomplete from './AddressAutocomplete';
 import { Loader2 } from 'lucide-react';
 import { CheckoutAddress } from '@/lib/types/checkout';
-import { SITE_CURRENCY, COUNTRY_TO_CURRENCY } from '@/lib/config/site';
+import {
+  SITE_CURRENCY,
+  COUNTRY_TO_CURRENCY,
+  PHONE_PREFIX,
+} from '@/lib/config/site';
 
 interface AddressSectionProps {
   tempAddress: CheckoutAddress;
@@ -114,7 +118,7 @@ export function AddressSection({
               {t('phone')} <span className="vibe-form-required">*</span>
             </label>
             <div className="vibe-flex-row">
-              <span className="vibe-input-prefix">+1</span>
+              <span className="vibe-input-prefix">{PHONE_PREFIX}</span>
               <FormInput
                 type="tel"
                 value={phone}

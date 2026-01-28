@@ -12,6 +12,8 @@ import { Loader2, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { API_ROUTES } from '@/lib/config/api-routes';
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
 interface CheckoutSuccessClientProps {
   locale: string;
@@ -40,10 +42,14 @@ export function CheckoutSuccessClient({
 
     const checkOrder = async () => {
       try {
-        let url = `/api/orders/verify?session_id=${identifier}`;
+        const params = new URLSearchParams();
         if (paymentIntentId) {
-          url = `/api/orders/verify?payment_intent_id=${paymentIntentId}`;
+          params.set('payment_intent_id', paymentIntentId);
+        } else {
+          params.set('session_id', identifier);
         }
+
+        const url = `${API_ROUTES.ORDERS.VERIFY}?${params.toString()}`;
 
         const response = await fetch(url);
         const data = await response.json();
@@ -51,7 +57,7 @@ export function CheckoutSuccessClient({
         if (data.exists && data.orderNumber) {
           setOrderConfirmed(true);
           setTimeout(() => {
-            window.location.href = `/${locale}/orders/${data.orderNumber}`;
+            window.location.href = `/${locale}${NAV_ROUTES.ORDERS}/${data.orderNumber}`;
           }, 2000);
           return true;
         }

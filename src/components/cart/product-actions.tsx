@@ -8,7 +8,7 @@ import { useToast } from '../ui/toast-provider';
 import { trackEvent } from '@/lib/core/tracker';
 
 import { API_ROUTES } from '@/lib/config/api-routes';
-import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 
 interface ProductActionsProps {
@@ -83,7 +83,7 @@ export function ProductActions({
         productName
       );
       router.push(
-        `/${locale}${NAV_ROUTES.CHECKOUT}?directVariantId=${variantId}&directQuantity=${quantity}`
+        `/${locale}${NAV_ROUTES.CHECKOUT}?${CHECKOUT_URL_PARAMS.DIRECT_VARIANT_ID}=${variantId}&${CHECKOUT_URL_PARAMS.DIRECT_QUANTITY}=${quantity}`
       );
     } catch (error) {
       console.error('Failed to buy now:', error);

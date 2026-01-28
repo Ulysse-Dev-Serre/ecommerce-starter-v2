@@ -14,6 +14,7 @@ import {
   updateCartLineSchema,
   UpdateCartLineInput,
 } from '@/lib/validators/cart';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 async function updateCartLineHandler(
   request: NextRequest,
@@ -27,7 +28,7 @@ async function updateCartLineHandler(
 
   const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   logger.info(
     {
@@ -132,7 +133,7 @@ async function removeCartLineHandler(
 
   const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   logger.info(
     {

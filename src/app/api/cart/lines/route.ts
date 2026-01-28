@@ -12,6 +12,7 @@ import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { addToCart } from '@/lib/services/cart.service';
 import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 async function addToCartHandler(
   request: NextRequest,
@@ -22,7 +23,7 @@ async function addToCartHandler(
   const { variantId, quantity } = data;
 
   const cookieStore = await cookies();
-  let anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  let anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   const userId = authContext.isAuthenticated ? authContext.userId : undefined;
 
@@ -72,7 +73,7 @@ async function addToCartHandler(
     );
 
     if (!userId && anonymousId) {
-      response.cookies.set('cart_anonymous_id', anonymousId, {
+      response.cookies.set(CART_COOKIE_NAME, anonymousId, {
         httpOnly: true,
         secure: env.NODE_ENV === 'production',
         sameSite: 'lax',

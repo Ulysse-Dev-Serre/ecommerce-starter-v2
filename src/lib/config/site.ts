@@ -77,6 +77,14 @@ export const SITE_ADDRESS = 'Montreal, QC\nCanada';
 export const CAD_TO_USD_RATE = 0.72;
 
 /**
+ * Default phone prefix for the site region.
+ * Used in checkout address forms.
+ */
+export const PHONE_PREFIX = '+1';
+
+export const CART_COOKIE_NAME = 'cart_anonymous_id';
+
+/**
  * =============================================================================
  * LEGAL
  * =============================================================================

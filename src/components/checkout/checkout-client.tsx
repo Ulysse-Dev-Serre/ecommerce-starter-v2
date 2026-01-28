@@ -15,7 +15,7 @@ import { useToast } from '@/components/ui/toast-provider';
 import { siteTokens } from '@/styles/themes/tokens';
 import { CheckoutAddress, ShippingRate } from '@/lib/types/checkout';
 import { API_ROUTES } from '@/lib/config/api-routes';
-import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 
 import { OrderSummary } from './OrderSummary';
 import { AddressSection } from './AddressSection';
@@ -54,8 +54,10 @@ export function CheckoutClient({
   const [error, setError] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
-  const directVariantId = searchParams.get('directVariantId');
-  const directQuantity = searchParams.get('directQuantity');
+  const directVariantId = searchParams.get(
+    CHECKOUT_URL_PARAMS.DIRECT_VARIANT_ID
+  );
+  const directQuantity = searchParams.get(CHECKOUT_URL_PARAMS.DIRECT_QUANTITY);
   const initialized = useRef(false);
 
   // 1. Au chargement, on crée une PaymentIntent (ou Session) vide pour avoir le clientSecret

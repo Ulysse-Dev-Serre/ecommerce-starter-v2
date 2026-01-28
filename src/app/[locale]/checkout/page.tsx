@@ -7,11 +7,12 @@ import { cookies } from 'next/headers';
 import { CheckoutService } from '@/lib/services/checkout.service';
 import { CheckoutClient } from '@/components/checkout/checkout-client';
 import { getCurrentUser } from '@/lib/services/user.service';
-import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 interface CheckoutPageProps {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ directVariantId?: string; directQuantity?: string }>;
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }
 
 export default async function CheckoutPage({
@@ -19,7 +20,10 @@ export default async function CheckoutPage({
   searchParams,
 }: CheckoutPageProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const { directVariantId, directQuantity } = await searchParams;
+  const searchParamsValue = await searchParams;
+  const directVariantId =
+    searchParamsValue[CHECKOUT_URL_PARAMS.DIRECT_VARIANT_ID];
+  const directQuantity = searchParamsValue[CHECKOUT_URL_PARAMS.DIRECT_QUANTITY];
 
   const t = await getTranslations({ locale, namespace: 'checkout' });
 
@@ -28,7 +32,7 @@ export default async function CheckoutPage({
   const userEmail = user?.email; // Use email directly from user object
 
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
   // Appel au Service pour préparer les données du checkout
   const checkoutSummary = await CheckoutService.getCheckoutSummary({
     userId,

@@ -12,9 +12,9 @@ import { getCurrentUser } from '@/lib/services/user.service';
 import { Navbar } from '@/components/layout/navbar';
 import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
 import { ConditionalFooter } from '@/components/layout/conditional-footer';
-import GoogleTagManager from '@/components/analytics/GoogleTagManager';
-import CookieConsentComponent from '@/components/analytics/CookieConsent';
-import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
+import GoogleTagManager from '@/components/analytics/google-tag-manager';
+import CookieConsentComponent from '@/components/analytics/cookie-consent';
+import { AnalyticsTracker } from '@/components/analytics/analytics-tracker';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { CartMergeHandler } from '@/components/cart/cart-merge-handler';
 import Script from 'next/script';
@@ -53,7 +53,9 @@ export async function generateMetadata({
     alternates: {
       canonical: `/${locale}`,
       languages: {
-        ...Object.fromEntries(SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`])),
+        ...Object.fromEntries(
+          SUPPORTED_LOCALES.map((loc: string) => [loc, `/${loc}`])
+        ),
         'x-default': `/${DEFAULT_LOCALE}`,
       },
     },
