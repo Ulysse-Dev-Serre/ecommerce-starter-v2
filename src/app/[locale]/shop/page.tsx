@@ -1,4 +1,4 @@
-import { getProducts } from '@/lib/services/product.service';
+import { getProducts, ProductProjection } from '@/lib/services/product.service';
 import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
@@ -71,7 +71,7 @@ export default async function ShopPage({
         </div>
       ) : (
         <div className="vibe-grid-4-cols">
-          {products.map((product: any, idx: number) => (
+          {products.map((product: ProductProjection, idx: number) => (
             <div
               key={product.id}
               className="vibe-animate-slide-in-bottom"

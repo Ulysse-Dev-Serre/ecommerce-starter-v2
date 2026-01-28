@@ -20,6 +20,8 @@ interface AddressSectionProps {
   isAddressReady: boolean;
   isLoading: boolean;
   onCalculateShipping: () => void;
+  readOnly?: boolean;
+  onEdit?: () => void;
 }
 
 export function AddressSection({
@@ -32,16 +34,18 @@ export function AddressSection({
   isAddressReady,
   isLoading,
   onCalculateShipping,
+  readOnly = false,
+  onEdit,
 }: AddressSectionProps) {
   const t = useTranslations('Checkout');
   const g = useTranslations('geography');
+
   // Determine the target country for this instance based on SITE_CURRENCY
-  // Example: If SITE_CURRENCY is 'USD', we look for keys in COUNTRY_TO_CURRENCY where value is 'USD' -> returns 'US'
   const instanceCountryCode = useMemo(() => {
     const entry = Object.entries(COUNTRY_TO_CURRENCY).find(
       ([_, currency]) => currency === SITE_CURRENCY
     );
-    return entry ? entry[0] : 'CA'; // Fallback to CA if not found, or handle error
+    return entry ? entry[0] : 'CA';
   }, []);
 
   // Ensure country is set to the instance default on mount or if missing
@@ -50,7 +54,7 @@ export function AddressSection({
       setTempAddress({
         ...tempAddress,
         country: instanceCountryCode,
-        state: '', // Reset state if country changed forcefully
+        state: '',
       });
     }
   }, [instanceCountryCode, tempAddress, setTempAddress]);
@@ -58,14 +62,39 @@ export function AddressSection({
   // Dynamic State/Province options based on the active instance country
   const provinceOptions = useMemo(() => {
     const regions = g.raw(instanceCountryCode) as Record<string, string>;
-
     if (!regions) return [];
-
     return Object.entries<string>(regions).map(([code, name]) => ({
       value: code,
       label: name,
     }));
   }, [instanceCountryCode, g]);
+
+  if (readOnly) {
+    return (
+      <section className="vibe-section-card vibe-border-primary/20 vibe-bg-primary/5">
+        <div className="vibe-flex-between-items-center vibe-mb-4">
+          <h2 className="vibe-text-lg-bold vibe-text-primary">
+            {t('shippingAddress')}
+          </h2>
+          <button onClick={onEdit} className="vibe-link-action vibe-text-sm">
+            {t('edit')}
+          </button>
+        </div>
+        <div className="vibe-text-medium-foreground vibe-leading-relaxed">
+          <p className="vibe-mb-1 vibe-font-bold">{tempName}</p>
+          <p>{tempAddress.line1}</p>
+          {tempAddress.line2 && <p>{tempAddress.line2}</p>}
+          <p>
+            {tempAddress.city}, {tempAddress.state} {tempAddress.postal_code}
+          </p>
+          <p>{tempAddress.country}</p>
+          <p className="vibe-mt-2 vibe-text-sm vibe-text-muted-foreground">
+            {phone}
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="vibe-container-sm">
@@ -109,7 +138,6 @@ export function AddressSection({
                 city: selected.city,
                 state: selected.state,
                 postal_code: selected.postal_code,
-                // Force country to instance default even if autocomplete returns something else (safety)
                 country: instanceCountryCode,
               });
             }}
@@ -122,7 +150,6 @@ export function AddressSection({
             value={tempAddress?.line1 || ''}
             placeholder={t('addressPlaceholder')}
             className="vibe-input-raw"
-            // Restrict Google Autocomplete to the instance country code (lower case for API)
             countryRestriction={instanceCountryCode.toLowerCase()}
           />
         </div>
@@ -139,13 +166,12 @@ export function AddressSection({
         {/* Country (Read-Only) & City */}
         <div className="vibe-grid-form">
           <div className="vibe-md-col-1">
-            {/* Display Country as Read-Only Input since it's fixed per instance */}
             <FormInput
               label={t('country')}
-              value={instanceCountryCode} // Display code since localized name map not found in dict
+              value={instanceCountryCode}
               disabled
               readOnly
-              className="vibe-input-readonly" // Style to look fixed but readable
+              className="vibe-input-readonly"
             />
           </div>
 

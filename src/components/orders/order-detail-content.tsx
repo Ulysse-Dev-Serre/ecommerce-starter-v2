@@ -83,24 +83,24 @@ export async function OrderDetailContent({
           {t('backToOrders')}
         </NextLink>
 
-        <div className="vibe-flex-col-md-row-md-end-between vibe-gap-6 vibe-mb-12">
-          <div className="vibe-stack-y-2">
-            <h1 className="vibe-text-4xl-mega">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-extrabold tracking-tight">
               {t('orderNumber')} #{order.orderNumber}
             </h1>
-            <p className="vibe-text-p-lg vibe-text-medium">
+            <p className="text-lg font-medium text-muted-foreground">
               {t('date')} : {formatDate(order.createdAt, locale)}
             </p>
           </div>
           <StatusBadge
             status={order.status}
             label={statusLabels[order.status]}
-            className="vibe-status-badge-lg"
+            className="px-4 py-1 text-base"
           />
         </div>
 
-        <div className="vibe-grid-3-cols">
-          <div className="vibe-span-2 vibe-stack-y-10">
+        <div className="vibe-grid-layout">
+          <div className="vibe-grid-main vibe-stack-y-10">
             <OrderStepper status={order.status} labels={statusLabels} />
 
             {(order.status === 'CANCELLED' || order.status === 'REFUNDED') && (
@@ -158,7 +158,13 @@ export async function OrderDetailContent({
             />
           </div>
 
-          <OrderSummary order={order} locale={locale} labels={summaryLabels} />
+          <div className="vibe-grid-side">
+            <OrderSummary
+              order={order}
+              locale={locale}
+              labels={summaryLabels}
+            />
+          </div>
         </div>
       </div>
     </div>

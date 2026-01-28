@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -51,6 +51,7 @@ export function CheckoutClient({
   const searchParams = useSearchParams();
   const directVariantId = searchParams.get('directVariantId');
   const directQuantity = searchParams.get('directQuantity');
+  const initialized = useRef(false);
 
   // 1. Au chargement, on crée une PaymentIntent (ou Session) vide pour avoir le clientSecret
   // C'est nécessaire pour initialiser <Elements> de Stripe
@@ -63,6 +64,9 @@ export function CheckoutClient({
             quantity: parseInt(directQuantity),
           }
         : undefined;
+
+    if (initialized.current) return;
+    initialized.current = true;
 
     // Create intent
     void fetch('/api/checkout/create-intent', {
@@ -158,11 +162,17 @@ export function CheckoutForm({
   summaryItems,
 }: CheckoutFormProps) {
   const t = useTranslations('Checkout');
+  const tCommon = useTranslations('common');
   const stripe = useStripe();
   const elements = useElements();
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // STEP STATE: 'address' -> 'shipping' -> 'payment'
+  const [step, setStep] = useState<'address' | 'shipping' | 'payment'>(
+    'address'
+  );
 
   useEffect(() => {
     void trackEvent('begin_checkout', { cartId, currency, initialTotal });
@@ -291,11 +301,13 @@ export function CheckoutForm({
 
       if (data.rates && data.rates.length > 0) {
         setShippingRates(data.rates);
-        const firstRate = data.rates[0];
-        await updatePaymentIntent(firstRate);
+        // Move to shipping step
+        setStep('shipping');
       } else {
         setShippingRates([]);
         setSelectedRate(null);
+        // Stay on address step but show error maybe?
+        alert(t('noShippingRates'));
       }
     } catch (error) {
       console.error('Error fetching rates:', error);
@@ -306,12 +318,20 @@ export function CheckoutForm({
   };
 
   const handleRateSelect = async (rate: ShippingRate) => {
+    // Just select the rate locally, don't move step yet
+    setSelectedRate(rate);
+  };
+
+  const handleConfirmShipping = async () => {
+    if (!selectedRate) return;
+
+    setIsLoading(true);
     const cleanPhone = phone.replace(/\D/g, '');
     const stripePhone = cleanPhone.startsWith('1')
       ? cleanPhone
       : `1${cleanPhone}`;
 
-    await updatePaymentIntent(rate, {
+    await updatePaymentIntent(selectedRate, {
       name: tempName || t('anonymousCustomer'),
       street1: tempAddress.line1,
       street2: tempAddress.line2 || '',
@@ -321,6 +341,21 @@ export function CheckoutForm({
       country: tempAddress.country,
       phone: stripePhone,
     });
+
+    setIsLoading(false);
+    setStep('payment');
+  };
+
+  const handleEditAddress = () => {
+    setStep('address');
+    setShippingRates([]);
+    setSelectedRate(null);
+    setHasAttemptedShippingRatesFetch(false);
+  };
+
+  const handleEditShipping = () => {
+    setStep('shipping');
+    // We keep selectedRate but user can change it
   };
 
   const handlePay = async () => {
@@ -357,16 +392,25 @@ export function CheckoutForm({
             isAddressReady={isAddressReady}
             isLoading={isLoading}
             onCalculateShipping={handleCalculateShipping}
+            readOnly={step !== 'address'}
+            onEdit={handleEditAddress}
           />
 
-          {hasAttemptedShippingRatesFetch && (
-            <ShippingSection
-              shippingRates={shippingRates}
-              selectedRate={selectedRate}
-              isLoading={isLoading}
-              onRateSelect={handleRateSelect}
-              locale={locale}
-            />
+          {step !== 'address' && (
+            <div
+              className={`vibe-mt-6 ${step === 'shipping' ? 'vibe-animate-fade-in' : ''}`}
+            >
+              <ShippingSection
+                shippingRates={shippingRates}
+                selectedRate={selectedRate}
+                isLoading={isLoading}
+                onRateSelect={handleRateSelect}
+                locale={locale}
+                readOnly={step === 'payment'}
+                onEdit={handleEditShipping}
+                onConfirm={handleConfirmShipping}
+              />
+            </div>
           )}
         </div>
 
@@ -382,15 +426,17 @@ export function CheckoutForm({
               selectedRate={selectedRate}
             />
 
-            <div className="vibe-container-sm vibe-shadow-lg">
-              <PaymentSection
-                stripe={stripe}
-                elements={elements}
-                selectedRate={selectedRate}
-                onPay={handlePay}
-                userEmail={userEmail}
-              />
-            </div>
+            {step === 'payment' && (
+              <div className="vibe-container-sm vibe-shadow-lg vibe-animate-fade-in">
+                <PaymentSection
+                  stripe={stripe}
+                  elements={elements}
+                  selectedRate={selectedRate}
+                  onPay={handlePay}
+                  userEmail={userEmail}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

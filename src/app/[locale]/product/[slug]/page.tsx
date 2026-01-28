@@ -89,7 +89,7 @@ export default async function ProductPage({
     })),
   }));
 
-  const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL;
   const productUrl = `${siteUrl}/${locale}/product/${product.slug}`;
 
   const productJsonLd = {

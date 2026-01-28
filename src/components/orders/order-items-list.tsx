@@ -58,44 +58,44 @@ export function OrderItemsList({
           return (
             <li
               key={item.id}
-              className="vibe-p-8 vibe-flex-col-sm-row-center vibe-gap-8 vibe-bg-muted-extra-soft-hover vibe-transition-colors"
+              className="p-8 flex flex-col sm:flex-row items-center gap-8 hover:bg-muted/30 transition-colors"
             >
-              <div className="vibe-w-24 vibe-h-24 vibe-bg-muted vibe-rounded-2xl vibe-overflow-hidden vibe-flex-shrink-0 vibe-border-border vibe-shadow-xs">
+              <div className="w-24 h-24 bg-muted rounded-2xl overflow-hidden flex-shrink-0 border border-border shadow-sm">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={itemName}
-                    className="vibe-full vibe-object-cover"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="vibe-full vibe-flex-center vibe-text-muted-soft vibe-text-3xl">
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 text-3xl">
                     📦
                   </div>
                 )}
               </div>
-              <div className="vibe-flex-1 vibe-min-w-0 vibe-text-center sm:vibe-text-left">
+              <div className="flex-1 min-w-0 text-center sm:text-left">
                 {slug ? (
                   <Link
                     href={`/${locale}/product/${slug}`}
-                    className="vibe-text-xl vibe-text-bold-foreground vibe-hover-primary vibe-hover-underline vibe-underline-offset-4 vibe-decoration-2 vibe-transition-colors"
+                    className="text-xl font-bold text-foreground hover:text-primary hover:underline underline-offset-4 decoration-2 transition-colors"
                   >
                     {itemName}
                   </Link>
                 ) : (
-                  <p className="vibe-text-xl vibe-text-bold-foreground">
+                  <p className="text-xl font-bold text-foreground">
                     {itemName}
                   </p>
                 )}
-                <p className="vibe-text-base vibe-text-muted vibe-mt-2 vibe-text-medium">
+                <p className="text-base text-muted-foreground mt-2 font-medium">
                   {labels.quantity} :{' '}
-                  <span className="vibe-text-bold-foreground">
+                  <span className="font-bold text-foreground">
                     {item.quantity}
                   </span>{' '}
                   × {formatPrice(item.unitPrice, currency as any, locale)}
                 </p>
               </div>
-              <div className="vibe-text-right">
-                <p className="vibe-text-xl-bold text-2xl">
+              <div className="text-right whitespace-nowrap">
+                <p className="font-bold text-2xl text-foreground">
                   {formatPrice(item.totalPrice, currency as any, locale)}
                 </p>
               </div>

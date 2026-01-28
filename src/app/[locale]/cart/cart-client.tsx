@@ -1,5 +1,8 @@
 'use client';
 
+import { API_ROUTES } from '@/lib/constants/api-routes';
+import { useToast } from '@/components/ui/toast-provider';
+
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -48,18 +51,23 @@ export function CartClient({ cart, locale }: CartClientProps) {
   const { isSignedIn } = useUser();
   const t = useTranslations('cart');
 
+  const { showToast } = useToast();
+
   const handleRemove = async (itemId: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/cart/lines/${itemId}`, {
+      const response = await fetch(API_ROUTES.CART.LINES(itemId), {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        showToast(t('itemRemoved'), 'success');
         router.refresh();
+      } else {
+        throw new Error('Failed to remove item');
       }
     } catch (error) {
-      console.error('Failed to remove item:', error);
+      showToast(t('errorRemovingItem'), 'error');
     } finally {
       setIsLoading(false);
     }

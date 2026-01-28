@@ -349,7 +349,10 @@
     "statePlaceholder": "Province / État",
     "validation": {
       "phone": "Veuillez entrer un numéro de téléphone valide pour la livraison."
-    }
+    },
+    "noShippingRates": "Aucune option de livraison trouvée pour cette adresse.",
+    "edit": "Modifier",
+    "continueToPayment": "Continuer vers le paiement"
   },
   "footer": {
     "about": "À propos",
@@ -382,6 +385,7 @@
       "viewDetails": "Voir détails"
     },
     "detail": {
+      "title": "Détail de la commande",
       "backToOrders": "← Retour aux commandes",
       "orderNumber": "Commande",
       "status": "Statut",
@@ -609,6 +613,7 @@
         "errorUnknown": "Une erreur est survenue"
       },
       "detail": {
+        "title": "Détail de la commande",
         "orderItems": "Articles de la commande",
         "paymentInfo": "Informations de paiement",
         "shippingAddress": "Adresse de livraison",

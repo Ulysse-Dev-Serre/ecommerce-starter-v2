@@ -80,9 +80,7 @@ export default async function RootLayout({
   // Vérifier si on a une vraie clé Clerk (pas une clé mock pour CI)
   const clerkKey = env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const hasValidClerkKey =
-    clerkKey?.startsWith('pk_live_') ||
-    (clerkKey?.startsWith('pk_test_') &&
-      clerkKey !== 'pk_test_mock_key_for_ci_build_only');
+    clerkKey?.startsWith('pk_live_') || clerkKey?.startsWith('pk_test_');
 
   // Récupérer le rôle de l'utilisateur si Clerk est actif
   let userRole: string | undefined;

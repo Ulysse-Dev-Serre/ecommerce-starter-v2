@@ -13,23 +13,23 @@ export function OrderTracking({ shipments, labels }: OrderTrackingProps) {
   if (!shipments || shipments.length === 0) return null;
 
   return (
-    <div className="vibe-container vibe-border-primary-soft vibe-bg-primary-soft">
-      <div className="vibe-flex-between-items-center vibe-mb-6">
-        <h2 className="vibe-text-xl-bold vibe-text-primary vibe-flex-items-center-gap-3">
-          <Package className="vibe-icon-md" /> {labels.tracking}
+    <div className="vibe-container border border-primary/10 bg-primary/5">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-primary flex items-center gap-3">
+          <Package className="w-6 h-6" /> {labels.tracking}
         </h2>
       </div>
       <div className="space-y-6">
         {shipments.map((shipment: any) => (
           <div
             key={shipment.id}
-            className="vibe-flex-col-sm-row-between vibe-items-start-sm-center vibe-gap-6 vibe-p-4 vibe-bg-background vibe-card-rounded vibe-border-primary-extra-soft"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 p-4 bg-background rounded-xl border border-primary/10"
           >
             <div>
-              <p className="vibe-text-xs-bold-muted-caps vibe-mb-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">
                 {shipment.carrier || labels.standardShipping}
               </p>
-              <p className="vibe-font-mono vibe-text-xl vibe-text-bold vibe-tracking-wider vibe-select-all">
+              <p className="font-mono text-xl font-bold tracking-wider select-all">
                 {shipment.trackingCode}
               </p>
             </div>
@@ -40,10 +40,10 @@ export function OrderTracking({ shipments, labels }: OrderTrackingProps) {
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="vibe-button-primary vibe-px-8 vibe-py-3 vibe-text-sm vibe-shadow-primary"
+              className="vibe-button-primary px-8 py-3 text-sm shadow-md shadow-primary/20"
             >
               {labels.trackPackage}
-              <ExternalLink className="vibe-icon-sm" />
+              <ExternalLink className="w-5 h-5" />
             </a>
           </div>
         ))}

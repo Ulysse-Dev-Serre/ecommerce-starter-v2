@@ -346,7 +346,10 @@
     "statePlaceholder": "State / Province",
     "validation": {
       "phone": "Please enter a valid phone number for shipping."
-    }
+    },
+    "noShippingRates": "No shipping rates found for this address.",
+    "edit": "Edit",
+    "continueToPayment": "Continue to Payment"
   },
   "footer": {
     "about": "About",
@@ -379,6 +382,7 @@
       "viewDetails": "View details"
     },
     "detail": {
+      "title": "Order Details",
       "backToOrders": "← Back to orders",
       "orderNumber": "Order",
       "status": "Status",
@@ -606,6 +610,7 @@
         "errorUnknown": "An error occurred"
       },
       "detail": {
+        "title": "Order Details",
         "orderItems": "Order Items",
         "paymentInfo": "Payment Information",
         "shippingAddress": "Shipping Address",

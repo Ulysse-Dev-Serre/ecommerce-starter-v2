@@ -21,8 +21,26 @@ export async function generateMetadata({
   const { locale, id } = await params;
   const t = await getTranslations({ locale, namespace: 'Orders.detail' });
 
+  // On essaie de récupérer le vrai numéro de commande si possible, sinon titre générique
+  // Note: On ne fait pas de gestion d'erreur complexe ici car c'est juste pour le titre
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id },
+      select: { orderNumber: true },
+    });
+
+    if (order?.orderNumber) {
+      return {
+        title: `${t('orderNumber')} #${order.orderNumber}`,
+        robots: { index: false, follow: false },
+      };
+    }
+  } catch (e) {
+    // Fallback silencieux
+  }
+
   return {
-    title: `${t('orderNumber')} #${id}`,
+    title: t('title'), // Titre générique "Détail de la commande"
     robots: { index: false, follow: false },
     alternates: {
       canonical: `/${locale}/orders/${id}`,
