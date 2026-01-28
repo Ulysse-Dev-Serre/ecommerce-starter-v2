@@ -1,5 +1,12 @@
 'use client';
 
+import {
+  VIBE_ANIMATION_FADE_IN,
+  VIBE_ANIMATION_ZOOM_IN,
+  VIBE_ANIMATION_SLIDE_IN_RIGHT,
+  VIBE_ANIMATION_SLIDE_IN_BOTTOM,
+} from '@/lib/vibe-styles';
+
 import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
@@ -76,22 +83,20 @@ export function CheckoutSuccessClient({
 
   if (error) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center p-6 animate-in fade-in duration-500">
-        <div className="vibe-info-box max-w-md w-full">
-          <div className="flex justify-center mb-6">
-            <AlertCircle className="h-16 w-16 text-error opacity-80" />
+      <div
+        className={`vibe-full-page-center vibe-animate-fade-in ${VIBE_ANIMATION_FADE_IN}`}
+      >
+        <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">
+          <div className="vibe-status-icon-box">
+            <AlertCircle className="vibe-icon-xxl vibe-text-error-soft" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-4">
-            {t('error')}
-          </h1>
-          <p className="text-muted-foreground mb-8 text-lg font-medium">
-            {error}
-          </p>
+          <h1 className="vibe-status-title">{t('error')}</h1>
+          <p className="vibe-status-desc">{error}</p>
           <Link
             href={`/${locale}/shop`}
-            className="vibe-button-primary h-12 px-8"
+            className="vibe-button-primary vibe-btn-sm-h10 vibe-px-8"
           >
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag className="vibe-icon-sm" />
             {t('backToShop')}
           </Link>
         </div>
@@ -100,26 +105,28 @@ export function CheckoutSuccessClient({
   }
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center p-6 animate-in fade-in duration-500">
-      <div className="vibe-info-box max-w-md w-full">
-        <div className="flex justify-center mb-8 relative">
+    <div className="vibe-full-page-center vibe-animate-fade-in">
+      <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">
+        <div className="vibe-status-icon-box vibe-relative">
           {orderConfirmed ? (
-            <CheckCircle className="h-20 w-20 text-success animate-in zoom-in duration-500" />
+            <CheckCircle
+              className={`vibe-icon-xxxl vibe-text-success vibe-animate-zoom-in ${VIBE_ANIMATION_ZOOM_IN}`}
+            />
           ) : (
-            <Loader2 className="h-20 w-20 text-primary animate-spin" />
+            <Loader2 className="vibe-icon-xxxl vibe-text-primary vibe-icon-spin" />
           )}
         </div>
 
-        <h1 className="text-3xl font-bold text-foreground mb-4 tracking-tight">
+        <h1 className="vibe-status-title vibe-text-h1-status">
           {orderConfirmed ? t('redirecting') : t('processing')}
         </h1>
 
-        <p className="text-xl text-muted-foreground mb-8 font-medium">
+        <p className="vibe-status-desc vibe-text-p-status">
           {orderConfirmed ? t('title') : t('waitMessage')}
         </p>
 
         {!orderConfirmed && sessionId && (
-          <div className="bg-muted/50 rounded-lg p-3 text-xs font-mono text-muted-foreground border border-border/50 break-all">
+          <div className="vibe-status-code-box">
             {t('sessionId')}: {sessionId}
           </div>
         )}

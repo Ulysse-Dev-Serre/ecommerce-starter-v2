@@ -4,13 +4,13 @@ export default function ShopLoading() {
   return (
     <div className="vibe-layout-container vibe-section-py">
       {/* Header Skeleton */}
-      <div className="mb-12 border-b border-border pb-8 space-y-4">
-        <div className="h-10 w-48 bg-muted/50 rounded-lg animate-pulse" />
-        <div className="h-6 w-96 bg-muted/30 rounded-lg animate-pulse" />
+      <div className="vibe-mb-12 vibe-section-divider-bottom vibe-pb-8 vibe-stack-y-4">
+        <div className="vibe-h-10 vibe-w-48 vibe-bg-muted-50 vibe-card-rounded vibe-animate-pulse" />
+        <div className="vibe-h-6 vibe-w-96 vibe-bg-muted-30 vibe-card-rounded vibe-animate-pulse" />
       </div>
 
       {/* Grid Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="vibe-grid-responsive-shop">
         {Array.from({ length: 8 }).map((_, i) => (
           <ProductSkeleton key={i} />
         ))}

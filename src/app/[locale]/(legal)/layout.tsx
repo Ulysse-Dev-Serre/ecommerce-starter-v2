@@ -1,3 +1,4 @@
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
 import React from 'react';
 
 export default function LegalLayout({
@@ -6,12 +7,10 @@ export default function LegalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-background min-h-screen animate-in fade-in duration-500 vibe-section-py">
-      <div className="vibe-layout-container max-w-4xl">
+    <div className="vibe-bg-background vibe-min-h-screen vibe-animate-fade-in vibe-section-py">
+      <div className="vibe-layout-container vibe-container-max-4xl">
         <div className="vibe-container">
-          <article className="prose prose-stone dark:prose-invert max-w-none hover:prose-a:text-primary transition-colors">
-            {children}
-          </article>
+          <article className={VIBE_TYPOGRAPHY_PROSE}>{children}</article>
         </div>
       </div>
     </div>

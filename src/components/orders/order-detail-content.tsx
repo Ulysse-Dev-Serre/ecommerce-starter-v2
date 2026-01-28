@@ -1,3 +1,4 @@
+import { VIBE_HOVER_GROUP } from '@/lib/vibe-styles';
 import { Link } from 'lucide-react'; // Placeholder to fix lint but we need real Link
 import NextLink from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -72,44 +73,44 @@ export async function OrderDetailContent({
   const shippingAddr = order.shippingAddress as Record<string, any> | null;
 
   return (
-    <div className="min-h-screen bg-muted/20 pb-12 animate-in fade-in duration-700 vibe-section-py">
-      <div className="vibe-layout-container max-w-6xl">
+    <div className="vibe-min-h-screen vibe-bg-muted-extra-soft vibe-pb-12 vibe-animate-fade-in vibe-section-py">
+      <div className="vibe-layout-6xl">
         <NextLink
           href={`/${locale}/orders`}
-          className="inline-flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors mb-8 group"
+          className={`${VIBE_HOVER_GROUP} vibe-nav-link-prev`}
         >
-          <ArrowLeft className="mr-2 h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="vibe-mr-2 vibe-icon-sm group-hover:vibe-translate-x-n1 vibe-transition" />
           {t('backToOrders')}
         </NextLink>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-extrabold text-foreground tracking-tight">
+        <div className="vibe-flex-col-md-row-md-end-between vibe-gap-6 vibe-mb-12">
+          <div className="vibe-stack-y-2">
+            <h1 className="vibe-text-4xl-mega">
               {t('orderNumber')} #{order.orderNumber}
             </h1>
-            <p className="text-lg text-muted-foreground font-medium">
+            <p className="vibe-text-p-lg vibe-text-medium">
               {t('date')} : {formatDate(order.createdAt, locale)}
             </p>
           </div>
           <StatusBadge
             status={order.status}
             label={statusLabels[order.status]}
-            className="px-6 py-2.5 text-base font-black uppercase tracking-widest"
+            className="vibe-status-badge-lg"
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <div className="lg:col-span-2 space-y-10">
+        <div className="vibe-grid-3-cols">
+          <div className="vibe-span-2 vibe-stack-y-10">
             <OrderStepper status={order.status} labels={statusLabels} />
 
             {(order.status === 'CANCELLED' || order.status === 'REFUNDED') && (
-              <div className="vibe-info-box bg-info/5 border-info/20 text-info">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <div className="vibe-info-box vibe-info-box-styled">
+                <h3 className="vibe-text-xl-bold vibe-mb-4 vibe-flex-items-center-gap-2">
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingTitle')
                     : tRefund('refundDoneTitle')}
                 </h3>
-                <p className="whitespace-pre-wrap leading-relaxed font-medium">
+                <p className="whitespace-pre-wrap leading-relaxed vibe-text-medium">
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingMessage', {
                         name:

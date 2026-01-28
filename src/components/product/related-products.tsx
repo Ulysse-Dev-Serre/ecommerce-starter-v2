@@ -35,9 +35,11 @@ export async function RelatedProducts({
   }
 
   return (
-    <div className="mt-20 border-t border-border pt-16">
-      <h2 className="text-2xl font-bold mb-8">{t('relatedProducts')}</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="vibe-related-section">
+      <h2 className="vibe-section-title border-none pb-0">
+        {t('relatedProducts')}
+      </h2>
+      <div className="vibe-grid-4-cols">
         {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} locale={locale} />
         ))}

@@ -5,6 +5,7 @@ import { OrderStatus } from '@/generated/prisma';
 import { Package, RefreshCcw, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils/cn';
 
 interface StatusActionsProps {
   orderId: string;
@@ -227,11 +228,12 @@ export function StatusActions({
           <button
             onClick={() => handleStatusChange(OrderStatus.REFUNDED)}
             disabled={isLoading}
-            className={`w-full ${
+            className={cn(
+              'w-full',
               currentStatus === OrderStatus.REFUND_REQUESTED
                 ? 'admin-btn-danger'
                 : 'admin-btn-secondary'
-            }`}
+            )}
           >
             <RefreshCcw className="h-4 w-4" />
             {currentStatus === OrderStatus.REFUND_REQUESTED

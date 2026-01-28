@@ -22,10 +22,12 @@ export function PaymentSection({
 }: PaymentSectionProps) {
   const t = useTranslations('Checkout');
   return (
-    <div className="mt-8 pt-8 border-t border-border animate-in fade-in duration-700">
-      <h3 className="text-xl font-bold mb-6 text-foreground">{t('payment')}</h3>
+    <div className="vibe-section-divider-top vibe-animate-fade-in vibe-duration-700">
+      <h3 className="vibe-text-price-xl vibe-mb-6 vibe-text-foreground">
+        {t('payment')}
+      </h3>
 
-      <div className="bg-background p-4 rounded-xl border border-border shadow-inner">
+      <div className="vibe-input-group-container vibe-shadow-inner">
         <PaymentElement
           options={{
             defaultValues: {
@@ -38,15 +40,15 @@ export function PaymentSection({
       </div>
 
       <button
-        className={`vibe-button-primary w-full mt-8 h-12 uppercase tracking-wide
-          ${!stripe || !elements || !selectedRate ? 'opacity-50 cursor-not-allowed shadow-none' : ''}`}
+        className={`vibe-button-primary vibe-btn-full-lg vibe-mt-8 vibe-uppercase vibe-tracking-wide
+          ${!stripe || !elements || !selectedRate ? 'vibe-opacity-50 vibe-cursor-not-allowed vibe-shadow-none' : ''}`}
         disabled={!stripe || !elements || !selectedRate}
         onClick={onPay}
       >
-        <div className="flex items-center justify-center gap-3">
+        <div className="vibe-flex-center-gap-3">
           {(!stripe || !elements || !selectedRate) && (
             <svg
-              className="w-5 h-5 text-muted-foreground/50"
+              className="vibe-icon-sm vibe-text-muted/50"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -63,9 +65,9 @@ export function PaymentSection({
         </div>
       </button>
 
-      <p className="text-xs text-center text-muted-foreground mt-4 flex items-center justify-center gap-2 font-medium">
+      <p className="vibe-text-xs-muted vibe-text-center vibe-mt-4 vibe-flex-center-gap-2 vibe-text-medium">
         <svg
-          className="w-4 h-4 text-success"
+          className="vibe-icon-xs vibe-text-success"
           fill="currentColor"
           viewBox="0 0 24 24"
         >

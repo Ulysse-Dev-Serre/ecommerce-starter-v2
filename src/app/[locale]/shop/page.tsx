@@ -54,25 +54,27 @@ export default async function ShopPage({
   );
 
   return (
-    <div className="vibe-layout-container vibe-section-py animate-in fade-in duration-700">
-      <div className="mb-12 border-b border-border pb-8">
-        <h1 className="vibe-page-header text-foreground">{t('title')}</h1>
-        <p className="text-muted-foreground mt-2 text-lg">{t('description')}</p>
+    <div className="vibe-layout-container vibe-section-py vibe-animate-fade-in">
+      <div className="vibe-mb-12 vibe-section-divider-bottom vibe-pb-8">
+        <h1 className="vibe-page-header vibe-text-foreground">{t('title')}</h1>
+        <p className="vibe-text-muted vibe-mt-2 vibe-text-lg">
+          {t('description')}
+        </p>
       </div>
 
       {products.length === 0 ? (
         <div className="vibe-info-box">
-          <Search className="w-16 h-16 text-muted-foreground/30 mb-4" />
-          <p className="text-xl text-muted-foreground font-medium">
+          <Search className="vibe-w-16 vibe-h-16 vibe-text-muted-soft vibe-mb-4" />
+          <p className="vibe-text-price-xl vibe-text-muted vibe-text-medium">
             {t('noProducts')}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="vibe-grid-4-cols">
           {products.map((product: any, idx: number) => (
             <div
               key={product.id}
-              className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+              className="vibe-animate-slide-in-bottom"
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               <ProductCard product={product} locale={locale} />

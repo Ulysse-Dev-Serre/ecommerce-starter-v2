@@ -1,3 +1,9 @@
+import {
+  VIBE_ANIMATION_FADE_IN,
+  VIBE_ANIMATION_ZOOM_IN,
+  VIBE_ANIMATION_SLIDE_IN_RIGHT,
+  VIBE_ANIMATION_SLIDE_IN_BOTTOM,
+} from '@/lib/vibe-styles';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -38,49 +44,51 @@ export function CartItem({ item, locale, onRemove, isLoading }: CartItemProps) {
   const image = item.variant.product.media[0]?.url;
 
   return (
-    <div className="vibe-card flex flex-col sm:flex-row gap-4 animate-in fade-in duration-300">
+    <div
+      className={`vibe-card vibe-product-list-item ${VIBE_ANIMATION_FADE_IN}`}
+    >
       {image && (
-        <div className="w-full sm:w-24 sm:h-24 aspect-square flex-shrink-0 bg-muted rounded-md overflow-hidden border border-border relative">
+        <div className="vibe-image-container vibe-product-thumb-container">
           <Image
             src={image}
             alt={translation?.name || ''}
             fill
-            className="object-cover"
+            className="vibe-image-cover"
             sizes="(max-width: 640px) 100vw, 96px"
           />
         </div>
       )}
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start gap-2">
+      <div className="vibe-flex-grow">
+        <div className="vibe-flex-between-start">
           <Link
             href={`/${locale}/product/${item.variant.product.slug}`}
-            className="font-bold text-lg mb-1 block hover:text-primary transition-colors truncate"
+            className="vibe-product-name-link"
           >
             {translation?.name || item.variant.sku}
           </Link>
           <button
             onClick={() => onRemove(item.id)}
             disabled={isLoading}
-            className="text-muted-foreground hover:text-error transition-colors p-1"
+            className="vibe-icon-btn-error"
             aria-label={t('remove')}
           >
-            <X className="h-5 w-5" />
+            <X className="vibe-icon-sm" />
           </button>
         </div>
 
-        <p className="text-sm text-muted-foreground mb-3">
+        <p className="vibe-text-meta">
           {t('sku')}: {item.variant.sku}
         </p>
 
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-3">
+        <div className="vibe-flex-footer-stack">
+          <div className="vibe-stack-y-3">
             <PriceDisplay
               pricing={item.variant.pricing}
-              className="text-lg font-bold text-foreground"
+              className="vibe-text-price-lg"
               locale={locale}
             />
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            <div className="vibe-flex-items-center-gap-3">
+              <span className="vibe-form-label-bold !mb-0">
                 {t('quantity')}
               </span>
               <QuantitySelector

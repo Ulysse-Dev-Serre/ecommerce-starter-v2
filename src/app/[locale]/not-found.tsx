@@ -7,24 +7,20 @@ export default async function NotFound() {
   const t = await getTranslations({ locale, namespace: 'error.notFound' });
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
-      <div className="vibe-info-box max-w-lg w-full bg-background border-none shadow-none">
-        <h1 className="text-9xl font-black text-primary opacity-10 select-none tracking-tighter">
-          404
-        </h1>
-        <div className="relative -mt-16 space-y-6">
-          <h2 className="text-4xl font-extrabold text-foreground tracking-tight">
-            {t('title')}
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed">
+    <div className="vibe-404-container">
+      <div className="vibe-info-box vibe-container-max-4xl vibe-w-full vibe-bg-background vibe-border-none vibe-shadow-none">
+        <h1 className="vibe-404-bg-text">404</h1>
+        <div className="vibe-relative vibe-mt-n16 vibe-stack-y-6">
+          <h2 className="vibe-404-title">{t('title')}</h2>
+          <p className="vibe-text-muted vibe-text-lg vibe-leading-relaxed">
             {t('description')}
           </p>
-          <div className="pt-8">
+          <div className="vibe-pt-8">
             <Link
               href={`/${locale}`}
-              className="vibe-button vibe-button-primary text-lg px-10 py-4"
+              className="vibe-button-primary vibe-text-lg vibe-px-10 vibe-py-4"
             >
-              <Home className="mr-3 h-6 w-6" />
+              <Home className="vibe-mr-3 vibe-icon-md" />
               {t('backHome')}
             </Link>
           </div>

@@ -46,7 +46,7 @@ export function PriceDisplay({
     <span className={className}>
       {formattedPrice}
       {showFallbackIndicator && isFallback && (
-        <span className="text-xs text-muted-foreground ml-1">
+        <span className="vibe-text-xs vibe-text-muted vibe-ml-1">
           ({displayCurrency})
         </span>
       )}

@@ -325,6 +325,60 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
 }
 
 /**
+ * Get enriched order details including associated product media and translations.
+ * Centralizes the logic previously found in the Order Detail page.
+ */
+export async function getOrderDetailsWithData(
+  idOrNumber: string,
+  userId: string,
+  locale: string
+) {
+  // Try finding by internal ID first, then by public orderNumber
+  let order;
+  try {
+    order = await getOrderById(idOrNumber, userId);
+  } catch {
+    order = await getOrderByNumber(idOrNumber, userId);
+  }
+
+  const productIds = order.items
+    .map(item => item.productId)
+    .filter((id): id is string => !!id);
+
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    select: {
+      id: true,
+      slug: true,
+      translations: {
+        where: { language: locale.toUpperCase() as Language },
+        select: {
+          name: true,
+        },
+      },
+      media: {
+        where: { isPrimary: true },
+        take: 1,
+      },
+    },
+  });
+
+  const productData = products.reduce(
+    (acc, product) => {
+      acc[product.id] = {
+        image: product.media[0]?.url,
+        slug: product.slug,
+        name: product.translations[0]?.name,
+      };
+      return acc;
+    },
+    {} as Record<string, { image?: string; slug: string; name?: string }>
+  );
+
+  return { order, productData };
+}
+
+/**
  * Get all orders for a specific user
  */
 export async function getUserOrders(userId: string) {

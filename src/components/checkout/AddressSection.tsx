@@ -68,13 +68,11 @@ export function AddressSection({
   }, [instanceCountryCode, g]);
 
   return (
-    <section className="bg-card p-6 rounded-xl shadow-sm border border-border">
-      <h2 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2 border-b border-border pb-4">
-        {t('shippingAddress')}
-      </h2>
-      <div className="space-y-4">
+    <section className="vibe-container-sm">
+      <h2 className="vibe-section-title">{t('shippingAddress')}</h2>
+      <div className="vibe-stack-y-4">
         {/* Name & Phone */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="vibe-grid-form">
           <FormInput
             label={t('fullName')}
             required
@@ -83,18 +81,16 @@ export function AddressSection({
           />
 
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t('phone')} <span className="text-error ml-1">*</span>
+            <label className="vibe-form-label">
+              {t('phone')} <span className="vibe-form-required">*</span>
             </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm">
-                +1
-              </span>
+            <div className="vibe-flex-row">
+              <span className="vibe-input-prefix">+1</span>
               <FormInput
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                className="rounded-l-none"
+                className="vibe-rounded-l-none"
               />
             </div>
           </div>
@@ -102,8 +98,8 @@ export function AddressSection({
 
         {/* Address Line 1 (Autocomplete restricted to instance Country) */}
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
-            {t('addressLine1')} <span className="text-error ml-1">*</span>
+          <label className="vibe-form-label">
+            {t('addressLine1')} <span className="vibe-form-required">*</span>
           </label>
           <AddressAutocomplete
             onAddressSelect={selected => {
@@ -125,7 +121,7 @@ export function AddressSection({
             }}
             value={tempAddress?.line1 || ''}
             placeholder={t('addressPlaceholder')}
-            className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+            className="vibe-input-raw"
             // Restrict Google Autocomplete to the instance country code (lower case for API)
             countryRestriction={instanceCountryCode.toLowerCase()}
           />
@@ -141,15 +137,15 @@ export function AddressSection({
         />
 
         {/* Country (Read-Only) & City */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-1">
+        <div className="vibe-grid-form">
+          <div className="vibe-md-col-1">
             {/* Display Country as Read-Only Input since it's fixed per instance */}
             <FormInput
               label={t('country')}
               value={instanceCountryCode} // Display code since localized name map not found in dict
               disabled
               readOnly
-              className="bg-muted text-muted-foreground opacity-100 cursor-not-allowed" // Style to look fixed but readable
+              className="vibe-input-readonly" // Style to look fixed but readable
             />
           </div>
 
@@ -164,7 +160,7 @@ export function AddressSection({
         </div>
 
         {/* State & Zip Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="vibe-grid-form">
           {provinceOptions.length > 0 ? (
             <FormSelect
               label={t('state')}
@@ -207,20 +203,20 @@ export function AddressSection({
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="vibe-mt-8">
         <button
           onClick={onCalculateShipping}
           disabled={!isAddressReady || isLoading || !phone}
-          className={`vibe-button-primary w-full h-12
+          className={`vibe-button-primary vibe-btn-full-lg vibe-h-12
             ${
               isAddressReady && !isLoading && phone
                 ? ''
-                : 'opacity-50 cursor-not-allowed shadow-none'
+                : 'vibe-opacity-50 vibe-cursor-not-allowed vibe-shadow-none'
             }`}
         >
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" />
+            <div className="vibe-loader-container">
+              <Loader2 className="vibe-loader-icon" />
               {t('calculating')}
             </div>
           ) : (

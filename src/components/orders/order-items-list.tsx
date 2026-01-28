@@ -39,13 +39,13 @@ export function OrderItemsList({
   };
 
   return (
-    <div className="vibe-container bg-background p-0 overflow-hidden">
-      <div className="px-8 py-6 border-b border-border bg-muted/10">
-        <h2 className="text-xl font-bold text-foreground">
+    <div className="vibe-container vibe-bg-background vibe-p-0 vibe-overflow-hidden">
+      <div className="vibe-px-8 vibe-py-6 vibe-section-divider-bottom vibe-bg-muted-extra-soft">
+        <h2 className="vibe-text-xl-bold vibe-text-foreground">
           {labels.itemsTitle} ({items.length})
         </h2>
       </div>
-      <ul className="divide-y divide-border">
+      <ul className="vibe-divide-y">
         {items.map((item: any) => {
           const snapshot = item.productSnapshot as any;
           const currentProduct = item.productId
@@ -58,44 +58,44 @@ export function OrderItemsList({
           return (
             <li
               key={item.id}
-              className="p-8 flex flex-col sm:flex-row items-center gap-8 hover:bg-muted/5 transition-colors"
+              className="vibe-p-8 vibe-flex-col-sm-row-center vibe-gap-8 vibe-bg-muted-extra-soft-hover vibe-transition-colors"
             >
-              <div className="w-24 h-24 bg-muted rounded-2xl overflow-hidden flex-shrink-0 border border-border shadow-sm">
+              <div className="vibe-w-24 vibe-h-24 vibe-bg-muted vibe-rounded-2xl vibe-overflow-hidden vibe-flex-shrink-0 vibe-border-border vibe-shadow-xs">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={itemName}
-                    className="w-full h-full object-cover"
+                    className="vibe-full vibe-object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/30 text-3xl">
+                  <div className="vibe-full vibe-flex-center vibe-text-muted-soft vibe-text-3xl">
                     📦
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0 text-center sm:text-left">
+              <div className="vibe-flex-1 vibe-min-w-0 vibe-text-center sm:vibe-text-left">
                 {slug ? (
                   <Link
                     href={`/${locale}/product/${slug}`}
-                    className="text-xl font-extrabold text-foreground hover:text-primary hover:underline underline-offset-4 decoration-2 transition-colors"
+                    className="vibe-text-xl vibe-text-bold-foreground vibe-hover-primary vibe-hover-underline vibe-underline-offset-4 vibe-decoration-2 vibe-transition-colors"
                   >
                     {itemName}
                   </Link>
                 ) : (
-                  <p className="text-xl font-extrabold text-foreground">
+                  <p className="vibe-text-xl vibe-text-bold-foreground">
                     {itemName}
                   </p>
                 )}
-                <p className="text-base text-muted-foreground mt-2 font-medium">
+                <p className="vibe-text-base vibe-text-muted vibe-mt-2 vibe-text-medium">
                   {labels.quantity} :{' '}
-                  <span className="text-foreground font-bold">
+                  <span className="vibe-text-bold-foreground">
                     {item.quantity}
                   </span>{' '}
                   × {formatPrice(item.unitPrice, currency as any, locale)}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-2xl font-black text-foreground">
+              <div className="vibe-text-right">
+                <p className="vibe-text-xl-bold text-2xl">
                   {formatPrice(item.totalPrice, currency as any, locale)}
                 </p>
               </div>

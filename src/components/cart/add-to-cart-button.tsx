@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2, ShoppingCart } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 
 interface AddToCartButtonProps {
   variantId: string;
@@ -56,12 +57,15 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={disabled || isLoading}
-      className={`vibe-button-primary ${fullWidth ? 'w-full h-12' : 'h-10 px-6'}`}
+      className={cn(
+        'vibe-button-primary',
+        fullWidth ? 'vibe-btn-full-lg' : 'vibe-btn-sm-h10'
+      )}
     >
       {isLoading ? (
-        <Loader2 className="h-5 w-5 animate-spin" />
+        <Loader2 className="vibe-icon-sm vibe-icon-spin" />
       ) : (
-        <ShoppingCart className="h-5 w-5" />
+        <ShoppingCart className="vibe-icon-sm" />
       )}
       <span>{isLoading ? tProducts('adding') : label}</span>
     </button>

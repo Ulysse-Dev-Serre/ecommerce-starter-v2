@@ -67,10 +67,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="cart-empty-state">
-        <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-        <p className="cart-empty-state-title">{t('emptyCart')}</p>
-        <Link href={`/${locale}/shop`} className="cart-empty-state-button">
+      <div className="vibe-empty-state">
+        <ShoppingCart className="vibe-empty-state-icon" />
+        <p className="vibe-empty-state-title">{t('emptyCart')}</p>
+        <Link href={`/${locale}/shop`} className="vibe-empty-state-button">
           {t('continueShopping')}
         </Link>
       </div>
@@ -84,8 +84,8 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
   return (
     <div className="vibe-grid-layout">
-      <div className="lg:col-span-8 space-y-6">
-        <div className="flex flex-col gap-4">
+      <div className="vibe-grid-main">
+        <div className="vibe-list-stack">
           {cart.items.map(item => (
             <CartItem
               key={item.id}
@@ -98,7 +98,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
         </div>
       </div>
 
-      <div className="lg:col-span-4 h-full">
+      <div className="vibe-grid-side">
         <CartSummary
           items={summaryItems}
           locale={locale}

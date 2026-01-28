@@ -34,11 +34,11 @@ export default async function ContactPage({ params }: Props) {
 
   return (
     <div className="vibe-section-py">
-      <div className="vibe-layout-container max-w-4xl">
-        <h1 className="vibe-page-header text-center">{t('title')}</h1>
+      <div className="vibe-layout-container vibe-container-max-4xl">
+        <h1 className="vibe-page-header-center">{t('title')}</h1>
 
-        <div className="vibe-container p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="vibe-container vibe-p-8">
+          <div className="vibe-grid-2-cols">
             <ContactInfo locale={locale} />
 
             <div className="vibe-form-card">

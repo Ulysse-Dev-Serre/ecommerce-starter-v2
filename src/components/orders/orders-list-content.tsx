@@ -1,3 +1,8 @@
+import {
+  VIBE_HOVER_GROUP,
+  VIBE_ANIMATION_SLIDE_IN_BOTTOM,
+  VIBE_ANIMATION_FADE_IN,
+} from '@/lib/vibe-styles';
 import Link from 'next/link';
 import { ArrowRight, PackageOpen } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -36,39 +41,36 @@ export async function OrdersListContent({
   };
 
   return (
-    <div className="flex-1 vibe-section-py animate-in fade-in duration-700">
-      <div className="vibe-layout-container max-w-4xl">
-        <h1 className="vibe-page-header mb-12">{t('title')}</h1>
+    <div className={`flex-1 vibe-section-py ${VIBE_ANIMATION_FADE_IN}`}>
+      <div className="vibe-layout-6xl max-w-4xl">
+        <h1 className="vibe-page-header vibe-mb-12">{t('title')}</h1>
 
         {orders.length === 0 ? (
           <div className="vibe-info-box">
-            <PackageOpen className="w-16 h-16 text-muted-foreground/30 mb-6" />
-            <p className="text-xl text-muted-foreground mb-8">
+            <PackageOpen className="vibe-w-16 vibe-h-16 vibe-text-muted-soft vibe-mb-6" />
+            <p className="vibe-text-price-xl vibe-text-muted vibe-mb-8">
               {t('noOrders')}
             </p>
-            <Link
-              href={`/${locale}/shop`}
-              className="vibe-button vibe-button-primary"
-            >
+            <Link href={`/${locale}/shop`} className="vibe-button-primary">
               {t('shopNow')}
             </Link>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="vibe-stack-y-6">
             {orders.map((order, idx) => (
               <div
                 key={order.id}
-                className="vibe-card group animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className={`vibe-card ${VIBE_HOVER_GROUP} ${VIBE_ANIMATION_SLIDE_IN_BOTTOM}`}
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
-                <div className="flex flex-wrap justify-between items-start gap-6">
-                  <div className="space-y-2">
-                    <p className="font-extrabold text-2xl text-foreground">
+                <div className="vibe-flex-wrap-justify-between-items-start vibe-gap-6">
+                  <div className="vibe-stack-y-2">
+                    <p className="vibe-text-xl-bold text-2xl">
                       {tDetail('orderNumber')} #{order.orderNumber}
                     </p>
-                    <div className="flex items-center gap-3 text-sm font-bold text-muted-foreground uppercase tracking-widest">
+                    <div className="vibe-flex-items-center-gap-3 vibe-text-xs-bold-muted-caps">
                       <span>{formatDate(order.createdAt, locale)}</span>
-                      <span className="w-1.5 h-1.5 rounded-full bg-border" />
+                      <span className="vibe-badge-dot-muted" />
                       <span>
                         {order.items.length}{' '}
                         {order.items.length > 1
@@ -77,13 +79,13 @@ export async function OrdersListContent({
                       </span>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="vibe-text-right">
                     <StatusBadge
                       status={order.status}
                       label={statusLabels[order.status]}
-                      className="px-4 py-1.5 font-black uppercase tracking-wider"
+                      className="vibe-px-4 vibe-py-1-5 vibe-text-black-caps"
                     />
-                    <p className="mt-3 text-3xl font-black text-foreground">
+                    <p className="vibe-mt-3 vibe-text-bold text-3xl">
                       {formatPrice(
                         order.totalAmount,
                         order.currency as any,
@@ -92,13 +94,13 @@ export async function OrdersListContent({
                     </p>
                   </div>
                 </div>
-                <div className="mt-8 pt-6 border-t border-border flex justify-end">
+                <div className="vibe-mt-8 vibe-pt-6 vibe-section-divider-top vibe-flex-justify-end">
                   <Link
                     href={`/${locale}/orders/${order.id}`}
-                    className="inline-flex items-center gap-2 text-base font-bold text-foreground hover:text-primary transition-all group/link"
+                    className="vibe-flex-items-center-gap-2 vibe-text-medium vibe-text-foreground vibe-hover-primary vibe-transition-all group/link"
                   >
                     {t('viewDetails')}
-                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="vibe-icon-md group-hover:vibe-translate-x-1 vibe-transition" />
                   </Link>
                 </div>
               </div>

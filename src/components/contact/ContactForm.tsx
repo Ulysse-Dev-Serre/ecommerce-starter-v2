@@ -13,12 +13,9 @@ export function ContactForm() {
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
-      <div className="space-y-2">
-        <label
-          htmlFor="name"
-          className="text-sm font-bold text-muted-foreground uppercase tracking-wider"
-        >
+    <form className="vibe-stack-y-6" onSubmit={handleSubmit}>
+      <div className="vibe-stack-y-2">
+        <label htmlFor="name" className="vibe-text-xs-bold-muted-caps">
           {t('formName')}
         </label>
         <input
@@ -30,11 +27,8 @@ export function ContactForm() {
         />
       </div>
 
-      <div className="space-y-2">
-        <label
-          htmlFor="email"
-          className="text-sm font-bold text-muted-foreground uppercase tracking-wider"
-        >
+      <div className="vibe-stack-y-2">
+        <label htmlFor="email" className="vibe-text-xs-bold-muted-caps">
           {t('formEmail')}
         </label>
         <input
@@ -46,17 +40,14 @@ export function ContactForm() {
         />
       </div>
 
-      <div className="space-y-2">
-        <label
-          htmlFor="message"
-          className="text-sm font-bold text-muted-foreground uppercase tracking-wider"
-        >
+      <div className="vibe-stack-y-2">
+        <label htmlFor="message" className="vibe-text-xs-bold-muted-caps">
           {t('formMessage')}
         </label>
         <textarea
           id="message"
           rows={5}
-          className="vibe-input h-auto py-3 resize-none"
+          className="vibe-input h-auto vibe-pt-2 resize-none"
           placeholder={t('formMessagePlaceholder')}
           disabled={isSubmitting}
         />
@@ -64,11 +55,11 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="vibe-button-primary w-full h-12"
+        className="vibe-button-primary vibe-relative-full vibe-btn-sm-h10"
         disabled={true}
       >
         {isSubmitting ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <Loader2 className="vibe-icon-sm vibe-icon-spin" />
         ) : (
           t('formSubmit')
         )}

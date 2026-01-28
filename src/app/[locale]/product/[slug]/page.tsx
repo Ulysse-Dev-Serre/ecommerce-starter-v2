@@ -1,3 +1,4 @@
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -141,29 +142,27 @@ export default async function ProductPage({
   };
 
   return (
-    <div className="flex-1 vibe-section-py animate-in fade-in duration-700">
+    <div className="vibe-flex-1 vibe-section-py vibe-animate-fade-in">
       <JsonLd data={productJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
       <div className="vibe-layout-container">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="vibe-grid-2-cols-wide">
           <ImageGallery
             images={images}
             productName={translation?.name || product.slug}
             locale={locale}
           />
 
-          <div className="space-y-8">
+          <div className="vibe-stack-y-8">
             <div>
-              <h1 className="vibe-page-header text-left">
+              <h1 className="vibe-page-header vibe-text-left">
                 {translation?.name || product.slug}
               </h1>
             </div>
 
             {translation?.shortDescription && (
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                {translation.shortDescription}
-              </p>
+              <p className="vibe-description">{translation.shortDescription}</p>
             )}
 
             <ProductClient
@@ -176,12 +175,12 @@ export default async function ProductPage({
             />
 
             {translation?.description && (
-              <div className="pt-8 border-t border-border">
-                <h3 className="text-lg font-bold mb-4">
-                  {tShop('description') || 'Description'}
+              <div className="vibe-pt-8 vibe-section-divider-top">
+                <h3 className="vibe-section-title vibe-text-left vibe-border-none vibe-pb-0">
+                  {tShop('description')}
                 </h3>
-                <div className="prose prose-stone dark:prose-invert max-w-none text-muted-foreground">
-                  <p className="whitespace-pre-line leading-relaxed">
+                <div className={`${VIBE_TYPOGRAPHY_PROSE} vibe-text-muted`}>
+                  <p className="vibe-whitespace-pre-line vibe-leading-relaxed">
                     {translation.description}
                   </p>
                 </div>
@@ -190,7 +189,7 @@ export default async function ProductPage({
           </div>
         </div>
 
-        <div className="mt-20">
+        <div className="vibe-mt-20">
           <RelatedProducts currentProductId={product.id} locale={locale} />
         </div>
       </div>

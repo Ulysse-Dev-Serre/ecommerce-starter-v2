@@ -1,3 +1,4 @@
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
 import React from 'react';
 
 interface LegalPageTemplateProps {
@@ -12,19 +13,17 @@ export function LegalPageTemplate({
   content,
 }: LegalPageTemplateProps) {
   return (
-    <div className="space-y-8 py-8">
-      <div className="border-b border-border pb-8">
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">
-          {title}
-        </h1>
-        <p className="text-muted-foreground mt-4 flex items-center gap-2 font-bold uppercase text-xs tracking-widest">
-          <span className="w-2 h-2 rounded-full bg-primary" />
+    <div className="vibe-stack-y-8 vibe-section-py">
+      <div className="vibe-section-divider-bottom vibe-pb-8">
+        <h1 className="vibe-h1-mega">{title}</h1>
+        <p className="vibe-text-muted vibe-mt-4 vibe-flex-items-center-gap-2 vibe-text-xs-bold-muted-caps">
+          <span className="vibe-badge-dot-primary" />
           {lastUpdated}
         </p>
       </div>
 
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <p className="whitespace-pre-line text-lg leading-relaxed text-foreground/80 font-medium">
+      <div className={VIBE_TYPOGRAPHY_PROSE}>
+        <p className="vibe-whitespace-pre-line vibe-text-p-lg vibe-text-foreground vibe-text-medium">
           {content}
         </p>
       </div>

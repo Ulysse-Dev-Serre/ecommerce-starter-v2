@@ -1,24 +1,11 @@
-import Link from 'next/link';
-import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { ArrowRight, PackageOpen } from 'lucide-react';
-
 import { auth } from '@clerk/nextjs/server';
-
+import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import { prisma } from '@/lib/db/prisma';
 import { getUserOrders } from '@/lib/services/order.service';
 import { getTranslations } from 'next-intl/server';
-import { formatDate } from '@/lib/utils/date';
-import { formatPrice } from '@/lib/utils/currency';
-import { StatusBadge } from '@/components/ui/status-badge';
 import { SUPPORTED_LOCALES } from '@/lib/constants';
-import { Order, OrderItem, Payment } from '@/generated/prisma';
 import { OrdersListContent } from '@/components/orders/orders-list-content';
-
-type UserOrder = Order & {
-  items: OrderItem[];
-  payments: Pick<Payment, 'status' | 'method'>[];
-};
 
 export const dynamic = 'force-dynamic';
 

@@ -10,9 +10,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+          <label className="vibe-form-label-bold">
             {label}
-            {props.required && <span className="text-error ml-1">*</span>}
+            {props.required && (
+              <span className="vibe-form-required ml-1">*</span>
+            )}
           </label>
         )}
         <input
@@ -24,9 +26,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           `}
           {...props}
         />
-        {error && (
-          <p className="mt-1.5 text-xs text-error font-bold">{error}</p>
-        )}
+        {error && <p className="vibe-form-error-bold">{error}</p>}
       </div>
     );
   }

@@ -1,3 +1,4 @@
+import { VIBE_ANIMATION_SLIDE_IN_BOTTOM } from '@/lib/vibe-styles';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
@@ -58,56 +59,39 @@ export default async function Home({
   );
 
   return (
-    <div className="flex-1">
-      <section className="bg-gradient-to-r from-muted/50 to-background border-b border-border vibe-section-py">
+    <div className="vibe-flex-1">
+      <section className="vibe-hero-section">
         <div className="vibe-layout-container text-center">
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground">
-            {t('heroTitle')}
-          </h1>
-          <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
-            {t('heroSubtitle') || ''}
-          </p>
-          <div className="mt-10 flex justify-center gap-4">
-            <Link
-              href={`/${locale}/shop`}
-              className="vibe-button vibe-button-primary text-lg px-8 py-4"
-            >
-              {tShop('title')}
-            </Link>
-          </div>
+          <h1 className="vibe-hero-title">{t('heroTitle')}</h1>
+          <p className="vibe-hero-subtitle">{t('heroSubtitle')}</p>
         </div>
       </section>
 
       <section className="vibe-section-py">
         <div className="vibe-layout-container">
-          <div className="flex justify-between items-end mb-12">
+          <div className="vibe-flex-between-items-end vibe-mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-foreground">
-                {t('featuredProducts')}
-              </h2>
-              <div className="h-1.5 w-20 bg-primary mt-3 rounded-full" />
+              <h2 className="vibe-h2">{t('featuredProducts')}</h2>
+              <div className="vibe-divider" />
             </div>
-            <Link
-              href={`/${locale}/shop`}
-              className="text-primary font-bold hover:underline underline-offset-4 inline-flex items-center"
-            >
-              {t('viewAll') || 'View all'}{' '}
-              <ArrowRight className="inline-block w-4 h-4 ml-1" />
+            <Link href={`/${locale}/shop`} className="vibe-link-action">
+              {t('viewAll')}{' '}
+              <ArrowRight className="vibe-inline-block vibe-icon-sm vibe-ml-1" />
             </Link>
           </div>
 
           {featuredProducts.length === 0 ? (
             <div className="vibe-info-box">
-              <p className="text-xl text-muted-foreground">
+              <p className="vibe-text-price-xl vibe-text-muted">
                 {t('noFeaturedProducts')}
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="vibe-grid-4-cols">
               {featuredProducts.map((product, idx) => (
                 <div
                   key={product.id}
-                  className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                  className={VIBE_ANIMATION_SLIDE_IN_BOTTOM}
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <ProductCard product={product} locale={locale} />

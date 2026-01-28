@@ -53,7 +53,7 @@ export default async function CheckoutPage({
   // Le client devra initialiser Stripe Elements
 
   return (
-    <div className="flex-1">
+    <div className="vibe-flex-grow">
       <CheckoutClient
         cartId={currentCartId}
         locale={locale}

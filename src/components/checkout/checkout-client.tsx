@@ -84,11 +84,11 @@ export function CheckoutClient({
 
   if (error)
     return (
-      <div className="p-4 text-red-500">
+      <div className="vibe-p-4 vibe-text-error">
         {t('error')}: {error}
       </div>
     );
-  if (!clientSecret) return <div className="p-4">{t('loading')}</div>;
+  if (!clientSecret) return <div className="vibe-p-4">{t('loading')}</div>;
 
   return (
     <Elements
@@ -344,9 +344,9 @@ export function CheckoutForm({
     <div className="vibe-layout-container vibe-section-py">
       <h1 className="vibe-page-header">{t('title')}</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="vibe-grid-layout">
         {/* Left Column: Address & Shipping */}
-        <div className="lg:col-span-12 xl:col-span-8 space-y-8">
+        <div className="vibe-grid-main-xl">
           <AddressSection
             tempAddress={tempAddress}
             setTempAddress={setTempAddress}
@@ -371,8 +371,8 @@ export function CheckoutForm({
         </div>
 
         {/* Right Column: Summary & Payment */}
-        <div className="lg:col-span-12 xl:col-span-4 h-full">
-          <div className="sticky top-8 space-y-6">
+        <div className="vibe-grid-side-xl">
+          <div className="vibe-checkout-sidebar">
             <OrderSummary
               summaryItems={summaryItems}
               initialTotal={initialTotal}
@@ -382,7 +382,7 @@ export function CheckoutForm({
               selectedRate={selectedRate}
             />
 
-            <div className="bg-card p-6 rounded-xl shadow-lg border border-border">
+            <div className="vibe-container-sm vibe-shadow-lg">
               <PaymentSection
                 stripe={stripe}
                 elements={elements}

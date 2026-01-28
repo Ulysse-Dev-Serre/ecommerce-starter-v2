@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertCircle, CheckCircle, Info, TriangleAlert } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 
 type AlertVariant = 'info' | 'success' | 'warning' | 'error';
 
@@ -12,20 +13,20 @@ interface AlertProps {
 
 const variants = {
   info: {
-    container: 'bg-info/5 border-info/20 text-info',
-    icon: <Info className="h-5 w-5" />,
+    container: 'vibe-status-banner-info-soft',
+    icon: <Info className="vibe-icon-sm" />,
   },
   success: {
-    container: 'bg-success/5 border-success/20 text-success',
-    icon: <CheckCircle className="h-5 w-5" />,
+    container: 'vibe-status-banner-success-soft vibe-text-success',
+    icon: <CheckCircle className="vibe-icon-sm" />,
   },
   warning: {
-    container: 'bg-warning/5 border-warning/20 text-warning',
-    icon: <TriangleAlert className="h-5 w-5" />,
+    container: 'vibe-status-banner-warning-soft',
+    icon: <TriangleAlert className="vibe-icon-sm" />,
   },
   error: {
-    container: 'bg-error/5 border-error/20 text-error',
-    icon: <AlertCircle className="h-5 w-5" />,
+    container: 'vibe-status-banner-error-soft vibe-text-error',
+    icon: <AlertCircle className="vibe-icon-sm" />,
   },
 };
 
@@ -39,13 +40,20 @@ export function Alert({
 
   return (
     <div
-      className={`flex gap-3 p-4 border ${container} ${className}`}
-      style={{ borderRadius: 'var(--radius-lg)' }}
+      className={cn(
+        'vibe-flex-gap-3 vibe-p-4 vibe-border vibe-card-rounded',
+        container,
+        className
+      )}
     >
-      <div className="mt-0.5 shrink-0">{icon}</div>
-      <div className="flex-1">
-        {title && <h4 className="font-bold mb-1 leading-tight">{title}</h4>}
-        <div className="text-sm opacity-90 leading-relaxed font-medium">
+      <div className="vibe-mt-0-5 vibe-flex-shrink-0">{icon}</div>
+      <div className="vibe-flex-1">
+        {title && (
+          <h4 className="vibe-text-bold vibe-mb-1 vibe-leading-tight">
+            {title}
+          </h4>
+        )}
+        <div className="vibe-text-sm vibe-opacity-90 vibe-leading-relaxed vibe-text-medium">
           {children}
         </div>
       </div>

@@ -147,7 +147,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   };
 
   return (
-    <div className="relative w-full">
+    <div className="vibe-relative-full">
       <input
         type="text"
         value={value}
@@ -161,16 +161,16 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         autoComplete="off"
       />
       {suggestions.length > 0 && showSuggestions && (
-        <ul className="absolute z-[9999] w-full mt-1 bg-background border border-border rounded-lg shadow-xl max-h-60 overflow-auto">
+        <ul className="vibe-dropdown-panel">
           {suggestions.map((s, idx) => {
             const prediction = s.placePrediction;
             return (
               <li
                 key={prediction.placeId || idx}
                 onClick={() => handleSelect(s)}
-                className="px-4 py-3 hover:bg-muted cursor-pointer border-b last:border-b-0 border-border transition-colors"
+                className="vibe-dropdown-item"
               >
-                <div className="font-medium text-foreground">
+                <div className="vibe-text-medium-foreground">
                   {prediction.text.text}
                 </div>
               </li>

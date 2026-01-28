@@ -1,3 +1,9 @@
+import {
+  VIBE_ANIMATION_FADE_IN,
+  VIBE_ANIMATION_ZOOM_IN,
+  VIBE_ANIMATION_SLIDE_IN_RIGHT,
+  VIBE_ANIMATION_SLIDE_IN_BOTTOM,
+} from '@/lib/vibe-styles';
 import { useTranslations } from 'next-intl';
 import { PriceTotal } from '@/components/price-display';
 import Link from 'next/link';
@@ -21,19 +27,15 @@ export function CartSummary({ items, locale, isSignedIn }: CartSummaryProps) {
   const tCheckout = useTranslations('Checkout');
 
   return (
-    <div className="vibe-card sticky top-4 animate-in fade-in duration-500">
-      <h2 className="text-xl font-bold mb-4 border-b border-border pb-4">
-        {t('total')}
-      </h2>
+    <div className={`vibe-card vibe-sticky-side-4 ${VIBE_ANIMATION_FADE_IN}`}>
+      <h2 className="vibe-section-title">{t('total')}</h2>
 
-      <div className="space-y-6 pt-2">
-        <div className="flex justify-between items-center mb-6">
-          <span className="text-lg font-medium text-muted-foreground">
-            {t('total')}
-          </span>
+      <div className="vibe-sidebar-stack vibe-pt-2">
+        <div className="vibe-flex-between-center vibe-mb-6">
+          <span className="vibe-form-label-meta">{t('total')}</span>
           <PriceTotal
             items={items}
-            className="text-2xl font-bold text-foreground"
+            className="vibe-text-price-xl"
             locale={locale}
           />
         </div>
@@ -41,20 +43,20 @@ export function CartSummary({ items, locale, isSignedIn }: CartSummaryProps) {
         {isSignedIn ? (
           <Link
             href={`/${locale}/checkout`}
-            className="vibe-button-primary w-full h-12"
+            className="vibe-button-primary vibe-btn-full-lg"
           >
             {t('checkout')}
           </Link>
         ) : (
           <SignInButton mode="modal">
-            <button className="vibe-button-primary w-full h-12">
+            <button className="vibe-button-primary vibe-btn-full-lg">
               {t('signInToCheckout')}
             </button>
           </SignInButton>
         )}
 
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-4 border-t border-border/50">
-          <ShieldCheck className="h-4 w-4" />
+        <div className="vibe-security-badge">
+          <ShieldCheck className="vibe-icon-xs" />
           <span>{tCheckout('securePayment')}</span>
         </div>
       </div>

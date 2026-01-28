@@ -17,7 +17,7 @@ export function ShopPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="mt-20 flex justify-center gap-3">
+    <div className="vibe-mt-20 vibe-flex-center vibe-gap-3">
       {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
         <Link
           key={p}

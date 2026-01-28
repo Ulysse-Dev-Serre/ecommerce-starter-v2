@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 
 interface ImageGalleryProps {
   images: Array<{
@@ -26,8 +27,8 @@ export function ImageGallery({
 
   if (images.length === 0) {
     return (
-      <div className="aspect-square bg-muted rounded-lg overflow-hidden flex items-center justify-center text-muted-foreground border border-border">
-        <ImageIcon className="w-12 h-12" />
+      <div className="vibe-image-container vibe-flex-center vibe-text-muted">
+        <ImageIcon className="vibe-w-12 vibe-h-12" />
         <span className="sr-only">{tShop('noImage')}</span>
       </div>
     );
@@ -46,13 +47,13 @@ export function ImageGallery({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group border border-border">
+    <div className="vibe-stack-y-4">
+      <div className="vibe-image-container vibe-group">
         <Image
           src={selectedImage.url}
           alt={selectedImage.alt || productName}
           fill
-          className="object-cover"
+          className="vibe-object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
           priority={selectedIndex === 0}
         />
@@ -62,33 +63,32 @@ export function ImageGallery({
             {hasPrevious && (
               <button
                 onClick={goToPrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-md backdrop-blur-sm z-10"
+                className="vibe-image-abs-center vibe-left-4"
                 aria-label={tCommon('previousImage')}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="vibe-icon-md" />
               </button>
             )}
 
             {hasNext && (
               <button
                 onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-md backdrop-blur-sm z-10"
+                className="vibe-image-abs-center vibe-right-4"
                 aria-label={tCommon('nextImage')}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="vibe-icon-md" />
               </button>
             )}
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            <div className="vibe-image-dots-container">
               {images.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all cursor-pointer shadow-sm ${
-                    index === selectedIndex
-                      ? 'bg-primary w-4'
-                      : 'bg-background/80 hover:bg-background'
-                  }`}
+                  className={cn(
+                    'vibe-image-dot',
+                    index === selectedIndex && 'vibe-image-dot-active'
+                  )}
                   aria-label={`${tCommon('goToImage')} ${index + 1}`}
                 />
               ))}
@@ -98,22 +98,23 @@ export function ImageGallery({
       </div>
 
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-2">
+        <div className="vibe-grid-gallery">
           {images.map((image, index) => (
             <button
               key={index}
               onClick={() => setSelectedIndex(index)}
-              className={`relative aspect-square bg-muted rounded-md overflow-hidden border-2 transition-all cursor-pointer ${
+              className={cn(
+                'vibe-image-thumb',
                 index === selectedIndex
-                  ? 'border-primary opacity-100 ring-2 ring-primary/20'
-                  : 'border-transparent hover:border-border opacity-70 hover:opacity-100'
-              }`}
+                  ? 'vibe-image-thumb-active'
+                  : 'vibe-image-thumb-inactive'
+              )}
             >
               <Image
                 src={image.url}
                 alt={image.alt || `${productName} ${index + 1}`}
                 fill
-                className="object-cover"
+                className="vibe-object-cover"
                 sizes="(max-width: 768px) 25vw, 10vw"
               />
             </button>

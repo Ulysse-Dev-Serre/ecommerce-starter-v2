@@ -15,18 +15,18 @@ export function LoadingState({
   return (
     <div
       className={cn(
-        'flex-1 flex flex-col items-center justify-center py-16 animate-in fade-in duration-500',
+        'vibe-flex-1 vibe-flex-center vibe-flex-col vibe-py-16 vibe-animate-fade-in',
         className
       )}
     >
       <Loader2
         className={cn(
-          'w-12 h-12 text-primary animate-spin mb-4',
+          'vibe-w-12 vibe-h-12 vibe-text-primary vibe-animate-spin vibe-mb-4',
           iconClassName
         )}
       />
       {message && (
-        <p className="text-muted-foreground animate-pulse">{message}</p>
+        <p className="vibe-text-muted vibe-animate-pulse">{message}</p>
       )}
     </div>
   );
