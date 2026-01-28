@@ -145,6 +145,7 @@ export const trackingBox = {
   borderRadius: '8px',
   padding: '24px',
   marginTop: '24px',
+  border: '1px solid #e5e7eb',
 };
 
 export const trackingTitle = {

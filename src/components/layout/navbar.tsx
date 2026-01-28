@@ -1,5 +1,6 @@
-// src/components/layout/navbar.tsx
 'use client';
+
+import { VIBE_HOVER_GROUP } from '@/lib/vibe-styles';
 
 import {
   SignInButton,
@@ -11,7 +12,9 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import React, { useState, type MouseEvent } from 'react';
+import React, { type MouseEvent } from 'react';
+import { ShoppingCart } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 
 import { logger } from '../../lib/logger';
 import { i18n } from '../../lib/i18n/config';
@@ -23,21 +26,13 @@ interface NavbarProps {
 }
 
 export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
-  const tNavbar = useTranslations('navbar'); // Ensure this is defined
+  const tNavbar = useTranslations('navbar');
   const tCommon = useTranslations('common');
-
-  const [messages, setMessages] = useState<any | null>(null); // Legacy logic removal in progress?
-  // Wait, I should have removed `messages` logic entirely.
-  // Previous view of Navbar (Step 840) showed explicit logic.
-  // I will just add the hooks for now to fix the error.
   const pathname = usePathname();
   const { isSignedIn } = useUser();
 
-  // Fonction pour changer de langue avec logging
   const handleLanguageChange = (newLocale: string, event: MouseEvent): void => {
     event.preventDefault();
-
-    // Logger le changement de langue
     logger.info(
       {
         action: 'language_change',
@@ -48,12 +43,9 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
       },
       'User changed language'
     );
-
-    // Redirection
     window.location.href = pathname.replace(`/${locale}`, `/${newLocale}`);
   };
 
-  // Fonction pour logger les clics de navigation
   const handleNavigationClick = (destination: string): void => {
     logger.info(
       {
@@ -68,26 +60,26 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   };
 
   return (
-    <header className="bg-background border-b border-border theme-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand */}
-          <div className="flex items-center">
+    <header className="vibe-nav-header">
+      <div className="vibe-layout-container">
+        <div className="vibe-flex-between-items-center vibe-h-20">
+          <div className="vibe-flex-items-center">
             <Link
               href={`/${locale}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
+              className={VIBE_HOVER_GROUP}
             >
-              <h1 className="text-xl font-bold theme-primary cursor-pointer">
-                {siteConfig.name}
-              </h1>
+              <h1 className="vibe-logo-text">{siteConfig.name}</h1>
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="vibe-nav-main">
             <Link
               href={`/${locale}`}
-              className="text-foreground hover:text-primary transition-colors"
+              className={cn(
+                'vibe-nav-link',
+                pathname === `/${locale}` && 'vibe-nav-link-active'
+              )}
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
               {tCommon('home')}
@@ -95,7 +87,10 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             <Link
               href={`/${locale}/shop`}
-              className="text-foreground hover:text-primary transition-colors"
+              className={cn(
+                'vibe-nav-link',
+                pathname.includes('/shop') && 'vibe-nav-link-active'
+              )}
               onClick={() => handleNavigationClick(`/${locale}/shop`)}
             >
               {tNavbar('shop')}
@@ -103,45 +98,49 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
 
             <Link
               href={`/${locale}/contact`}
-              className="text-foreground hover:text-primary transition-colors"
+              className={cn(
+                'vibe-nav-link',
+                pathname.includes('/contact') && 'vibe-nav-link-active'
+              )}
               onClick={() => handleNavigationClick(`/${locale}/contact`)}
             >
               {tCommon('contact')}
             </Link>
 
-            {/* Mes commandes - Visible pour les utilisateurs connectés */}
             {isSignedIn && (
               <Link
                 href={`/${locale}/orders`}
-                className="text-foreground hover:text-primary transition-colors"
+                className={cn(
+                  'vibe-nav-link',
+                  pathname.includes('/orders') && 'vibe-nav-link-active'
+                )}
                 onClick={() => handleNavigationClick(`/${locale}/orders`)}
               >
                 {tNavbar('orders')}
               </Link>
             )}
 
-            {/* Admin Dashboard - Visible uniquement pour les admins */}
             {isSignedIn && userRole === 'ADMIN' && (
               <Link
                 href={`/${locale}/admin`}
-                className="bg-secondary text-secondary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-secondary/80 transition-colors"
+                className="vibe-nav-admin-link"
                 onClick={() => handleNavigationClick(`/${locale}/admin`)}
               >
-                📊 Dashboard
+                📊 {tNavbar('dashboard')}
               </Link>
             )}
 
-            {/* Sélecteur de langue */}
-            <div className="flex items-center space-x-2 border-l pl-4 ml-4">
+            <div className="vibe-nav-lang-divider">
               {i18n.locales.map(loc => (
                 <button
                   key={loc}
                   onClick={e => handleLanguageChange(loc, e)}
-                  className={`px-2 py-1 text-sm rounded transition-colors uppercase ${
+                  className={cn(
+                    'vibe-nav-lang-btn',
                     locale === loc
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-foreground hover:bg-muted'
-                  }`}
+                      ? 'vibe-nav-lang-btn-active'
+                      : 'vibe-nav-lang-btn-inactive'
+                  )}
                 >
                   {loc}
                 </button>
@@ -149,20 +148,20 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             </div>
           </nav>
 
-          {/* Right side - Auth & Cart */}
-          <div className="flex items-center space-x-4">
+          <div className="vibe-nav-spacing">
+            <Link
+              href={`/${locale}/cart`}
+              className="vibe-nav-icon-btn"
+              title={tNavbar('cart')}
+              onClick={() => handleNavigationClick(`/${locale}/cart`)}
+            >
+              <ShoppingCart className="vibe-icon-md" />
+            </Link>
+
             <SignedOut>
-              <Link
-                href={`/${locale}/cart`}
-                className="text-foreground hover:text-muted-foreground p-2"
-                title={tNavbar('cart')}
-                onClick={() => handleNavigationClick(`/${locale}/cart`)}
-              >
-                🛒
-              </Link>
-              <SignInButton>
+              <SignInButton mode="modal">
                 <button
-                  className="bg-primary text-primary-foreground rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer hover:bg-primary-hover transition-colors"
+                  className="vibe-button-auth"
                   onClick={() => {
                     logger.info(
                       {
@@ -175,22 +174,12 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                     );
                   }}
                 >
-                  {tCommon('signIn')} / {tCommon('signUp')}
+                  {tCommon('signIn')}
                 </button>
               </SignInButton>
             </SignedOut>
             <SignedIn>
-              <div className="flex items-center space-x-2">
-                <Link
-                  href={`/${locale}/cart`}
-                  className="text-foreground hover:text-muted-foreground p-2"
-                  title={tNavbar('cart')}
-                  onClick={() => handleNavigationClick(`/${locale}/cart`)}
-                >
-                  🛒
-                </Link>
-                <UserButton />
-              </div>
+              <UserButton />
             </SignedIn>
           </div>
         </div>

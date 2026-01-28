@@ -4,9 +4,10 @@ import { getTranslations } from 'next-intl/server';
 
 import { auth } from '@clerk/nextjs/server';
 
-import { Language } from '@/generated/prisma';
 import { prisma } from '@/lib/db/prisma';
 import { logger } from '@/lib/logger';
+import { getCartPageData } from '@/lib/services/cart.service';
+import { getCurrentUser } from '@/lib/services/user.service';
 
 import { CartClient } from './cart-client';
 
@@ -27,7 +28,6 @@ export default async function CartPage({
   params,
 }: CartPageProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const language = locale.toUpperCase() as Language;
 
   const { userId: clerkId } = await auth();
   const cookieStore = await cookies();
@@ -42,89 +42,26 @@ export default async function CartPage({
     'Loading cart page'
   );
 
-  let userId: string | undefined;
-  if (clerkId) {
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
-      select: { id: true },
-    });
-    userId = user?.id;
-  }
+  const user = await getCurrentUser();
+  const userId = user?.id;
 
-  const cart =
-    userId || anonymousId
-      ? await prisma.cart.findFirst({
-          where: userId
-            ? { userId, status: 'ACTIVE' }
-            : { anonymousId, status: 'ACTIVE' },
-          include: {
-            items: {
-              include: {
-                variant: {
-                  include: {
-                    pricing: {
-                      where: { isActive: true, priceType: 'base' },
-                    },
-                    product: {
-                      include: {
-                        translations: {
-                          where: { language },
-                        },
-                        media: {
-                          where: { isPrimary: true },
-                          take: 1,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
-      : null;
+  const serializedCart = await getCartPageData(userId, anonymousId, locale);
 
   logger.info(
     {
       action: 'cart_query_result',
-      cartId: cart?.id ?? null,
-      cartStatus: cart?.status ?? null,
-      itemsCount: cart?.items?.length ?? 0,
+      cartId: serializedCart?.id ?? null,
+      itemsCount: serializedCart?.items?.length ?? 0,
     },
     'Cart query completed'
   );
 
-  const serializedCart = cart
-    ? {
-        ...cart,
-        items: cart.items.map(item => ({
-          ...item,
-          variant: {
-            ...item.variant,
-            // Serialize variant Decimal & JSON fields
-            weight: item.variant.weight ? Number(item.variant.weight) : null,
-            pricing: item.variant.pricing.map(p => ({
-              ...p,
-              price: p.price.toString(),
-            })),
-            product: {
-              ...item.variant.product,
-              // Serialize product Decimal & JSON fields
-              weight: item.variant.product.weight
-                ? Number(item.variant.product.weight)
-                : null,
-            },
-          },
-        })),
-      }
-    : null;
-
   const t = await getTranslations({ locale, namespace: 'cart' });
 
   return (
-    <div className="flex-1 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
+    <div className="vibe-section-py vibe-flex-grow">
+      <div className="vibe-layout-container">
+        <h1 className="vibe-page-header">{t('title')}</h1>
         <CartClient cart={serializedCart} locale={locale} />
       </div>
     </div>

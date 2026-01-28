@@ -1,8 +1,18 @@
+'use client';
+
+import { useEffect, useMemo } from 'react';
+import { FormInput } from '@/components/ui/form-input';
+import { FormSelect } from '@/components/ui/form-select';
+import { useTranslations } from 'next-intl';
+
 import AddressAutocomplete from './AddressAutocomplete';
+import { Loader2 } from 'lucide-react';
+import { CheckoutAddress } from '@/lib/types/checkout';
+import { SITE_CURRENCY, COUNTRY_TO_CURRENCY } from '@/lib/constants';
 
 interface AddressSectionProps {
-  tempAddress: any;
-  setTempAddress: (address: any) => void;
+  tempAddress: CheckoutAddress;
+  setTempAddress: (address: CheckoutAddress) => void;
   tempName: string;
   setTempName: (name: string) => void;
   phone: string;
@@ -10,7 +20,6 @@ interface AddressSectionProps {
   isAddressReady: boolean;
   isLoading: boolean;
   onCalculateShipping: () => void;
-  translations: any;
 }
 
 export function AddressSection({
@@ -23,49 +32,74 @@ export function AddressSection({
   isAddressReady,
   isLoading,
   onCalculateShipping,
-  translations: t,
 }: AddressSectionProps) {
+  const t = useTranslations('Checkout');
+  const g = useTranslations('geography');
+  // Determine the target country for this instance based on SITE_CURRENCY
+  // Example: If SITE_CURRENCY is 'USD', we look for keys in COUNTRY_TO_CURRENCY where value is 'USD' -> returns 'US'
+  const instanceCountryCode = useMemo(() => {
+    const entry = Object.entries(COUNTRY_TO_CURRENCY).find(
+      ([_, currency]) => currency === SITE_CURRENCY
+    );
+    return entry ? entry[0] : 'CA'; // Fallback to CA if not found, or handle error
+  }, []);
+
+  // Ensure country is set to the instance default on mount or if missing
+  useEffect(() => {
+    if (tempAddress?.country !== instanceCountryCode) {
+      setTempAddress({
+        ...tempAddress,
+        country: instanceCountryCode,
+        state: '', // Reset state if country changed forcefully
+      });
+    }
+  }, [instanceCountryCode, tempAddress, setTempAddress]);
+
+  // Dynamic State/Province options based on the active instance country
+  const provinceOptions = useMemo(() => {
+    const regions = g.raw(instanceCountryCode) as Record<string, string>;
+
+    if (!regions) return [];
+
+    return Object.entries<string>(regions).map(([code, name]) => ({
+      value: code,
+      label: name,
+    }));
+  }, [instanceCountryCode, g]);
+
   return (
-    <section className="bg-card p-6 rounded-xl shadow-sm border border-border">
-      <h2 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2 border-b border-border pb-4">
-        {t.shippingAddress}
-      </h2>
-      <div className="space-y-4">
+    <section className="vibe-container-sm">
+      <h2 className="vibe-section-title">{t('shippingAddress')}</h2>
+      <div className="vibe-stack-y-4">
         {/* Name & Phone */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="vibe-grid-form">
+          <FormInput
+            label={t('fullName')}
+            required
+            value={tempName}
+            onChange={e => setTempName(e.target.value)}
+          />
+
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.fullName} <span className="text-error ml-1">*</span>
+            <label className="vibe-form-label">
+              {t('phone')} <span className="vibe-form-required">*</span>
             </label>
-            <input
-              type="text"
-              value={tempName}
-              onChange={e => setTempName(e.target.value)}
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.phone} <span className="text-error ml-1">*</span>
-            </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm">
-                +1
-              </span>
-              <input
+            <div className="vibe-flex-row">
+              <span className="vibe-input-prefix">+1</span>
+              <FormInput
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                className="w-full px-4 py-2 bg-background border border-border rounded-r-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                className="vibe-rounded-l-none"
               />
             </div>
           </div>
         </div>
 
-        {/* Address Line 1 */}
+        {/* Address Line 1 (Autocomplete restricted to instance Country) */}
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
-            {t.addressLine1} <span className="text-error ml-1">*</span>
+          <label className="vibe-form-label">
+            {t('addressLine1')} <span className="vibe-form-required">*</span>
           </label>
           <AddressAutocomplete
             onAddressSelect={selected => {
@@ -75,7 +109,8 @@ export function AddressSection({
                 city: selected.city,
                 state: selected.state,
                 postal_code: selected.postal_code,
-                country: selected.country,
+                // Force country to instance default even if autocomplete returns something else (safety)
+                country: instanceCountryCode,
               });
             }}
             onInputChange={val => {
@@ -85,156 +120,107 @@ export function AddressSection({
               });
             }}
             value={tempAddress?.line1 || ''}
-            placeholder={t.addressLine1}
-            className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            countryRestriction={tempAddress?.country === 'US' ? 'us' : 'ca'}
+            placeholder={t('addressPlaceholder')}
+            className="vibe-input-raw"
+            // Restrict Google Autocomplete to the instance country code (lower case for API)
+            countryRestriction={instanceCountryCode.toLowerCase()}
           />
         </div>
 
         {/* Address Line 2 */}
-        <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-1">
-            {t.addressLine2}
-          </label>
-          <input
-            type="text"
-            value={tempAddress?.line2 || ''}
+        <FormInput
+          label={t('addressLine2')}
+          value={tempAddress?.line2 || ''}
+          onChange={e =>
+            setTempAddress({ ...tempAddress, line2: e.target.value })
+          }
+        />
+
+        {/* Country (Read-Only) & City */}
+        <div className="vibe-grid-form">
+          <div className="vibe-md-col-1">
+            {/* Display Country as Read-Only Input since it's fixed per instance */}
+            <FormInput
+              label={t('country')}
+              value={instanceCountryCode} // Display code since localized name map not found in dict
+              disabled
+              readOnly
+              className="vibe-input-readonly" // Style to look fixed but readable
+            />
+          </div>
+
+          <FormInput
+            label={t('city')}
+            required
+            value={tempAddress?.city || ''}
             onChange={e =>
-              setTempAddress({ ...tempAddress, line2: e.target.value })
+              setTempAddress({ ...tempAddress, city: e.target.value })
             }
-            className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
           />
         </div>
 
-        {/* Country & City Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.country} <span className="text-error ml-1">*</span>
-            </label>
-            <select
-              value={tempAddress?.country || 'CA'}
-              onChange={e => {
-                setTempAddress({
-                  ...tempAddress,
-                  country: e.target.value,
-                  state: '',
-                });
-              }}
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            >
-              <option value="CA">Canada (CA)</option>
-              <option value="US">États-Unis (US)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.city} <span className="text-error ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              value={tempAddress?.city || ''}
-              onChange={e =>
-                setTempAddress({ ...tempAddress, city: e.target.value })
-              }
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-            />
-          </div>
-        </div>
-
         {/* State & Zip Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.state} <span className="text-error ml-1">*</span>
-            </label>
-            {tempAddress?.country === 'CA' ? (
-              <select
-                value={tempAddress?.state || ''}
-                onChange={e =>
-                  setTempAddress({
-                    ...tempAddress,
-                    state: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-              >
-                <option value="">{t.selectState}</option>
-                {Object.entries<string>(t.geography.CA).map(([code, name]) => (
-                  <option key={code} value={code}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            ) : tempAddress?.country === 'US' ? (
-              <select
-                value={tempAddress?.state || ''}
-                onChange={e =>
-                  setTempAddress({
-                    ...tempAddress,
-                    state: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-              >
-                <option value="">{t.selectState}</option>
-                {Object.entries<string>(t.geography.US).map(([code, name]) => (
-                  <option key={code} value={code}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={tempAddress?.state || ''}
-                onChange={e =>
-                  setTempAddress({
-                    ...tempAddress,
-                    state: e.target.value,
-                  })
-                }
-                className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-              />
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1">
-              {t.zipCode} <span className="text-error ml-1">*</span>
-            </label>
-            <input
-              type="text"
-              value={tempAddress?.postal_code || ''}
+        <div className="vibe-grid-form">
+          {provinceOptions.length > 0 ? (
+            <FormSelect
+              label={t('state')}
+              required
+              value={tempAddress?.state || ''}
               onChange={e =>
                 setTempAddress({
                   ...tempAddress,
-                  postal_code: e.target.value,
+                  state: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+              options={provinceOptions}
+              placeholder={t('selectState')}
             />
-          </div>
+          ) : (
+            <FormInput
+              label={t('state')}
+              required
+              value={tempAddress?.state || ''}
+              onChange={e =>
+                setTempAddress({
+                  ...tempAddress,
+                  state: e.target.value,
+                })
+              }
+            />
+          )}
+
+          <FormInput
+            label={t('zipCode')}
+            required
+            value={tempAddress?.postal_code || ''}
+            onChange={e =>
+              setTempAddress({
+                ...tempAddress,
+                postal_code: e.target.value,
+              })
+            }
+          />
         </div>
       </div>
 
-      <div className="mt-8">
+      <div className="vibe-mt-8">
         <button
           onClick={onCalculateShipping}
           disabled={!isAddressReady || isLoading || !phone}
-          className={`w-full py-4 px-6 rounded-xl font-bold text-white shadow-lg transition-all transform active:scale-[0.98]
+          className={`vibe-button-primary vibe-btn-full-lg vibe-h-12
             ${
               isAddressReady && !isLoading && phone
-                ? 'bg-primary hover:bg-primary-hover hover:shadow-primary/20'
-                : 'bg-muted text-muted-foreground cursor-not-allowed border border-border shadow-none'
+                ? ''
+                : 'vibe-opacity-50 vibe-cursor-not-allowed vibe-shadow-none'
             }`}
         >
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2">
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              {t.calculating}
+            <div className="vibe-loader-container">
+              <Loader2 className="vibe-loader-icon" />
+              {t('calculating')}
             </div>
           ) : (
-            t.confirmAddress
+            t('confirmAddress')
           )}
         </button>
       </div>

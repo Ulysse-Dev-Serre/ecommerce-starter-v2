@@ -1,13 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-
-import { ShoppingCart, Zap } from 'lucide-react';
+import { ShoppingCart, Zap, Plus, Minus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-
 import { useToast } from '../ui/toast-provider';
-
 import { trackEvent } from '@/lib/analytics/tracker';
 
 interface ProductActionsProps {
@@ -36,8 +33,6 @@ export function ProductActions({
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
-
-  /* translations object removed */
 
   const t = useTranslations('products');
   const tCommon = useTranslations('common');
@@ -80,7 +75,6 @@ export function ProductActions({
         { variantId, quantity, productName, type: 'direct' },
         productName
       );
-      // Redirection vers le checkout avec les paramètres pour l'achat direct
       router.push(
         `/${locale}/checkout?directVariantId=${variantId}&directQuantity=${quantity}`
       );
@@ -92,67 +86,67 @@ export function ProductActions({
   };
 
   const incrementQuantity = () => {
-    if (quantity < maxQuantity) {
-      setQuantity(quantity + 1);
-    }
+    if (quantity < maxQuantity) setQuantity(quantity + 1);
   };
 
   const decrementQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
+    if (quantity > 1) setQuantity(quantity - 1);
   };
 
   return (
-    <div className={`space-y-4 ${compact ? 'space-y-2' : ''}`}>
+    <div className={compact ? 'vibe-stack-y-3' : 'vibe-stack-y-6'}>
       {showQuantitySelector && (
-        <div className="flex items-center gap-3">
+        <div className="vibe-flex-items-center-gap-4">
           {!compact && (
-            <span className="text-sm font-medium text-foreground">
-              {tCommon('quantity')}:
+            <span className="vibe-text-xs-bold-muted-caps">
+              {tCommon('quantity')}
             </span>
           )}
-          <div className="flex items-center border border-border rounded-lg">
+          <div className="vibe-quantity-selector">
             <button
               onClick={decrementQuantity}
               disabled={disabled || quantity <= 1}
-              className="px-3 py-2 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="vibe-quantity-btn"
             >
-              -
+              <Minus className="vibe-icon-xxs" />
             </button>
-            <span className="px-4 py-2 min-w-12 text-center font-medium">
-              {quantity}
-            </span>
+            <span className="vibe-text-center-mono">{quantity}</span>
             <button
               onClick={incrementQuantity}
               disabled={disabled || quantity >= maxQuantity}
-              className="px-3 py-2 hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="vibe-quantity-btn"
             >
-              +
+              <Plus className="vibe-icon-xxs" />
             </button>
           </div>
         </div>
       )}
 
-      <div
-        className={`flex gap-3 ${compact ? 'flex-col' : 'flex-row'} ${compact ? 'w-full' : ''}`}
-      >
+      <div className={compact ? 'vibe-flex-col-gap-3' : 'vibe-flex-row-gap-3'}>
         <button
           onClick={handleAddToCart}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className={`flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground px-6 py-3 rounded-lg font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
+          className="vibe-button-primary vibe-flex-grow vibe-btn-sm-h10"
         >
-          {!compact && <ShoppingCart className="w-5 h-5" />}
-          {isAddingToCart ? t('adding') : t('addToCart')}
+          {isAddingToCart ? (
+            <Loader2 className="vibe-icon-sm vibe-icon-spin" />
+          ) : (
+            <ShoppingCart className="vibe-icon-sm" />
+          )}
+          <span>{isAddingToCart ? t('adding') : t('addToCart')}</span>
         </button>
 
         <button
           onClick={handleBuyNow}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className={`flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground px-6 py-3 rounded-lg font-medium disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors ${compact ? 'text-sm px-4 py-2' : ''} ${compact ? 'w-full' : 'flex-1'}`}
+          className="vibe-button-buy-now vibe-flex-grow vibe-btn-sm-h10"
         >
-          {!compact && <Zap className="w-5 h-5" />}
-          {isBuyingNow ? t('buying') : t('buyNow')}
+          {isBuyingNow ? (
+            <Loader2 className="vibe-icon-sm vibe-icon-spin" />
+          ) : (
+            <Zap className="vibe-icon-sm fill-current" />
+          )}
+          <span>{isBuyingNow ? t('buying') : t('buyNow')}</span>
         </button>
       </div>
     </div>

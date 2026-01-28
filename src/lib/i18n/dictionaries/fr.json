@@ -1,8 +1,10 @@
 {
   "home": {
     "heroTitle": "Votre Boutique",
+    "heroSubtitle": "Découvrez notre sélection exclusive de produits.",
     "featuredProducts": "Produits en vedette",
-    "noFeaturedProducts": "Aucun produit en vedette pour le moment."
+    "noFeaturedProducts": "Aucun produit en vedette pour le moment.",
+    "viewAll": "Tout voir"
   },
   "common": {
     "signIn": "Se connecter",
@@ -75,7 +77,8 @@
     "cart": "Panier",
     "wishlist": "Liste d'envies",
     "account": "Mon compte",
-    "orders": "Mes commandes"
+    "orders": "Mes commandes",
+    "dashboard": "Tableau de bord"
   },
   "products": {
     "title": "Produits",
@@ -93,6 +96,7 @@
   },
   "shop": {
     "title": "Boutique",
+    "description": "Découvrez notre catalogue complet de produits de haute qualité.",
     "addToCart": "Ajouter",
     "viewOptions": "Voir les options",
     "noImage": "Pas d'image"
@@ -101,6 +105,7 @@
     "title": "Panier",
     "empty": "Votre panier est vide",
     "emptyCart": "Votre panier est vide",
+    "emptyCartIcon": "🛒",
     "total": "Total",
     "sku": "SKU",
     "quantity": "Quantité",
@@ -322,6 +327,8 @@
     "payNow": "Payer maintenant",
     "loading": "Chargement...",
     "error": "Erreur d'initialisation",
+    "errorInit": "Échec de l'initialisation du paiement",
+    "anonymousCustomer": "Client",
     "orderSummary": "Résumé de la commande",
     "subtotal": "Sous-total",
     "shipping": "Livraison",
@@ -331,6 +338,7 @@
     "securePayment": "Paiement sécurisé par Stripe",
     "fullName": "Nom complet",
     "phone": "Téléphone",
+    "addressPlaceholder": "Commencez à saisir votre adresse...",
     "addressLine1": "Adresse (Ligne 1)",
     "addressLine2": "Appartement, suite, etc. (optionnel)",
     "city": "Ville",
@@ -534,7 +542,8 @@
     "backToShop": "Retour à la boutique",
     "error": "Une erreur est survenue lors de la vérification de la commande.",
     "timeout": "Délai d'attente dépassé pour la vérification de la commande. Veuillez vérifier vos emails pour la confirmation.",
-    "noId": "Aucun identifiant de session ou de paiement fourni."
+    "noId": "Aucun identifiant de session ou de paiement fourni.",
+    "redirecting": "Redirection en cours..."
   },
   "adminDashboard": {
     "analytics": {
@@ -705,7 +714,10 @@
       "viewAll": "Voir tout",
       "noRecentOrders": "Aucune commande",
       "revenueOverview": "Aperçu des revenus",
-      "last7Days": "7 derniers jours"
+      "last7Days": "7 derniers jours",
+      "time": {
+        "daysShort": "j"
+      }
     }
   }
 }

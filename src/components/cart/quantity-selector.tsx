@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Minus, Plus, Loader2 } from 'lucide-react';
 
 interface QuantitySelectorProps {
   cartItemId?: string;
@@ -96,37 +96,49 @@ export function QuantitySelector({
     }
   };
 
-  const t = useTranslations('cart'); // or common
+  const t = useTranslations('cart');
 
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={decrement}
-        disabled={quantity <= 1 || isLoading}
-        className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-accent active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-foreground font-bold text-lg"
-        aria-label={t('quantity')}
-      >
-        −
-      </button>
-      <input
-        type="number"
-        value={quantity}
-        onChange={handleInputChange}
-        disabled={isLoading}
-        className="w-14 h-10 text-center border border-border bg-background rounded-lg disabled:opacity-50 focus:outline-none focus:ring-1 focus:ring-primary transition-shadow font-medium"
-        min="1"
-        max={maxQuantity}
-      />
-      <button
-        type="button"
-        onClick={increment}
-        disabled={quantity >= maxQuantity || isLoading}
-        className="w-10 h-10 flex items-center justify-center border border-border rounded-lg hover:bg-accent active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-foreground font-bold text-lg"
-        aria-label={t('quantity')}
-      >
-        +
-      </button>
+    <div className="vibe-flex-center-gap-2">
+      <div className="vibe-quantity-selector">
+        <button
+          type="button"
+          onClick={decrement}
+          disabled={quantity <= 1 || isLoading}
+          className="vibe-quantity-btn"
+          aria-label={t('quantity')}
+        >
+          {isLoading ? (
+            <Loader2 className="vibe-icon-xxs vibe-icon-spin" />
+          ) : (
+            <Minus className="vibe-icon-xxs" />
+          )}
+        </button>
+
+        <input
+          type="number"
+          value={quantity}
+          onChange={handleInputChange}
+          disabled={isLoading}
+          className="vibe-quantity-input"
+          min="1"
+          max={maxQuantity}
+        />
+
+        <button
+          type="button"
+          onClick={increment}
+          disabled={quantity >= maxQuantity || isLoading}
+          className="vibe-quantity-btn"
+          aria-label={t('quantity')}
+        >
+          {isLoading ? (
+            <Loader2 className="vibe-icon-xxs vibe-icon-spin" />
+          ) : (
+            <Plus className="vibe-icon-xxs" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

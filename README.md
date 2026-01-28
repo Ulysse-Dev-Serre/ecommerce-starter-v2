@@ -1,6 +1,7 @@
 # E-Commerce Starter V2
 
-## Vision
+## Vision 
+architecture Multi-Tenant (isolée)
 
 **Starter e-commerce universel, flexible et prêt à l'emploi** pour lancer rapidement des boutiques en ligne dans n'importe quelle niche et pays.
 

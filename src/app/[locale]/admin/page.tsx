@@ -155,12 +155,12 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
         <div className="lg:col-span-2 admin-card">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold vibe-admin-text-main">
                 {t('revenueOverview')}
               </h3>
-              <p className="text-sm text-gray-500">{t('last7Days')}</p>
+              <p className="text-sm vibe-admin-text-subtle">{t('last7Days')}</p>
             </div>
-            <TrendingUp className="h-5 w-5 text-gray-400" />
+            <TrendingUp className="h-5 w-5 vibe-admin-text-subtle" />
           </div>
           <RevenueChart data={chartData} />
         </div>

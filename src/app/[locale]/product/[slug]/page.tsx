@@ -1,18 +1,18 @@
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { SITE_CURRENCY } from '@/lib/constants';
-
+import { SITE_CURRENCY, SUPPORTED_LOCALES } from '@/lib/constants';
 import { Language, ProductStatus } from '@/generated/prisma';
 import { env } from '@/lib/env';
+
 import { ImageGallery } from '@/components/product/image-gallery';
 import { JsonLd } from '@/components/seo/json-ld';
-import { prisma } from '@/lib/db/prisma';
-
+import { getProductBySlug } from '@/lib/services/product.service';
 import { ProductClient } from './product-client';
 import { RelatedProducts } from '@/components/product/related-products';
+import { siteConfig } from '@/lib/config/site';
 
-// Disable static generation (requires DB)
 export const dynamic = 'force-dynamic';
 
 interface ProductPageProps {
@@ -23,36 +23,26 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { locale, slug } = await params;
-  const language = locale.toUpperCase() as Language;
+  const product = await getProductBySlug(
+    slug,
+    locale.toUpperCase() as Language
+  );
 
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      translations: { where: { language } },
-      media: { orderBy: { sortOrder: 'asc' }, take: 1 },
-    },
-  });
+  if (!product) return {};
 
-  if (!product) {
-    return {};
-  }
-
-  const t = await getTranslations({ locale, namespace: 'products' });
   const translation = product.translations[0];
   const title = translation?.name || product.slug;
-  const description = translation?.description
-    ? translation.description.substring(0, 160)
-    : t('fallbackDescription', { title });
+  const description =
+    translation?.description || translation?.shortDescription || '';
 
   return {
     title,
     description,
     alternates: {
       canonical: `/${locale}/product/${slug}`,
-      languages: {
-        fr: `/fr/product/${slug}`,
-        en: `/en/product/${slug}`,
-      },
+      languages: Object.fromEntries(
+        SUPPORTED_LOCALES.map(loc => [loc, `/${loc}/product/${slug}`])
+      ),
     },
     openGraph: {
       title,
@@ -66,50 +56,16 @@ export default async function ProductPage({
   params,
 }: ProductPageProps): Promise<React.ReactElement> {
   const { locale, slug } = await params;
-  const language = locale.toUpperCase() as Language;
+  const product = await getProductBySlug(
+    slug,
+    locale.toUpperCase() as Language
+  );
 
-  const product = await prisma.product.findUnique({
-    where: { slug },
-    include: {
-      translations: {
-        where: { language },
-      },
-      media: {
-        orderBy: { sortOrder: 'asc' },
-      },
-      variants: {
-        where: { deletedAt: null },
-        include: {
-          pricing: {
-            where: { isActive: true, priceType: 'base' },
-          },
-          inventory: true,
-          attributeValues: {
-            include: {
-              attributeValue: {
-                include: {
-                  attribute: {
-                    include: {
-                      translations: {
-                        where: { language },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!product || product.status !== ProductStatus.ACTIVE) {
-    notFound();
+  if (!product || product.status !== 'ACTIVE') {
+    return notFound();
   }
 
   const translation = product.translations[0];
-
   const images = product.media.map(m => ({
     url: m.url,
     alt: m.alt,
@@ -120,21 +76,21 @@ export default async function ProductPage({
     id: v.id,
     sku: v.sku,
     pricing: v.pricing.map(p => ({
-      price: p.price.toString(),
+      price: p.price,
       currency: p.currency,
     })),
     stock: v.inventory?.stock || 0,
     attributes: v.attributeValues.map(av => ({
       name:
-        av.attributeValue.attribute.translations[0]?.name ||
-        av.attributeValue.attribute.key,
-      value: av.attributeValue.value,
+        av.attributeValue?.translations[0]?.displayName ||
+        av.attributeValue?.attribute.key ||
+        '',
+      value: av.attributeValue?.value || '',
     })),
   }));
 
   const siteUrl = env.NEXT_PUBLIC_SITE_URL || 'https://example.com';
   const productUrl = `${siteUrl}/${locale}/product/${product.slug}`;
-  const imageUrl = images[0]?.url || '';
 
   const productJsonLd = {
     '@context': 'https://schema.org',
@@ -142,8 +98,8 @@ export default async function ProductPage({
     name: translation?.name || product.slug,
     description:
       translation?.description || translation?.shortDescription || '',
-    image: imageUrl,
-    sku: product.variants[0]?.sku || '',
+    image: images[0]?.url || '',
+    sku: variants[0]?.sku || '',
     offers: {
       '@type': 'Offer',
       price: variants[0]?.pricing[0]?.price || '0',
@@ -154,13 +110,9 @@ export default async function ProductPage({
           : 'https://schema.org/OutOfStock',
       url: productUrl,
     },
-    brand: {
-      '@type': 'Organization',
-      name: 'AgTechNest',
-    },
+    brand: { '@type': 'Organization', name: siteConfig.name },
   };
 
-  /* Translations for JSON-LD */
   const tCommon = await getTranslations({ locale, namespace: 'common' });
   const tShop = await getTranslations({ locale, namespace: 'shop' });
 
@@ -190,28 +142,27 @@ export default async function ProductPage({
   };
 
   return (
-    <div className="flex-1 py-8">
+    <div className="vibe-flex-1 vibe-section-py vibe-animate-fade-in">
       <JsonLd data={productJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+      <div className="vibe-layout-container">
+        <div className="vibe-grid-2-cols-wide">
           <ImageGallery
             images={images}
             productName={translation?.name || product.slug}
             locale={locale}
           />
 
-          <div className="space-y-6">
+          <div className="vibe-stack-y-8">
             <div>
-              <h1 className="text-3xl font-bold mb-2">
+              <h1 className="vibe-page-header vibe-text-left">
                 {translation?.name || product.slug}
               </h1>
             </div>
 
-            {translation?.description && (
-              <div className="prose max-w-none">
-                <p className="text-gray-700">{translation.description}</p>
-              </div>
+            {translation?.shortDescription && (
+              <p className="vibe-description">{translation.shortDescription}</p>
             )}
 
             <ProductClient
@@ -222,9 +173,25 @@ export default async function ProductPage({
               initialPrice={variants[0]?.pricing[0]?.price}
               initialCurrency={variants[0]?.pricing[0]?.currency}
             />
+
+            {translation?.description && (
+              <div className="vibe-pt-8 vibe-section-divider-top">
+                <h3 className="vibe-section-title vibe-text-left vibe-border-none vibe-pb-0">
+                  {tShop('description')}
+                </h3>
+                <div className={`${VIBE_TYPOGRAPHY_PROSE} vibe-text-muted`}>
+                  <p className="vibe-whitespace-pre-line vibe-leading-relaxed">
+                    {translation.description}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <RelatedProducts currentProductId={product.id} locale={locale} />
+
+        <div className="vibe-mt-20">
+          <RelatedProducts currentProductId={product.id} locale={locale} />
+        </div>
       </div>
     </div>
   );

@@ -54,6 +54,71 @@ export interface CartProjection {
 }
 
 /**
+ * Get detailed cart data for the cart page (including translations and primary media)
+ */
+export async function getCartPageData(
+  userId?: string,
+  anonymousId?: string,
+  locale?: string
+): Promise<any | null> {
+  const language = (locale?.toUpperCase() || 'FR') as any;
+
+  const cart = await prisma.cart.findFirst({
+    where: userId
+      ? { userId, status: 'ACTIVE' }
+      : { anonymousId, status: 'ACTIVE' },
+    include: {
+      items: {
+        include: {
+          variant: {
+            include: {
+              pricing: {
+                where: { isActive: true, priceType: 'base' },
+              },
+              product: {
+                include: {
+                  translations: {
+                    where: { language },
+                  },
+                  media: {
+                    where: { isPrimary: true },
+                    take: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!cart) return null;
+
+  // Manual serialization of Decimal and nested objects for Server -> Client pass
+  return {
+    ...cart,
+    items: cart.items.map(item => ({
+      ...item,
+      variant: {
+        ...item.variant,
+        weight: item.variant.weight ? Number(item.variant.weight) : null,
+        pricing: item.variant.pricing.map(p => ({
+          ...p,
+          price: p.price.toString(),
+        })),
+        product: {
+          ...item.variant.product,
+          weight: item.variant.product.weight
+            ? Number(item.variant.product.weight)
+            : null,
+        },
+      },
+    })),
+  };
+}
+
+/**
  * Get or create cart for anonymous user or authenticated user
  */
 export async function getOrCreateCart(

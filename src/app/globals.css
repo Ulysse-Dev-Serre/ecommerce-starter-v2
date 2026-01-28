@@ -5,13 +5,15 @@
  * Pour créer un nouveau thème : dupliquer themes/neutral.css
  * Pour activer un thème : modifier la ligne ci-dessous
  */
-@import '../styles/themes/neutral.css'; /* ← Thème actif */
+@import '../styles/themes/neutral.css';
+/* ← Thème actif */
 
 @theme inline {
   /* Tailwind color mapping to our CSS vars */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
@@ -23,6 +25,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-border-focus: var(--border-focus);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
   /* Shadow mapping */
   --shadow-sm: var(--shadow);
@@ -31,26 +35,6 @@
   /* Font families */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-/* Dark theme overrides removed to force light mode consistency */
-/* @media (prefers-color-scheme: dark) { ... } */
-
-/* E-commerce specific theme classes */
-.theme-primary {
-  color: var(--primary);
-}
-
-.theme-background {
-  background-color: var(--background);
-}
-
-.theme-foreground {
-  color: var(--foreground);
-}
-
-.theme-border {
-  border-color: var(--border);
 }
 
 /* Base styles */
@@ -86,33 +70,1545 @@ body {
   --shadow-lg: rgba(0, 0, 0, 0.4);
 }
 
-.theme-purple {
-  --primary: #6c47ff;
-  --primary-hover: #5b3fe6;
+/* ✨ VIBE SYSTEM - REUSABLE UI PATTERNS */
+
+@utility vibe-card {
+  @apply bg-card border border-border shadow-sm transition-all duration-300;
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
 }
 
-.theme-indigo {
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
+.vibe-card:hover {
+  box-shadow: var(--shadow-md);
 }
 
-.theme-green {
-  --primary: #10b981;
-  --primary-hover: #059669;
+@utility vibe-container {
+  @apply bg-card border border-border shadow-sm;
+  border-radius: var(--radius-xl);
+  padding: 2rem;
 }
 
-/* Toast animations */
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+@utility vibe-container-sm {
+  @apply vibe-container p-6;
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
+/* Typography */
+@utility vibe-page-header {
+  @apply text-3xl font-bold mb-8;
+}
+
+@utility vibe-page-header-center {
+  @apply vibe-page-header text-center;
+}
+
+@utility vibe-section-title {
+  @apply text-xl font-bold mb-6 text-foreground border-b border-border pb-4;
+}
+
+@utility vibe-hero-title {
+  @apply text-5xl md:text-6xl font-extrabold tracking-tight text-foreground;
+}
+
+@utility vibe-hero-subtitle {
+  @apply mt-6 text-xl text-muted-foreground max-w-2xl mx-auto;
+}
+
+@utility vibe-h2 {
+  @apply text-3xl font-bold text-foreground;
+}
+
+@utility vibe-description {
+  @apply text-xl text-muted-foreground leading-relaxed;
+}
+
+@utility vibe-logo-text {
+  @apply text-xl md:text-2xl font-black text-foreground tracking-tighter transition-colors group-hover:text-primary;
+}
+
+/* Layout */
+@utility vibe-layout-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+@utility vibe-section-py {
+  @apply py-8 lg:py-12;
+}
+
+@utility vibe-hero-section {
+  @apply bg-gradient-to-r from-muted/50 to-background border-b border-border vibe-section-py;
+}
+
+@utility vibe-related-section {
+  @apply mt-20 border-t border-border pt-16;
+}
+
+@utility vibe-info-box {
+  @apply bg-muted/30 border border-dashed border-border text-center transition-all duration-300;
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+}
+
+@utility vibe-form-card {
+  @apply bg-background/50 p-6 rounded-xl border border-border/50;
+}
+
+@utility vibe-divider {
+  @apply h-1.5 w-20 bg-primary mt-3 rounded-full;
+}
+
+/* 🧱 LAYOUT GRIDS */
+@utility vibe-grid-layout {
+  @apply grid grid-cols-1 lg:grid-cols-12 gap-10 items-start;
+}
+
+@utility vibe-grid-main {
+  @apply lg:col-span-8 space-y-6;
+}
+
+@utility vibe-grid-main-xl {
+  @apply lg:col-span-12 xl:col-span-8 space-y-8;
+}
+
+@utility vibe-grid-side {
+  @apply lg:col-span-4 h-full;
+}
+
+@utility vibe-grid-side-xl {
+  @apply lg:col-span-12 xl:col-span-4 h-full;
+}
+
+@utility vibe-grid-2-cols {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-8;
+}
+
+@utility vibe-grid-2-cols-wide {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-12;
+}
+
+@utility vibe-grid-4-cols {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8;
+}
+
+@utility vibe-grid-gallery {
+  @apply grid grid-cols-4 gap-2;
+}
+
+@utility vibe-grid-form {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+@utility vibe-list-stack {
+  @apply flex flex-col gap-4;
+}
+
+@utility vibe-list-stack-sm {
+  @apply flex flex-col gap-2;
+}
+
+/* 🧱 BUTTONS & INPUTS */
+@utility vibe-button-primary {
+  @apply bg-primary text-primary-foreground flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  border-radius: var(--radius-button);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-button);
+}
+
+.vibe-button-primary:hover:not(:disabled) {
+  @apply bg-primary-hover;
+}
+
+@utility vibe-button-secondary {
+  @apply bg-secondary text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  border-radius: var(--radius-button);
+  font-weight: var(--font-weight-bold);
+}
+
+@utility vibe-input {
+  @apply w-full border border-border bg-background transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:opacity-50;
+  border-radius: var(--radius-sm);
+  height: 2.5rem;
+  padding: 0 0.75rem;
+}
+
+@utility vibe-link-action {
+  @apply text-primary font-bold hover:underline underline-offset-4 inline-flex items-center;
+}
+
+/* 📝 FORM SPECIALS */
+@utility vibe-form-label {
+  @apply block text-sm font-medium text-muted-foreground mb-1;
+}
+
+@utility vibe-form-label-bold {
+  @apply block text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1.5;
+}
+
+@utility vibe-form-error {
+  @apply text-xs text-error mt-1;
+}
+
+@utility vibe-form-error-bold {
+  @apply mt-1.5 text-xs text-error font-bold;
+}
+
+@utility vibe-form-required {
+  @apply text-error ml-1;
+}
+
+@utility vibe-input-readonly {
+  @apply bg-muted text-muted-foreground opacity-100 cursor-not-allowed;
+}
+
+@utility vibe-input-group-container {
+  @apply bg-background p-4 rounded-xl border border-border;
+}
+
+@utility vibe-input-raw {
+  @apply w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all;
+}
+
+@utility vibe-input-prefix {
+  @apply inline-flex items-center px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm;
+}
+
+/* 🖱️ INTERACTIVE ELEMENTS */
+@utility vibe-selectable-card {
+  @apply relative p-5 border-2 rounded-xl cursor-pointer transition-all duration-300;
+}
+
+@utility vibe-selectable-card-selected {
+  @apply border-primary bg-primary/5 shadow-md ring-1 ring-primary/20;
+}
+
+@utility vibe-selectable-card-inactive {
+  @apply border-border bg-background hover:border-primary/50 hover:bg-accent/50;
+}
+
+@utility vibe-custom-radio {
+  @apply w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300;
+}
+
+@utility vibe-custom-radio-selected {
+  @apply border-primary bg-primary;
+}
+
+@utility vibe-custom-radio-inactive {
+  @apply border-border group-hover:border-primary/50;
+}
+
+@utility vibe-custom-radio-inner {
+  @apply w-2.5 h-2.5 rounded-full bg-primary-foreground;
+}
+
+/* 🏷 BADGES */
+@utility vibe-badge {
+  @apply px-2.5 py-0.5 text-xs transition-colors border shadow-sm inline-flex items-center;
+  font-weight: var(--font-weight-bold);
+  border-radius: 9999px;
+}
+
+@utility vibe-badge-success {
+  @apply bg-success/10 text-success border-success/20;
+}
+
+@utility vibe-badge-info {
+  @apply bg-info/10 text-info border-info/20;
+}
+
+@utility vibe-badge-primary {
+  @apply bg-primary/10 text-primary border-primary/20;
+}
+
+@utility vibe-badge-error {
+  @apply bg-error/10 text-error border-error/20;
+}
+
+@utility vibe-badge-urgent {
+  @apply bg-error text-white animate-pulse shadow-md border-error/80;
+}
+
+@utility vibe-badge-muted {
+  @apply bg-muted text-muted-foreground border-border;
+}
+
+@utility vibe-badge-quantity {
+  @apply absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg;
+}
+
+@utility vibe-security-badge {
+  @apply flex items-center justify-center gap-2 text-xs text-muted-foreground pt-4 border-t border-border/50;
+}
+
+/* 🔗 LINKS & TYPO */
+@utility vibe-product-name-link {
+  @apply font-bold text-lg mb-1 block hover:text-primary transition-colors truncate;
+}
+
+@utility vibe-text-meta {
+  @apply text-sm text-muted-foreground mb-3;
+}
+
+@utility vibe-product-thumb-sm {
+  @apply relative h-16 w-16 flex-shrink-0 bg-muted border border-border rounded-lg overflow-hidden;
+}
+
+/* 🔢 PAGINATION & CONTROLS */
+@utility vibe-pagination-item {
+  @apply inline-flex items-center justify-center w-10 h-10 text-sm transition-all duration-300;
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--radius-md);
+}
+
+@utility vibe-pagination-active {
+  @apply bg-primary text-primary-foreground shadow-md;
+}
+
+@utility vibe-pagination-inactive {
+  @apply bg-card border border-border text-muted-foreground hover:border-primary/50 hover:text-primary;
+}
+
+@utility vibe-quantity-selector {
+  @apply flex items-center bg-muted/50 rounded-lg p-1 border border-border/50 h-10;
+}
+
+@utility vibe-quantity-btn {
+  @apply w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground;
+}
+
+@utility vibe-quantity-input {
+  @apply w-10 text-center border-none focus:ring-0 font-bold text-sm bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none;
+}
+
+/* 🖼 IMAGES */
+@utility vibe-image-container {
+  @apply aspect-square bg-muted rounded-lg overflow-hidden border border-border relative;
+}
+
+@utility vibe-image-thumb {
+  @apply relative aspect-square bg-muted rounded-md overflow-hidden border-2 transition-all cursor-pointer;
+}
+
+@utility vibe-image-thumb-active {
+  @apply border-primary opacity-100 ring-2 ring-primary/20;
+}
+
+@utility vibe-image-thumb-inactive {
+  @apply border-transparent hover:border-border opacity-70 hover:opacity-100;
+}
+
+/* 🧭 NAVIGATION */
+@utility vibe-nav-header {
+  @apply bg-background border-b border-border sticky top-0 z-50;
+}
+
+@utility vibe-nav-link {
+  @apply px-4 py-2 text-sm font-bold transition-all rounded-md text-muted-foreground hover:text-foreground;
+}
+
+@utility vibe-nav-link-active {
+  @apply text-primary;
+}
+
+@utility vibe-nav-admin-link {
+  @apply bg-secondary/10 text-secondary px-4 py-2 rounded-md text-sm font-bold hover:bg-secondary/20 transition-all ml-4;
+}
+
+@utility vibe-nav-icon-btn {
+  @apply text-foreground hover:bg-muted p-2 rounded-md transition-all;
+}
+
+@utility vibe-nav-lang-btn {
+  @apply w-8 h-8 text-[10px] font-black rounded-md transition-all uppercase;
+}
+
+@utility vibe-nav-lang-btn-active {
+  @apply bg-foreground text-background shadow-sm;
+}
+
+@utility vibe-nav-lang-btn-inactive {
+  @apply text-muted-foreground hover:text-foreground hover:bg-muted;
+}
+
+@utility vibe-nav-spacing {
+  @apply flex items-center space-x-2 md:space-x-4;
+}
+
+@utility vibe-flex-between-items-center {
+  @apply flex items-center justify-between;
+}
+
+@utility vibe-flex-items-center {
+  @apply flex items-center;
+}
+
+@utility vibe-footer-grid {
+  @apply vibe-grid-layout !gap-8 !grid-cols-1 md:!grid-cols-3;
+}
+
+/* 🛒 CART SPECIFICS */
+@utility vibe-empty-state {
+  @apply text-center py-20 bg-background border border-dashed border-border rounded-3xl mx-auto max-w-2xl px-6;
+}
+
+@utility vibe-empty-state-icon {
+  @apply w-16 h-16 mx-auto text-muted-foreground/30 mb-4;
+}
+
+@utility vibe-empty-state-title {
+  @apply text-2xl font-bold mb-8 text-foreground;
+}
+
+@utility vibe-empty-state-button {
+  @apply vibe-button-primary px-8 py-3 text-base;
+}
+
+/* 🏷 STATUS LABELS */
+@utility vibe-status-label-success {
+  @apply text-success;
+}
+
+@utility vibe-status-label-error {
+  @apply text-error;
+}
+
+/* 📦 PRODUCT VARIANTS */
+@utility vibe-variant-button {
+  @apply px-4 py-2 rounded-md border-2 transition cursor-pointer disabled:cursor-not-allowed;
+}
+
+@utility vibe-variant-button-selected {
+  @apply border-primary bg-primary text-primary-foreground;
+}
+
+@utility vibe-variant-button-available {
+  @apply border-border hover:border-border-focus;
+}
+
+@utility vibe-variant-button-unavailable {
+  @apply border-muted text-muted-foreground opacity-50;
+}
+
+/* 🏗 LAYOUT PATTERNS */
+@utility vibe-full-page-center {
+  @apply min-h-[60vh] flex items-center justify-center p-6;
+}
+
+@utility vibe-checkout-sidebar {
+  @apply sticky top-8 space-y-6;
+}
+
+@utility vibe-scrollable-area {
+  @apply overflow-y-auto pr-2;
+}
+
+/* 🍱 STRUCTURE & WRAPPERS */
+@utility vibe-section-card {
+  @apply bg-card p-6 rounded-xl shadow-sm border border-border duration-500;
+}
+
+@utility vibe-section-header {
+  @apply flex items-center gap-2 border-b border-border pb-4;
+}
+
+@utility vibe-card-raised-p6 {
+  @apply p-6 duration-500 shadow-lg border border-border rounded-xl bg-card;
+}
+
+@utility vibe-h2-underlined {
+  @apply text-xl font-bold mb-6 text-foreground border-b border-border pb-4;
+}
+
+@utility vibe-list-container {
+  @apply space-y-3;
+}
+
+@utility vibe-product-list-item {
+  @apply flex flex-col sm:flex-row gap-4 duration-300;
+}
+
+@utility vibe-product-thumb-container {
+  @apply w-full sm:w-24 sm:h-24 flex-shrink-0;
+}
+
+@utility vibe-dropdown-panel {
+  @apply absolute z-[9999] w-full mt-1 bg-background border border-border rounded-lg shadow-xl max-h-60 overflow-auto;
+}
+
+@utility vibe-dropdown-item {
+  @apply px-4 py-3 hover:bg-muted cursor-pointer border-b last:border-b-0 border-border transition-colors;
+}
+
+@utility vibe-status-container {
+  @apply p-4;
+}
+
+@utility vibe-status-icon-box {
+  @apply flex justify-center mb-6;
+}
+
+@utility vibe-loader-container {
+  @apply flex items-center justify-center gap-2;
+}
+
+@utility vibe-loader-icon {
+  @apply w-5 h-5 animate-spin;
+}
+
+@utility vibe-empty-placeholder {
+  @apply text-center py-12 bg-muted/50 rounded-xl border border-dashed border-border;
+}
+
+@utility vibe-empty-icon {
+  @apply text-4xl mb-4 group-hover:scale-110 transition-transform;
+}
+
+@utility vibe-status-title {
+  @apply text-2xl font-bold text-foreground mb-4;
+}
+
+@utility vibe-status-desc {
+  @apply text-muted-foreground mb-8 text-lg font-medium;
+}
+
+/* 📐 LAYOUT UTILITIES */
+@utility vibe-flex-between-start {
+  @apply flex justify-between items-start gap-2;
+}
+
+@utility vibe-flex-between-center {
+  @apply flex justify-between items-center;
+}
+
+@utility vibe-flex-center-gap-2 {
+  @apply flex items-center justify-center gap-2;
+}
+
+@utility vibe-flex-center-gap-3 {
+  @apply flex items-center justify-center gap-3;
+}
+
+@utility vibe-flex-row {
+  @apply flex;
+}
+
+@utility vibe-flex-items-center-gap-4 {
+  @apply flex items-center gap-4;
+}
+
+@utility vibe-flex-items-center-gap-3 {
+  @apply flex items-center gap-3;
+}
+
+@utility vibe-flex-footer-stack {
+  @apply flex flex-wrap items-end justify-between gap-4;
+}
+
+@utility vibe-flex-grow {
+  @apply flex-1 min-w-0;
+}
+
+@utility vibe-stack-y-3 {
+  @apply space-y-3;
+}
+
+@utility vibe-stack-y-4 {
+  @apply space-y-4;
+}
+
+@utility vibe-stack-y-6 {
+  @apply space-y-6;
+}
+
+@utility vibe-sidebar-stack {
+  @apply space-y-6;
+}
+
+@utility vibe-sticky-side-4 {
+  @apply sticky top-4 duration-500;
+}
+
+/* 🏷 TYPOGRAPHY UTILITIES */
+@utility vibe-text-total-label {
+  @apply font-bold text-lg text-foreground;
+}
+
+@utility vibe-text-total-value {
+  @apply font-extrabold text-2xl text-primary;
+}
+
+@utility vibe-text-right {
+  @apply text-right;
+}
+
+@utility vibe-text-price-lg {
+  @apply text-lg font-bold text-foreground;
+}
+
+@utility vibe-text-price-xl {
+  @apply text-2xl font-bold text-foreground;
+}
+
+@utility vibe-text-mono-meta {
+  @apply text-xs font-bold uppercase tracking-widest text-muted-foreground;
+}
+
+@utility vibe-quantity-value {
+  @apply w-10 text-center font-bold text-foreground;
+}
+
+@utility vibe-icon-btn-error {
+  @apply text-muted-foreground hover:text-error transition-colors p-1;
+}
+
+@utility vibe-btn-full-lg {
+  @apply w-full h-12;
+}
+
+@utility vibe-btn-sm-h10 {
+  @apply h-10 px-6;
+}
+
+/* 🖼️ MEDIA UTILITIES */
+@utility vibe-badge-img-placeholder {
+  @apply h-full w-full flex items-center justify-center bg-muted text-muted-foreground;
+}
+
+@utility vibe-text-img-placeholder {
+  @apply text-[10px];
+}
+
+/* 💠 ICON UTILITIES */
+@utility vibe-icon-sm {
+  @apply h-5 w-5;
+}
+
+@utility vibe-icon-xs {
+  @apply h-4 w-4;
+}
+
+@utility vibe-icon-xxs {
+  @apply h-3.5 w-3.5;
+}
+
+@utility vibe-icon-md {
+  @apply h-16 w-16;
+}
+
+@utility vibe-icon-lg {
+  @apply h-20 w-20;
+}
+
+@utility vibe-icon-spin {
+  @apply animate-spin;
+}
+
+/* 💠 FINAL NANO UTILITIES */
+@utility vibe-animate-fade-in {
+  @apply duration-500;
+}
+
+@utility vibe-animate-slide-in-right {
+  @apply duration-300;
+}
+
+@utility vibe-icon-xl {
+  @apply h-12 w-12;
+}
+
+@utility vibe-icon-xxl {
+  @apply h-16 w-16;
+}
+
+@utility vibe-icon-xxxl {
+  @apply h-20 w-20;
+}
+
+@utility vibe-text-h1-status {
+  @apply text-3xl tracking-tight font-bold text-foreground;
+}
+
+@utility vibe-text-p-status {
+  @apply text-xl text-muted-foreground;
+}
+
+@utility vibe-status-code-box {
+  @apply bg-muted/50 rounded-lg p-3 text-xs font-mono text-muted-foreground border border-border/50 break-all;
+}
+
+@utility vibe-section-divider-top {
+  @apply border-t border-border pt-4 mt-4;
+}
+
+@utility vibe-section-divider-bottom {
+  @apply border-b border-border pb-4;
+}
+
+@utility vibe-text-bold-foreground {
+  @apply font-bold text-foreground;
+}
+
+@utility vibe-text-medium-foreground {
+  @apply font-medium text-foreground;
+}
+
+@utility vibe-text-xs-muted {
+  @apply text-xs text-muted-foreground;
+}
+
+@utility vibe-text-xs-bold-muted-caps {
+  @apply text-xs font-bold uppercase tracking-widest text-muted-foreground;
+}
+
+@utility vibe-text-center-mono {
+  @apply w-10 text-center font-bold text-foreground;
+}
+
+@utility vibe-skeleton-icon {
+  @apply w-6 h-6 rounded-full;
+}
+
+@utility vibe-skeleton-text-sm {
+  @apply h-3 w-24;
+}
+
+@utility vibe-skeleton-text-md {
+  @apply h-4 w-32;
+}
+
+@utility vibe-skeleton-price {
+  @apply h-6 w-16;
+}
+
+@utility vibe-shadow-lg {
+  @apply shadow-lg;
+}
+
+@utility vibe-shadow-inner {
+  @apply shadow-inner;
+}
+
+@utility vibe-pt-2 {
+  @apply pt-2;
+}
+
+@utility vibe-mb-6 {
+  @apply mb-6;
+}
+
+@utility vibe-mb-4 {
+  @apply mb-4;
+}
+
+@utility vibe-p-4 {
+  @apply p-4;
+}
+
+@utility vibe-text-red {
+  @apply text-red-500;
+}
+
+@utility vibe-container-sm {
+  @apply max-w-sm mx-auto;
+}
+
+@utility vibe-relative {
+  @apply relative;
+}
+
+@utility vibe-duration-500 {
+  @apply duration-500;
+}
+
+@utility vibe-duration-700 {
+  @apply duration-700;
+}
+
+@utility vibe-px-8 {
+  @apply px-8;
+}
+
+@utility vibe-opacity-80 {
+  @apply opacity-80;
+}
+
+@utility vibe-opacity-60 {
+  @apply opacity-60;
+}
+
+@utility vibe-animate-zoom-in {
+  @apply duration-500;
+}
+
+@utility vibe-text-error-soft {
+  @apply text-error opacity-80;
+}
+
+@utility vibe-text-success-soft {
+  @apply text-success opacity-80;
+}
+
+@utility vibe-text-success {
+  @apply text-success;
+}
+
+@utility vibe-text-error {
+  @apply text-error;
+}
+
+@utility vibe-text-primary {
+  @apply text-primary;
+}
+
+@utility vibe-text-foreground {
+  @apply text-foreground;
+}
+
+@utility vibe-text-muted {
+  @apply text-muted-foreground;
+}
+
+@utility vibe-gap-4 {
+  @apply gap-4;
+}
+
+@utility vibe-gap-3 {
+  @apply gap-3;
+}
+
+@utility vibe-gap-2 {
+  @apply gap-2;
+}
+
+@utility vibe-mb-6 {
+  @apply mb-6;
+}
+
+@utility vibe-mt-4 {
+  @apply mt-4;
+}
+
+@utility vibe-mt-8 {
+  @apply mt-8;
+}
+
+@utility vibe-mt-2 {
+  @apply mt-2;
+}
+
+@utility vibe-mt-1 {
+  @apply mt-1;
+}
+
+@utility vibe-pb-8 {
+  @apply pb-8;
+}
+
+@utility vibe-pt-6 {
+  @apply pt-6;
+}
+
+@utility vibe-transition {
+  @apply transition-all duration-300;
+}
+
+@utility vibe-bg-background {
+  @apply bg-background;
+}
+
+@utility vibe-min-h-screen {
+  @apply min-h-screen;
+}
+
+@utility vibe-bg-muted-soft {
+  @apply bg-muted/50;
+}
+
+@utility vibe-badge-dot-primary {
+  @apply w-2 h-2 rounded-full bg-primary;
+}
+
+@utility vibe-underline-primary {
+  @apply underline decoration-primary decoration-2 underline-offset-4;
+}
+
+@utility vibe-hover-primary {
+  @apply hover:text-primary;
+}
+
+@utility vibe-transition-colors {
+  @apply transition-colors;
+}
+
+/* 🏗️ LAYOUTS ÉTENDUS */
+@utility vibe-layout-6xl {
+  @apply max-w-6xl mx-auto px-4;
+}
+
+@utility vibe-grid-3-cols {
+  @apply grid grid-cols-1 lg:grid-cols-3 gap-10;
+}
+
+@utility vibe-span-2 {
+  @apply lg:col-span-2;
+}
+
+/* 🎨 ACCENTS & BACKGROUNDS */
+@utility vibe-bg-muted-extra-soft {
+  @apply bg-muted/20;
+}
+
+@utility vibe-info-box-styled {
+  @apply bg-info/5 border-info/20 text-info;
+}
+
+/* 📝 TYPOGRAPHIE FINALE */
+@utility vibe-text-4xl-mega {
+  @apply text-4xl font-extrabold text-foreground tracking-tight;
+}
+
+@utility vibe-status-badge-lg {
+  @apply px-6 py-2.5 text-base font-black uppercase tracking-widest;
+}
+
+@utility vibe-line-clamp-1 {
+  @apply line-clamp-1;
+}
+
+@utility vibe-line-clamp-2 {
+  @apply line-clamp-2;
+}
+
+@utility vibe-min-h-12 {
+  @apply min-h-[3rem];
+}
+
+/* 🧭 NAVIGATION & INTERACTION */
+@utility vibe-nav-link-prev {
+  @apply inline-flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors mb-8;
+}
+
+@utility vibe-image-container-abs {
+  @apply relative mb-4 overflow-hidden rounded-lg bg-muted aspect-square;
+}
+
+@utility vibe-image-abs-center {
+  @apply absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer shadow-md backdrop-blur-sm z-10;
+}
+
+@utility vibe-mr-2 {
+  @apply mr-2;
+}
+
+@utility vibe-translate-x-n1 {
+  @apply -translate-x-1;
+}
+
+@utility vibe-gap-6 {
+  @apply gap-6;
+}
+
+@utility vibe-px-4 {
+  @apply px-4;
+}
+
+@utility vibe-py-1-5 {
+  @apply py-1.5;
+}
+
+@utility vibe-text-black-caps {
+  @apply font-black uppercase tracking-wider;
+}
+
+@utility vibe-flex-justify-end {
+  @apply flex justify-end;
+}
+
+@utility vibe-text-muted-soft {
+  @apply text-muted-foreground/30;
+}
+
+@utility vibe-badge-dot-muted {
+  @apply w-1.5 h-1.5 rounded-full bg-border;
+}
+
+@utility vibe-transition-all {
+  @apply transition-all duration-300;
+}
+
+@utility vibe-flex-col-md-row-md-end-between {
+  @apply flex flex-col md:flex-row md:items-end justify-between;
+}
+
+@utility vibe-left-4 {
+  @apply left-4;
+}
+
+@utility vibe-right-4 {
+  @apply right-4;
+}
+
+@utility vibe-image-dots-container {
+  @apply absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10;
+}
+
+@utility vibe-image-dot {
+  @apply w-2 h-2 rounded-full transition-all cursor-pointer shadow-sm bg-background/80 hover:bg-background;
+}
+
+@utility vibe-image-dot-active {
+  @apply bg-primary w-4;
+}
+
+@utility vibe-transition-500 {
+  @apply transition-transform duration-500;
+}
+
+@utility vibe-scale-110 {
+  @apply scale-110;
+}
+
+@utility vibe-block {
+  @apply block;
+}
+
+@utility vibe-flex-col-h-full {
+  @apply flex flex-col h-full;
+}
+
+@utility vibe-mt-20 {
+  @apply mt-20;
+}
+
+@utility vibe-text-left {
+  @apply text-left;
+}
+
+@utility vibe-flex-1 {
+  @apply flex-1;
+}
+
+@utility vibe-mt-n16 {
+  @apply -mt-16;
+}
+
+@utility vibe-mr-3 {
+  @apply mr-3;
+}
+
+@utility vibe-inline-block {
+  @apply inline-block;
+}
+
+@utility vibe-flex-between-items-end {
+  @apply flex justify-between items-end;
+}
+
+@utility vibe-flex-col {
+  @apply flex flex-col;
+}
+
+@utility vibe-flex-grow {
+  @apply flex-grow;
+}
+
+@utility vibe-antialiased {
+  @apply antialiased;
+}
+
+@utility vibe-relative {
+  @apply relative;
+}
+
+@utility vibe-leading-snug {
+  @apply leading-snug;
+}
+
+@utility vibe-h-auto {
+  @apply h-auto;
+}
+
+@utility vibe-resize-none {
+  @apply resize-none;
+}
+
+@utility vibe-text-center {
+  @apply text-center;
+}
+
+@utility vibe-text-medium {
+  @apply font-medium;
+}
+
+@utility vibe-text-bold {
+  @apply font-bold;
+}
+
+@utility vibe-text-semibold {
+  @apply font-semibold;
+}
+
+@utility vibe-status-icon-error {
+  @apply vibe-icon-md text-error opacity-80;
+}
+
+/* 🎨 ANIMATIONS PROLONGÉES */
+@utility vibe-animate-slide-in-left {
+  @apply duration-700;
+}
+
+@utility vibe-animate-slide-in-right {
+  @apply duration-300;
+}
+
+/* 📝 TYPOGRAPHIE & CONTENU MEGA */
+
+@utility vibe-h1-mega {
+  @apply text-4xl md:text-5xl font-black tracking-tight text-foreground;
+}
+
+@utility vibe-text-p-lg {
+  @apply text-lg text-muted-foreground leading-relaxed;
+}
+
+@utility vibe-text-xl-bold {
+  @apply text-xl font-bold text-foreground;
+}
+
+/* 🍱 BOXES & ICONES */
+@utility vibe-icon-box-primary {
+  @apply bg-primary/10 text-primary p-3 rounded-lg border border-primary/20;
+}
+
+@utility vibe-icon-box-muted {
+  @apply bg-muted text-foreground p-3 rounded-lg border border-border;
+}
+
+/* 📏 SPACING & STRUCTURE */
+@utility vibe-stack-y-10 {
+  @apply space-y-10;
+}
+
+@utility vibe-stack-y-8 {
+  @apply space-y-8;
+}
+
+@utility vibe-p-8 {
+  @apply p-8;
+}
+
+@utility vibe-abs-inset-0 {
+  @apply absolute inset-0;
+}
+
+@utility vibe-bg-muted-soft {
+  @apply bg-muted/30;
+}
+
+@utility vibe-shadow-xs {
+  @apply shadow-sm;
+}
+
+@utility vibe-text-ellipsis {
+  @apply text-ellipsis;
+}
+
+@utility vibe-flex-2 {
+  @apply flex-[2];
+}
+
+@utility vibe-flex-grow-2 {
+  @apply flex-[2];
+}
+
+@utility vibe-hover-error-dark {
+  @apply hover:bg-error/90;
+}
+
+@utility vibe-bg-error-soft {
+  @apply bg-error/10;
+}
+
+@utility vibe-status-banner-success-soft {
+  @apply bg-success/10 rounded-xl border border-success/20;
+}
+
+@utility vibe-status-banner-error-soft {
+  @apply bg-error/5 rounded-xl border border-error/20 flex flex-col;
+}
+
+@utility vibe-border-primary-soft {
+  @apply border-primary/20;
+}
+
+@utility vibe-bg-primary-soft {
+  @apply bg-primary/5;
+}
+
+@utility vibe-border-primary-extra-soft {
+  @apply border-primary/10;
+}
+
+@utility vibe-flex-col-gap-4 {
+  @apply flex flex-col gap-4;
+}
+
+@utility vibe-flex-gap-4 {
+  @apply flex gap-4;
+}
+
+@utility vibe-w-3-4 {
+  @apply w-3/4;
+}
+
+@utility vibe-w-1-2 {
+  @apply w-1/2;
+}
+
+@utility vibe-divide-y {
+  @apply divide-y divide-border;
+}
+
+@utility vibe-underline-offset-4 {
+  @apply underline-offset-4;
+}
+
+@utility vibe-decoration-2 {
+  @apply decoration-2;
+}
+
+@utility vibe-hover-underline {
+  @apply hover:underline;
+}
+
+@utility vibe-bg-muted-extra-soft-hover {
+  @apply hover:bg-muted/5;
+}
+
+@utility vibe-ring-4-primary-soft {
+  @apply ring-4 ring-primary/10;
+}
+
+@utility vibe-shadow-2xl-primary {
+  @apply shadow-2xl shadow-foreground/20;
+}
+
+@utility vibe-opacity-80 {
+  @apply opacity-80;
+}
+
+@utility vibe-opacity-50 {
+  @apply opacity-50;
+}
+
+@utility vibe-stroke-3 {
+  @apply stroke-[3px];
+}
+
+@utility vibe-z-10 {
+  @apply z-10;
+}
+
+@utility vibe-z-n-0 {
+  @apply -z-0;
+}
+
+@utility vibe-bg-error-dark {
+  @apply bg-error;
+}
+
+@utility vibe-flex-col-sm-row-center {
+  @apply flex flex-col sm:flex-row items-center;
+}
+
+@utility vibe-flex-shrink-0 {
+  @apply flex-shrink-0;
+}
+
+@utility vibe-transition-700 {
+  @apply transition-all duration-700;
+}
+
+@utility vibe-transition-1000 {
+  @apply transition-all duration-1000;
+}
+
+@utility vibe-section-divider-bottom-soft {
+  @apply border-b border-background/20;
+}
+
+@utility vibe-section-divider-top-soft {
+  @apply border-t border-background/20;
+}
+
+@utility vibe-section-divider-top-half {
+  @apply border-t border-border/50;
+}
+
+@utility vibe-text-4xl-bold {
+  @apply text-4xl font-black;
+}
+
+@utility vibe-nav-main {
+  @apply hidden md:flex items-center space-x-1;
+}
+
+@utility vibe-nav-lang-divider {
+  @apply flex items-center gap-1 border-l border-border ml-6 pl-6 h-6;
+}
+
+@utility vibe-button-auth {
+  @apply vibe-button-primary h-10 px-6 text-sm;
+}
+
+@utility vibe-status-banner-info-soft {
+  @apply bg-info/5 border-info/20 text-info;
+}
+
+@utility vibe-status-banner-warning-soft {
+  @apply bg-warning/5 border-warning/20 text-warning;
+}
+
+@utility vibe-icon-info {
+  @apply text-info;
+}
+
+@utility vibe-icon-warning {
+  @apply text-warning;
+}
+
+@utility vibe-bg-select {
+  @apply appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[length:1.25em_1.25em] bg-no-repeat;
+}
+
+@utility vibe-focus-error {
+  @apply focus:ring-error/20 focus:border-error;
+}
+
+@utility vibe-mt-1-5 {
+  @apply mt-1.5;
+}
+
+@utility vibe-ml-1 {
+  @apply ml-1;
+}
+
+@utility vibe-pos-toast {
+  @apply fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none;
+}
+
+@utility vibe-toast-item {
+  @apply pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg;
+}
+
+@utility vibe-bg-success-dark {
+  @apply bg-success text-white;
+}
+
+@utility vibe-bg-error-dark {
+  @apply bg-error text-white;
+}
+
+@utility vibe-bg-info-dark {
+  @apply bg-info text-white;
+}
+
+@utility vibe-mt-0-5 {
+  @apply mt-0.5;
+}
+
+@utility vibe-hover-opacity-80 {
+  @apply hover:opacity-80;
+}
+
+@utility vibe-transition-opacity {
+  @apply transition-opacity;
+}
+
+@utility vibe-h-1 {
+  @apply h-1;
+}
+
+@utility vibe-top-6 {
+  @apply top-6;
+}
+
+@utility vibe-grid-2-cols {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-8 items-start;
+}
+
+@utility vibe-status-icon-success {
+  @apply vibe-icon-lg text-success duration-500;
+}
+
+@utility vibe-status-icon-pending {
+  @apply vibe-icon-lg text-primary animate-spin;
+}
+
+/* 🧩 MISC UTILITIES */
+@utility vibe-divider-pt2 {
+  @apply border-b border-border pt-2;
+}
+
+@utility vibe-divider-pt4 {
+  @apply border-t border-border pt-4 mt-4;
+}
+
+@utility vibe-badge-mono {
+  @apply bg-muted/50 rounded-lg p-3 text-xs font-mono text-muted-foreground border border-border/50 break-all;
+}
+
+@utility vibe-relative-full {
+  @apply relative w-full;
+}
+
+@utility vibe-h3-bold {
+  @apply text-xl font-bold mb-6 text-foreground;
+}
+
+/* 🧭 404 PAGE */
+@utility vibe-404-container {
+  @apply min-h-[70vh] flex items-center justify-center py-12 px-4;
+}
+
+@utility vibe-404-bg-text {
+  @apply text-9xl font-black text-primary opacity-10 select-none tracking-tighter;
+}
+
+@utility vibe-404-title {
+  @apply text-4xl font-extrabold text-foreground tracking-tight;
+}
+
+/* 👨‍💻 ADMIN TOKENS */
+@utility vibe-admin-text-main {
+  @apply text-foreground;
+}
+
+@utility vibe-admin-text-subtle {
+  @apply text-muted-foreground;
+}
+
+/* 📂 FOOTER */
+@utility vibe-footer {
+  @apply bg-background border-t border-border mt-auto;
+}
+
+@utility vibe-footer-title {
+  @apply text-lg font-bold mb-4 text-primary;
+}
+
+@utility vibe-footer-subtitle {
+  @apply font-semibold mb-4;
+}
+
+@utility vibe-footer-link {
+  @apply hover:text-primary transition-colors;
+}
+
+/* 🚀 FINAL ROOT & SKELETON UTILITIES */
+@utility vibe-text-9xl {
+  @apply text-9xl font-bold;
+}
+
+@utility vibe-mt-n-12 {
+  @apply -mt-12;
+}
+
+@utility vibe-h-10 {
+  @apply h-10;
+}
+
+@utility vibe-w-48 {
+  @apply w-48;
+}
+
+@utility vibe-w-96 {
+  @apply w-96;
+}
+
+@utility vibe-bg-muted-50 {
+  @apply bg-muted/50;
+}
+
+@utility vibe-bg-muted-30 {
+  @apply bg-muted/30;
+}
+
+@utility vibe-grid-responsive-shop {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8;
+}
+
+@utility vibe-text-semibold {
+  @apply font-semibold;
+}
+
+@utility vibe-button-buy-now {
+  @apply vibe-button-secondary bg-foreground text-background hover:opacity-90;
+}
+
+@utility vibe-stack-y-6 {
+  @apply space-y-6;
+}
+
+@utility vibe-stack-y-3 {
+  @apply space-y-3;
+}
+
+@utility vibe-rounded-l-none {
+  @apply rounded-l-none;
+}
+
+@utility vibe-md-col-1 {
+  @apply md:col-span-1;
+}
+
+@utility vibe-max-w-md {
+  @apply max-w-md;
+}
+
+@utility vibe-uppercase {
+  @apply uppercase;
+}
+
+@utility vibe-tracking-wide {
+  @apply tracking-wide;
+}
+
+@utility vibe-tracking-tight {
+  @apply tracking-tight;
+}
+
+@utility vibe-leading-relaxed {
+  @apply leading-relaxed;
+}
+
+@utility vibe-mt-8 {
+  @apply mt-8;
+}
+
+@utility vibe-mt-1 {
+  @apply mt-1;
+}
+
+@utility vibe-whitespace-pre-line {
+  @apply whitespace-pre-line;
+}
+
+/* 📜 Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--muted-foreground);
+  opacity: 0.2;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  opacity: 0.4;
 }

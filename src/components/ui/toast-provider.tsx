@@ -1,8 +1,10 @@
 'use client';
 
+import { VIBE_ANIMATION_SLIDE_IN_RIGHT } from '@/lib/vibe-styles';
 import { createContext, useContext, useState, useCallback } from 'react';
 
 import { CheckCircle, X } from 'lucide-react';
+import { cn } from '@/lib/utils/cn';
 
 interface Toast {
   id: string;
@@ -49,25 +51,30 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      <div className="vibe-pos-toast">
         {toasts.map(toast => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg animate-slide-in-right ${
+            role="alert"
+            aria-live="assertive"
+            className={cn(
+              `vibe-toast-item ${VIBE_ANIMATION_SLIDE_IN_RIGHT}`,
               toast.type === 'success'
-                ? 'bg-success text-white'
+                ? 'vibe-bg-success-dark'
                 : toast.type === 'error'
-                  ? 'bg-error text-white'
-                  : 'bg-info text-white'
-            }`}
+                  ? 'vibe-bg-error-dark'
+                  : 'vibe-bg-info-dark'
+            )}
           >
-            {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
-            <span className="font-medium">{toast.message}</span>
+            {toast.type === 'success' && (
+              <CheckCircle className="vibe-icon-md" />
+            )}
+            <span className="vibe-text-medium">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-2 hover:opacity-80 transition-opacity"
+              className="vibe-ml-2 vibe-hover-opacity-80 vibe-transition-opacity"
             >
-              <X className="w-4 h-4" />
+              <X className="vibe-icon-sm" />
             </button>
           </div>
         ))}

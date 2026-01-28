@@ -7,7 +7,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="admin-card text-center py-12">
-        <p className="text-gray-500">Settings page coming soon...</p>
+        <p className="vibe-admin-text-subtle">Settings page coming soon...</p>
       </div>
     </div>
   );

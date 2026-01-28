@@ -1,20 +1,22 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
+import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useTranslations } from 'next-intl';
 import AddressAutocomplete from './AddressAutocomplete';
 import { trackEvent } from '@/lib/analytics/tracker';
 import { formatPrice } from '@/lib/utils/currency';
 
 import { env } from '@/lib/env';
 import { siteTokens } from '@/styles/themes/tokens';
+import { CheckoutAddress, ShippingRate } from '@/lib/types/checkout';
+
+import { OrderSummary } from './OrderSummary';
+import { AddressSection } from './AddressSection';
+import { ShippingSection } from './ShippingSection';
+import { PaymentSection } from './PaymentSection';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -24,39 +26,6 @@ interface CheckoutClientProps {
   locale: string;
   initialTotal: number;
   currency: string;
-  translations: {
-    title: string;
-    shippingAddress: string;
-    shippingMethod: string;
-    payment: string;
-    payNow: string;
-    loading: string;
-    error: string;
-    orderSummary: string;
-    subtotal: string;
-    shipping: string;
-    totalToPay: string;
-    confirmAddress: string;
-    calculating: string;
-    securePayment: string;
-    fullName: string;
-    phone: string;
-    addressLine1: string;
-    addressLine2: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    selectState: string;
-    statePlaceholder: string;
-    validation: {
-      phone: string;
-    };
-    geography: {
-      CA: Record<string, string>;
-      US: Record<string, string>;
-    };
-  };
   userEmail?: string | null | undefined;
   summaryItems?: Array<{
     name: string;
@@ -72,10 +41,10 @@ export function CheckoutClient({
   locale,
   initialTotal,
   currency,
-  translations: t,
   userEmail,
   summaryItems,
 }: CheckoutClientProps) {
+  const t = useTranslations('Checkout');
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -109,17 +78,17 @@ export function CheckoutClient({
       .then(res => res.json())
       .then(data => {
         if (data.clientSecret) setClientSecret(data.clientSecret);
-        else setError('Failed to init payment');
+        else setError(t('errorInit'));
       });
   }, [cartId, currency, directVariantId, directQuantity]);
 
   if (error)
     return (
-      <div className="p-4 text-red-500">
-        {t.error}: {error}
+      <div className="vibe-p-4 vibe-text-error">
+        {t('error')}: {error}
       </div>
     );
-  if (!clientSecret) return <div className="p-4">{t.loading}</div>;
+  if (!clientSecret) return <div className="vibe-p-4">{t('loading')}</div>;
 
   return (
     <Elements
@@ -153,7 +122,6 @@ export function CheckoutClient({
       <CheckoutForm
         clientSecret={clientSecret}
         currency={currency}
-        translations={t}
         locale={locale}
         initialTotal={initialTotal}
         userEmail={userEmail}
@@ -169,39 +137,6 @@ interface CheckoutFormProps {
   currency: string;
   locale: string;
   initialTotal: number;
-  translations: {
-    title: string;
-    shippingAddress: string;
-    shippingMethod: string;
-    payment: string;
-    payNow: string;
-    loading: string;
-    error: string;
-    orderSummary: string;
-    subtotal: string;
-    shipping: string;
-    totalToPay: string;
-    confirmAddress: string;
-    calculating: string;
-    securePayment: string;
-    fullName: string;
-    phone: string;
-    addressLine1: string;
-    addressLine2: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-    selectState: string;
-    statePlaceholder: string;
-    validation: {
-      phone: string;
-    };
-    geography: {
-      CA: Record<string, string>;
-      US: Record<string, string>;
-    };
-  };
   userEmail?: string | null | undefined;
   cartId: string;
   summaryItems?: Array<{
@@ -218,15 +153,15 @@ export function CheckoutForm({
   currency,
   locale,
   initialTotal,
-  translations: t,
   userEmail,
   cartId,
   summaryItems,
 }: CheckoutFormProps) {
+  const t = useTranslations('Checkout');
   const stripe = useStripe();
   const elements = useElements();
-  const [shippingRates, setShippingRates] = useState<any[]>([]);
-  const [selectedRate, setSelectedRate] = useState<any>(null);
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
+  const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -238,7 +173,7 @@ export function CheckoutForm({
     useState(false);
 
   // States for address and contact
-  const [tempAddress, setTempAddress] = useState<any>({
+  const [tempAddress, setTempAddress] = useState<CheckoutAddress>({
     line1: '',
     line2: '',
     city: '',
@@ -275,13 +210,16 @@ export function CheckoutForm({
     }
   }, [selectedRate, initialTotal]);
 
-  const updatePaymentIntent = async (rate: any, shippingDetailsArg?: any) => {
+  const updatePaymentIntent = async (
+    rate: ShippingRate,
+    shippingDetailsArg?: any
+  ) => {
     try {
       setSelectedRate(rate);
       const paymentIntentId = clientSecret.split('_secret_')[0];
 
       const detailsToSend = shippingDetailsArg || {
-        name: tempName || 'Customer',
+        name: tempName || t('anonymousCustomer'),
         street1: tempAddress.line1,
         street2: tempAddress.line2 || '',
         city: tempAddress.city,
@@ -315,7 +253,7 @@ export function CheckoutForm({
     if (!isAddressReady || !tempAddress) return;
 
     if (!phone || phone.length < 10) {
-      alert(t.validation.phone);
+      alert(t('validation.phone'));
       return;
     }
 
@@ -331,14 +269,14 @@ export function CheckoutForm({
       const addressPayload = {
         cartId: cartId,
         addressTo: {
-          name: tempName || 'Customer',
+          name: tempName || t('anonymousCustomer'),
           street1: tempAddress.line1,
           street2: tempAddress.line2 || '',
           city: tempAddress.city,
           state: tempAddress.state,
           zip: tempAddress.postal_code,
           country: tempAddress.country,
-          email: userEmail || 'customer@example.com',
+          email: userEmail || '',
           phone: formattedPhone,
         },
       };
@@ -367,14 +305,14 @@ export function CheckoutForm({
     }
   };
 
-  const handleRateSelect = async (rate: any) => {
+  const handleRateSelect = async (rate: ShippingRate) => {
     const cleanPhone = phone.replace(/\D/g, '');
     const stripePhone = cleanPhone.startsWith('1')
       ? cleanPhone
       : `1${cleanPhone}`;
 
     await updatePaymentIntent(rate, {
-      name: tempName || 'Customer',
+      name: tempName || t('anonymousCustomer'),
       street1: tempAddress.line1,
       street2: tempAddress.line2 || '',
       city: tempAddress.city,
@@ -403,14 +341,12 @@ export function CheckoutForm({
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 lg:p-8">
-      <h1 className="text-4xl font-extrabold mb-10 text-foreground animate-in fade-in slide-in-from-left-4 duration-500">
-        {t.title}
-      </h1>
+    <div className="vibe-layout-container vibe-section-py">
+      <h1 className="vibe-page-header">{t('title')}</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="vibe-grid-layout">
         {/* Left Column: Address & Shipping */}
-        <div className="lg:col-span-12 xl:col-span-8 space-y-8">
+        <div className="vibe-grid-main-xl">
           <AddressSection
             tempAddress={tempAddress}
             setTempAddress={setTempAddress}
@@ -421,7 +357,6 @@ export function CheckoutForm({
             isAddressReady={isAddressReady}
             isLoading={isLoading}
             onCalculateShipping={handleCalculateShipping}
-            translations={t}
           />
 
           {hasAttemptedShippingRatesFetch && (
@@ -430,32 +365,29 @@ export function CheckoutForm({
               selectedRate={selectedRate}
               isLoading={isLoading}
               onRateSelect={handleRateSelect}
-              translations={t}
               locale={locale}
             />
           )}
         </div>
 
         {/* Right Column: Summary & Payment */}
-        <div className="lg:col-span-12 xl:col-span-4 h-full">
-          <div className="sticky top-8 space-y-6">
+        <div className="vibe-grid-side-xl">
+          <div className="vibe-checkout-sidebar">
             <OrderSummary
               summaryItems={summaryItems}
               initialTotal={initialTotal}
               total={total}
               currency={currency}
               locale={locale}
-              translations={t}
               selectedRate={selectedRate}
             />
 
-            <div className="bg-card p-6 rounded-xl shadow-lg border border-border">
+            <div className="vibe-container-sm vibe-shadow-lg">
               <PaymentSection
                 stripe={stripe}
                 elements={elements}
                 selectedRate={selectedRate}
                 onPay={handlePay}
-                translations={t}
                 userEmail={userEmail}
               />
             </div>
@@ -465,9 +397,3 @@ export function CheckoutForm({
     </div>
   );
 }
-
-// Sub-components are now in separate files for better maintainability.
-import { OrderSummary } from './OrderSummary';
-import { AddressSection } from './AddressSection';
-import { ShippingSection } from './ShippingSection';
-import { PaymentSection } from './PaymentSection';

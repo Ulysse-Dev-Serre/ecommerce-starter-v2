@@ -7,18 +7,17 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center px-4">
-        <h1 className="text-9xl font-bold text-muted opacity-30">404</h1>
-        <div className="-mt-12 relative">
-          <h2 className="text-2xl font-semibold mb-2">Page non trouvée</h2>
-          <p className="text-muted-foreground mb-8">
+    <div className="vibe-min-h-screen vibe-flex-center vibe-bg-background">
+      <div className="vibe-text-center vibe-px-4">
+        <h1 className="vibe-text-9xl vibe-text-muted vibe-opacity-30">404</h1>
+        <div className="vibe-mt-n-12 vibe-relative">
+          <h2 className="vibe-text-2xl vibe-text-semibold vibe-mb-2">
+            Page non trouvée
+          </h2>
+          <p className="vibe-text-muted-foreground vibe-mb-8">
             La page que vous cherchez n&apos;existe pas.
           </p>
-          <Link
-            href="/"
-            className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors"
-          >
+          <Link href="/" className="vibe-button-primary vibe-px-6 vibe-py-3">
             Retour à l&apos;accueil
           </Link>
         </div>

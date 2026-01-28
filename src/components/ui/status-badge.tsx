@@ -1,4 +1,5 @@
 import { OrderStatus } from '@/generated/prisma';
+import { cn } from '@/lib/utils/cn';
 
 interface StatusBadgeProps {
   status: string | OrderStatus;
@@ -7,29 +8,29 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, label, className }: StatusBadgeProps) {
-  const getStatusColor = (s: string) => {
+  const getStatusClass = (s: string) => {
     switch (s) {
       case 'PAID':
-        return 'bg-success/10 text-success border-success/20';
+        return 'vibe-badge-success';
       case 'SHIPPED':
       case 'IN_TRANSIT':
-        return 'bg-info/10 text-info border-info/20';
+        return 'vibe-badge-info';
       case 'DELIVERED':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'vibe-badge-primary';
       case 'CANCELLED':
       case 'REFUNDED':
-        return 'bg-error/10 text-error border-error/20';
+        return 'vibe-badge-error';
       case 'REFUND_REQUESTED':
-        return 'bg-error text-white animate-pulse shadow-md border-error/80';
+        return 'vibe-badge-urgent';
       case 'PENDING':
       default:
-        return 'bg-muted text-muted-foreground border-border';
+        return 'vibe-badge-muted';
     }
   };
 
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border shadow-sm ${getStatusColor(status as string)} ${className || ''}`}
+      className={cn('vibe-badge', getStatusClass(status as string), className)}
     >
       {label || status}
     </span>

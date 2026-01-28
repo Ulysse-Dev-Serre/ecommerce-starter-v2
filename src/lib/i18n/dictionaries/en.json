@@ -1,8 +1,10 @@
 {
   "home": {
     "heroTitle": "Your Store",
+    "heroSubtitle": "Discover our exclusive selection of products.",
     "featuredProducts": "Featured Products",
-    "noFeaturedProducts": "No featured products at the moment."
+    "noFeaturedProducts": "No featured products at the moment.",
+    "viewAll": "View all"
   },
   "common": {
     "signIn": "Sign in",
@@ -75,7 +77,8 @@
     "cart": "Cart",
     "wishlist": "Wishlist",
     "account": "My account",
-    "orders": "My orders"
+    "orders": "My orders",
+    "dashboard": "Dashboard"
   },
   "products": {
     "title": "Products",
@@ -93,6 +96,7 @@
   },
   "shop": {
     "title": "Shop",
+    "description": "Browse our full catalog of high-quality products.",
     "addToCart": "Add",
     "viewOptions": "View options",
     "noImage": "No image"
@@ -101,6 +105,7 @@
     "title": "Cart",
     "empty": "Your cart is empty",
     "emptyCart": "Your cart is empty",
+    "emptyCartIcon": "🛒",
     "total": "Total",
     "sku": "SKU",
     "quantity": "Quantity",
@@ -319,6 +324,8 @@
     "payNow": "Pay Now",
     "loading": "Loading checkout...",
     "error": "Error initializing checkout",
+    "errorInit": "Failed to initialize payment",
+    "anonymousCustomer": "Customer",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
@@ -331,8 +338,9 @@
     "addressLine1": "Address (Line 1)",
     "addressLine2": "Apartment, suite, etc. (optional)",
     "city": "City",
+    "addressPlaceholder": "Start typing your address...",
     "state": "State / Province",
-    "zipCode": "Zip / Postal Code",
+    "zipCode": "ZIP / Postal Code",
     "country": "Country",
     "selectState": "Select...",
     "statePlaceholder": "State / Province",
@@ -531,7 +539,8 @@
     "backToShop": "Back to shop",
     "error": "An error occurred while verifying the order.",
     "timeout": "Order verification timeout. Please check your email for confirmation.",
-    "noId": "No session or payment ID provided."
+    "noId": "No session or payment ID provided.",
+    "redirecting": "Redirecting..."
   },
   "adminDashboard": {
     "analytics": {
@@ -702,7 +711,10 @@
       "viewAll": "View All",
       "noRecentOrders": "No orders",
       "revenueOverview": "Revenue Overview",
-      "last7Days": "Last 7 days"
+      "last7Days": "Last 7 days",
+      "time": {
+        "daysShort": "d"
+      }
     }
   }
 }

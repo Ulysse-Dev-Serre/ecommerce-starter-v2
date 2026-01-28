@@ -8,6 +8,7 @@
 :root {
   /* Brand Colors */
   --primary: #3b82f6;
+  --primary-foreground: #ffffff;
   /* blue-500 */
   --primary-hover: #2563eb;
   /* blue-600 */
@@ -29,6 +30,8 @@
   /* Neutrals */
   --background: #ffffff;
   --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
   /* slate-900 */
   --muted: #f8fafc;
   /* slate-50 */
@@ -40,4 +43,22 @@
   /* Typography */
   --font-heading: 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  /* 🧱 Aesthetic Tokens - CENTRALIZED DESIGN OPINION */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-button: var(--radius-md);
+
+  --font-weight-thin: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-button: var(--shadow-sm);
 }

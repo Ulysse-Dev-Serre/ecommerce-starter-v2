@@ -3,6 +3,11 @@ import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import { ProductCard } from '@/components/product/product-card';
+import { cn } from '@/lib/utils/cn';
+import { SUPPORTED_LOCALES } from '@/lib/constants';
+import Link from 'next/link';
+import { Search } from 'lucide-react';
+import { ShopPagination } from '@/components/shop/shop-pagination';
 
 interface ShopPageProps {
   params: Promise<{ locale: string }>;
@@ -17,16 +22,14 @@ export async function generateMetadata({
 
   return {
     title: t('title'),
+    description: t('description'),
     alternates: {
       canonical: `/${locale}/shop`,
-      languages: {
-        fr: '/fr/shop',
-        en: '/en/shop',
-      },
+      languages: Object.fromEntries(
+        SUPPORTED_LOCALES.map(loc => [loc, `/${loc}/shop`])
+      ),
     },
-    openGraph: {
-      title: t('title'),
-    },
+    openGraph: { title: t('title') },
   };
 }
 
@@ -51,42 +54,41 @@ export default async function ShopPage({
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
+    <div className="vibe-layout-container vibe-section-py vibe-animate-fade-in">
+      <div className="vibe-mb-12 vibe-section-divider-bottom vibe-pb-8">
+        <h1 className="vibe-page-header vibe-text-foreground">{t('title')}</h1>
+        <p className="vibe-text-muted vibe-mt-2 vibe-text-lg">
+          {t('description')}
+        </p>
+      </div>
 
       {products.length === 0 ? (
-        <div className="text-center py-20 bg-muted/50 rounded-lg">
-          <p className="text-xl text-muted-foreground">
-            {t('noProducts') || 'No products found'}
+        <div className="vibe-info-box">
+          <Search className="vibe-w-16 vibe-h-16 vibe-text-muted-soft vibe-mb-4" />
+          <p className="vibe-text-price-xl vibe-text-muted vibe-text-medium">
+            {t('noProducts')}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product: any) => (
-            <ProductCard key={product.id} product={product} locale={locale} />
+        <div className="vibe-grid-4-cols">
+          {products.map((product: any, idx: number) => (
+            <div
+              key={product.id}
+              className="vibe-animate-slide-in-bottom"
+              style={{ animationDelay: `${idx * 50}ms` }}
+            >
+              <ProductCard product={product} locale={locale} />
+            </div>
           ))}
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
-        <div className="mt-12 flex justify-center gap-2">
-          {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-            p => (
-              <a
-                key={p}
-                href={`/${locale}/shop?page=${p}${category ? `&category=${category}` : ''}`}
-                className={`px-4 py-2 rounded-md font-medium transition-colors ${
-                  p === pagination.page
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted hover:bg-border text-foreground'
-                }`}
-              >
-                {p}
-              </a>
-            )
-          )}
-        </div>
-      )}
+      <ShopPagination
+        totalPages={pagination.totalPages}
+        currentPage={pagination.page}
+        locale={locale}
+        categorySlug={category}
+      />
     </div>
   );
 }

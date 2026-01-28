@@ -1,16 +1,38 @@
+import { VIBE_ANIMATION_SLIDE_IN_BOTTOM } from '@/lib/vibe-styles';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Metadata } from 'next';
+import { ArrowRight } from 'lucide-react';
 
 import { Language, ProductStatus } from '@/generated/prisma';
-import { ProductActions } from '@/components/cart/product-actions';
-import { PriceDisplay } from '@/components/price-display';
 import { getProducts } from '@/lib/services/product.service';
+import { ProductCard } from '@/components/product/product-card';
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/constants';
 
 // Disable static generation for this page (requires DB)
 export const dynamic = 'force-dynamic';
 
 interface HomeProps {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: HomeProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'Metadata' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: `/${locale}`,
+      languages: {
+        ...Object.fromEntries(SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`])),
+        'x-default': `/${DEFAULT_LOCALE}`,
+      },
+    },
+  };
 }
 
 export default async function Home({
@@ -37,99 +59,44 @@ export default async function Home({
   );
 
   return (
-    <div className="flex-1">
-      <section className="bg-gradient-to-r from-muted to-background py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold">{t('heroTitle')}</h1>
+    <div className="vibe-flex-1">
+      <section className="vibe-hero-section">
+        <div className="vibe-layout-container text-center">
+          <h1 className="vibe-hero-title">{t('heroTitle')}</h1>
+          <p className="vibe-hero-subtitle">{t('heroSubtitle')}</p>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold mb-8 text-center">
-            {t('featuredProducts')}
-          </h2>
+      <section className="vibe-section-py">
+        <div className="vibe-layout-container">
+          <div className="vibe-flex-between-items-end vibe-mb-12">
+            <div>
+              <h2 className="vibe-h2">{t('featuredProducts')}</h2>
+              <div className="vibe-divider" />
+            </div>
+            <Link href={`/${locale}/shop`} className="vibe-link-action">
+              {t('viewAll')}{' '}
+              <ArrowRight className="vibe-inline-block vibe-icon-sm vibe-ml-1" />
+            </Link>
+          </div>
 
           {featuredProducts.length === 0 ? (
-            <p className="text-center text-muted-foreground">
-              {t('noFeaturedProducts')}
-            </p>
+            <div className="vibe-info-box">
+              <p className="vibe-text-price-xl vibe-text-muted">
+                {t('noFeaturedProducts')}
+              </p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {featuredProducts.map(product => {
-                const translation = product.translations.find(
-                  t => t.language === language
-                );
-                const primaryImage = product.media?.find(m => m.isPrimary);
-                const firstVariant = product.variants?.[0];
-                const pricing = firstVariant?.pricing ?? [];
-
-                return (
-                  <div
-                    key={product.id}
-                    className="group border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <Link href={`/${locale}/product/${product.slug}`}>
-                      <div className="aspect-square bg-muted relative overflow-hidden">
-                        {primaryImage ? (
-                          <img
-                            src={primaryImage.url}
-                            alt={primaryImage.alt || translation?.name || ''}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
-                            {tShop('noImage')}
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                    <div className="p-4">
-                      <Link href={`/${locale}/product/${product.slug}`}>
-                        <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                          {translation?.name || product.slug}
-                        </h3>
-                      </Link>
-                      {translation?.shortDescription && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {translation.shortDescription}
-                        </p>
-                      )}
-                      <div className="mb-3">
-                        {pricing.length > 0 && (
-                          <PriceDisplay
-                            pricing={pricing.map(p => ({
-                              price: p.price.toString(),
-                              currency: p.currency,
-                            }))}
-                            className="text-lg font-bold"
-                            locale={locale}
-                          />
-                        )}
-                      </div>
-                      {firstVariant &&
-                        (product.variants.length > 1 ? (
-                          <Link
-                            href={`/${locale}/product/${product.slug}`}
-                            className="w-full inline-block text-center bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary-hover transition-colors"
-                          >
-                            {tShop('viewOptions')}
-                          </Link>
-                        ) : (
-                          <ProductActions
-                            variantId={firstVariant.id}
-                            locale={locale}
-                            disabled={!firstVariant.id}
-                            compact={true}
-                            showQuantitySelector={true}
-                            maxQuantity={firstVariant.inventory?.stock || 99}
-                            productName={translation?.name || product.slug}
-                          />
-                        ))}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="vibe-grid-4-cols">
+              {featuredProducts.map((product, idx) => (
+                <div
+                  key={product.id}
+                  className={VIBE_ANIMATION_SLIDE_IN_BOTTOM}
+                  style={{ animationDelay: `${idx * 100}ms` }}
+                >
+                  <ProductCard product={product} locale={locale} />
+                </div>
+              ))}
             </div>
           )}
         </div>

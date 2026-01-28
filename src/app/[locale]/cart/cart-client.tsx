@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
+import { ShoppingCart } from 'lucide-react';
 
 import { CartItem } from '@/components/cart/CartItem';
 import { CartSummary } from '@/components/cart/CartSummary';
@@ -65,17 +67,12 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="text-center py-24 bg-card rounded-2xl border border-dashed border-border animate-in fade-in zoom-in duration-500">
-        <div className="mb-6 text-6xl">🛒</div>
-        <p className="text-2xl font-bold text-foreground mb-4">
-          {t('emptyCart')}
-        </p>
-        <a
-          href={`/${locale}/shop`}
-          className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary-hover transition-all shadow-md shadow-primary/10"
-        >
+      <div className="vibe-empty-state">
+        <ShoppingCart className="vibe-empty-state-icon" />
+        <p className="vibe-empty-state-title">{t('emptyCart')}</p>
+        <Link href={`/${locale}/shop`} className="vibe-empty-state-button">
           {t('continueShopping')}
-        </a>
+        </Link>
       </div>
     );
   }
@@ -86,9 +83,9 @@ export function CartClient({ cart, locale }: CartClientProps) {
   }));
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-      <div className="lg:col-span-8 space-y-6">
-        <div className="flex flex-col gap-4">
+    <div className="vibe-grid-layout">
+      <div className="vibe-grid-main">
+        <div className="vibe-list-stack">
           {cart.items.map(item => (
             <CartItem
               key={item.id}
@@ -101,7 +98,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
         </div>
       </div>
 
-      <div className="lg:col-span-4 h-full">
+      <div className="vibe-grid-side">
         <CartSummary
           items={summaryItems}
           locale={locale}

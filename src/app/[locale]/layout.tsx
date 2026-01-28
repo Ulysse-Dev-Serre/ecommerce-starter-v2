@@ -32,6 +32,8 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/constants';
+
 export async function generateMetadata({
   params,
 }: {
@@ -51,9 +53,8 @@ export async function generateMetadata({
     alternates: {
       canonical: `/${locale}`,
       languages: {
-        fr: '/fr',
-        en: '/en',
-        'x-default': '/en',
+        ...Object.fromEntries(SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`])),
+        'x-default': `/${DEFAULT_LOCALE}`,
       },
     },
   };
@@ -103,7 +104,7 @@ export default async function RootLayout({
   const content = (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} vibe-antialiased flex vibe-flex-col vibe-min-h-screen`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleTagManager />
@@ -114,7 +115,7 @@ export default async function RootLayout({
           <ToastProvider>
             <CartMergeHandler />
             <ConditionalNavbar locale={locale} userRole={userRole} />
-            <main className="flex-grow">{children}</main>
+            <main className="vibe-flex-grow">{children}</main>
             <ConditionalFooter locale={locale} />
           </ToastProvider>
           <Script

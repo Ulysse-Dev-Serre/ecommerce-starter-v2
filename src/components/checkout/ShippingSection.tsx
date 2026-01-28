@@ -1,11 +1,21 @@
+import {
+  VIBE_ANIMATION_FADE_IN,
+  VIBE_ANIMATION_ZOOM_IN,
+  VIBE_ANIMATION_SLIDE_IN_RIGHT,
+  VIBE_ANIMATION_SLIDE_IN_BOTTOM,
+  VIBE_HOVER_GROUP,
+} from '@/lib/vibe-styles';
 import { formatPrice } from '@/lib/utils/currency';
+import { useTranslations } from 'next-intl';
+
+import { ShippingRate } from '@/lib/types/checkout';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ShippingSectionProps {
-  shippingRates: any[];
-  selectedRate: any;
+  shippingRates: ShippingRate[];
+  selectedRate: ShippingRate | null;
   isLoading: boolean;
-  onRateSelect: (rate: any) => void;
-  translations: any;
+  onRateSelect: (rate: ShippingRate) => void;
   locale: string;
 }
 
@@ -14,25 +24,34 @@ export function ShippingSection({
   selectedRate,
   isLoading,
   onRateSelect,
-  translations: t,
   locale,
 }: ShippingSectionProps) {
+  const t = useTranslations('Checkout');
   return (
-    <section className="bg-card p-6 rounded-xl shadow-sm border border-border animate-in slide-in-from-bottom-4 duration-500">
-      <h2 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2 border-b border-border pb-4">
-        {t.shippingMethod}
-      </h2>
+    <section className={`vibe-section-card ${VIBE_ANIMATION_SLIDE_IN_BOTTOM}`}>
+      <h2 className="vibe-section-header">{t('shippingMethod')}</h2>
 
       {isLoading ? (
-        <div className="text-center py-12 bg-muted/50 rounded-xl border border-border/50 animate-pulse">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
-          <p className="text-muted-foreground font-medium">
-            Calcul des frais de port...
-          </p>
+        <div className="vibe-list-container">
+          {[1, 2].map(i => (
+            <div
+              key={i}
+              className={`${VIBE_HOVER_GROUP} vibe-selectable-card vibe-selectable-card-inactive vibe-flex-between-center`}
+            >
+              <div className="vibe-flex-items-center-gap-4">
+                <Skeleton className="vibe-skeleton-icon" />
+                <div className="vibe-stack-y-2">
+                  <Skeleton className="vibe-skeleton-text-md" />
+                  <Skeleton className="vibe-skeleton-text-sm" />
+                </div>
+              </div>
+              <Skeleton className="vibe-skeleton-price" />
+            </div>
+          ))}
         </div>
       ) : shippingRates.length > 0 ? (
-        <div className="space-y-3">
-          {shippingRates.map((rate: any, index: number) => {
+        <div className="vibe-stack-y-3">
+          {shippingRates.map((rate: ShippingRate, index: number) => {
             const rateId = rate.object_id || rate.objectId;
             const selectedId =
               selectedRate?.object_id || selectedRate?.objectId;
@@ -41,38 +60,36 @@ export function ShippingSection({
             return (
               <div
                 key={rateId || index}
-                className={`relative p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 group
-                  ${
-                    isSelected
-                      ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20'
-                      : 'border-border bg-background hover:border-primary/50 hover:bg-accent/50'
-                  }`}
+                className={`${VIBE_HOVER_GROUP} vibe-selectable-card ${isSelected ? 'vibe-selectable-card-selected' : 'vibe-selectable-card-inactive'}`}
                 onClick={() => onRateSelect(rate)}
               >
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex items-center gap-4">
+                <div className="vibe-flex-between-center vibe-relative-full">
+                  <div className="vibe-flex-items-center-gap-4">
                     {/* Radio Circle */}
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300
-                        ${isSelected ? 'border-primary bg-primary' : 'border-border group-hover:border-primary/50'}`}
+                      className={
+                        isSelected
+                          ? 'vibe-custom-radio vibe-custom-radio-selected'
+                          : 'vibe-custom-radio vibe-custom-radio-inactive'
+                      }
                     >
                       {isSelected && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary-foreground" />
+                        <div className="vibe-custom-radio-inner" />
                       )}
                     </div>
 
                     <div>
-                      <div className="font-bold text-foreground">
+                      <div className="vibe-text-bold-foreground">
                         {rate.displayName || rate.servicelevel.name}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="vibe-text-xs-muted">
                         {rate.duration_terms || rate.displayTime}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="font-bold text-xl text-foreground">
-                      {formatPrice(rate.amount, rate.currency, locale)}
+                  <div className="vibe-text-right">
+                    <div className="vibe-text-price-xl">
+                      {formatPrice(rate.amount, rate.currency as any, locale)}
                     </div>
                   </div>
                 </div>
@@ -81,17 +98,16 @@ export function ShippingSection({
           })}
         </div>
       ) : (
-        <div className="text-center py-12 bg-muted/50 rounded-xl border border-dashed border-border group">
-          <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
-            📍
+        <div className={`${VIBE_HOVER_GROUP} vibe-empty-placeholder`}>
+          <div className="vibe-empty-icon">📍</div>
+          <p className="vibe-text-xs-muted vibe-container-sm">
+            {t('enterAddressToSeeShipping')}
+          </p>
+          <div className="vibe-flex-between-center vibe-text-muted">
+            <span className="vibe-text-medium">
+              {t('addressRequiredFields')}
+            </span>
           </div>
-          <p className="text-muted-foreground max-w-sm mx-auto">
-            Veuillez saisir une adresse complète pour voir les options de
-            livraison.
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-2">
-            (Pays, Rue, Ville, Province, Code Postal)
-          </p>
         </div>
       )}
     </section>
