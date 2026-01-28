@@ -33,7 +33,12 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
         {image ? (
           <Image
             src={image}
-            alt={primaryImage?.alt || translation?.name || product.slug}
+            alt={
+              primaryImage?.alt ||
+              translation?.name ||
+              product.slug ||
+              t('productImage')
+            }
             fill
             className="vibe-object-cover group-hover:vibe-scale-110 vibe-transition-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

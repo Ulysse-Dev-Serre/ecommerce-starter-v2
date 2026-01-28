@@ -1,7 +1,6 @@
-import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { prisma } from '@/lib/db/prisma';
+import { getCurrentUser } from '@/lib/services/user.service';
 import { getUserOrders } from '@/lib/services/order.service';
 import { getTranslations } from 'next-intl/server';
 import { SUPPORTED_LOCALES } from '@/lib/constants';
@@ -35,16 +34,8 @@ export default async function OrdersPage({
   params,
 }: OrdersPageProps): Promise<React.ReactElement> {
   const { locale } = await params;
-  const { userId: clerkId } = await auth();
 
-  if (!clerkId) {
-    redirect(`/${locale}/sign-in`);
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true },
-  });
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect(`/${locale}/sign-in`);

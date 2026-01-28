@@ -64,7 +64,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
         showToast(t('itemRemoved'), 'success');
         router.refresh();
       } else {
-        throw new Error('Failed to remove item');
+        throw new Error(t('errorRemovingItem'));
       }
     } catch (error) {
       showToast(t('errorRemovingItem'), 'error');

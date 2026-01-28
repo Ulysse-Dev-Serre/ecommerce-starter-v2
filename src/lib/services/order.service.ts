@@ -303,6 +303,20 @@ export async function getOrderById(orderId: string, userId: string) {
   return order;
 }
 
+/**
+ * Get minimal order data for SEO/Metadata
+ */
+export async function getOrderMetadata(idOrNumber: string) {
+  return prisma.order.findFirst({
+    where: {
+      OR: [{ id: idOrNumber }, { orderNumber: idOrNumber }],
+    },
+    select: {
+      orderNumber: true,
+    },
+  });
+}
+
 export async function getOrderByNumber(orderNumber: string, userId: string) {
   const order = await prisma.order.findUnique({
     where: { orderNumber },

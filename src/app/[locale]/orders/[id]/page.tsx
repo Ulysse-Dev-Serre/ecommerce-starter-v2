@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 
-import { auth } from '@clerk/nextjs/server';
-
-import { prisma } from '@/lib/db/prisma';
-import { getOrderDetailsWithData } from '@/lib/services/order.service';
+import {
+  getOrderDetailsWithData,
+  getOrderMetadata,
+} from '@/lib/services/order.service';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { getCurrentUser } from '@/lib/services/user.service';
 import { OrderDetailContent } from '@/components/orders/order-detail-content';
 
 export const dynamic = 'force-dynamic';
@@ -22,12 +23,8 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'Orders.detail' });
 
   // On essaie de récupérer le vrai numéro de commande si possible, sinon titre générique
-  // Note: On ne fait pas de gestion d'erreur complexe ici car c'est juste pour le titre
   try {
-    const order = await prisma.order.findUnique({
-      where: { id },
-      select: { orderNumber: true },
-    });
+    const order = await getOrderMetadata(id);
 
     if (order?.orderNumber) {
       return {
@@ -56,16 +53,8 @@ export default async function OrderDetailPage({
 }: OrderDetailPageProps): Promise<React.ReactElement> {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { userId: clerkId } = await auth();
 
-  if (!clerkId) {
-    redirect(`/${locale}/sign-in`);
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true, firstName: true, email: true },
-  });
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect(`/${locale}/sign-in`);

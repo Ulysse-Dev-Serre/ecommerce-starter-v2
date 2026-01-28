@@ -126,7 +126,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
                 className="vibe-nav-admin-link"
                 onClick={() => handleNavigationClick(`/${locale}/admin`)}
               >
-                📊 {tNavbar('dashboard')}
+                {tNavbar('dashboard')}
               </Link>
             )}
 

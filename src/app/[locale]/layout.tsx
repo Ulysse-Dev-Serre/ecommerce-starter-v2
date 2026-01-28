@@ -8,7 +8,7 @@ import { getTranslations, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { siteConfig } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
-import { prisma } from '@/lib/db/prisma';
+import { getCurrentUser } from '@/lib/services/user.service';
 import { Navbar } from '@/components/layout/navbar';
 import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
 import { ConditionalFooter } from '@/components/layout/conditional-footer';
@@ -85,18 +85,8 @@ export default async function RootLayout({
   // Récupérer le rôle de l'utilisateur si Clerk est actif
   let userRole: string | undefined;
   if (hasValidClerkKey) {
-    try {
-      const { userId: clerkId } = await auth();
-      if (clerkId) {
-        const user = await prisma.user.findUnique({
-          where: { clerkId },
-          select: { role: true },
-        });
-        userRole = user?.role;
-      }
-    } catch (error) {
-      userRole = undefined;
-    }
+    const user = await getCurrentUser();
+    userRole = user?.role;
   }
 
   const content = (

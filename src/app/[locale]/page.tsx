@@ -61,7 +61,7 @@ export default async function Home({
   return (
     <div className="vibe-flex-1">
       <section className="vibe-hero-section">
-        <div className="vibe-layout-container text-center">
+        <div className="vibe-layout-container vibe-text-center">
           <h1 className="vibe-hero-title">{t('heroTitle')}</h1>
           <p className="vibe-hero-subtitle">{t('heroSubtitle')}</p>
         </div>
