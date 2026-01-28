@@ -20,7 +20,7 @@ interface CheckoutSuccessClientProps {
 export function CheckoutSuccessClient({
   locale,
 }: CheckoutSuccessClientProps): React.ReactElement {
-  const t = useTranslations('CheckoutSuccess');
+  const t = useTranslations('checkoutSuccess');
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const paymentIntentId = searchParams.get('payment_intent');
@@ -117,9 +117,9 @@ export function CheckoutSuccessClient({
           )}
         </div>
 
-        <h1 className="vibe-status-title vibe-text-h1-status">
+        <h2 className="vibe-status-title vibe-text-h1-status">
           {orderConfirmed ? t('redirecting') : t('processing')}
-        </h1>
+        </h2>
 
         <p className="vibe-status-desc vibe-text-p-status">
           {orderConfirmed ? t('title') : t('waitMessage')}

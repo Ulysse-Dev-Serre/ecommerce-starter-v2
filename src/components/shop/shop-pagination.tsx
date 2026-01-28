@@ -18,20 +18,26 @@ export function ShopPagination({
 
   return (
     <div className="vibe-mt-20 vibe-flex-center vibe-gap-3">
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-        <Link
-          key={p}
-          href={`/${locale}/shop?page=${p}${categorySlug ? `&category=${categorySlug}` : ''}`}
-          className={cn(
-            'vibe-pagination-item',
-            p === currentPage
-              ? 'vibe-pagination-active'
-              : 'vibe-pagination-inactive'
-          )}
-        >
-          {p}
-        </Link>
-      ))}
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => {
+        const isPrev = p === currentPage - 1;
+        const isNext = p === currentPage + 1;
+
+        return (
+          <Link
+            key={p}
+            href={`/${locale}/shop?page=${p}${categorySlug ? `&category=${categorySlug}` : ''}`}
+            rel={isPrev ? 'prev' : isNext ? 'next' : undefined}
+            className={cn(
+              'vibe-pagination-item',
+              p === currentPage
+                ? 'vibe-pagination-active'
+                : 'vibe-pagination-inactive'
+            )}
+          >
+            {p}
+          </Link>
+        );
+      })}
     </div>
   );
 }

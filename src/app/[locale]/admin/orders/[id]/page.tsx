@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { OrderHeader } from '@/components/admin/orders/order-header';
 import { OrderItemsTable } from '@/components/admin/orders/order-items-table';
 import { OrderSummary } from '@/components/admin/orders/order-summary';

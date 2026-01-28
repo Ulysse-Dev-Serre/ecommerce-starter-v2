@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
-import { logger } from '../logger';
+import { logger } from '@/lib/core/logger';
 
 type ApiHandler = (...args: any[]) => Promise<NextResponse> | NextResponse;
 

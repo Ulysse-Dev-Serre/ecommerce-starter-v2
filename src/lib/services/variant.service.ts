@@ -1,7 +1,7 @@
 import { Prisma, Language } from '../../generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
-import { SITE_CURRENCY } from '../constants';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
+import { SITE_CURRENCY } from '@/lib/config/site';
 
 // ============================================
 // TYPES

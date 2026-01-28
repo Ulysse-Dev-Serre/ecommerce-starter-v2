@@ -1,5 +1,5 @@
 // src/app/[locale]/layout.tsx
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
@@ -32,7 +32,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/constants';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export async function generateMetadata({
   params,
@@ -40,7 +40,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const t = await getTranslations({ locale, namespace: 'metadata' });
   const baseUrl = env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return {
@@ -92,7 +92,7 @@ export default async function RootLayout({
   const content = (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} vibe-antialiased flex vibe-flex-col vibe-min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} vibe-antialiased vibe-flex vibe-flex-col vibe-min-h-screen`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleTagManager />

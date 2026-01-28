@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { ConversionFunnel } from '@/components/admin/analytics/conversion-funnel';
 import { SourceTable } from '@/components/admin/analytics/source-table';
 import { AnalyticsStatsGrid } from '@/components/admin/analytics/analytics-stats-grid';

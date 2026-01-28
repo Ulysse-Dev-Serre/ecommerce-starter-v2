@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '../../../../lib/db/prisma';
-import { logger } from '../../../../lib/logger';
+import { prisma } from '../../../../lib/core/db';
+import { logger } from '../../../../lib/core/logger';
 import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
 import {

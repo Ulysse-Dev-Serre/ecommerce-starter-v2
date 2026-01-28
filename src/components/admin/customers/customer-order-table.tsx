@@ -16,7 +16,7 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
     locale,
     namespace: 'adminDashboard.customers.detail',
   });
-  const tDetail = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const tDetail = await getTranslations({ locale, namespace: 'orders.detail' });
 
   return (
     <div className="admin-card">

@@ -6,7 +6,7 @@ import {
   getOrderMetadata,
 } from '@/lib/services/order.service';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { getCurrentUser } from '@/lib/services/user.service';
 import { OrderDetailContent } from '@/components/orders/order-detail-content';
 
@@ -20,7 +20,7 @@ export async function generateMetadata({
   params,
 }: OrderDetailPageProps): Promise<Metadata> {
   const { locale, id } = await params;
-  const t = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const t = await getTranslations({ locale, namespace: 'orders.detail' });
 
   // On essaie de récupérer le vrai numéro de commande si possible, sinon titre générique
   try {

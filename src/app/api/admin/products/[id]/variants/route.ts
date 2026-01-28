@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import {
   CreateVariantsSchema,
   formatZodErrors,
-} from '@/lib/schemas/product.schema';
+} from '@/lib/validators/product';
 import {
   getProductVariants,
   createVariants,
@@ -108,7 +108,7 @@ async function getVariantsHandler(
  * }
  */
 import { withValidation } from '@/lib/middleware/withValidation';
-import { CreateVariantsInput } from '@/lib/schemas/product.schema';
+import { CreateVariantsInput } from '@/lib/validators/product';
 
 async function createVariantsHandler(
   request: NextRequest,

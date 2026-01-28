@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withValidation } from '@/lib/middleware/withValidation';
@@ -9,7 +9,7 @@ import {
   CreateLocationInput,
 } from '@/lib/validators/admin';
 
-import { SITE_CURRENCY } from '@/lib/constants';
+import { SITE_CURRENCY } from '@/lib/config/site';
 
 async function createLocationHandler(
   req: NextRequest,

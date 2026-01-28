@@ -28,7 +28,7 @@ export function StatusActions({
 }: StatusActionsProps) {
   const router = useRouter();
   const t = useTranslations('adminDashboard.orders.statusActions');
-  const tStatus = useTranslations('Orders.detail');
+  const tStatus = useTranslations('orders.detail');
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

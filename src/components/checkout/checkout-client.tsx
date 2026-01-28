@@ -6,12 +6,16 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 import AddressAutocomplete from './AddressAutocomplete';
-import { trackEvent } from '@/lib/analytics/tracker';
+import { trackEvent } from '@/lib/core/tracker';
 import { formatPrice } from '@/lib/utils/currency';
 
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
+import { logger } from '@/lib/core/logger';
+import { useToast } from '@/components/ui/toast-provider';
 import { siteTokens } from '@/styles/themes/tokens';
 import { CheckoutAddress, ShippingRate } from '@/lib/types/checkout';
+import { API_ROUTES } from '@/lib/config/api-routes';
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
 import { OrderSummary } from './OrderSummary';
 import { AddressSection } from './AddressSection';
@@ -44,7 +48,8 @@ export function CheckoutClient({
   userEmail,
   summaryItems,
 }: CheckoutClientProps) {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
+  const { showToast } = useToast();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,7 +74,7 @@ export function CheckoutClient({
     initialized.current = true;
 
     // Create intent
-    void fetch('/api/checkout/create-intent', {
+    void fetch(API_ROUTES.CHECKOUT.CREATE_INTENT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -161,8 +166,9 @@ export function CheckoutForm({
   cartId,
   summaryItems,
 }: CheckoutFormProps) {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
   const tCommon = useTranslations('common');
+  const { showToast } = useToast();
   const stripe = useStripe();
   const elements = useElements();
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
@@ -244,7 +250,7 @@ export function CheckoutForm({
         email: userEmail,
       };
 
-      await fetch('/api/checkout/update-intent', {
+      await fetch(API_ROUTES.CHECKOUT.UPDATE_INTENT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -255,7 +261,8 @@ export function CheckoutForm({
         }),
       });
     } catch (err) {
-      console.error('Failed to update shipping cost', err);
+      logger.error({ err }, 'Failed to update shipping cost');
+      showToast(t('errorShippingUpdate'), 'error');
     }
   };
 
@@ -263,7 +270,7 @@ export function CheckoutForm({
     if (!isAddressReady || !tempAddress) return;
 
     if (!phone || phone.length < 10) {
-      alert(t('validation.phone'));
+      showToast(t('validation.phone'), 'error');
       return;
     }
 
@@ -291,7 +298,7 @@ export function CheckoutForm({
         },
       };
 
-      const response = await fetch('/api/shipping/rates', {
+      const response = await fetch(API_ROUTES.SHIPPING.RATES, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(addressPayload),
@@ -307,10 +314,11 @@ export function CheckoutForm({
         setShippingRates([]);
         setSelectedRate(null);
         // Stay on address step but show error maybe?
-        alert(t('noShippingRates'));
+        showToast(t('noShippingRates'), 'error');
       }
     } catch (error) {
-      console.error('Error fetching rates:', error);
+      logger.error({ error }, 'Error fetching rates');
+      showToast(t('errorFetchingRates'), 'error');
       setShippingRates([]);
     } finally {
       setIsLoading(false);
@@ -365,79 +373,79 @@ export function CheckoutForm({
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/${locale}/checkout/success`,
+        return_url: `${window.location.origin}/${locale}${NAV_ROUTES.CHECKOUT_SUCCESS}`,
       },
     });
 
     if (result.error) {
-      console.error(result.error.message);
+      logger.error(
+        { error: result.error },
+        result.error.message || 'Payment error'
+      );
+      showToast(result.error.message || t('errorPayment'), 'error');
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="vibe-layout-container vibe-section-py">
-      <h1 className="vibe-page-header">{t('title')}</h1>
+    <div className="vibe-grid-layout">
+      {/* Left Column: Address & Shipping */}
+      <div className="vibe-grid-main-xl">
+        <AddressSection
+          tempAddress={tempAddress}
+          setTempAddress={setTempAddress}
+          tempName={tempName}
+          setTempName={setTempName}
+          phone={phone}
+          setPhone={setPhone}
+          isAddressReady={isAddressReady}
+          isLoading={isLoading}
+          onCalculateShipping={handleCalculateShipping}
+          readOnly={step !== 'address'}
+          onEdit={handleEditAddress}
+        />
 
-      <div className="vibe-grid-layout">
-        {/* Left Column: Address & Shipping */}
-        <div className="vibe-grid-main-xl">
-          <AddressSection
-            tempAddress={tempAddress}
-            setTempAddress={setTempAddress}
-            tempName={tempName}
-            setTempName={setTempName}
-            phone={phone}
-            setPhone={setPhone}
-            isAddressReady={isAddressReady}
-            isLoading={isLoading}
-            onCalculateShipping={handleCalculateShipping}
-            readOnly={step !== 'address'}
-            onEdit={handleEditAddress}
+        {step !== 'address' && (
+          <div
+            className={`vibe-mt-6 ${step === 'shipping' ? 'vibe-animate-fade-in' : ''}`}
+          >
+            <ShippingSection
+              shippingRates={shippingRates}
+              selectedRate={selectedRate}
+              isLoading={isLoading}
+              onRateSelect={handleRateSelect}
+              locale={locale}
+              readOnly={step === 'payment'}
+              onEdit={handleEditShipping}
+              onConfirm={handleConfirmShipping}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Right Column: Summary & Payment */}
+      <div className="vibe-grid-side-xl">
+        <div className="vibe-checkout-sidebar">
+          <OrderSummary
+            summaryItems={summaryItems}
+            initialTotal={initialTotal}
+            total={total}
+            currency={currency}
+            locale={locale}
+            selectedRate={selectedRate}
           />
 
-          {step !== 'address' && (
-            <div
-              className={`vibe-mt-6 ${step === 'shipping' ? 'vibe-animate-fade-in' : ''}`}
-            >
-              <ShippingSection
-                shippingRates={shippingRates}
+          {step === 'payment' && (
+            <div className="vibe-container-sm vibe-shadow-lg vibe-animate-fade-in">
+              <PaymentSection
+                stripe={stripe}
+                elements={elements}
                 selectedRate={selectedRate}
-                isLoading={isLoading}
-                onRateSelect={handleRateSelect}
-                locale={locale}
-                readOnly={step === 'payment'}
-                onEdit={handleEditShipping}
-                onConfirm={handleConfirmShipping}
+                onPay={handlePay}
+                userEmail={userEmail}
               />
             </div>
           )}
-        </div>
-
-        {/* Right Column: Summary & Payment */}
-        <div className="vibe-grid-side-xl">
-          <div className="vibe-checkout-sidebar">
-            <OrderSummary
-              summaryItems={summaryItems}
-              initialTotal={initialTotal}
-              total={total}
-              currency={currency}
-              locale={locale}
-              selectedRate={selectedRate}
-            />
-
-            {step === 'payment' && (
-              <div className="vibe-container-sm vibe-shadow-lg vibe-animate-fade-in">
-                <PaymentSection
-                  stripe={stripe}
-                  elements={elements}
-                  selectedRate={selectedRate}
-                  onPay={handlePay}
-                  userEmail={userEmail}
-                />
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>

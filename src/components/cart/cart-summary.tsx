@@ -9,14 +9,14 @@ import { PriceTotal } from '@/components/price-display';
 import Link from 'next/link';
 import { SignInButton } from '@clerk/nextjs';
 import { ShieldCheck } from 'lucide-react';
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
+
+import { CartPricing } from '@/lib/types/cart';
 
 interface CartSummaryProps {
   items: Array<{
     quantity: number;
-    pricing: Array<{
-      price: string;
-      currency: string;
-    }>;
+    pricing: CartPricing[];
   }>;
   locale: string;
   isSignedIn: boolean;
@@ -24,7 +24,7 @@ interface CartSummaryProps {
 
 export function CartSummary({ items, locale, isSignedIn }: CartSummaryProps) {
   const t = useTranslations('cart');
-  const tCheckout = useTranslations('Checkout');
+  const tCheckout = useTranslations('checkout');
 
   return (
     <div className={`vibe-card vibe-sticky-side-4 ${VIBE_ANIMATION_FADE_IN}`}>
@@ -42,7 +42,7 @@ export function CartSummary({ items, locale, isSignedIn }: CartSummaryProps) {
 
         {isSignedIn ? (
           <Link
-            href={`/${locale}/checkout`}
+            href={`/${locale}${NAV_ROUTES.CHECKOUT}`}
             className="vibe-button-primary vibe-btn-full-lg"
           >
             {t('checkout')}

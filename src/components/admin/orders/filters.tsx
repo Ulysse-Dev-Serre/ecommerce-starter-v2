@@ -56,7 +56,7 @@ function OrderStatusFilter({
   locale: string;
   currentStatus: string;
 }) {
-  const t = useTranslations('Orders.detail');
+  const t = useTranslations('orders.detail');
   const router = useRouter();
   const searchParams = useSearchParams();
 

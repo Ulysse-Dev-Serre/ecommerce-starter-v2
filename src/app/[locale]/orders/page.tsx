@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 import { getCurrentUser } from '@/lib/services/user.service';
 import { getUserOrders } from '@/lib/services/order.service';
 import { getTranslations } from 'next-intl/server';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { OrdersListContent } from '@/components/orders/orders-list-content';
 
 export const dynamic = 'force-dynamic';
@@ -16,7 +16,7 @@ export async function generateMetadata({
   params,
 }: OrdersPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Orders.list' });
+  const t = await getTranslations({ locale, namespace: 'orders.list' });
 
   return {
     title: t('title'),

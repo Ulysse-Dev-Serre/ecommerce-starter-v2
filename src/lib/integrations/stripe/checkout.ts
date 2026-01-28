@@ -1,10 +1,10 @@
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 import Stripe from 'stripe';
-import { SupportedCurrency } from '../constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
-import { toStripeAmount } from '../utils/currency';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
+import { toStripeAmount } from '@/lib/utils/currency';
 import { stripe } from './client';
 
 export type CheckoutCurrency = SupportedCurrency;

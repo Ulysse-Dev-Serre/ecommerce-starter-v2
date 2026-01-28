@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
-import { logger } from '../../../../lib/logger';
+import { logger } from '../../../../lib/core/logger';
 import { withError } from '../../../../lib/middleware/withError';
 import { getUserCount } from '../../../../lib/services/user.service';
 

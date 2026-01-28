@@ -4,12 +4,13 @@ import { getTranslations } from 'next-intl/server';
 
 import { auth } from '@clerk/nextjs/server';
 
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { getCartPageData } from '@/lib/services/cart.service';
 import { getCurrentUser } from '@/lib/services/user.service';
 
 import { CartClient } from './cart-client';
+import { Cart } from '@/lib/types/cart';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,11 @@ export default async function CartPage({
   const user = await getCurrentUser();
   const userId = user?.id;
 
-  const serializedCart = await getCartPageData(userId, anonymousId, locale);
+  const serializedCart: Cart | null = await getCartPageData(
+    userId,
+    anonymousId,
+    locale
+  );
 
   logger.info(
     {

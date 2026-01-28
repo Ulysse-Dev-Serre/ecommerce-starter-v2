@@ -26,7 +26,7 @@ export function RefundRequestForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { showToast } = useToast();
-  const t = useTranslations('Orders.refund');
+  const t = useTranslations('orders.refund');
 
   const handleCancelOrder = async () => {
     if (!confirm(t('confirmCancel'))) return;

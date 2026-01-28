@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { auth } from '@clerk/nextjs/server';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/core/logger';
 import { z } from 'zod';
 
 const schema = z.object({

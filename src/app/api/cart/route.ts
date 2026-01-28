@@ -1,14 +1,14 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../lib/logger';
-import { withError } from '../../../lib/middleware/withError';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
 import {
   OptionalAuthContext,
   withOptionalAuth,
-} from '../../../lib/middleware/withAuth';
-import { getOrCreateCart } from '../../../lib/services/cart.service';
-import { env } from '@/lib/env';
+} from '@/lib/middleware/withAuth';
+import { getOrCreateCart } from '@/lib/services/cart.service';
+import { env } from '@/lib/core/env';
 
 async function getCartHandler(
   request: NextRequest,
@@ -91,10 +91,7 @@ async function getCartHandler(
   return response;
 }
 
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../lib/middleware/withRateLimit';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const GET = withError(
   withOptionalAuth(withRateLimit(getCartHandler, RateLimits.PUBLIC))

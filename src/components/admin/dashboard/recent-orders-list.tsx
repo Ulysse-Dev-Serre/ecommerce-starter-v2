@@ -3,7 +3,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface RecentOrdersListProps {
   orders: any[];
@@ -17,7 +17,7 @@ export async function RecentOrdersList({ orders }: RecentOrdersListProps) {
   });
   const tOrders = await getTranslations({
     locale,
-    namespace: 'Orders.detail',
+    namespace: 'orders.detail',
   });
 
   return (

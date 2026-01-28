@@ -1,8 +1,8 @@
 import Stripe from 'stripe';
 
-import { PaymentMethod, PaymentStatus } from '../../generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
+import { PaymentMethod, PaymentStatus } from '@/generated/prisma';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 
 export async function createPaymentRecord(
   orderId: string,

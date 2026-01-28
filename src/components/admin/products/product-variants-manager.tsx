@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, Trash2, Save } from 'lucide-react';
-import { SUPPORTED_CURRENCIES } from '@/lib/constants';
+import { SUPPORTED_CURRENCIES } from '@/lib/config/site';
 import { Variant, NewVariant } from './product-form';
 
 interface ProductVariantsManagerProps {

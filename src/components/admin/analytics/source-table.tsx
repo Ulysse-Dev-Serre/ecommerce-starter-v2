@@ -1,6 +1,6 @@
 import { useTranslations, useLocale } from 'next-intl';
 import { formatPrice } from '@/lib/utils/currency';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface SourceData {
   source: string;

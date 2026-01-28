@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-import { logger } from '../../../../lib/logger';
-import { withError } from '../../../../lib/middleware/withError';
-import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
-import { withValidation } from '../../../../lib/middleware/withValidation';
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
-import { getOrCreateCart } from '../../../../lib/services/cart.service';
-import { reserveStock } from '../../../../lib/services/inventory.service';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withValidation } from '@/lib/middleware/withValidation';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { getOrCreateCart } from '@/lib/services/cart.service';
+import { reserveStock } from '@/lib/services/inventory.service';
 import {
   createPaymentIntent,
   type CheckoutCurrency,
-} from '../../../../lib/stripe/checkout';
-import { SITE_CURRENCY } from '@/lib/constants';
+} from '@/lib/integrations/stripe/checkout';
+import { SITE_CURRENCY } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
 import {
   createIntentSchema,

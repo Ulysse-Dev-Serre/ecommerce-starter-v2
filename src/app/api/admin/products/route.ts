@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../lib/logger';
-import { AuthContext, withAdmin } from '../../../../lib/middleware/withAuth';
-import { withError } from '../../../../lib/middleware/withError';
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
-import { withValidation } from '../../../../lib/middleware/withValidation';
+import { logger } from '@/lib/core/logger';
+import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { withValidation } from '@/lib/middleware/withValidation';
 import {
   CreateProductSchema,
   CreateProductInput,
-} from '../../../../lib/schemas/product.schema';
-import { Language } from '../../../../generated/prisma';
+} from '@/lib/validators/product';
+import { Language } from '@/generated/prisma';
 import {
   createProduct,
   CreateProductData,
-} from '../../../../lib/services/product.service';
+} from '@/lib/services/product.service';
 
 async function createProductHandler(
   request: NextRequest,

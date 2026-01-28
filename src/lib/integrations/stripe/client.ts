@@ -1,7 +1,7 @@
 import Stripe from 'stripe';
 
-import { logger } from '../logger';
-import { env } from '../env';
+import { logger } from '@/lib/core/logger';
+import { env } from '@/lib/core/env';
 
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-12-18.acacia' as any,

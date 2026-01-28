@@ -1,22 +1,25 @@
 import Stripe from 'stripe';
 
-import { OrderStatus, Language } from '../../generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
-import { createTransaction, getReturnShippingRates } from './shippo';
-import { stripe } from '../../lib/stripe/client';
+import { OrderStatus, Language } from '@/generated/prisma';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
+import {
+  createTransaction,
+  getReturnShippingRates,
+} from '@/lib/integrations/shippo';
+import { stripe } from '@/lib/integrations/stripe/client';
 import { calculateCart, type Currency } from './calculation.service';
 import { CartProjection } from './cart.service';
 import { decrementStock } from './inventory.service';
-import { resend, FROM_EMAIL } from '../../lib/resend';
-import { OrderConfirmationEmail } from '../../components/emails/order-confirmation';
+import { resend, FROM_EMAIL } from '@/lib/core/resend';
+import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
 import { render } from '@react-email/render';
-import { i18n } from '../i18n/config';
-import { env } from '@/lib/env';
-import { SITE_CURRENCY } from '../constants';
+import { i18n } from '@/lib/i18n/config';
+import { env } from '@/lib/core/env';
+import { SITE_CURRENCY } from '@/lib/config/site';
 
-import fr from '../i18n/dictionaries/fr.json';
-import en from '../i18n/dictionaries/en.json';
+import fr from '@/lib/i18n/dictionaries/fr.json';
+import en from '@/lib/i18n/dictionaries/en.json';
 const dictionaries: Record<string, any> = { fr, en };
 
 export interface CreateOrderFromCartInput {
@@ -243,7 +246,7 @@ export async function createOrderFromCart({
   if (env.ADMIN_EMAIL) {
     try {
       const { AdminNewOrderEmail } = await import(
-        '../../components/emails/admin-new-order'
+        '@/components/emails/admin-new-order'
       );
 
       const siteUrl = env.NEXT_PUBLIC_SITE_URL;
@@ -566,7 +569,7 @@ export async function updateOrderStatus(
 
       if (recipientEmail && shipment && shipment.trackingCode) {
         const { OrderShippedEmail } = await import(
-          '../../components/emails/order-shipped'
+          '@/components/emails/order-shipped'
         );
 
         const shippingAddr = order.shippingAddress as any;
@@ -631,7 +634,7 @@ export async function updateOrderStatus(
 
       if (recipientEmail) {
         const { OrderDeliveredEmail } = await import(
-          '../../components/emails/order-delivered'
+          '@/components/emails/order-delivered'
         );
 
         const shippingAddr = order.shippingAddress as any;
@@ -694,7 +697,7 @@ export async function updateOrderStatus(
 
       if (recipientEmail) {
         const { OrderRefundedEmail } = await import(
-          '../../components/emails/order-refunded'
+          '@/components/emails/order-refunded'
         );
 
         const shippingAddr = order.shippingAddress as any;

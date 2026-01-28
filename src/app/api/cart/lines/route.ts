@@ -1,19 +1,16 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../lib/logger';
-import { withError } from '../../../../lib/middleware/withError';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
 import {
   OptionalAuthContext,
   withOptionalAuth,
-} from '../../../../lib/middleware/withAuth';
-import { env } from '@/lib/env';
-import { withValidation } from '../../../../lib/middleware/withValidation';
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
-import { addToCart } from '../../../../lib/services/cart.service';
+} from '@/lib/middleware/withAuth';
+import { env } from '@/lib/core/env';
+import { withValidation } from '@/lib/middleware/withValidation';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { addToCart } from '@/lib/services/cart.service';
 import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
 
 async function addToCartHandler(

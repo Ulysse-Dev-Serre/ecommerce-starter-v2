@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import AddressAutocomplete from './AddressAutocomplete';
 import { Loader2 } from 'lucide-react';
 import { CheckoutAddress } from '@/lib/types/checkout';
-import { SITE_CURRENCY, COUNTRY_TO_CURRENCY } from '@/lib/constants';
+import { SITE_CURRENCY, COUNTRY_TO_CURRENCY } from '@/lib/config/site';
 
 interface AddressSectionProps {
   tempAddress: CheckoutAddress;
@@ -37,7 +37,7 @@ export function AddressSection({
   readOnly = false,
   onEdit,
 }: AddressSectionProps) {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
   const g = useTranslations('geography');
 
   // Determine the target country for this instance based on SITE_CURRENCY

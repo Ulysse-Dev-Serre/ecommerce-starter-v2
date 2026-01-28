@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle, X } from 'lucide-react';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 interface ProductBasicInfoProps {
   formData: {
@@ -31,7 +31,8 @@ export function ProductBasicInfo({
   setTranslations,
   isSlugValid,
   t,
-}: ProductBasicInfoProps) {
+  isEditMode = true,
+}: ProductBasicInfoProps & { isEditMode?: boolean }) {
   const handleTranslationChange = (
     lang: string,
     field: string,
@@ -104,12 +105,18 @@ export function ProductBasicInfo({
                   }))
                 }
                 className="admin-input"
+                disabled={!isEditMode}
               >
                 <option value="DRAFT">{t('draft')}</option>
                 <option value="ACTIVE">{t('active')}</option>
                 <option value="INACTIVE">{t('inactive')}</option>
                 <option value="ARCHIVED">{t('archived')}</option>
               </select>
+              {!isEditMode && (
+                <p className="text-xs text-gray-500 mt-1">
+                  * Statut initial forcé à BROUILLON.
+                </p>
+              )}
             </div>
 
             <div className="flex items-end pb-2">
@@ -135,7 +142,7 @@ export function ProductBasicInfo({
       </div>
 
       <div className="space-y-4">
-        {SUPPORTED_LOCALES.map(lang => (
+        {SUPPORTED_LOCALES.map((lang: string) => (
           <div key={lang} className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               {lang.toUpperCase()}

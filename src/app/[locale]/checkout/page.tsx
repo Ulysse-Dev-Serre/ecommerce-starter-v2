@@ -7,6 +7,7 @@ import { cookies } from 'next/headers';
 import { CheckoutService } from '@/lib/services/checkout.service';
 import { CheckoutClient } from '@/components/checkout/checkout-client';
 import { getCurrentUser } from '@/lib/services/user.service';
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
 interface CheckoutPageProps {
   params: Promise<{ locale: string }>;
@@ -20,7 +21,7 @@ export default async function CheckoutPage({
   const { locale } = await params;
   const { directVariantId, directQuantity } = await searchParams;
 
-  const t = await getTranslations({ locale, namespace: 'Checkout' });
+  const t = await getTranslations({ locale, namespace: 'checkout' });
 
   const user = await getCurrentUser();
   const userId = user?.id;
@@ -39,7 +40,7 @@ export default async function CheckoutPage({
 
   // Si pas de résultat (ex: panier vide ou utilisateur non trouvé), redirection vers le panier
   if (!checkoutSummary) {
-    redirect(`/${locale}/cart`);
+    redirect(`/${locale}${NAV_ROUTES.CART}`);
   }
 
   const {
@@ -53,15 +54,18 @@ export default async function CheckoutPage({
   // Le client devra initialiser Stripe Elements
 
   return (
-    <div className="vibe-flex-grow">
-      <CheckoutClient
-        cartId={currentCartId}
-        locale={locale}
-        initialTotal={initialTotal}
-        currency={currency}
-        userEmail={userEmail}
-        summaryItems={summaryItems}
-      />
+    <div className="vibe-section-py vibe-flex-grow">
+      <div className="vibe-layout-container">
+        <h1 className="vibe-page-header">{t('title')}</h1>
+        <CheckoutClient
+          cartId={currentCartId}
+          locale={locale}
+          initialTotal={initialTotal}
+          currency={currency}
+          userEmail={userEmail}
+          summaryItems={summaryItems}
+        />
+      </div>
     </div>
   );
 }

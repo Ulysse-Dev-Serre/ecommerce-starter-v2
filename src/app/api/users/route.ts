@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { logger } from '../../../lib/logger';
+import { logger } from '../../../lib/core/logger';
 import { withAdmin } from '../../../lib/middleware/withAuth';
 import { withError } from '../../../lib/middleware/withError';
 import { getAllUsers } from '../../../lib/services/user.service';

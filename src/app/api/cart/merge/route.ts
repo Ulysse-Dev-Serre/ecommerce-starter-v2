@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../lib/logger';
-import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
-import { withError } from '../../../../lib/middleware/withError';
-import { env } from '@/lib/env';
-import { mergeAnonymousCartToUser } from '../../../../lib/services/cart.service';
+import { logger } from '@/lib/core/logger';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { env } from '@/lib/core/env';
+import { mergeAnonymousCartToUser } from '@/lib/services/cart.service';
 
 async function mergeCartHandler(
   _request: NextRequest,
@@ -92,10 +92,7 @@ async function mergeCartHandler(
   return response;
 }
 
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const POST = withError(
   withAuth(withRateLimit(mergeCartHandler, RateLimits.PUBLIC))

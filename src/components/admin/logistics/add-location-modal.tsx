@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, MapPin } from 'lucide-react';
-import { Address } from '@/lib/services/shippo';
+import { Address } from '@/lib/integrations/shippo';
 import { useTranslations } from 'next-intl';
 
 interface AddLocationModalProps {

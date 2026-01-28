@@ -16,7 +16,7 @@ import React, { type MouseEvent } from 'react';
 import { ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
-import { logger } from '../../lib/logger';
+import { logger } from '../../lib/core/logger';
 import { i18n } from '../../lib/i18n/config';
 import { siteConfig } from '@/lib/config/site';
 

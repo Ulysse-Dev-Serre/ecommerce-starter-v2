@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SUPPORTED_LOCALES } from '../constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export const createLocationSchema = z.object({
   name: z.string().min(1),

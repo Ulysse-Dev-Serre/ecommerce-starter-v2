@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { UserRole } from '@/generated/prisma';
 import { AdminSidebar } from '@/components/admin/layout/admin-sidebar';
 import { AdminHeader } from '@/components/admin/layout/admin-header';

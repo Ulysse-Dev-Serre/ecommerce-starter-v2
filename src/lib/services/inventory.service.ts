@@ -1,5 +1,5 @@
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 
 export interface ReserveStockInput {
   variantId: string;

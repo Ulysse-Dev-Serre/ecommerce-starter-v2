@@ -32,7 +32,7 @@ export function ShippingSection({
   onEdit,
   onConfirm,
 }: ShippingSectionProps) {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
 
   if (readOnly && selectedRate) {
     return (

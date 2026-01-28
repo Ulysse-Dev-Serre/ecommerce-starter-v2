@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { updateOrderStatus } from '@/lib/services/order.service';
 import { OrderStatus } from '@/generated/prisma';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { withError } from '@/lib/middleware/withError';

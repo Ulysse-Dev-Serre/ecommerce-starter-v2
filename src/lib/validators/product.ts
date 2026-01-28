@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-import { SUPPORTED_LOCALES, PRODUCT_STATUSES } from '../constants';
+import { SUPPORTED_LOCALES, PRODUCT_STATUSES } from '@/lib/config/site';
 
 const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

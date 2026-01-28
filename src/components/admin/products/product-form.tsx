@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/constants';
+import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/config/site';
 
 import { ProductBasicInfo } from './product-basic-info';
 import { ProductMediaManager } from './product-media-manager';
@@ -140,7 +140,7 @@ export function ProductForm({
     const initialTranslations: Record<string, any> = {};
     const productTrans = initialProduct?.translations || [];
 
-    SUPPORTED_LOCALES.forEach(lang => {
+    SUPPORTED_LOCALES.forEach((lang: string) => {
       const existing = productTrans.find(
         pt => pt.language.toLowerCase() === lang.toLowerCase()
       );
@@ -486,6 +486,7 @@ export function ProductForm({
             isSlugValid={isSlugValid}
             t={t}
             tc={tc}
+            isEditMode={isEditMode}
           />
 
           {isEditMode && (
@@ -537,10 +538,11 @@ export function ProductForm({
                 {tc('saveChanges')}
               </button>
               <p className="admin-text-tiny text-center italic">
-                {t('lastUpdated')}:{' '}
-                {initialProduct
-                  ? new Date(initialProduct.updatedAt).toLocaleString()
-                  : '-'}
+                {t('lastUpdated', {
+                  date: initialProduct
+                    ? new Date(initialProduct.updatedAt).toLocaleString()
+                    : '-',
+                })}
               </p>
             </div>
           </div>

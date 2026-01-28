@@ -1,9 +1,21 @@
 import { getTranslations, getFormatter } from 'next-intl/server';
 import { LegalPageTemplate } from '@/components/legal/LegalPageTemplate';
-import { LEGAL_LAST_UPDATED } from '@/lib/constants';
+import { LEGAL_LAST_UPDATED } from '@/lib/config/site';
+import { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'legal.privacyPolicy' });
+
+  return {
+    title: t('title'),
+  };
 }
 
 export default async function PrivacyPage({ params }: PageProps) {

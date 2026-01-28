@@ -20,7 +20,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
         <input
           ref={ref}
           className={cn(
-            'w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed',
+            'vibe-input',
             error ? 'border-error focus:ring-error' : '',
             className
           )}

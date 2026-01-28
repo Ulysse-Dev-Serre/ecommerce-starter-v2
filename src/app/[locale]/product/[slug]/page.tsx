@@ -2,13 +2,16 @@ import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { SITE_CURRENCY, SUPPORTED_LOCALES } from '@/lib/constants';
+import { SITE_CURRENCY, SUPPORTED_LOCALES } from '@/lib/config/site';
 import { Language, ProductStatus } from '@/generated/prisma';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 import { ImageGallery } from '@/components/product/image-gallery';
 import { JsonLd } from '@/components/seo/json-ld';
-import { getProductBySlug } from '@/lib/services/product.service';
+import {
+  getProductBySlug,
+  getProductViewModel,
+} from '@/lib/services/product.service';
 import { ProductClient } from './product-client';
 import { RelatedProducts } from '@/components/product/related-products';
 import { siteConfig } from '@/lib/config/site';
@@ -65,29 +68,8 @@ export default async function ProductPage({
     return notFound();
   }
 
+  const { images, variants } = getProductViewModel(product);
   const translation = product.translations[0];
-  const images = product.media.map(m => ({
-    url: m.url,
-    alt: m.alt,
-    isPrimary: m.isPrimary,
-  }));
-
-  const variants = product.variants.map(v => ({
-    id: v.id,
-    sku: v.sku,
-    pricing: v.pricing.map(p => ({
-      price: p.price,
-      currency: p.currency,
-    })),
-    stock: v.inventory?.stock || 0,
-    attributes: v.attributeValues.map(av => ({
-      name:
-        av.attributeValue?.translations[0]?.displayName ||
-        av.attributeValue?.attribute.key ||
-        '',
-      value: av.attributeValue?.value || '',
-    })),
-  }));
 
   const siteUrl = env.NEXT_PUBLIC_SITE_URL;
   const productUrl = `${siteUrl}/${locale}/product/${product.slug}`;
@@ -114,6 +96,7 @@ export default async function ProductPage({
   };
 
   const tCommon = await getTranslations({ locale, namespace: 'common' });
+  const tProduct = await getTranslations({ locale, namespace: 'product' });
   const tShop = await getTranslations({ locale, namespace: 'shop' });
 
   const breadcrumbJsonLd = {
@@ -177,7 +160,7 @@ export default async function ProductPage({
             {translation?.description && (
               <div className="vibe-pt-8 vibe-section-divider-top">
                 <h3 className="vibe-section-title vibe-text-left vibe-border-none vibe-pb-0">
-                  {tShop('description')}
+                  {tProduct('title')}
                 </h3>
                 <div className={`${VIBE_TYPOGRAPHY_PROSE} vibe-text-muted`}>
                   <p className="vibe-whitespace-pre-line vibe-leading-relaxed">

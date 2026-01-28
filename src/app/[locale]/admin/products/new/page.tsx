@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { ProductForm } from '@/components/admin/products/product-form';
 
 export const dynamic = 'force-dynamic';

@@ -1,6 +1,6 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { formatPrice } from '@/lib/utils/currency';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface OrderSummaryProps {
   subtotal: number;

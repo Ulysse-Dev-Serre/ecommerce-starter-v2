@@ -20,7 +20,7 @@ export function PaymentSection({
   onPay,
   userEmail,
 }: PaymentSectionProps) {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
   return (
     <div className="vibe-section-divider-top vibe-animate-fade-in vibe-duration-700">
       <h3 className="vibe-text-price-xl vibe-mb-6 vibe-text-foreground">

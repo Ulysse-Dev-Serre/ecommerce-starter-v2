@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, Loader2 } from 'lucide-react';
+import { API_ROUTES } from '@/lib/config/api-routes';
 
 interface QuantitySelectorProps {
   cartItemId?: string;
@@ -47,7 +48,7 @@ export function QuantitySelector({
     debounceTimeout.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/cart/lines/${cartItemId}`, {
+        const response = await fetch(API_ROUTES.CART.LINES(cartItemId), {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -106,7 +107,7 @@ export function QuantitySelector({
           onClick={decrement}
           disabled={quantity <= 1 || isLoading}
           className="vibe-quantity-btn"
-          aria-label={t('quantity')}
+          aria-label={t('decreaseQuantity')}
         >
           {isLoading ? (
             <Loader2 className="vibe-icon-xxs vibe-icon-spin" />
@@ -130,7 +131,7 @@ export function QuantitySelector({
           onClick={increment}
           disabled={quantity >= maxQuantity || isLoading}
           className="vibe-quantity-btn"
-          aria-label={t('quantity')}
+          aria-label={t('increaseQuantity')}
         >
           {isLoading ? (
             <Loader2 className="vibe-icon-xxs vibe-icon-spin" />

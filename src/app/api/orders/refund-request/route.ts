@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { render } from '@react-email/render';
 
-import { prisma } from '@/lib/db/prisma';
-import { resend, FROM_EMAIL } from '@/lib/resend';
-import { logger } from '@/lib/logger';
-import { env } from '@/lib/env';
+import { prisma } from '@/lib/core/db';
+import { resend, FROM_EMAIL } from '@/lib/core/resend';
+import { logger } from '@/lib/core/logger';
+import { env } from '@/lib/core/env';
 import RefundRequestAdminEmail from '@/components/emails/refund-request-admin';
 
 import { withError } from '@/lib/middleware/withError';

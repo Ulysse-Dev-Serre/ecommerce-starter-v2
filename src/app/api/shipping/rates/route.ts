@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShippingRates, Address, Parcel } from '@/lib/services/shippo';
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { getShippingRates, Address, Parcel } from '@/lib/integrations/shippo';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 import { withError } from '@/lib/middleware/withError';
 import { withValidation } from '@/lib/middleware/withValidation';
 import {
   shippingRequestSchema,
   ShippingRequestInput,
 } from '@/lib/validators/shipping';
-import { CAD_TO_USD_RATE, SITE_CURRENCY } from '@/lib/constants';
+import { CAD_TO_USD_RATE, SITE_CURRENCY } from '@/lib/config/site';
 
 // Initializing defaults (Will be overridden by DB values if found)
 async function handler(
