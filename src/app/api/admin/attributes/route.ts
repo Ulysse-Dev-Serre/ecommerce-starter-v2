@@ -7,8 +7,8 @@ import { withError } from '../../../../lib/middleware/withError';
 import {
   getProductAttributes,
   createProductAttribute,
-  CreateAttributeData,
-} from '../../../../lib/services/attribute.service';
+  type CreateAttributeData,
+} from '@/lib/services/attributes';
 
 /**
  * GET /api/admin/attributes

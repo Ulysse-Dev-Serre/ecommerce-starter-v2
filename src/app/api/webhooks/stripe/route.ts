@@ -13,7 +13,7 @@ import {
 import {
   alertInvalidSignature,
   alertWebhookFailure,
-} from '@/lib/services/webhook-alert.service';
+} from '@/lib/services/webhooks';
 import {
   generatePayloadHash,
   validateWebhookSignature,

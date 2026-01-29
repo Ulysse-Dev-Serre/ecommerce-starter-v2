@@ -17,7 +17,7 @@ import {
   validateCartForCheckout,
   serializeCalculation,
   type Currency,
-} from '@/lib/services/calculation.service';
+} from '@/lib/services/calculations';
 
 /**
  * GET /api/cart/calculate
