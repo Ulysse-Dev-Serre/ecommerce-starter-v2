@@ -86,37 +86,92 @@ export async function getOrderDetailsWithData(
     .map(item => item.productId)
     .filter((id): id is string => !!id);
 
-  const products = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: {
-      id: true,
-      slug: true,
-      translations: {
-        where: { language: locale.toUpperCase() as Language },
-        select: {
-          name: true,
+  const variantIds = order.items
+    .map(item => item.variantId)
+    .filter((id): id is string => !!id);
+
+  const [products, variants] = await Promise.all([
+    prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: {
+        id: true,
+        slug: true,
+        translations: {
+          where: { language: locale.toUpperCase() as Language },
+          select: { name: true },
+        },
+        media: {
+          where: { isPrimary: true },
+          take: 1,
         },
       },
-      media: {
-        where: { isPrimary: true },
-        take: 1,
+    }),
+    prisma.productVariant.findMany({
+      where: { id: { in: variantIds } },
+      select: {
+        id: true,
+        productId: true,
+        attributeValues: {
+          select: {
+            attributeValue: {
+              select: {
+                value: true,
+                attribute: {
+                  select: {
+                    key: true,
+                    translations: {
+                      where: { language: locale.toUpperCase() as Language },
+                      select: { name: true },
+                    },
+                  },
+                },
+                translations: {
+                  where: { language: locale.toUpperCase() as Language },
+                  select: { displayName: true },
+                },
+              },
+            },
+          },
+        },
       },
-    },
-  });
+    }),
+  ]);
 
-  const productData = products.reduce(
-    (acc, product) => {
-      acc[product.id] = {
-        image: product.media[0]?.url,
-        slug: product.slug,
-        name: product.translations[0]?.name,
+  // Créer un dictionnaire pour accès rapide par variantId
+  const itemData = variants.reduce(
+    (acc, variant) => {
+      const product = products.find(p => p.id === variant.productId);
+      const attributes = variant.attributeValues.map(av => ({
+        name:
+          av.attributeValue?.attribute.translations[0]?.name ||
+          av.attributeValue?.attribute.key ||
+          '',
+        value:
+          av.attributeValue?.translations[0]?.displayName ||
+          av.attributeValue?.value ||
+          '',
+      }));
+
+      acc[variant.id] = {
+        image: product?.media[0]?.url,
+        slug: product?.slug || '',
+        name: product?.translations[0]?.name || '',
+        attributes, // Liste structurée pour éviter le hardcoding visuel
       };
       return acc;
     },
-    {} as Record<string, { image?: string; slug: string; name?: string }>
+    {} as Record<
+      string,
+      {
+        image?: string;
+        slug: string;
+        name: string;
+        attributes: { name: string; value: string }[];
+      }
+    >
   );
 
-  return { order, productData };
+  return { order, itemData };
 }
 
 /**

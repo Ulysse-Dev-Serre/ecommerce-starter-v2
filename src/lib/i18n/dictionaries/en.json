@@ -429,7 +429,8 @@
       "trackPackage": "Track Package",
       "apartment": "Apt / Suite",
       "productFallback": "Product",
-      "standardShipping": "Standard Shipping"
+      "standardShipping": "Standard Shipping",
+      "variant": "Variant"
     },
     "refund": {
       "clientFallback": "Customer",

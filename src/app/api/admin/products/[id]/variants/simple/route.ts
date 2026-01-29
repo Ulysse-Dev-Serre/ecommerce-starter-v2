@@ -4,10 +4,8 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import {
-  createSimpleVariants,
-  SimpleVariantData,
-} from '@/lib/services/variant.service';
+import { createSimpleVariants } from '@/lib/services/variants';
+import type { SimpleVariantData } from '@/lib/types/domain/variant';
 
 /**
  * POST /api/admin/products/[id]/variants/simple

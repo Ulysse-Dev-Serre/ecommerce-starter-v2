@@ -60,7 +60,7 @@ export default async function OrderDetailPage({
     redirect(`/${locale}/sign-in`);
   }
 
-  const { order, productData } = await getOrderDetailsWithData(
+  const { order, itemData } = await getOrderDetailsWithData(
     id,
     user.id,
     locale
@@ -71,7 +71,7 @@ export default async function OrderDetailPage({
       order={order}
       user={user}
       locale={locale}
-      productData={productData}
+      itemData={itemData}
     />
   );
 }

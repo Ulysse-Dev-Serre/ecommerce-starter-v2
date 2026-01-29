@@ -1,253 +1,19 @@
-import { Prisma, Language } from '../../generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { SITE_CURRENCY } from '@/lib/config/site';
-
-// ============================================
-// TYPES
-// ============================================
-
-export interface SimpleVariantData {
-  nameEN: string;
-  nameFR: string;
-  prices: Record<string, number>; // { CAD: 10, USD: 8, ... }
-  stock: number;
-  weight?: number | null;
-  length?: number | null;
-  width?: number | null;
-  height?: number | null;
-}
-
-const GENERIC_ATTRIBUTE_KEY = 'variant_type';
-
-export interface VariantAttributeValue {
-  attributeValueId: string;
-}
-
-export interface VariantPricing {
-  price: number;
-  currency?: string;
-  priceType?: string;
-  isActive?: boolean;
-}
-
-export interface VariantInventory {
-  stock: number;
-  trackInventory?: boolean;
-  allowBackorder?: boolean;
-  lowStockThreshold?: number;
-}
-
-export interface CreateVariantData {
-  sku: string;
-  barcode?: string;
-  weight?: number;
-  dimensions?: { length?: number; width?: number; height?: number };
-  attributeValueIds: string[]; // Exactement 1 ID
-  prices?: Record<string, number>; // New generic pricing
-  pricing?: VariantPricing; // Legacy / Fallback
-  inventory?: VariantInventory;
-}
-
-export interface UpdateVariantData {
-  sku?: string;
-  barcode?: string;
-  weight?: number | null;
-  dimensions?: {
-    length?: number | null;
-    width?: number | null;
-    height?: number | null;
-  } | null;
-  pricing?: VariantPricing; // Legacy / Fallback
-  prices?: Record<string, number>; // New generic format
-  inventory?: VariantInventory;
-}
-
-export interface GenerateVariantsConfig {
-  attributeId: string; // Attribut unique (couleur, type, etc.)
-  defaultPricing: VariantPricing;
-  defaultInventory?: VariantInventory;
-  skuPattern?: string; // Ex: "SOIL-{attr}"
-}
-
-// ============================================
-// FONCTIONS UTILITAIRES
-// ============================================
-
-/**
- * Assure qu'un attribut générique "variant_type" existe
- * Crée l'attribut s'il n'existe pas, sinon le retourne
- */
-async function ensureGenericVariantAttribute() {
-  let attribute = await prisma.productAttribute.findUnique({
-    where: { key: GENERIC_ATTRIBUTE_KEY },
-  });
-
-  if (!attribute) {
-    logger.info(
-      {
-        action: 'create_generic_attribute',
-        key: GENERIC_ATTRIBUTE_KEY,
-      },
-      "Création de l'attribut générique variant_type"
-    );
-
-    attribute = await prisma.productAttribute.create({
-      data: {
-        key: GENERIC_ATTRIBUTE_KEY,
-        inputType: 'select',
-        isRequired: true,
-        sortOrder: 0,
-        translations: {
-          create: [
-            { language: Language.EN, name: 'Variant' },
-            { language: Language.FR, name: 'Variante' },
-          ],
-        },
-      },
-    });
-  }
-
-  return attribute;
-}
-
-/**
- * Crée ou récupère une valeur d'attribut pour un nom de variante
- */
-async function ensureAttributeValue(
-  attributeId: string,
-  valueKey: string,
-  nameEN: string,
-  nameFR: string
-) {
-  let attributeValue = await prisma.productAttributeValue.findUnique({
-    where: {
-      attributeId_value: {
-        attributeId,
-        value: valueKey,
-      },
-    },
-  });
-
-  if (!attributeValue) {
-    attributeValue = await prisma.productAttributeValue.create({
-      data: {
-        attributeId,
-        value: valueKey,
-        translations: {
-          create: [
-            { language: Language.EN, displayName: nameEN },
-            { language: Language.FR, displayName: nameFR },
-          ],
-        },
-      },
-    });
-  }
-
-  return attributeValue;
-}
-
-/**
- * Génère un SKU automatique basé sur l'attribut
- */
-function generateSku(
-  productSlug: string,
-  attrValue: string,
-  pattern?: string
-): string {
-  if (pattern) {
-    return pattern
-      .replace('{product}', productSlug.toUpperCase())
-      .replace('{attr}', attrValue.toUpperCase());
-  }
-
-  // Pattern par défaut: PRODUCTSLUG-ATTR
-  return `${productSlug.toUpperCase()}-${attrValue.toUpperCase()}`;
-}
-
-/**
- * Valide qu'une variante a exactement 1 attribut
- */
-function validateVariantAttributes(attributeValueIds: string[]): void {
-  if (attributeValueIds.length !== 1) {
-    throw new Error(
-      `Une variante doit avoir exactement 1 attribut (reçu ${attributeValueIds.length})`
-    );
-  }
-}
-
-// ============================================
-// GÉNÉRATION AUTOMATIQUE DE VARIANTES
-// ============================================
-
-/**
- * Génère toutes les variantes possibles pour 1 attribut
- */
-export async function generateVariantCombinations(
-  productId: string,
-  config: GenerateVariantsConfig
-): Promise<CreateVariantData[]> {
-  logger.info(
-    {
-      productId,
-      attributeId: config.attributeId,
-    },
-    'Génération des variantes'
-  );
-
-  // Récupérer le produit avec son slug
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-    select: { slug: true },
-  });
-
-  if (!product) {
-    throw new Error(`Produit non trouvé: ${productId}`);
-  }
-
-  // Récupérer les valeurs de l'attribut
-  const attrValues = await prisma.productAttributeValue.findMany({
-    where: { attributeId: config.attributeId },
-    select: { id: true, value: true },
-  });
-
-  if (attrValues.length === 0) {
-    throw new Error(
-      `Aucune valeur trouvée pour l'attribut ${config.attributeId}`
-    );
-  }
-
-  // Générer une variante pour chaque valeur
-  const variants: CreateVariantData[] = [];
-
-  for (const attrValue of attrValues) {
-    const sku = generateSku(product.slug, attrValue.value, config.skuPattern);
-
-    variants.push({
-      sku,
-      attributeValueIds: [attrValue.id],
-      pricing: { ...config.defaultPricing },
-      inventory: config.defaultInventory
-        ? { ...config.defaultInventory }
-        : { stock: 0, trackInventory: true },
-    });
-  }
-
-  logger.info(
-    {
-      productId,
-      variantsGenerated: variants.length,
-      attrValuesCount: attrValues.length,
-    },
-    `${variants.length} variante(s) générée(s)`
-  );
-
-  return variants;
-}
-
-// ============================================
-// API SIMPLIFIÉE POUR VARIANTES MANUELLES
-// ============================================
+import {
+  SimpleVariantData,
+  CreateVariantData,
+  UpdateVariantData,
+  VariantWithRelations,
+} from '@/lib/types/domain/variant';
+import {
+  ensureGenericVariantAttribute,
+  ensureAttributeValue,
+  getVariantById,
+} from './variant-management.service';
+import { validateVariantAttributes } from './variant-generator.service';
 
 /**
  * Créer des variantes simples avec noms EN/FR
@@ -255,7 +21,7 @@ export async function generateVariantCombinations(
 export async function createSimpleVariants(
   productId: string,
   variants: SimpleVariantData[]
-) {
+): Promise<VariantWithRelations[]> {
   logger.info(
     {
       productId,
@@ -337,9 +103,9 @@ export async function createSimpleVariants(
         dimensions:
           variantData.length || variantData.width || variantData.height
             ? {
-                length: variantData.length || 0,
-                width: variantData.width || 0,
-                height: variantData.height || 0,
+                length: Number(variantData.length) || 0,
+                width: Number(variantData.width) || 0,
+                height: Number(variantData.height) || 0,
               }
             : undefined,
         attributeValues: {
@@ -386,12 +152,8 @@ export async function createSimpleVariants(
     `${createdVariants.length} variante(s) simple(s) créée(s)`
   );
 
-  return createdVariants;
+  return createdVariants as unknown as VariantWithRelations[];
 }
-
-// ============================================
-// CRUD VARIANTES
-// ============================================
 
 /**
  * Créer une ou plusieurs variantes pour un produit
@@ -399,7 +161,7 @@ export async function createSimpleVariants(
 export async function createVariants(
   productId: string,
   variants: CreateVariantData[]
-) {
+): Promise<VariantWithRelations[]> {
   logger.info(
     {
       productId,
@@ -513,88 +275,7 @@ export async function createVariants(
     `${createdVariants.length} variante(s) créée(s) avec succès`
   );
 
-  return createdVariants;
-}
-
-/**
- * Récupérer toutes les variantes d'un produit
- */
-export async function getProductVariants(productId: string) {
-  logger.info({ productId }, 'Récupération des variantes du produit');
-
-  return prisma.productVariant.findMany({
-    where: {
-      productId,
-      deletedAt: null,
-    },
-    include: {
-      attributeValues: {
-        include: {
-          attributeValue: {
-            include: {
-              attribute: {
-                include: {
-                  translations: true,
-                },
-              },
-              translations: true,
-            },
-          },
-        },
-      },
-      pricing: {
-        where: { isActive: true },
-      },
-      inventory: true,
-      media: {
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-    orderBy: { createdAt: 'asc' },
-  });
-}
-
-/**
- * Récupérer une variante par ID
- */
-export async function getVariantById(variantId: string) {
-  logger.info({ variantId }, 'Récupération de la variante');
-
-  return prisma.productVariant.findFirst({
-    where: {
-      id: variantId,
-      deletedAt: null,
-    },
-    include: {
-      product: {
-        select: {
-          id: true,
-          slug: true,
-        },
-      },
-      attributeValues: {
-        include: {
-          attributeValue: {
-            include: {
-              attribute: {
-                include: {
-                  translations: true,
-                },
-              },
-              translations: true,
-            },
-          },
-        },
-      },
-      pricing: {
-        where: { isActive: true },
-      },
-      inventory: true,
-      media: {
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-  });
+  return createdVariants as unknown as VariantWithRelations[];
 }
 
 /**
@@ -603,7 +284,7 @@ export async function getVariantById(variantId: string) {
 export async function updateVariant(
   variantId: string,
   updateData: UpdateVariantData
-) {
+): Promise<VariantWithRelations | null> {
   logger.info({ variantId }, 'Mise à jour de la variante');
 
   // Vérifier que la variante existe
@@ -627,9 +308,9 @@ export async function updateVariant(
   }
 
   // Transaction pour mettre à jour variante + pricing + inventory
-  const updatedVariant = await prisma.$transaction(async tx => {
+  await prisma.$transaction(async tx => {
     // Mise à jour de la variante elle-même
-    const updated = await tx.productVariant.update({
+    await tx.productVariant.update({
       where: { id: variantId },
       data: {
         ...variantUpdate,
@@ -659,7 +340,7 @@ export async function updateVariant(
     if (updateData.prices) {
       for (const [currency, price] of Object.entries(updateData.prices)) {
         const currentPricing = variant.pricing.find(
-          p => p.currency === currency
+          (p: any) => p.currency === currency
         );
         if (currentPricing) {
           await tx.productVariantPricing.update({
@@ -694,14 +375,12 @@ export async function updateVariant(
         },
       });
     }
-
-    return updated;
   });
 
   logger.info(
     {
       variantId,
-      sku: updatedVariant.sku,
+      sku: variantUpdate.sku || variant.sku,
     },
     'Variante mise à jour avec succès'
   );
