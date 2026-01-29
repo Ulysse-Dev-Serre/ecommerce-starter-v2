@@ -10,7 +10,7 @@ import {
 import { env } from '@/lib/core/env';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { addToCart } from '@/lib/services/cart.service';
+import { addToCart } from '@/lib/services/cart';
 import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 

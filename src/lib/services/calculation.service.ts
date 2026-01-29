@@ -1,7 +1,7 @@
 import { Decimal } from '@prisma/client/runtime/library';
 
 import { logger } from '@/lib/core/logger';
-import { CartProjection } from './cart.service';
+import { CartProjection } from '@/lib/types/domain/cart';
 
 import { SUPPORTED_CURRENCIES } from '@/lib/config/site';
 import { SupportedCurrency } from '@/lib/config/site';

@@ -11,7 +11,7 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { getOrCreateCart } from '@/lib/services/cart.service';
+import { getOrCreateCart } from '@/lib/services/cart';
 import {
   calculateCart,
   validateCartForCheckout,

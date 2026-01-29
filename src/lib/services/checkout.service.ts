@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/core/db';
 import { SITE_CURRENCY } from '@/lib/config/site';
-import { getOrCreateCart } from '@/lib/services/cart.service';
+import { getOrCreateCart } from '@/lib/services/cart';
 import { Language } from '@/generated/prisma';
 
 export interface CheckoutSummaryParams {
