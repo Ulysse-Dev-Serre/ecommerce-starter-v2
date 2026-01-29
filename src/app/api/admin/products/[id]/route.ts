@@ -10,8 +10,8 @@ import {
   getProductByIdSimple,
   updateProduct,
   deleteProduct,
-  UpdateProductData,
-} from '@/lib/services/product.service';
+} from '@/lib/services/products';
+import { UpdateProductData } from '@/lib/types/domain/product';
 
 /**
  * GET /api/admin/products/[id]
