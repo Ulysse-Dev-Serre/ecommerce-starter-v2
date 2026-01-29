@@ -61,7 +61,7 @@ async function handler(request: NextRequest) {
   const newStatus = isCancellation ? 'CANCELLED' : 'REFUND_REQUESTED';
 
   // Mettre à jour le statut via le service centralisé
-  const { updateOrderStatus } = await import('@/lib/services/order.service');
+  const { updateOrderStatus } = await import('@/lib/services/orders');
   await updateOrderStatus(
     order.id,
     newStatus as any,

@@ -5,7 +5,7 @@ import { Metadata } from 'next';
 import { ArrowRight } from 'lucide-react';
 
 import { Language, ProductStatus } from '@/generated/prisma';
-import { getProducts } from '@/lib/services/product.service';
+import { getProducts } from '@/lib/services/products';
 import { ProductCard } from '@/components/product/product-card';
 import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/config/site';
 

@@ -1,4 +1,5 @@
-import { getProducts, ProductProjection } from '@/lib/services/product.service';
+import { getProducts } from '@/lib/services/products';
+import { ProductProjection } from '@/lib/types/domain/product';
 import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';

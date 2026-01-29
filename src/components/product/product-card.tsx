@@ -6,7 +6,7 @@ import { ProductActions } from '@/components/cart/product-actions';
 import { getTranslations } from 'next-intl/server';
 import { Package } from 'lucide-react';
 
-import { ProductProjection } from '@/lib/services/product.service';
+import { ProductProjection } from '@/lib/types/domain/product';
 
 interface ProductCardProps {
   product: ProductProjection;
