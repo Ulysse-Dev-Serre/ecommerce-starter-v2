@@ -8,10 +8,8 @@ import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getOrCreateCart } from '@/lib/services/cart';
 import { reserveStock } from '@/lib/services/inventory.service';
-import {
-  createPaymentIntent,
-  type CheckoutCurrency,
-} from '@/lib/integrations/stripe/checkout';
+import { createPaymentIntent } from '@/lib/services/payments';
+import { CheckoutCurrency } from '@/lib/types/domain/checkout';
 import { SITE_CURRENCY } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
 import {
@@ -114,7 +112,7 @@ async function createIntentHandler(
     logger.info(
       {
         requestId,
-        paymentIntentId: paymentIntent.id,
+        paymentIntentId: paymentIntent.paymentIntentId,
         createdIntentFull: JSON.stringify(paymentIntent, null, 2),
         isDirect: !!directItem,
       },
@@ -122,7 +120,7 @@ async function createIntentHandler(
     );
 
     return NextResponse.json({
-      clientSecret: paymentIntent.client_secret,
+      clientSecret: paymentIntent.clientSecret,
       amount: paymentIntent.amount,
       currency: paymentIntent.currency,
     });

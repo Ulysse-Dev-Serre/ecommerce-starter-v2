@@ -88,12 +88,12 @@ async function handleShippoWebhook(request: NextRequest) {
           'Shippo Webhook: Marking order as DELIVERED'
         );
 
-        await updateOrderStatus(
+        await updateOrderStatus({
           orderId,
-          OrderStatus.DELIVERED,
-          'Shippo Webhook: Delivered',
-          'SYSTEM'
-        );
+          status: OrderStatus.DELIVERED,
+          comment: 'Shippo Webhook: Delivered',
+          userId: 'SYSTEM',
+        });
 
         return NextResponse.json({
           received: true,

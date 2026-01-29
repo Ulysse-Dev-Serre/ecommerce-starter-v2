@@ -1,33 +1,32 @@
-import { env } from '@/lib/core/env';
-import Stripe from 'stripe';
-import { SupportedCurrency } from '@/lib/config/site';
-
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { Language } from '@/generated/prisma';
+import { env } from '@/lib/core/env';
 import { toStripeAmount } from '@/lib/utils/currency';
-import { stripe } from './client';
+import { stripe } from '@/lib/integrations/stripe/client';
+import { StripeCheckoutInput } from '@/lib/types/domain/checkout';
+import Stripe from 'stripe';
 
-export type CheckoutCurrency = SupportedCurrency;
+/**
+ * Crée une session Stripe Checkout
+ * Utilisé pour le mode "Checkout Session" (redirection vers Stripe)
+ *
+ * @param input - Paramètres de session checkout
+ * @returns Session Stripe créée
+ */
+export async function createCheckoutSession(
+  input: StripeCheckoutInput
+): Promise<Stripe.Checkout.Session> {
+  const {
+    items,
+    currency,
+    userId,
+    cartId,
+    anonymousId,
+    successUrl,
+    cancelUrl,
+  } = input;
 
-export interface CreateCheckoutSessionParams {
-  items: Array<{ variantId: string; quantity: number }>;
-  currency: CheckoutCurrency;
-  userId?: string;
-  cartId?: string;
-  anonymousId?: string;
-  successUrl: string;
-  cancelUrl: string;
-}
-
-export async function createCheckoutSession({
-  items,
-  currency,
-  userId,
-  cartId,
-  anonymousId,
-  successUrl,
-  cancelUrl,
-}: CreateCheckoutSessionParams): Promise<Stripe.Checkout.Session> {
   // Récupérer les détails des variants depuis la DB
   const variants = await prisma.productVariant.findMany({
     where: {
@@ -160,116 +159,4 @@ export async function createCheckoutSession({
   );
 
   return session;
-}
-
-export interface CreatePaymentIntentParams {
-  items: Array<{ variantId: string; quantity: number }>;
-  currency: CheckoutCurrency;
-  userId?: string;
-  cartId?: string;
-  anonymousId?: string;
-  metadata?: Record<string, string>;
-}
-
-export async function createPaymentIntent({
-  items,
-  currency,
-  userId,
-  cartId,
-  anonymousId,
-  metadata = {},
-}: CreatePaymentIntentParams): Promise<Stripe.PaymentIntent> {
-  // 1. Récupérer et valider les variants (similaire à createCheckoutSession)
-  const variants = await prisma.productVariant.findMany({
-    where: {
-      id: { in: items.map(i => i.variantId) },
-      deletedAt: null,
-    },
-    include: {
-      pricing: {
-        where: { isActive: true, priceType: 'base' },
-      },
-      product: {
-        include: {
-          translations: {
-            take: 1,
-          },
-        },
-      },
-    },
-  });
-
-  if (variants.length !== items.length) {
-    throw new Error('Some variants not found');
-  }
-
-  // 2. Calculer le montant total
-  let totalAmount = 0;
-
-  // Calcul du sous-total des items
-  items.forEach(item => {
-    const variant = variants.find(v => v.id === item.variantId);
-    if (!variant) throw new Error(`Variant ${item.variantId} not found`);
-
-    let pricing = variant.pricing.find(p => p.currency === currency);
-    // Fallback simple si devise non trouvée (devrait être mieux géré en prod)
-    if (!pricing) {
-      pricing = variant.pricing.find(
-        p => p.currency === (currency === 'CAD' ? 'USD' : 'CAD')
-      );
-    }
-
-    if (!pricing) throw new Error(`Price not found for variant ${variant.sku}`);
-
-    totalAmount += Number(pricing.price) * item.quantity;
-  });
-
-  // Convertir en centimes pour Stripe
-  const amountInCents = toStripeAmount(totalAmount.toString(), currency);
-
-  logger.info(
-    {
-      action: 'payment_intent_create',
-      currency,
-      amount: totalAmount,
-      userId: userId || 'anonymous',
-    },
-    'Creating Stripe Payment Intent'
-  );
-
-  // 2b. Récupérer l'email de l'utilisateur (OBLIGATOIRE CAR AUTHENTIFIÉ)
-  let receiptEmail: string | undefined;
-  if (userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    });
-    if (user?.email) {
-      receiptEmail = user.email;
-    }
-  }
-
-  // 3. Créer le PaymentIntent
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountInCents,
-    currency: currency.toLowerCase(),
-    automatic_payment_methods: {
-      enabled: true,
-    },
-    receipt_email: receiptEmail, // <--- LA CLÉ DU PROBLÈME EST ICI
-    metadata: {
-      userId: userId || '',
-      cartId: cartId || '',
-      anonymousId: anonymousId || '',
-      items: JSON.stringify(items),
-      integration_check: 'accept_a_payment',
-      subtotal: amountInCents.toString(), // CRUCIAL pour l'update du shipping
-      ...metadata,
-    },
-    // Activer Stripe Tax si configuré
-    // automatic_tax will be enabled in update-intent when we have the address
-    // automatic_tax will be enabled in update-intent when we have the address
-  });
-
-  return paymentIntent;
 }

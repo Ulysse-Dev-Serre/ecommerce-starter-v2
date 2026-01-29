@@ -62,14 +62,14 @@ async function handler(request: NextRequest) {
 
   // Mettre à jour le statut via le service centralisé
   const { updateOrderStatus } = await import('@/lib/services/orders');
-  await updateOrderStatus(
-    order.id,
-    newStatus as any,
-    isCancellation
+  await updateOrderStatus({
+    orderId: order.id,
+    status: newStatus as any,
+    comment: isCancellation
       ? `Annulation immédiate par le client.`
       : `Remboursement demandé : ${reason.substring(0, 500)}${file ? ' (Image jointe)' : ''}`,
-    user.id
-  );
+    userId: user.id,
+  });
 
   // Send email to admin
   const adminEmail = env.ADMIN_EMAIL;
