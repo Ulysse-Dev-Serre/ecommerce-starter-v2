@@ -5,7 +5,11 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { clearCart, getOrCreateCart } from '@/lib/services/cart.service';
 import { releaseStock } from '@/lib/services/inventory.service';
-import { createOrderFromCart } from '@/lib/services/order.service';
+import {
+  createOrderFromCart,
+  sendOrderConfirmationEmail,
+  sendAdminNewOrderAlert,
+} from '@/lib/services/orders';
 import {
   alertInvalidSignature,
   alertWebhookFailure,
@@ -347,17 +351,49 @@ async function handleCheckoutSessionCompleted(
   // Extraction de l'adresse
   const shippingAddress = extractShippingAddress(session);
 
-  await createOrderFromCart({
+  const order = await createOrderFromCart({
     cart: virtualCart as any,
     userId,
     paymentIntent: {
       id: paymentIntentId,
       amount: session.amount_total || 0,
       currency: session.currency || 'eur',
-      // On mock le reste pour satisfaire le type si besoin, ou on fait confiance au cast
+      receipt_email: (session.customer_details as any)?.email || null,
+      metadata: session.metadata || {},
     } as Stripe.PaymentIntent,
-    shippingAddress, // <--- AJOUT IMPORTANT
+    shippingAddress,
   });
+
+  // Envoyer les emails de confirmation
+  try {
+    const recipientEmail = (session.customer_details as any)?.email;
+    if (recipientEmail) {
+      const calculation = {
+        items: order.items.map((item: any) => ({
+          productName: item.productSnapshot?.name || 'Product',
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          lineTotal: item.totalPrice,
+          variantId: item.variantId,
+          sku: item.productSnapshot?.sku || '',
+          currency: item.currency,
+        })),
+      };
+
+      await sendOrderConfirmationEmail(
+        order,
+        calculation,
+        shippingAddress,
+        recipientEmail
+      );
+      await sendAdminNewOrderAlert(order, calculation, shippingAddress);
+    }
+  } catch (emailError) {
+    logger.error(
+      { error: emailError, orderId: order.id },
+      'Failed to send order emails'
+    );
+  }
 
   // ... (reste de la fonction)
   const cartId = session.metadata?.cartId;
@@ -473,12 +509,43 @@ async function handlePaymentIntentSucceeded(
     shippingAddress.email = paymentIntent.receipt_email;
   }
 
-  await createOrderFromCart({
+  const order = await createOrderFromCart({
     cart: virtualCart as any,
     userId,
     paymentIntent,
-    shippingAddress, // <--- Contient maintenant l'email
+    shippingAddress,
   });
+
+  // Envoyer les emails de confirmation
+  try {
+    const recipientEmail = paymentIntent.receipt_email;
+    if (recipientEmail) {
+      const calculation = {
+        items: order.items.map((item: any) => ({
+          productName: item.productSnapshot?.name || 'Product',
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          lineTotal: item.totalPrice,
+          variantId: item.variantId,
+          sku: item.productSnapshot?.sku || '',
+          currency: item.currency,
+        })),
+      };
+
+      await sendOrderConfirmationEmail(
+        order,
+        calculation,
+        shippingAddress,
+        recipientEmail
+      );
+      await sendAdminNewOrderAlert(order, calculation, shippingAddress);
+    }
+  } catch (emailError) {
+    logger.error(
+      { error: emailError, orderId: order.id },
+      'Failed to send order emails'
+    );
+  }
 
   // ... (reste)
   const cartId = paymentIntent.metadata?.cartId;

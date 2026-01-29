@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createReturnLabel } from '@/lib/services/order.service';
+import { createReturnLabel } from '@/lib/services/orders';
 import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
