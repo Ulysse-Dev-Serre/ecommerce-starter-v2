@@ -7,7 +7,7 @@ import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getOrCreateCart } from '@/lib/services/cart';
-import { reserveStock } from '@/lib/services/inventory.service';
+import { reserveStock } from '@/lib/services/inventory';
 import { createPaymentIntent } from '@/lib/services/payments';
 import { CheckoutCurrency } from '@/lib/types/domain/checkout';
 import { SITE_CURRENCY } from '@/lib/config/site';

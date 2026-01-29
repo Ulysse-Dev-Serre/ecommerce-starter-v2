@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { clearCart, getOrCreateCart } from '@/lib/services/cart';
-import { releaseStock } from '@/lib/services/inventory.service';
+import { releaseStock } from '@/lib/services/inventory';
 import {
   createOrderFromCart,
   sendOrderConfirmationEmail,

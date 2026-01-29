@@ -4,7 +4,7 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { i18n } from '@/lib/i18n/config';
 import { calculateCart, type Currency } from '../calculation.service';
-import { decrementStock } from '../inventory.service';
+import { decrementStock } from '../inventory';
 import { CreateOrderFromCartInput } from '@/lib/types/domain/order';
 
 /**
