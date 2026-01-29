@@ -2,9 +2,10 @@ import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { formatDate } from '@/lib/utils/date';
+import { User } from '@/generated/prisma';
 
 interface CustomerListTableProps {
-  customers: any[];
+  customers: User[];
   query?: string;
   locale: string;
   tSearchPlaceholder: string;
@@ -53,7 +54,7 @@ export async function CustomerListTable({
               <tr>
                 <td
                   colSpan={4}
-                  className="px-6 py-10 text-center text-gray-500"
+                  className="px-6 py-10 text-center admin-text-subtle"
                 >
                   {t('table.noCustomers')}
                 </td>
@@ -72,10 +73,10 @@ export async function CustomerListTable({
                       </span>
                     </div>
                   </td>
-                  <td className="admin-table-td text-gray-600">
+                  <td className="admin-table-td admin-text-subtle">
                     {customer.email}
                   </td>
-                  <td className="admin-table-td text-gray-600">
+                  <td className="admin-table-td admin-text-subtle">
                     {formatDate(customer.createdAt, locale)}
                   </td>
                   <td className="admin-table-td text-right">

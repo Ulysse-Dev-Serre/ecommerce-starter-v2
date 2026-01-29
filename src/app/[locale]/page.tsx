@@ -7,7 +7,7 @@ import { ArrowRight } from 'lucide-react';
 import { Language, ProductStatus } from '@/generated/prisma';
 import { getProducts } from '@/lib/services/product.service';
 import { ProductCard } from '@/components/product/product-card';
-import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/constants';
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/config/site';
 
 // Disable static generation for this page (requires DB)
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export async function generateMetadata({
   params,
 }: HomeProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const t = await getTranslations({ locale, namespace: 'metadata' });
 
   return {
     title: t('title'),
@@ -61,7 +61,7 @@ export default async function Home({
   return (
     <div className="vibe-flex-1">
       <section className="vibe-hero-section">
-        <div className="vibe-layout-container text-center">
+        <div className="vibe-layout-container vibe-text-center">
           <h1 className="vibe-hero-title">{t('heroTitle')}</h1>
           <p className="vibe-hero-subtitle">{t('heroSubtitle')}</p>
         </div>

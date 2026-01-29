@@ -1,5 +1,8 @@
 'use client';
 
+import { API_ROUTES } from '@/lib/config/api-routes';
+import { useToast } from '@/components/ui/toast-provider';
+
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -7,35 +10,11 @@ import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { ShoppingCart } from 'lucide-react';
 
-import { CartItem } from '@/components/cart/CartItem';
-import { CartSummary } from '@/components/cart/CartSummary';
+import { CartItem } from '@/components/cart/cart-item';
+import { CartSummary } from '@/components/cart/cart-summary';
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
-interface CartItemData {
-  id: string;
-  quantity: number;
-  variant: {
-    id: string;
-    sku: string;
-    pricing: Array<{
-      price: string;
-      currency: string;
-    }>;
-    product: {
-      slug: string;
-      translations: Array<{
-        name: string;
-      }>;
-      media: Array<{
-        url: string;
-      }>;
-    };
-  };
-}
-
-interface Cart {
-  id: string;
-  items: CartItemData[];
-}
+import { Cart } from '@/lib/types/cart';
 
 interface CartClientProps {
   cart: Cart | null;
@@ -44,24 +23,33 @@ interface CartClientProps {
 
 export function CartClient({ cart, locale }: CartClientProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
   const { isSignedIn } = useUser();
   const t = useTranslations('cart');
 
+  const { showToast } = useToast();
+
   const handleRemove = async (itemId: string) => {
-    setIsLoading(true);
+    setLoadingItems(prev => new Set(prev).add(itemId));
     try {
-      const response = await fetch(`/api/cart/lines/${itemId}`, {
+      const response = await fetch(API_ROUTES.CART.LINES(itemId), {
         method: 'DELETE',
       });
 
       if (response.ok) {
+        showToast(t('itemRemoved'), 'success');
         router.refresh();
+      } else {
+        throw new Error(t('errorRemovingItem'));
       }
     } catch (error) {
-      console.error('Failed to remove item:', error);
+      showToast(t('errorRemovingItem'), 'error');
     } finally {
-      setIsLoading(false);
+      setLoadingItems(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
   };
 
@@ -70,7 +58,10 @@ export function CartClient({ cart, locale }: CartClientProps) {
       <div className="vibe-empty-state">
         <ShoppingCart className="vibe-empty-state-icon" />
         <p className="vibe-empty-state-title">{t('emptyCart')}</p>
-        <Link href={`/${locale}/shop`} className="vibe-empty-state-button">
+        <Link
+          href={`/${locale}${NAV_ROUTES.SHOP}`}
+          className="vibe-empty-state-button"
+        >
           {t('continueShopping')}
         </Link>
       </div>
@@ -92,7 +83,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
               item={item}
               locale={locale}
               onRemove={handleRemove}
-              isLoading={isLoading}
+              isLoading={loadingItems.has(item.id)}
             />
           ))}
         </div>

@@ -1,10 +1,10 @@
-import { getProducts } from '@/lib/services/product.service';
+import { getProducts, ProductProjection } from '@/lib/services/product.service';
 import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
 import { ProductCard } from '@/components/product/product-card';
 import { cn } from '@/lib/utils/cn';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { ShopPagination } from '@/components/shop/shop-pagination';
@@ -71,7 +71,7 @@ export default async function ShopPage({
         </div>
       ) : (
         <div className="vibe-grid-4-cols">
-          {products.map((product: any, idx: number) => (
+          {products.map((product: ProductProjection, idx: number) => (
             <div
               key={product.id}
               className="vibe-animate-slide-in-bottom"

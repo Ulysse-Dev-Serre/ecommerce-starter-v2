@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../lib/logger';
-import { withError } from '../../../../lib/middleware/withError';
-import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
-import { withValidation } from '../../../../lib/middleware/withValidation';
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
-import { stripe } from '../../../../lib/stripe/client';
-import { toStripeAmount } from '../../../../lib/utils/currency';
-import { SupportedCurrency } from '@/lib/constants';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withValidation } from '@/lib/middleware/withValidation';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { stripe } from '@/lib/integrations/stripe/client';
+import { toStripeAmount } from '@/lib/utils/currency';
+import { SupportedCurrency } from '@/lib/config/site';
 import {
   updateIntentSchema,
   UpdateIntentInput,
 } from '@/lib/validators/checkout';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 async function updateIntentHandler(
   request: NextRequest,

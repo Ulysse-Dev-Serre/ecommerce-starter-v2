@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { GTM_ID } from '../../lib/analytics/gtm';
+import { GTM_ID } from '@/lib/config/gtm';
 
 export default function GoogleTagManager() {
   if (!GTM_ID) return null;

@@ -15,9 +15,17 @@ interface RevenueChartProps {
     date: string;
     amount: number;
   }[];
+  label: string;
 }
 
-export function RevenueChart({ data }: RevenueChartProps) {
+const TOOLTIP_STYLE = {
+  backgroundColor: '#fff',
+  border: '1px solid #e2e8f0',
+  borderRadius: '8px',
+  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+};
+
+export function RevenueChart({ data, label }: RevenueChartProps) {
   return (
     <div className="h-[300px] w-full min-w-0">
       <ResponsiveContainer width="100%" height="100%">
@@ -47,15 +55,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
             tickFormatter={value => `$${value}`}
           />
           <Tooltip
-            contentStyle={{
-              backgroundColor: '#fff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-            }}
+            contentStyle={TOOLTIP_STYLE}
             formatter={(value: number | undefined) => [
               `$${(value || 0).toFixed(2)}`,
-              'Revenue',
+              label,
             ]}
           />
           <Area

@@ -1,7 +1,7 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Package } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/currency';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface OrderItemsTableProps {
   items: any[];

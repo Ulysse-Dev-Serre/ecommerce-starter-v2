@@ -11,28 +11,10 @@ import { X } from 'lucide-react';
 import { PriceDisplay } from '@/components/price-display';
 import { QuantitySelector } from '@/components/cart/quantity-selector';
 
+import { CartItem as CartItemType } from '@/lib/types/cart';
+
 interface CartItemProps {
-  item: {
-    id: string;
-    quantity: number;
-    variant: {
-      id: string;
-      sku: string;
-      pricing: Array<{
-        price: string;
-        currency: string;
-      }>;
-      product: {
-        slug: string;
-        translations: Array<{
-          name: string;
-        }>;
-        media: Array<{
-          url: string;
-        }>;
-      };
-    };
-  };
+  item: CartItemType;
   locale: string;
   onRemove: (id: string) => void;
   isLoading: boolean;
@@ -88,7 +70,7 @@ export function CartItem({ item, locale, onRemove, isLoading }: CartItemProps) {
               locale={locale}
             />
             <div className="vibe-flex-items-center-gap-3">
-              <span className="vibe-form-label-bold !mb-0">
+              <span className="vibe-form-label-bold vibe-mb-0">
                 {t('quantity')}
               </span>
               <QuantitySelector

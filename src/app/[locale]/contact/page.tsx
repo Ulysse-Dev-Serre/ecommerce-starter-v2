@@ -1,8 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
-import { ContactForm } from '@/components/contact/ContactForm';
-import { ContactInfo } from '@/components/contact/ContactInfo';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { ContactForm } from '@/components/contact/contact-form';
+import { ContactInfo } from '@/components/contact/contact-info';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -10,10 +10,10 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'common' });
+  const t = await getTranslations({ locale, namespace: 'contact' });
 
   return {
-    title: t('contact'),
+    title: t('title'),
     description: t('description'),
     alternates: {
       canonical: `/${locale}/contact`,
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ),
     },
     openGraph: {
-      title: t('contact'),
+      title: t('title'),
       description: t('description'),
     },
   };
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ContactPage({ params }: Props) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'common' });
+  const t = await getTranslations({ locale, namespace: 'contact' });
 
   return (
     <div className="vibe-section-py">

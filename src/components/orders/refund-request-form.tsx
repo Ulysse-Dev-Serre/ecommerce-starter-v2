@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast-provider';
 import { Camera, Send, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 
+import { API_ROUTES } from '@/lib/config/api-routes';
+
 interface RefundRequestFormProps {
   orderId: string;
   orderNumber: string;
@@ -26,14 +28,14 @@ export function RefundRequestForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { showToast } = useToast();
-  const t = useTranslations('Orders.refund');
+  const t = useTranslations('orders.refund');
 
   const handleCancelOrder = async () => {
     if (!confirm(t('confirmCancel'))) return;
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/orders/refund-request', {
+      const response = await fetch(API_ROUTES.ORDERS.REFUND_REQUEST, {
         method: 'POST',
         body: (() => {
           const fd = new FormData();
@@ -71,7 +73,7 @@ export function RefundRequestForm({
     }
 
     try {
-      const response = await fetch('/api/orders/refund-request', {
+      const response = await fetch(API_ROUTES.ORDERS.REFUND_REQUEST, {
         method: 'POST',
         body: formData,
       });

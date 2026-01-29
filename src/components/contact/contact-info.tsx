@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Mail, MapPin } from 'lucide-react';
-import { SITE_EMAIL, SITE_ADDRESS } from '@/lib/constants';
+import { SITE_EMAIL, SITE_ADDRESS } from '@/lib/config/site';
 import { Alert } from '@/components/ui/alert';
 import { useTranslations } from 'next-intl';
 
@@ -9,7 +9,7 @@ interface ContactInfoProps {
 }
 
 export function ContactInfo({ locale }: ContactInfoProps) {
-  const t = useTranslations('common');
+  const t = useTranslations('contact');
 
   return (
     <div className="vibe-animate-slide-in-left vibe-stack-y-10">

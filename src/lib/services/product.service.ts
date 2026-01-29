@@ -4,8 +4,8 @@ import {
   Language,
   Product,
 } from '../../generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 
 export interface ProductListFilters {
   status?: ProductStatus;
@@ -728,4 +728,37 @@ export async function hardDeleteProduct(id: string): Promise<Product> {
   );
 
   return deletedProduct;
+}
+
+/**
+ * Transform ProductProjection into a view model for the product client component
+ */
+export function getProductViewModel(product: ProductProjection) {
+  const images = product.media.map(m => ({
+    url: m.url,
+    alt: m.alt,
+    isPrimary: m.isPrimary,
+  }));
+
+  const variants = product.variants.map(v => ({
+    id: v.id,
+    sku: v.sku,
+    pricing: v.pricing.map(p => ({
+      price: p.price,
+      currency: p.currency,
+    })),
+    stock: v.inventory?.stock || 0,
+    attributes: v.attributeValues.map(av => ({
+      name:
+        av.attributeValue?.translations[0]?.displayName ||
+        av.attributeValue?.attribute.key ||
+        '',
+      value: av.attributeValue?.value || '',
+    })),
+  }));
+
+  return {
+    images,
+    variants,
+  };
 }

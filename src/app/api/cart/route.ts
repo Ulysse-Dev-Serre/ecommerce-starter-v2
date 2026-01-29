@@ -1,14 +1,15 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../lib/logger';
-import { withError } from '../../../lib/middleware/withError';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
 import {
   OptionalAuthContext,
   withOptionalAuth,
-} from '../../../lib/middleware/withAuth';
-import { getOrCreateCart } from '../../../lib/services/cart.service';
-import { env } from '@/lib/env';
+} from '@/lib/middleware/withAuth';
+import { getOrCreateCart } from '@/lib/services/cart.service';
+import { env } from '@/lib/core/env';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 async function getCartHandler(
   request: NextRequest,
@@ -24,7 +25,7 @@ async function getCartHandler(
     userId = authContext.userId;
   } else {
     const cookieStore = await cookies();
-    anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+    anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
     // Créer un nouvel ID anonyme si nécessaire
     if (!anonymousId) {
@@ -71,7 +72,7 @@ async function getCartHandler(
 
   // Set cookie si nouvel ID anonyme créé
   if (newAnonymousId) {
-    response.cookies.set('cart_anonymous_id', newAnonymousId, {
+    response.cookies.set(CART_COOKIE_NAME, newAnonymousId, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -91,10 +92,7 @@ async function getCartHandler(
   return response;
 }
 
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../lib/middleware/withRateLimit';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const GET = withError(
   withOptionalAuth(withRateLimit(getCartHandler, RateLimits.PUBLIC))

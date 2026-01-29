@@ -1,7 +1,7 @@
 import { CartStatus } from '../../generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
-import { SITE_CURRENCY } from '../constants';
+import { prisma } from '../core/db';
+import { logger } from '../core/logger';
+import { SITE_CURRENCY } from '../config/site';
 
 export interface AddToCartInput {
   variantId: string;
@@ -53,6 +53,8 @@ export interface CartProjection {
   updatedAt: Date;
 }
 
+import { Cart } from '../types/cart';
+
 /**
  * Get detailed cart data for the cart page (including translations and primary media)
  */
@@ -60,7 +62,7 @@ export async function getCartPageData(
   userId?: string,
   anonymousId?: string,
   locale?: string
-): Promise<any | null> {
+): Promise<Cart | null> {
   const language = (locale?.toUpperCase() || 'FR') as any;
 
   const cart = await prisma.cart.findFirst({

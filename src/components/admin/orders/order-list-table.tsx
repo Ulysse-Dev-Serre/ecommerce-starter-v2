@@ -5,7 +5,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { formatPrice } from '@/lib/utils/currency';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
 import { formatDate } from '@/lib/utils/date';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface OrderListTableProps {
   orders: any[];
@@ -17,7 +17,7 @@ export async function OrderListTable({ orders, locale }: OrderListTableProps) {
     locale,
     namespace: 'adminDashboard.orders',
   });
-  const tDetail = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const tDetail = await getTranslations({ locale, namespace: 'orders.detail' });
 
   return (
     <div className="admin-card p-0 overflow-hidden min-h-[400px]">

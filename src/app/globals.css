@@ -619,6 +619,14 @@ body {
   @apply space-y-6;
 }
 
+@utility vibe-flex-row-gap-3 {
+  @apply flex flex-row gap-3;
+}
+
+@utility vibe-flex-col-gap-3 {
+  @apply flex flex-col gap-3;
+}
+
 @utility vibe-sidebar-stack {
   @apply space-y-6;
 }
@@ -793,6 +801,10 @@ body {
 
 @utility vibe-mb-6 {
   @apply mb-6;
+}
+
+@utility vibe-mb-0 {
+  margin-bottom: 0 !important;
 }
 
 @utility vibe-mb-4 {

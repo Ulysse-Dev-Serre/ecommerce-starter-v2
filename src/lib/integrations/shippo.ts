@@ -1,6 +1,6 @@
 import { Shippo } from 'shippo';
-import { logger } from '@/lib/logger';
-import { env } from '../env';
+import { logger } from '@/lib/core/logger';
+import { env } from '@/lib/core/env';
 
 // Initialize Shippo only if API key is present, otherwise we relies on Mock mode or error out later
 const shippoApiKey = env.SHIPPO_API_KEY;

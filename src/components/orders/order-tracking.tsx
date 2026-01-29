@@ -14,22 +14,22 @@ export function OrderTracking({ shipments, labels }: OrderTrackingProps) {
 
   return (
     <div className="vibe-container vibe-border-primary-soft vibe-bg-primary-soft">
-      <div className="vibe-flex-between-items-center vibe-mb-6">
-        <h2 className="vibe-text-xl-bold vibe-text-primary vibe-flex-items-center-gap-3">
+      <div className="vibe-flex-between vibe-mb-6">
+        <h2 className="vibe-text-xl-bold vibe-text-primary vibe-flex-center-gap-3">
           <Package className="vibe-icon-md" /> {labels.tracking}
         </h2>
       </div>
-      <div className="space-y-6">
+      <div className="vibe-stack-y-6">
         {shipments.map((shipment: any) => (
           <div
             key={shipment.id}
-            className="vibe-flex-col-sm-row-between vibe-items-start-sm-center vibe-gap-6 vibe-p-4 vibe-bg-background vibe-card-rounded vibe-border-primary-extra-soft"
+            className="vibe-flex-col sm:vibe-flex-row vibe-flex-between-items-start sm:vibe-items-center vibe-gap-6 vibe-p-6 vibe-bg-background vibe-card-rounded-xl vibe-border-primary-soft"
           >
             <div>
               <p className="vibe-text-xs-bold-muted-caps vibe-mb-1">
                 {shipment.carrier || labels.standardShipping}
               </p>
-              <p className="vibe-font-mono vibe-text-xl vibe-text-bold vibe-tracking-wider vibe-select-all">
+              <p className="vibe-text-xl-bold vibe-tracking-wider vibe-select-all">
                 {shipment.trackingCode}
               </p>
             </div>
@@ -40,10 +40,10 @@ export function OrderTracking({ shipments, labels }: OrderTrackingProps) {
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="vibe-button-primary vibe-px-8 vibe-py-3 vibe-text-sm vibe-shadow-primary"
+              className="vibe-button-primary vibe-px-8 vibe-py-3 vibe-text-sm vibe-shadow-sm-primary"
             >
               {labels.trackPackage}
-              <ExternalLink className="vibe-icon-sm" />
+              <ExternalLink className="vibe-icon-md" />
             </a>
           </div>
         ))}

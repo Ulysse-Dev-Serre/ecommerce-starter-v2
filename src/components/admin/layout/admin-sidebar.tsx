@@ -91,7 +91,7 @@ export function AdminSidebar() {
           <Home className="h-5 w-5" />
           {t('backToSite')}
         </Link>
-        <div className="text-xs text-gray-500 mt-2">{t('version')}</div>
+        <div className="text-xs admin-text-subtle mt-2">{t('version')}</div>
       </div>
     </aside>
   );

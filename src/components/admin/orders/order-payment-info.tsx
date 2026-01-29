@@ -2,7 +2,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { CreditCard } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/currency';
 import { formatDate } from '@/lib/utils/date';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface OrderPaymentInfoProps {
   payments: any[];

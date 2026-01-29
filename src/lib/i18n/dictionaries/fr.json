@@ -14,10 +14,13 @@
     "error": "Erreur",
     "success": "Succès",
     "save": "Enregistrer",
+    "saveChanges": "Enregistrer les modifications",
     "cancel": "Annuler",
     "delete": "Supprimer",
     "edit": "Modifier",
     "add": "Ajouter",
+    "upload": "Téléverser",
+    "uploading": "Téléversement...",
     "search": "Rechercher",
     "filter": "Filtrer",
     "sort": "Trier",
@@ -30,7 +33,9 @@
     "discount": "Réduction",
     "previousImage": "Image précédente",
     "nextImage": "Image suivante",
-    "goToImage": "Aller à l'image",
+    "goToImage": "Aller à l'image"
+  },
+  "contact": {
     "title": "Nous contacter",
     "description": "Une question sur nos produits ou votre commande ? Remplissez le formulaire et nous vous répondrons dans les plus brefs délais.",
     "emailLabel": "Email",
@@ -43,7 +48,10 @@
     "formEmailPlaceholder": "votre@email.com",
     "formMessage": "Message",
     "formMessagePlaceholder": "Comment pouvons-nous vous aider ?",
-    "formSubmit": "Envoyer (Bientôt disponible)"
+    "formSubmit": "Envoyer le message",
+    "successTitle": "Message envoyé !",
+    "successMessage": "Merci, nous vous répondrons dès que possible.",
+    "sendAnother": "Envoyer un autre message"
   },
   "error": {
     "notFound": {
@@ -80,7 +88,7 @@
     "orders": "Mes commandes",
     "dashboard": "Tableau de bord"
   },
-  "products": {
+  "product": {
     "title": "Produits",
     "categories": "Catégories",
     "price": "Prix",
@@ -112,7 +120,11 @@
     "remove": "Retirer",
     "checkout": "Passer commande",
     "signInToCheckout": "Se connecter pour commander",
-    "continueShopping": "Continuer mes achats"
+    "increaseQuantity": "Augmenter la quantité",
+    "decreaseQuantity": "Diminuer la quantité",
+    "continueShopping": "Continuer mes achats",
+    "itemRemoved": "Article retiré du panier",
+    "errorRemovingItem": "Erreur lors du retrait de l'article"
   },
   "admin": {
     "sidebar": {
@@ -141,6 +153,8 @@
       "createProductWithVariants": "Créer le produit avec {{count}} variantes",
       "creating": "Création...",
       "saving": "Enregistrement...",
+      "quickActions": "Actions Rapides",
+      "lastUpdated": "Dernière mise à jour : {date}",
       "deleting": "Suppression...",
       "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.",
       "deleteVariantConfirm": "Êtes-vous sûr de vouloir supprimer la variante {{sku}} ? Cette action est irréversible.",
@@ -152,6 +166,9 @@
       "status": "Statut",
       "featured": "Produit vedette",
       "sortOrder": "Ordre de tri",
+      "proTip": "Astuce pro :",
+      "seoProTip": "Utilisez des mots-clés pertinents dans le nom et la description pour améliorer le référencement.",
+      "shippingAndLogistics": "Expédition et Logistique",
       "shippingCustoms": "Expédition et Douanes",
       "shippingOrigin": "Origine de l'expédition",
       "selectOrigin": "Sélectionner un emplacement...",
@@ -163,9 +180,12 @@
       "searchHSCodes": "Rechercher les codes SH",
       "exportExplanation": "Explication d'exportation",
       "exportExplanationHelp": "Brève description des marchandises pour les douanes (remplace la valeur par défaut).",
+      "incoterm": "Incoterm",
       "incotermOverride": "Remplacement de l'Incoterm",
       "incotermHelp": "Forcer un Incoterm spécifique pour ce produit.",
+      "weight": "Poids",
       "weightKg": "Poids (kg)",
+      "dimensions": "Dimensions",
       "dimensionsCm": "Dimensions (L x l x H cm)",
       "productName": "Nom du produit",
       "shortDescription": "Description courte",
@@ -217,6 +237,8 @@
       "dragToReorder": "Glissez-déposez les produits pour les réorganiser",
       "retry": "Réessayer",
       "media": "Médias",
+      "productMedia": "Médias du produit",
+      "noMediaYet": "Aucun média téléversé pour le moment.",
       "uploadMedia": "Téléverser des images et vidéos",
       "selectFiles": "Sélectionner des fichiers",
       "uploading": "Téléversement...",
@@ -319,7 +341,7 @@
       "saveError": "Erreur lors de la sauvegarde du lieu"
     }
   },
-  "Checkout": {
+  "checkout": {
     "title": "Expédition & Paiement",
     "shippingAddress": "Adresse de livraison",
     "shippingMethod": "Mode de livraison",
@@ -349,7 +371,10 @@
     "statePlaceholder": "Province / État",
     "validation": {
       "phone": "Veuillez entrer un numéro de téléphone valide pour la livraison."
-    }
+    },
+    "noShippingRates": "Aucune option de livraison trouvée pour cette adresse.",
+    "edit": "Modifier",
+    "continueToPayment": "Continuer vers le paiement"
   },
   "footer": {
     "about": "À propos",
@@ -374,7 +399,7 @@
       "content": "Ceci est un exemple de politique de remboursement. Définissez clairement vos règles de retour, d'échange et de remboursement ici."
     }
   },
-  "Orders": {
+  "orders": {
     "list": {
       "title": "Mes commandes",
       "noOrders": "Vous n'avez pas encore de commandes.",
@@ -382,6 +407,7 @@
       "viewDetails": "Voir détails"
     },
     "detail": {
+      "title": "Détail de la commande",
       "backToOrders": "← Retour aux commandes",
       "orderNumber": "Commande",
       "status": "Statut",
@@ -435,7 +461,7 @@
       "refundDoneMessage": "Le remboursement de {amount} {currency} a été traité avec succès."
     }
   },
-  "Metadata": {
+  "metadata": {
     "title": "Starter E-commerce Universel",
     "description": "Starter e-commerce universel, flexible et prêt à l'emploi."
   },
@@ -532,7 +558,7 @@
     "orders": "Commandes",
     "revenue": "Revenus"
   },
-  "CheckoutSuccess": {
+  "checkoutSuccess": {
     "processing": "Traitement de votre paiement en cours...",
     "title": "Paiement réussi !",
     "message": "Votre commande a été confirmée et est en cours de traitement.",
@@ -609,6 +635,7 @@
         "errorUnknown": "Une erreur est survenue"
       },
       "detail": {
+        "title": "Détail de la commande",
         "orderItems": "Articles de la commande",
         "paymentInfo": "Informations de paiement",
         "shippingAddress": "Adresse de livraison",
@@ -686,6 +713,9 @@
         "noAddresses": "Aucune adresse enregistrée",
         "joinedOn": "Membre depuis le {date}",
         "acquisitionSource": "Acquisition",
+        "source": "Source",
+        "medium": "Support",
+        "campaign": "Campagne",
         "directUnknown": "Direct / Inconnu",
         "internalNote": "Note interne",
         "internalNoteHelper": "Ces notes sont visibles uniquement par l'équipe.",

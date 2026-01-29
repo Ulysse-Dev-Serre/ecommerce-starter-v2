@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SUPPORTED_CURRENCIES } from '../constants';
+import { SUPPORTED_CURRENCIES } from '@/lib/config/site';
 
 export const createIntentSchema = z
   .object({

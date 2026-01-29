@@ -26,8 +26,8 @@ export async function OrdersListContent({
   orders,
   locale,
 }: OrdersListContentProps) {
-  const t = await getTranslations({ locale, namespace: 'Orders.list' });
-  const tDetail = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const t = await getTranslations({ locale, namespace: 'orders.list' });
+  const tDetail = await getTranslations({ locale, namespace: 'orders.detail' });
 
   const statusLabels: Record<string, string> = {
     PENDING: tDetail('statusPending'),
@@ -41,8 +41,8 @@ export async function OrdersListContent({
   };
 
   return (
-    <div className={`flex-1 vibe-section-py ${VIBE_ANIMATION_FADE_IN}`}>
-      <div className="vibe-layout-6xl max-w-4xl">
+    <div className={`vibe-flex-grow vibe-section-py ${VIBE_ANIMATION_FADE_IN}`}>
+      <div className="vibe-layout-container vibe-container-max-4xl">
         <h1 className="vibe-page-header vibe-mb-12">{t('title')}</h1>
 
         {orders.length === 0 ? (
@@ -65,7 +65,7 @@ export async function OrdersListContent({
               >
                 <div className="vibe-flex-wrap-justify-between-items-start vibe-gap-6">
                   <div className="vibe-stack-y-2">
-                    <p className="vibe-text-xl-bold text-2xl">
+                    <p className="vibe-text-xl-bold vibe-h2">
                       {tDetail('orderNumber')} #{order.orderNumber}
                     </p>
                     <div className="vibe-flex-items-center-gap-3 vibe-text-xs-bold-muted-caps">
@@ -85,7 +85,7 @@ export async function OrdersListContent({
                       label={statusLabels[order.status]}
                       className="vibe-px-4 vibe-py-1-5 vibe-text-black-caps"
                     />
-                    <p className="vibe-mt-3 vibe-text-bold text-3xl">
+                    <p className="vibe-mt-3 vibe-text-bold vibe-text-3xl">
                       {formatPrice(
                         order.totalAmount,
                         order.currency as any,

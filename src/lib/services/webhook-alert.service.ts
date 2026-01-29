@@ -1,5 +1,5 @@
-import { env } from '../env';
-import { logger } from '../logger';
+import { env } from '@/lib/core/env';
+import { logger } from '@/lib/core/logger';
 
 /**
  * Send message to Slack webhook

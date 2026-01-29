@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createReturnLabel } from '@/lib/services/order.service';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import type { AuthContext } from '@/lib/middleware/withAuth';

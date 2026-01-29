@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
 import { VariantButton } from '@/components/ui/variant-button';
-import { trackEvent } from '@/lib/analytics/tracker';
+import { trackEvent } from '@/lib/core/tracker';
 
 interface Variant {
   id: string;
@@ -51,7 +51,7 @@ export function ProductClient({
   const [selectedVariantId, setSelectedVariantId] = useState(
     variants[0]?.id || ''
   );
-  const t = useTranslations('products');
+  const t = useTranslations('product');
   const tCommon = useTranslations('shop'); // For "viewOptions" etc
 
   const selectedVariant = variants.find(v => v.id === selectedVariantId);

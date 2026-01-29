@@ -1,5 +1,5 @@
 import { UserRole, User } from '../../generated/prisma';
-import { logger } from '../logger';
+import { logger } from '@/lib/core/logger';
 import {
   createUserFromClerk,
   upsertUserFromClerk,

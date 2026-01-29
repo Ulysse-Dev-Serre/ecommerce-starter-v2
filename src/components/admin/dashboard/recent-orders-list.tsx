@@ -3,10 +3,13 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
-import { SupportedCurrency } from '@/lib/constants';
+import { SupportedCurrency } from '@/lib/config/site';
+import { Order } from '@/generated/prisma';
+
+type OrderWithUser = Order & { user: { email: string | null } | null };
 
 interface RecentOrdersListProps {
-  orders: any[];
+  orders: OrderWithUser[];
 }
 
 export async function RecentOrdersList({ orders }: RecentOrdersListProps) {
@@ -17,25 +20,20 @@ export async function RecentOrdersList({ orders }: RecentOrdersListProps) {
   });
   const tOrders = await getTranslations({
     locale,
-    namespace: 'Orders.detail',
+    namespace: 'orders.detail',
   });
 
   return (
     <div className="admin-card">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {t('recentOrders')}
-        </h3>
-        <Link
-          href={`/${locale}/admin/orders`}
-          className="text-sm text-blue-600 hover:text-blue-800"
-        >
+        <h3 className="admin-section-title">{t('recentOrders')}</h3>
+        <Link href={`/${locale}/admin/orders`} className="admin-link text-sm">
           {t('viewAll')}
         </Link>
       </div>
       <div className="space-y-4">
         {orders.length === 0 ? (
-          <p className="text-center text-sm text-gray-500 py-8">
+          <p className="text-center text-sm admin-text-subtle py-8">
             {t('noRecentOrders')}
           </p>
         ) : (
@@ -60,7 +58,7 @@ export async function RecentOrdersList({ orders }: RecentOrdersListProps) {
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {order.orderNumber}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs admin-text-subtle truncate">
                     {order.user?.email} • {displayTime}
                   </p>
                 </div>
