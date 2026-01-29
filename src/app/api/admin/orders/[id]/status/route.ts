@@ -164,12 +164,12 @@ async function handler(
       '@/lib/services/orders'
     );
 
-    const updatedOrder = await updateOrderStatus(
+    const updatedOrder = await updateOrderStatus({
       orderId,
-      newStatus,
+      status: newStatus,
       comment,
-      authContext.userId
-    );
+      userId: authContext.userId,
+    });
 
     // Envoyer l'email approprié basé sur le nouveau statut
     try {
