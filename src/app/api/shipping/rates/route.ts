@@ -179,7 +179,9 @@ async function handler(
           }
         });
 
-        if (calculatedWeight > 0) totalWeight = calculatedWeight;
+        if (calculatedWeight > 0) {
+          totalWeight = Math.round(calculatedWeight * 10) / 10;
+        }
 
         if (maxL > 0 && maxW > 0 && sumH > 0) {
           parcelLength = maxL.toString();
@@ -228,7 +230,7 @@ async function handler(
                 item.variant?.product?.translations?.[0]?.name || 'Merchandise'
               ).trim(),
               quantity: item.quantity,
-              netWeight: weight.toString(),
+              netWeight: (Math.round(weight * 10) / 10).toString(),
               massUnit: 'kg' as const,
               valueAmount: unitPrice,
               valueCurrency: 'CAD',

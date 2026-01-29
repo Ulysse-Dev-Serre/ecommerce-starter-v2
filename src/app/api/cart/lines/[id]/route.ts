@@ -7,7 +7,7 @@ import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
-import { updateCartLine, removeCartLine } from '@/lib/services/cart.service';
+import { updateCartLine, removeCartLine } from '@/lib/services/cart';
 
 import { withValidation } from '@/lib/middleware/withValidation';
 import {

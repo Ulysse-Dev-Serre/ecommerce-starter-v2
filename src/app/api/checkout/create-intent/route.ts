@@ -6,7 +6,7 @@ import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { getOrCreateCart } from '@/lib/services/cart.service';
+import { getOrCreateCart } from '@/lib/services/cart';
 import { reserveStock } from '@/lib/services/inventory.service';
 import {
   createPaymentIntent,

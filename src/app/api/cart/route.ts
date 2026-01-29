@@ -7,7 +7,7 @@ import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
-import { getOrCreateCart } from '@/lib/services/cart.service';
+import { getOrCreateCart } from '@/lib/services/cart';
 import { env } from '@/lib/core/env';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 
