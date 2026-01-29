@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 
-import { auth } from '@clerk/nextjs/server';
-
-import { prisma } from '@/lib/db/prisma';
-import { getOrderDetailsWithData } from '@/lib/services/order.service';
+import {
+  getOrderDetailsWithData,
+  getOrderMetadata,
+} from '@/lib/services/order.service';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { getCurrentUser } from '@/lib/services/user.service';
 import { OrderDetailContent } from '@/components/orders/order-detail-content';
 
 export const dynamic = 'force-dynamic';
@@ -19,10 +20,24 @@ export async function generateMetadata({
   params,
 }: OrderDetailPageProps): Promise<Metadata> {
   const { locale, id } = await params;
-  const t = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const t = await getTranslations({ locale, namespace: 'orders.detail' });
+
+  // On essaie de récupérer le vrai numéro de commande si possible, sinon titre générique
+  try {
+    const order = await getOrderMetadata(id);
+
+    if (order?.orderNumber) {
+      return {
+        title: `${t('orderNumber')} #${order.orderNumber}`,
+        robots: { index: false, follow: false },
+      };
+    }
+  } catch (e) {
+    // Fallback silencieux
+  }
 
   return {
-    title: `${t('orderNumber')} #${id}`,
+    title: t('title'), // Titre générique "Détail de la commande"
     robots: { index: false, follow: false },
     alternates: {
       canonical: `/${locale}/orders/${id}`,
@@ -38,16 +53,8 @@ export default async function OrderDetailPage({
 }: OrderDetailPageProps): Promise<React.ReactElement> {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { userId: clerkId } = await auth();
 
-  if (!clerkId) {
-    redirect(`/${locale}/sign-in`);
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { clerkId },
-    select: { id: true, firstName: true, email: true },
-  });
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect(`/${locale}/sign-in`);

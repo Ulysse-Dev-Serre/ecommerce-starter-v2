@@ -1,5 +1,5 @@
-import { env } from '../env';
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '../constants';
+import { env } from '@/lib/core/env';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export const i18n = {
   defaultLocale: DEFAULT_LOCALE,

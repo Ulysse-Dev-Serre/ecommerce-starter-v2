@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/db/prisma';
-import { SITE_CURRENCY } from '@/lib/constants';
+import { prisma } from '@/lib/core/db';
+import { SITE_CURRENCY } from '@/lib/config/site';
 import { getOrCreateCart } from '@/lib/services/cart.service';
 import { Language } from '@/generated/prisma';
 

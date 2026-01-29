@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { UserRole, User } from '@/generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 
 export interface CreateUserData {
   clerkId: string;

@@ -20,10 +20,10 @@ export function ProductStatsGrid({
       <div className="admin-card">
         <div className="flex items-center gap-4">
           <div className="rounded-lg bg-gray-100 p-3">
-            <Package className="h-6 w-6 text-gray-700" />
+            <Package className="h-6 w-6 admin-text-subtle" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-sm font-medium admin-text-subtle">
               {t('stats.total')}
             </p>
             <p className="text-2xl font-bold text-gray-900">{total}</p>
@@ -36,7 +36,9 @@ export function ProductStatsGrid({
             <div className="h-6 w-6 rounded-full bg-green-500" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">{t('active')}</p>
+            <p className="text-sm font-medium admin-text-subtle">
+              {t('active')}
+            </p>
             <p className="text-2xl font-bold text-gray-900">{active}</p>
           </div>
         </div>
@@ -47,7 +49,9 @@ export function ProductStatsGrid({
             <div className="h-6 w-6 rounded-full bg-yellow-500" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">{t('draft')}</p>
+            <p className="text-sm font-medium admin-text-subtle">
+              {t('draft')}
+            </p>
             <p className="text-2xl font-bold text-gray-900">{draft}</p>
           </div>
         </div>
@@ -58,7 +62,7 @@ export function ProductStatsGrid({
             <Package className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-sm font-medium admin-text-subtle">
               {t('stats.stock')}
             </p>
             <p className="text-2xl font-bold text-gray-900">

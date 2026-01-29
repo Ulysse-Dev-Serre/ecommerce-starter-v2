@@ -1,6 +1,6 @@
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { Language } from '@/generated/prisma';
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/core/logger';
 
 // ============================================
 // TYPES

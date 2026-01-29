@@ -2,7 +2,7 @@ import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { i18n } from '@/lib/i18n/config';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 const { locales, defaultLocale } = i18n;
 

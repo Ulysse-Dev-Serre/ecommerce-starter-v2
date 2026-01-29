@@ -21,7 +21,7 @@ export function DashboardStatsGrid({ stats }: DashboardStatsGridProps) {
           <div key={stat.title} className="admin-card">
             <div className="flex items-center justify-between">
               <div className="rounded-lg bg-gray-100 p-2">
-                <Icon className="h-5 w-5 text-gray-700" />
+                <Icon className="h-5 w-5 admin-text-subtle" />
               </div>
               <span
                 className={`text-sm font-medium ${

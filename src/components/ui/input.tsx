@@ -8,12 +8,12 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, className, ...props }, ref) => {
     return (
-      <div className="w-full">
+      <div className="vibe-w-full">
         {label && (
           <label className="vibe-form-label-bold">
             {label}
             {props.required && (
-              <span className="vibe-form-required ml-1">*</span>
+              <span className="vibe-form-required vibe-ml-1">*</span>
             )}
           </label>
         )}

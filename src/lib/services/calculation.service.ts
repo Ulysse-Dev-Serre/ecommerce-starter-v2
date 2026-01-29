@@ -1,10 +1,10 @@
 import { Decimal } from '@prisma/client/runtime/library';
 
-import { logger } from '../logger';
+import { logger } from '@/lib/core/logger';
 import { CartProjection } from './cart.service';
 
-import { SUPPORTED_CURRENCIES } from '../constants';
-import { SupportedCurrency } from '../constants';
+import { SUPPORTED_CURRENCIES } from '@/lib/config/site';
+import { SupportedCurrency } from '@/lib/config/site';
 
 export type Currency = SupportedCurrency;
 

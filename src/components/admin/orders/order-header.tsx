@@ -13,7 +13,7 @@ interface OrderHeaderProps {
 
 export async function OrderHeader({ order, locale }: OrderHeaderProps) {
   const t = await getTranslations('adminDashboard.orders.detail');
-  const tStatus = await getTranslations('Orders.detail');
+  const tStatus = await getTranslations('orders.detail');
 
   return (
     <div className="flex items-center justify-between">

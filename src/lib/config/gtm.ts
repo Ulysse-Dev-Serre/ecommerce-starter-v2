@@ -1,4 +1,4 @@
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 export const GTM_ID = env.NEXT_PUBLIC_GTM_ID;
 

@@ -1,4 +1,5 @@
-import { prisma } from '@/lib/db/prisma';
+import { setRequestLocale } from 'next-intl/server';
+import { prisma } from '@/lib/core/db';
 import { ProductForm } from '@/components/admin/products/product-form';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,9 @@ interface NewProductPageProps {
 
 export default async function NewProductPage({ params }: NewProductPageProps) {
   const { locale } = await params;
+
+  // Enable static rendering
+  setRequestLocale(locale);
 
   // Fetch Suppliers for shipping origin selection
   const suppliers = await prisma.supplier.findMany({

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodSchema, ZodError } from 'zod';
-import { logger } from '../logger';
+import { logger } from '@/lib/core/logger';
 
 type ApiHandler<T> = (
   request: NextRequest,

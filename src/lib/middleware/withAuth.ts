@@ -30,11 +30,11 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 import { UserRole } from '../../generated/prisma';
-import { prisma } from '../db/prisma';
-import { logger } from '../logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 
 type ApiHandler = (...args: any[]) => Promise<NextResponse> | NextResponse;
 

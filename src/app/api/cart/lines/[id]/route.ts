@@ -1,22 +1,20 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../../lib/logger';
-import { withError } from '../../../../../lib/middleware/withError';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
 import {
   OptionalAuthContext,
   withOptionalAuth,
-} from '../../../../../lib/middleware/withAuth';
-import {
-  updateCartLine,
-  removeCartLine,
-} from '../../../../../lib/services/cart.service';
+} from '@/lib/middleware/withAuth';
+import { updateCartLine, removeCartLine } from '@/lib/services/cart.service';
 
-import { withValidation } from '../../../../../lib/middleware/withValidation';
+import { withValidation } from '@/lib/middleware/withValidation';
 import {
   updateCartLineSchema,
   UpdateCartLineInput,
 } from '@/lib/validators/cart';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 async function updateCartLineHandler(
   request: NextRequest,
@@ -30,7 +28,7 @@ async function updateCartLineHandler(
 
   const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   logger.info(
     {
@@ -135,7 +133,7 @@ async function removeCartLineHandler(
 
   const userId = authContext.isAuthenticated ? authContext.userId : undefined;
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   logger.info(
     {
@@ -211,10 +209,7 @@ async function removeCartLineHandler(
   }
 }
 
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../../lib/middleware/withRateLimit';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const PUT = withError(
   withOptionalAuth(

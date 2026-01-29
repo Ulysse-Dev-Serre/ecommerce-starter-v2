@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { logger } from '../../lib/logger';
+import { logger } from '../../lib/core/logger';
 import { siteConfig } from '@/lib/config/site';
 
 interface FooterProps {

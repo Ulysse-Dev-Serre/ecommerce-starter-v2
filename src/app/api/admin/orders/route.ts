@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';

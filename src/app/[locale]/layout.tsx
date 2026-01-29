@@ -1,5 +1,5 @@
 // src/app/[locale]/layout.tsx
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 import { ClerkProvider } from '@clerk/nextjs';
 import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
@@ -8,13 +8,13 @@ import { getTranslations, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { siteConfig } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
-import { prisma } from '@/lib/db/prisma';
+import { getCurrentUser } from '@/lib/services/user.service';
 import { Navbar } from '@/components/layout/navbar';
 import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
 import { ConditionalFooter } from '@/components/layout/conditional-footer';
-import GoogleTagManager from '@/components/analytics/GoogleTagManager';
-import CookieConsentComponent from '@/components/analytics/CookieConsent';
-import { AnalyticsTracker } from '@/components/analytics/AnalyticsTracker';
+import GoogleTagManager from '@/components/analytics/google-tag-manager';
+import CookieConsentComponent from '@/components/analytics/cookie-consent';
+import { AnalyticsTracker } from '@/components/analytics/analytics-tracker';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { CartMergeHandler } from '@/components/cart/cart-merge-handler';
 import Script from 'next/script';
@@ -32,7 +32,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/constants';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export async function generateMetadata({
   params,
@@ -40,7 +40,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'Metadata' });
+  const t = await getTranslations({ locale, namespace: 'metadata' });
   const baseUrl = env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   return {
@@ -53,7 +53,9 @@ export async function generateMetadata({
     alternates: {
       canonical: `/${locale}`,
       languages: {
-        ...Object.fromEntries(SUPPORTED_LOCALES.map(loc => [loc, `/${loc}`])),
+        ...Object.fromEntries(
+          SUPPORTED_LOCALES.map((loc: string) => [loc, `/${loc}`])
+        ),
         'x-default': `/${DEFAULT_LOCALE}`,
       },
     },
@@ -80,31 +82,19 @@ export default async function RootLayout({
   // Vérifier si on a une vraie clé Clerk (pas une clé mock pour CI)
   const clerkKey = env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   const hasValidClerkKey =
-    clerkKey?.startsWith('pk_live_') ||
-    (clerkKey?.startsWith('pk_test_') &&
-      clerkKey !== 'pk_test_mock_key_for_ci_build_only');
+    clerkKey?.startsWith('pk_live_') || clerkKey?.startsWith('pk_test_');
 
   // Récupérer le rôle de l'utilisateur si Clerk est actif
   let userRole: string | undefined;
   if (hasValidClerkKey) {
-    try {
-      const { userId: clerkId } = await auth();
-      if (clerkId) {
-        const user = await prisma.user.findUnique({
-          where: { clerkId },
-          select: { role: true },
-        });
-        userRole = user?.role;
-      }
-    } catch (error) {
-      userRole = undefined;
-    }
+    const user = await getCurrentUser();
+    userRole = user?.role;
   }
 
   const content = (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} vibe-antialiased flex vibe-flex-col vibe-min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} vibe-antialiased vibe-flex vibe-flex-col vibe-min-h-screen`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleTagManager />

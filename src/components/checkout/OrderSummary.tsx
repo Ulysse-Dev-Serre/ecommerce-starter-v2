@@ -32,7 +32,7 @@ export function OrderSummary({
   locale,
   selectedRate,
 }: OrderSummaryProps) {
-  const t = useTranslations('Checkout');
+  const t = useTranslations('checkout');
   return (
     <Card className={`vibe-card-raised-p6 ${VIBE_ANIMATION_FADE_IN}`}>
       <h2 className="vibe-h2-underlined">{t('orderSummary')}</h2>

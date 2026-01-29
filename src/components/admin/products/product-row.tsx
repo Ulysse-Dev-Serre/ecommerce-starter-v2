@@ -1,10 +1,9 @@
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useTranslations } from 'next-intl';
 
 interface ProductRowProps {
   product: {
@@ -34,6 +33,9 @@ export function SortableProductRow({
   deletingId,
   statusColors,
 }: ProductRowProps) {
+  const t = useTranslations('admin.products');
+  const tc = useTranslations('common');
+
   const {
     attributes,
     listeners,
@@ -89,7 +91,7 @@ export function SortableProductRow({
             <div className="font-medium text-gray-900">
               {getProductName(product.translations)}
             </div>
-            <div className="text-xs text-gray-500 font-mono">
+            <div className="text-xs admin-text-subtle font-mono">
               {product.slug}
             </div>
           </div>
@@ -101,35 +103,39 @@ export function SortableProductRow({
             statusColors[product.status]
           }`}
         >
-          {product.status}
+          {t(`filters.${product.status}`)}
         </span>
       </td>
       <td className="admin-table-td">
         <div className="text-gray-900">
           {getBasePrice(product.variants) || '—'}
         </div>
-        <div className="text-xs text-gray-500">
-          {product.variants.length} variantes
+        <div className="text-xs admin-text-subtle">
+          {product.variants.length} {t('variants')}
         </div>
       </td>
       <td className="admin-table-td">
         <div className="text-gray-900">{getTotalStock(product.variants)}</div>
-        <div className="text-xs text-gray-500">unités en stock</div>
+        <div className="text-xs admin-text-subtle">{t('stats.units')}</div>
       </td>
       <td className="admin-table-td text-right font-medium">
         <div className="flex justify-end gap-2">
           <Link
             href={`/${locale}/admin/products/${product.id}/edit`}
-            className="text-primary hover:text-primary/80"
+            className="admin-link"
           >
-            Modifier
+            {tc('edit')}
           </Link>
           <button
             onClick={() => handleDelete(product.id)}
             disabled={deletingId === product.id}
             className="text-red-600 hover:text-red-800 disabled:opacity-50"
           >
-            {deletingId === product.id ? '...' : <Trash2 className="h-4 w-4" />}
+            {deletingId === product.id ? (
+              tc('loading')
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
           </button>
         </div>
       </td>

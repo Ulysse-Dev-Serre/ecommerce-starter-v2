@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle, X } from 'lucide-react';
-import { SUPPORTED_LOCALES } from '@/lib/constants';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 interface ProductBasicInfoProps {
   formData: {
@@ -31,7 +31,8 @@ export function ProductBasicInfo({
   setTranslations,
   isSlugValid,
   t,
-}: ProductBasicInfoProps) {
+  isEditMode = true,
+}: ProductBasicInfoProps & { isEditMode?: boolean }) {
   const handleTranslationChange = (
     lang: string,
     field: string,
@@ -49,9 +50,7 @@ export function ProductBasicInfo({
   return (
     <div className="space-y-6">
       <div className="admin-card">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          {t('basicInfo')}
-        </h2>
+        <h2 className="admin-section-title">{t('basicInfo')}</h2>
 
         <div className="space-y-4">
           <div>
@@ -83,7 +82,7 @@ export function ProductBasicInfo({
                 )}
               </p>
             )}
-            <p className="mt-1 text-xs text-gray-500">{t('slugHelp')}</p>
+            <p className="mt-1 text-xs admin-text-subtle">{t('slugHelp')}</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
@@ -104,6 +103,7 @@ export function ProductBasicInfo({
                   }))
                 }
                 className="admin-input"
+                disabled={!isEditMode}
               >
                 <option value="DRAFT">{t('draft')}</option>
                 <option value="ACTIVE">{t('active')}</option>
@@ -135,7 +135,7 @@ export function ProductBasicInfo({
       </div>
 
       <div className="space-y-4">
-        {SUPPORTED_LOCALES.map(lang => (
+        {SUPPORTED_LOCALES.map((lang: string) => (
           <div key={lang} className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               {lang.toUpperCase()}

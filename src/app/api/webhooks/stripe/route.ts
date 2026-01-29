@@ -1,31 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-import { prisma } from '../../../../lib/db/prisma';
-import { logger } from '../../../../lib/logger';
-import {
-  clearCart,
-  getOrCreateCart,
-} from '../../../../lib/services/cart.service';
-import { releaseStock } from '../../../../lib/services/inventory.service';
-import { createOrderFromCart } from '../../../../lib/services/order.service';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
+import { clearCart, getOrCreateCart } from '@/lib/services/cart.service';
+import { releaseStock } from '@/lib/services/inventory.service';
+import { createOrderFromCart } from '@/lib/services/order.service';
 import {
   alertInvalidSignature,
   alertWebhookFailure,
-} from '../../../../lib/services/webhook-alert.service';
+} from '@/lib/services/webhook-alert.service';
 import {
   generatePayloadHash,
   validateWebhookSignature,
-} from '../../../../lib/stripe/webhooks';
+} from '@/lib/integrations/stripe/webhooks';
 
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
-import { env } from '../../../../lib/env';
-import { withError } from '../../../../lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { env } from '@/lib/core/env';
+import { withError } from '@/lib/middleware/withError';
 
-import { SITE_CURRENCY } from '../../../../lib/constants';
+import { SITE_CURRENCY } from '@/lib/config/site';
 // ... (imports remain)
 
 async function handler(request: NextRequest): Promise<NextResponse> {

@@ -56,33 +56,31 @@ function SortableMediaItem({ item, onDelete, labels }: SortableMediaItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white ${
-        isDragging ? 'z-50 shadow-2xl' : ''
-      }`}
+      className={`group relative aspect-square overflow-hidden admin-card p-0 ${isDragging ? 'z-50 shadow-2xl ring-2 ring-primary' : ''}`}
     >
       <Image
         src={item.url}
         alt={item.alt || 'Product image'}
         fill
-        className="object-cover"
+        className="object-cover transition-transform group-hover:scale-105"
         sizes="(max-width: 768px) 50vw, 25vw"
       />
       {item.isPrimary && (
-        <div className="absolute left-2 top-2 z-10 rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white shadow-sm">
+        <div className="absolute left-2 top-2 z-10 admin-badge-success shadow-sm">
           {labels.primary}
         </div>
       )}
       <div
         {...attributes}
         {...listeners}
-        className="absolute bottom-2 left-2 z-10 cursor-grab rounded bg-black/50 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+        className="absolute bottom-2 left-2 z-10 cursor-grab rounded-lg bg-white/90 p-1.5 text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing border border-gray-200 shadow-sm"
       >
         <GripVertical className="h-4 w-4" />
       </div>
       <button
         type="button"
         onClick={() => onDelete(item.id)}
-        className="absolute right-2 top-2 z-10 rounded bg-red-600/90 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700"
+        className="absolute right-2 top-2 z-10 rounded-lg bg-red-600/90 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700 shadow-sm"
         title={labels.delete}
       >
         <Trash2 className="h-4 w-4" />
@@ -122,12 +120,12 @@ export function ProductMediaManager({
   if (!productId) {
     return (
       <div className="admin-card">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          {t('productMedia')}
-        </h2>
+        <h2 className="admin-section-title">{t('productMedia')}</h2>
         <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center bg-gray-50/50">
-          <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">{t('uploadAfterSave')}</p>
+          <ImageIcon className="mx-auto h-12 w-12 admin-text-subtle" />
+          <p className="mt-2 text-sm admin-text-subtle">
+            {t('uploadAfterSave')}
+          </p>
         </div>
       </div>
     );
@@ -136,9 +134,7 @@ export function ProductMediaManager({
   return (
     <div className="admin-card">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
-          {t('productMedia')}
-        </h2>
+        <h2 className="admin-section-title">{t('productMedia')}</h2>
         <label className="admin-btn-secondary cursor-pointer gap-2">
           <Upload className="h-4 w-4" />
           {uploading ? tc('uploading') : tc('upload')}

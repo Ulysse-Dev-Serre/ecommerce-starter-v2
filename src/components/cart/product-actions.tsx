@@ -5,7 +5,11 @@ import { ShoppingCart, Zap, Plus, Minus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '../ui/toast-provider';
-import { trackEvent } from '@/lib/analytics/tracker';
+import { trackEvent } from '@/lib/core/tracker';
+
+import { API_ROUTES } from '@/lib/config/api-routes';
+import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
+import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 
 interface ProductActionsProps {
   variantId: string;
@@ -34,13 +38,13 @@ export function ProductActions({
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
 
-  const t = useTranslations('products');
+  const t = useTranslations('product');
   const tCommon = useTranslations('common');
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
     try {
-      const response = await fetch('/api/cart/lines', {
+      const response = await fetch(API_ROUTES.CART.LINES(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,14 +58,17 @@ export function ProductActions({
       if (response.ok) {
         showToast(t('addedToCart', { count: quantity }), 'success');
         void trackEvent(
-          'add_to_cart',
+          ANALYTICS_EVENTS.ADD_TO_CART,
           { variantId, quantity, productName },
           productName
         );
         router.refresh();
+      } else {
+        throw new Error('Failed to add to cart');
       }
     } catch (error) {
       console.error('Failed to add to cart:', error);
+      showToast(tCommon('error'), 'error');
     } finally {
       setIsAddingToCart(false);
     }
@@ -71,12 +78,12 @@ export function ProductActions({
     setIsBuyingNow(true);
     try {
       void trackEvent(
-        'begin_checkout',
+        ANALYTICS_EVENTS.BEGIN_CHECKOUT,
         { variantId, quantity, productName, type: 'direct' },
         productName
       );
       router.push(
-        `/${locale}/checkout?directVariantId=${variantId}&directQuantity=${quantity}`
+        `/${locale}${NAV_ROUTES.CHECKOUT}?${CHECKOUT_URL_PARAMS.DIRECT_VARIANT_ID}=${variantId}&${CHECKOUT_URL_PARAMS.DIRECT_QUANTITY}=${quantity}`
       );
     } catch (error) {
       console.error('Failed to buy now:', error);

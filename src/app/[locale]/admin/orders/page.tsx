@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { OrderFilters } from '@/components/admin/orders/filters';
 import { OrderStatus } from '@/generated/prisma';
 import { OrderListTable } from '@/components/admin/orders/order-list-table';

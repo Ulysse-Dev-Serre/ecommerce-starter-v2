@@ -18,11 +18,14 @@ interface FunnelData {
 
 interface ConversionFunnelProps {
   data: FunnelData[];
+  labels: {
+    visitors: string;
+  };
 }
 
 const COLORS = ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
 
-export function ConversionFunnel({ data }: ConversionFunnelProps) {
+export function ConversionFunnel({ data, labels }: ConversionFunnelProps) {
   return (
     <div className="h-[300px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -44,7 +47,7 @@ export function ConversionFunnel({ data }: ConversionFunnelProps) {
             cursor={{ fill: 'transparent' }}
             formatter={(value: any, name: any, props: any) => [
               `${value} (${props.payload.percentage}%)`,
-              'Visitors',
+              labels.visitors,
             ]}
           />
           <Bar dataKey="count" radius={[0, 4, 4, 0]} barSize={40}>

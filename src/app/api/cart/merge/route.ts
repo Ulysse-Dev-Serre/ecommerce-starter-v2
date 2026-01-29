@@ -1,11 +1,12 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../lib/logger';
-import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
-import { withError } from '../../../../lib/middleware/withError';
-import { env } from '@/lib/env';
-import { mergeAnonymousCartToUser } from '../../../../lib/services/cart.service';
+import { logger } from '@/lib/core/logger';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { env } from '@/lib/core/env';
+import { mergeAnonymousCartToUser } from '@/lib/services/cart.service';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 async function mergeCartHandler(
   _request: NextRequest,
@@ -14,7 +15,7 @@ async function mergeCartHandler(
   const requestId = crypto.randomUUID();
 
   const cookieStore = await cookies();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   if (!anonymousId) {
     logger.info(
@@ -80,7 +81,7 @@ async function mergeCartHandler(
     }
   );
 
-  response.cookies.set('cart_anonymous_id', '', {
+  response.cookies.set(CART_COOKIE_NAME, '', {
     path: '/',
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
@@ -92,10 +93,7 @@ async function mergeCartHandler(
   return response;
 }
 
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const POST = withError(
   withAuth(withRateLimit(mergeCartHandler, RateLimits.PUBLIC))

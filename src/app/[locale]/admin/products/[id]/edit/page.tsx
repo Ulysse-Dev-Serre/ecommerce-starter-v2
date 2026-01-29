@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/db/prisma';
+import { setRequestLocale } from 'next-intl/server';
+import { prisma } from '@/lib/core/db';
 import { ProductForm } from '@/components/admin/products/product-form';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,9 @@ export default async function EditProductPage({
   params,
 }: EditProductPageProps) {
   const { id, locale } = await params;
+
+  // Enable static rendering
+  setRequestLocale(locale);
 
   // Parallel fetch: Product (with nested relations) & Suppliers
   const [product, suppliers] = await Promise.all([

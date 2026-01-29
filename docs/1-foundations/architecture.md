@@ -157,8 +157,8 @@ src/components
 ├── cart
 │   ├── add-to-cart-button.tsx
 │   ├── cart-merge-handler.tsx
-│   ├── CartItem.tsx
-│   ├── CartSummary.tsx
+│   ├── Cart-Item.tsx
+│   ├── Cart-Summary.tsx
 │   ├── product-actions.tsx
 │   └── quantity-selector.tsx
 ├── checkout
@@ -166,7 +166,7 @@ src/components
 │   ├── checkout-client.tsx
 │   ├── checkout-success-client.tsx
 │   └── ... (sections: Address, Payment, Shipping)
-├── contact (Nouveau !)
+├── contact 
 │   ├── ContactForm.tsx
 │   └── ContactInfo.tsx
 ├── emails
@@ -178,7 +178,7 @@ src/components
 │   ├── conditional-navbar.tsx
 │   ├── footer.tsx
 │   └── navbar.tsx
-├── legal (Nouveau !)
+├── legal 
 │   └── LegalPageTemplate.tsx
 ├── orders
 │   └── refund-request-form.tsx
@@ -188,6 +188,8 @@ src/components
 │   └── related-products.tsx
 ├── seo
 │   └── json-ld.tsx
+├── shop
+│   └── shop-pagination.tsx
 ├── ui
 │   ├── status-badge.tsx
 │   ├── toast-provider.tsx

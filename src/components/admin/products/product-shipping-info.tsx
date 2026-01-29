@@ -39,10 +39,8 @@ export function ProductShippingInfo({
   return (
     <div className="admin-card">
       <div className="mb-4 flex items-center gap-2">
-        <Truck className="h-5 w-5 text-gray-500" />
-        <h2 className="text-lg font-semibold text-gray-900">
-          {t('shippingAndLogistics')}
-        </h2>
+        <Truck className="h-5 w-5 admin-text-subtle" />
+        <h2 className="admin-section-title">{t('shippingAndLogistics')}</h2>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

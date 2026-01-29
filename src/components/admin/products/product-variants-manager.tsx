@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, Trash2, Save } from 'lucide-react';
-import { SUPPORTED_CURRENCIES } from '@/lib/constants';
+import { SUPPORTED_CURRENCIES } from '@/lib/config/site';
 import { Variant, NewVariant } from './product-form';
 
 interface ProductVariantsManagerProps {
@@ -34,7 +34,7 @@ export function ProductVariantsManager({
       return variant.sku;
     const translation =
       variant.attributeValues[0].attributeValue.translations.find(
-        tr => tr.language === locale.toUpperCase()
+        (tr: any) => tr.language === locale.toUpperCase()
       );
     return (
       translation?.displayName ||
@@ -45,7 +45,7 @@ export function ProductVariantsManager({
 
   const handleAddNewVariant = () => {
     const initialPrices: Record<string, string> = {};
-    SUPPORTED_CURRENCIES.forEach(curr => {
+    SUPPORTED_CURRENCIES.forEach((curr: string) => {
       initialPrices[curr] = '';
     });
 
@@ -92,7 +92,7 @@ export function ProductVariantsManager({
   return (
     <div className="space-y-6">
       <div className="admin-card p-0 overflow-hidden">
-        <h2 className="p-6 pb-2 text-lg font-semibold text-gray-900">
+        <h2 className="p-6 pb-2 admin-section-title">
           {t('variants')} ({variants.length})
         </h2>
 
@@ -115,20 +115,21 @@ export function ProductVariantsManager({
               <tbody className="divide-y divide-gray-200 bg-white">
                 {variants.map(variant => (
                   <tr key={variant.id} className="admin-table-tr">
-                    <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900">
+                    <td className="admin-table-td font-medium">
                       {getVariantName(variant)}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-gray-600">
+                    <td className="admin-table-td admin-text-subtle">
                       {variant.sku}
                     </td>
-                    {SUPPORTED_CURRENCIES.map(curr => (
-                      <td key={curr} className="whitespace-nowrap px-4 py-3">
+                    {SUPPORTED_CURRENCIES.map((curr: string) => (
+                      <td key={curr} className="admin-table-td">
                         <input
                           type="number"
                           step="0.01"
                           defaultValue={
-                            variant.pricing.find(p => p.currency === curr)
-                              ?.price || ''
+                            variant.pricing.find(
+                              (p: any) => p.currency === curr
+                            )?.price || ''
                           }
                           onBlur={e =>
                             e.target.value &&
@@ -140,7 +141,7 @@ export function ProductVariantsManager({
                         />
                       </td>
                     ))}
-                    <td className="whitespace-nowrap px-4 py-3">
+                    <td className="admin-table-td">
                       <input
                         type="number"
                         defaultValue={variant.inventory?.stock || 0}
@@ -152,7 +153,7 @@ export function ProductVariantsManager({
                         className="w-20 admin-input py-1"
                       />
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <td className="admin-table-td text-right">
                       <button
                         type="button"
                         onClick={() =>
@@ -173,13 +174,13 @@ export function ProductVariantsManager({
 
       <div className="admin-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="admin-section-title">
             {tc('add')} {t('variants')}
           </h2>
           <button
             type="button"
             onClick={handleAddNewVariant}
-            className="admin-btn-primary bg-blue-600 hover:bg-blue-700"
+            className="admin-btn-primary"
           >
             <Plus className="h-4 w-4" /> {tc('add')} {t('variant')}
           </button>
@@ -239,7 +240,7 @@ export function ProductVariantsManager({
                       className="admin-input"
                     />
                   </div>
-                  {SUPPORTED_CURRENCIES.map(curr => (
+                  {SUPPORTED_CURRENCIES.map((curr: string) => (
                     <div key={curr}>
                       <label className="block text-sm font-medium text-gray-700">
                         {t('price')} ({curr})
@@ -284,7 +285,7 @@ export function ProductVariantsManager({
               <button
                 type="button"
                 onClick={onSaveNewVariants}
-                className="admin-btn-primary bg-green-600 hover:bg-green-700"
+                className="admin-btn-primary"
               >
                 <Save className="h-4 w-4" /> {tc('save')} {newVariants.length}{' '}
                 {t('variant')}

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Truck, MapPin, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Truck, MapPin, Plus, Trash2, Edit } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { API_ROUTES } from '@/lib/config/api-routes';
 import { AddLocationModal } from './add-location-modal';
 
 interface LogisticsClientProps {
@@ -11,6 +13,7 @@ interface LogisticsClientProps {
 }
 
 export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
+  const router = useRouter();
   const t = useTranslations('admin.logistics');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<any>(null);
@@ -23,11 +26,11 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
   const handleDelete = async (id: string, name: string) => {
     if (confirm(t('deleteConfirm', { name }))) {
       try {
-        const res = await fetch(`/api/admin/logistics/locations/${id}`, {
+        const res = await fetch(API_ROUTES.ADMIN.LOGISTICS.ITEM(id), {
           method: 'DELETE',
         });
         if (res.ok) {
-          window.location.reload();
+          router.refresh();
         } else {
           alert(t('deleteError'));
         }
@@ -52,7 +55,7 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors"
+          className="admin-btn-primary"
         >
           <Plus className="h-4 w-4" />
           {t('addLocation')}
@@ -60,18 +63,20 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
       </div>
 
       {suppliers.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center">
+        <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50/50 p-12 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
             <Truck className="h-6 w-6 text-gray-400" />
           </div>
           <h3 className="text-lg font-medium text-gray-900">
             {t('noLocations')}
           </h3>
-          <p className="mt-2 text-sm text-gray-500">{t('noLocationsDesc')}</p>
+          <p className="mt-2 text-sm admin-text-subtle">
+            {t('noLocationsDesc')}
+          </p>
           <div className="mt-6">
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              className="admin-btn-secondary"
             >
               <Plus className="h-4 w-4" />
               {t('createFirst')}
@@ -83,27 +88,25 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
           {suppliers.map(supplier => (
             <div
               key={supplier.id}
-              className="relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+              className="admin-card overflow-hidden flex flex-col"
             >
-              <div className="p-6">
+              <div className="p-6 flex-grow">
                 <div className="flex items-center gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
                     <MapPin className="h-5 w-5 text-blue-600" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-semibold text-gray-900">
                       {supplier.name}
                     </h3>
-                    <p className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full inline-block mt-1">
+                    <p className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full inline-block mt-1 uppercase tracking-wider">
                       {supplier.type}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 space-y-2 text-sm text-gray-600">
-                  {/*  Show rudimentary address info if JSON */}
+                <div className="mt-4 space-y-2 text-sm admin-text-subtle">
                   <p className="truncate">
-                    {/* JSON field handling needs proper typing in component */}
                     {(supplier.address as any)?.street1 ||
                       t('addressUndefined')}
                   </p>
@@ -113,19 +116,21 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
                   </p>
                 </div>
               </div>
-              <div className="border-t border-gray-100 bg-gray-50 px-6 py-3">
-                <div className="flex justify-end gap-2 text-sm">
+              <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-3 mt-auto">
+                <div className="flex justify-end gap-3 text-sm font-medium">
                   <button
                     onClick={() => handleEdit(supplier)}
-                    className="font-medium text-gray-900 hover:underline"
+                    className="admin-link flex items-center gap-1"
                   >
+                    <Edit className="h-3.5 w-3.5" />
                     {t('edit')}
                   </button>
                   <button
                     onClick={() => handleDelete(supplier.id, supplier.name)}
-                    className="font-medium text-red-600 hover:underline ml-3"
+                    className="text-red-600 hover:text-red-800 flex items-center gap-1"
                   >
-                    {t('delete') || 'Supprimer'}
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {t('delete')}
                   </button>
                 </div>
               </div>

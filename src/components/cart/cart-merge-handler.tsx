@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 
+import { API_ROUTES } from '@/lib/config/api-routes';
+
 export function CartMergeHandler(): null {
   const { isSignedIn, isLoaded } = useUser();
   const router = useRouter();
@@ -14,7 +16,7 @@ export function CartMergeHandler(): null {
 
     const mergeCart = async () => {
       try {
-        const response = await fetch('/api/cart/merge', {
+        const response = await fetch(API_ROUTES.CART.MERGE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

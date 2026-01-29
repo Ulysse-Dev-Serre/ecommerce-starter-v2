@@ -1,8 +1,7 @@
-import { VIBE_HOVER_GROUP } from '@/lib/vibe-styles';
-import { Link } from 'lucide-react'; // Placeholder to fix lint but we need real Link
+import { VIBE_HOVER_GROUP, VIBE_ANIMATION_FADE_IN } from '@/lib/vibe-styles';
 import NextLink from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -32,9 +31,9 @@ export async function OrderDetailContent({
   locale,
   productData,
 }: OrderDetailContentProps) {
-  const t = await getTranslations({ locale, namespace: 'Orders.detail' });
+  const t = await getTranslations({ locale, namespace: 'orders.detail' });
   const tCommon = await getTranslations({ locale, namespace: 'common' });
-  const tRefund = await getTranslations({ locale, namespace: 'Orders.refund' });
+  const tRefund = await getTranslations({ locale, namespace: 'orders.refund' });
 
   const statusLabels: Record<string, string> = {
     PENDING: t('statusPending'),
@@ -73,34 +72,36 @@ export async function OrderDetailContent({
   const shippingAddr = order.shippingAddress as Record<string, any> | null;
 
   return (
-    <div className="vibe-min-h-screen vibe-bg-muted-extra-soft vibe-pb-12 vibe-animate-fade-in vibe-section-py">
-      <div className="vibe-layout-6xl">
+    <div
+      className={`vibe-min-h-screen vibe-bg-muted-extra-soft vibe-pb-12 vibe-section-py ${VIBE_ANIMATION_FADE_IN}`}
+    >
+      <div className="vibe-layout-container vibe-container-max-6xl">
         <NextLink
           href={`/${locale}/orders`}
-          className={`${VIBE_HOVER_GROUP} vibe-nav-link-prev`}
+          className={`${VIBE_HOVER_GROUP} vibe-nav-link-prev vibe-mb-8`}
         >
           <ArrowLeft className="vibe-mr-2 vibe-icon-sm group-hover:vibe-translate-x-n1 vibe-transition" />
           {t('backToOrders')}
         </NextLink>
 
-        <div className="vibe-flex-col-md-row-md-end-between vibe-gap-6 vibe-mb-12">
+        <div className="vibe-flex-wrap-justify-between-items-end vibe-gap-6 vibe-mb-12">
           <div className="vibe-stack-y-2">
-            <h1 className="vibe-text-4xl-mega">
+            <h1 className="vibe-page-header vibe-mb-0">
               {t('orderNumber')} #{order.orderNumber}
             </h1>
-            <p className="vibe-text-p-lg vibe-text-medium">
+            <p className="vibe-text-p-lg vibe-text-muted">
               {t('date')} : {formatDate(order.createdAt, locale)}
             </p>
           </div>
           <StatusBadge
             status={order.status}
             label={statusLabels[order.status]}
-            className="vibe-status-badge-lg"
+            className="vibe-px-6 vibe-py-2 vibe-text-black-caps"
           />
         </div>
 
-        <div className="vibe-grid-3-cols">
-          <div className="vibe-span-2 vibe-stack-y-10">
+        <div className="vibe-grid-layout">
+          <div className="vibe-grid-main vibe-stack-y-10">
             <OrderStepper status={order.status} labels={statusLabels} />
 
             {(order.status === 'CANCELLED' || order.status === 'REFUNDED') && (
@@ -158,7 +159,13 @@ export async function OrderDetailContent({
             />
           </div>
 
-          <OrderSummary order={order} locale={locale} labels={summaryLabels} />
+          <div className="vibe-grid-side">
+            <OrderSummary
+              order={order}
+              locale={locale}
+              labels={summaryLabels}
+            />
+          </div>
         </div>
       </div>
     </div>

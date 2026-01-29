@@ -7,7 +7,12 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { SUPPORTED_LOCALES, SupportedLocale } from '@/lib/constants';
+import {
+  SUPPORTED_LOCALES,
+  SupportedLocale,
+  SUPPORTED_CURRENCIES,
+} from '@/lib/config/site';
+import { API_ROUTES } from '@/lib/config/api-routes';
 
 import { ProductBasicInfo } from './product-basic-info';
 import { ProductMediaManager } from './product-media-manager';
@@ -140,7 +145,7 @@ export function ProductForm({
     const initialTranslations: Record<string, any> = {};
     const productTrans = initialProduct?.translations || [];
 
-    SUPPORTED_LOCALES.forEach(lang => {
+    SUPPORTED_LOCALES.forEach((lang: string) => {
       const existing = productTrans.find(
         pt => pt.language.toLowerCase() === lang.toLowerCase()
       );
@@ -155,11 +160,10 @@ export function ProductForm({
 
   const [uploading, setUploading] = useState(false);
   const [reorderingMedia, setReorderingMedia] = useState(false);
-  console.log('reorderingMedia', reorderingMedia); // Use it or remove it. For now let's just use it to avoid warning if intended for future UI.
 
   const loadVariants = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/products/${id}/variants`);
+      const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.VARIANTS(id));
       if (!response.ok) return;
       const data = await response.json();
       setVariants(data.data || []);
@@ -170,7 +174,9 @@ export function ProductForm({
 
   const loadMedia = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/media?productId=${id}`);
+      const response = await fetch(
+        `${API_ROUTES.ADMIN.MEDIA.BASE}?productId=${id}`
+      );
       if (!response.ok) return;
       const data = await response.json();
       setMedia(data.data || []);
@@ -199,7 +205,7 @@ export function ProductForm({
         if (media.length === 0 && i === 0)
           formDataUpload.append('isPrimary', 'true');
 
-        const response = await fetch('/api/admin/media/upload', {
+        const response = await fetch(API_ROUTES.ADMIN.MEDIA.UPLOAD, {
           method: 'POST',
           body: formDataUpload,
         });
@@ -227,7 +233,7 @@ export function ProductForm({
     if (!confirm(t('deleteMediaConfirm'))) return;
 
     try {
-      const response = await fetch(`/api/admin/media/${mediaId}`, {
+      const response = await fetch(API_ROUTES.ADMIN.MEDIA.ITEM(mediaId), {
         method: 'DELETE',
       });
       if (!response.ok) throw new Error(t('messages.errorDeletingProduct'));
@@ -261,7 +267,7 @@ export function ProductForm({
     reorderTimeoutRef.current = setTimeout(async () => {
       try {
         setReorderingMedia(true);
-        const response = await fetch(`/api/admin/media/reorder`, {
+        const response = await fetch(API_ROUTES.ADMIN.MEDIA.REORDER, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -271,11 +277,11 @@ export function ProductForm({
             })),
           }),
         });
-        if (!response.ok) throw new Error('Failed to save media order');
+        if (!response.ok) throw new Error(t('messages.errorReorderingMedia'));
       } catch (err) {
         console.error(err);
         await loadMedia(productId);
-        setError('Failed to save media order.');
+        setError(t('messages.errorReorderingMedia'));
       } finally {
         setReorderingMedia(false);
         reorderTimeoutRef.current = null;
@@ -306,7 +312,9 @@ export function ProductForm({
       };
 
       const response = await fetch(
-        productId ? `/api/admin/products/${productId}` : `/api/admin/products`,
+        productId
+          ? API_ROUTES.ADMIN.PRODUCTS.ITEM(productId)
+          : API_ROUTES.ADMIN.PRODUCTS.BASE,
         {
           method: productId ? 'PUT' : 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -329,7 +337,7 @@ export function ProductForm({
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : tc('error'));
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSaving(false);
@@ -345,7 +353,7 @@ export function ProductForm({
         payload.inventory = { stock: updates.stock };
 
       const response = await fetch(
-        `/api/admin/products/${productId}/variants/${variantId}`,
+        API_ROUTES.ADMIN.PRODUCTS.VARIANT_ITEM(productId, variantId),
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -371,7 +379,7 @@ export function ProductForm({
       return;
     try {
       const response = await fetch(
-        `/api/admin/products/${productId}/variants/${variantId}`,
+        API_ROUTES.ADMIN.PRODUCTS.VARIANT_ITEM(productId, variantId),
         { method: 'DELETE' }
       );
       if (!response.ok) throw new Error(t('messages.errorDeletingProduct'));
@@ -402,7 +410,7 @@ export function ProductForm({
         })),
       };
       const response = await fetch(
-        `/api/admin/products/${productId}/variants/simple`,
+        API_ROUTES.ADMIN.PRODUCTS.VARIANTS_SIMPLE(productId),
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -453,26 +461,31 @@ export function ProductForm({
       </div>
 
       {successMessage && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-          <div className="flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <div>
-              <h3 className="font-medium text-green-900">{tc('success')}</h3>
-              <p className="mt-1 text-sm text-green-700">{successMessage}</p>
-            </div>
+        <div className="admin-alert-success">
+          <CheckCircle className="h-5 w-5 shrink-0" />
+          <div className="flex-1">
+            <h3 className="font-bold">{tc('success')}</h3>
+            <p className="mt-0.5 text-sm opacity-90">{successMessage}</p>
           </div>
+          <button
+            onClick={() => setSuccessMessage(null)}
+            className="hover:opacity-70"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <div className="flex items-start gap-3">
-            <X className="h-5 w-5 text-red-600" />
-            <div>
-              <h3 className="font-medium text-red-900">{tc('error')}</h3>
-              <p className="mt-1 text-sm text-red-700">{error}</p>
-            </div>
+        <div className="admin-alert-error">
+          <X className="h-5 w-5 shrink-0" />
+          <div className="flex-1">
+            <h3 className="font-bold">{tc('error')}</h3>
+            <p className="mt-0.5 text-sm opacity-90">{error}</p>
           </div>
+          <button onClick={() => setError(null)} className="hover:opacity-70">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
@@ -486,6 +499,7 @@ export function ProductForm({
             isSlugValid={isSlugValid}
             t={t}
             tc={tc}
+            isEditMode={isEditMode}
           />
 
           {isEditMode && (
@@ -537,10 +551,11 @@ export function ProductForm({
                 {tc('saveChanges')}
               </button>
               <p className="admin-text-tiny text-center italic">
-                {t('lastUpdated')}:{' '}
-                {initialProduct
-                  ? new Date(initialProduct.updatedAt).toLocaleString()
-                  : '-'}
+                {t('lastUpdated', {
+                  date: initialProduct
+                    ? new Date(initialProduct.updatedAt).toLocaleString()
+                    : '-',
+                })}
               </p>
             </div>
           </div>

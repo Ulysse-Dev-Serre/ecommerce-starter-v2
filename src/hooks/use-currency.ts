@@ -1,5 +1,5 @@
-import { env } from '@/lib/env';
-import { SupportedCurrency, SITE_CURRENCY } from '@/lib/constants';
+import { env } from '@/lib/core/env';
+import { SupportedCurrency, SITE_CURRENCY } from '@/lib/config/site';
 
 export type Currency = SupportedCurrency;
 

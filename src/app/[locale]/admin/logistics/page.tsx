@@ -1,6 +1,6 @@
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { LogisticsClient } from '@/components/admin/logistics/logistics-client';
 
 interface LogisticsPageProps {

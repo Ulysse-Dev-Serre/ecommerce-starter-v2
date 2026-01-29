@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import type { AuthContext } from '@/lib/middleware/withAuth';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 
 async function purchaseLabelHandler(
   request: Request,
@@ -75,9 +75,7 @@ async function purchaseLabelHandler(
       );
 
       try {
-        const { getShippingRates } = await import(
-          '../../../../../../lib/services/shippo'
-        );
+        const { getShippingRates } = await import('@/lib/integrations/shippo');
 
         const shippingAddress = order.shippingAddress as any;
 
@@ -219,9 +217,7 @@ async function purchaseLabelHandler(
       }
     }
 
-    const { createTransaction } = await import(
-      '../../../../../../lib/services/shippo'
-    );
+    const { createTransaction } = await import('@/lib/integrations/shippo');
 
     if (typeof rateId !== 'string') {
       return NextResponse.json(

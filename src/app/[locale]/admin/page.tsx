@@ -5,14 +5,14 @@ import {
   Package,
   Users,
 } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '@/lib/core/db';
 import { RevenueChart } from '@/components/admin/analytics/revenue-chart';
 import { formatPrice } from '@/lib/utils/currency';
-import { SITE_CURRENCY, SupportedCurrency } from '@/lib/constants';
+import { SITE_CURRENCY, SupportedCurrency } from '@/lib/config/site';
 import { formatDate } from '@/lib/utils/date';
-import { env } from '@/lib/env';
+import { env } from '@/lib/core/env';
 import { DashboardStatsGrid } from '@/components/admin/dashboard/dashboard-stats-grid';
 import { RecentOrdersList } from '@/components/admin/dashboard/recent-orders-list';
 
@@ -24,6 +24,10 @@ interface AdminDashboardProps {
 
 export default async function AdminDashboard({ params }: AdminDashboardProps) {
   const { locale } = await params;
+
+  // Enable static rendering
+  setRequestLocale(locale);
+
   const t = await getTranslations({
     locale,
     namespace: 'adminDashboard.dashboard',
@@ -158,11 +162,11 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
               <h3 className="text-lg font-semibold vibe-admin-text-main">
                 {t('revenueOverview')}
               </h3>
-              <p className="text-sm vibe-admin-text-subtle">{t('last7Days')}</p>
+              <p className="text-sm admin-text-subtle">{t('last7Days')}</p>
             </div>
-            <TrendingUp className="h-5 w-5 vibe-admin-text-subtle" />
+            <TrendingUp className="h-5 w-5 admin-text-subtle" />
           </div>
-          <RevenueChart data={chartData} />
+          <RevenueChart data={chartData} label={t('stats.revenue')} />
         </div>
 
         <RecentOrdersList orders={recentOrders} />

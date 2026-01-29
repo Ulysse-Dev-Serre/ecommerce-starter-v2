@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import * as CookieConsent from 'vanilla-cookieconsent';
 import 'vanilla-cookieconsent/dist/cookieconsent.css';
-import { cookieConfig } from '../../lib/analytics/cookie-config';
+import { cookieConfig } from '@/lib/config/cookie-config';
 
 export default function CookieConsentComponent() {
   useEffect(() => {

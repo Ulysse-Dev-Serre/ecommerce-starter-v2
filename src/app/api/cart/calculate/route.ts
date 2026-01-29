@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { auth } from '@clerk/nextjs/server';
-import { SITE_CURRENCY, SUPPORTED_CURRENCIES } from '@/lib/constants';
+import {
+  SITE_CURRENCY,
+  SUPPORTED_CURRENCIES,
+  CART_COOKIE_NAME,
+} from '@/lib/config/site';
 
-import { prisma } from '@/lib/db/prisma';
-import { logger } from '@/lib/logger';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getOrCreateCart } from '@/lib/services/cart.service';
@@ -50,7 +54,7 @@ async function calculateCartHandler(
 
   // Récupérer l'utilisateur
   const { userId: clerkId } = await auth();
-  const anonymousId = cookieStore.get('cart_anonymous_id')?.value;
+  const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 
   if (!clerkId && !anonymousId) {
     return NextResponse.json(
