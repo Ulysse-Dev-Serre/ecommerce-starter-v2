@@ -7,7 +7,7 @@ import {
 } from '@/lib/services/orders';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
-import { getCurrentUser } from '@/lib/services/user.service';
+import { getCurrentUser } from '@/lib/services/users';
 import { OrderDetailContent } from '@/components/orders/order-detail-content';
 
 export const dynamic = 'force-dynamic';

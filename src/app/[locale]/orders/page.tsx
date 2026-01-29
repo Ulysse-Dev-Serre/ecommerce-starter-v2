@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { getCurrentUser } from '@/lib/services/user.service';
+import { getCurrentUser } from '@/lib/services/users';
 import { getUserOrders } from '@/lib/services/orders';
 import { getTranslations } from 'next-intl/server';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';

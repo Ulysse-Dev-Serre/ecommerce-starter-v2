@@ -8,7 +8,7 @@ import { getTranslations, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { siteConfig } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
-import { getCurrentUser } from '@/lib/services/user.service';
+import { getCurrentUser } from '@/lib/services/users';
 import { Navbar } from '@/components/layout/navbar';
 import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
 import { ConditionalFooter } from '@/components/layout/conditional-footer';

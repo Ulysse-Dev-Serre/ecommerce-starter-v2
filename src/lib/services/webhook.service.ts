@@ -4,7 +4,7 @@ import {
   createUserFromClerk,
   upsertUserFromClerk,
   deleteUserByClerkId,
-} from './user.service';
+} from './users';
 
 interface ClerkWebhookEventData {
   id: string;
