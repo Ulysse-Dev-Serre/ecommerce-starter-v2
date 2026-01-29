@@ -12,9 +12,11 @@ import {
   getProductVariants,
   createVariants,
   generateVariantCombinations,
+} from '@/lib/services/variants';
+import type {
   CreateVariantData,
   GenerateVariantsConfig,
-} from '@/lib/services/variant.service';
+} from '@/lib/types/domain/variant';
 
 /**
  * GET /api/admin/products/[id]/variants

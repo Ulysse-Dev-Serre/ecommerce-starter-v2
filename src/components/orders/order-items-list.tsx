@@ -3,28 +3,38 @@ import { formatPrice } from '@/lib/utils/currency';
 
 interface OrderItemsListProps {
   items: any[];
-  productData: Record<string, { image?: string; slug: string; name?: string }>;
+  itemData: Record<
+    string,
+    {
+      image?: string;
+      slug: string;
+      name: string;
+      attributes: { name: string; value: string }[];
+    }
+  >;
   currency: string;
   locale: string;
   labels: {
     itemsTitle: string;
     quantity: string;
     productFallback: string;
+    variant: string;
   };
 }
 
 export function OrderItemsList({
   items,
-  productData,
+  itemData,
   currency,
   locale,
   labels,
 }: OrderItemsListProps) {
   const getItemName = (item: any) => {
-    const snapshot = item.productSnapshot as any;
-    const currentProduct = item.productId ? productData[item.productId] : null;
+    const info = item.variantId ? itemData[item.variantId] : null;
 
-    if (currentProduct?.name) return currentProduct.name;
+    if (info?.name) return info.name;
+
+    const snapshot = item.productSnapshot as any;
     if (snapshot?.name) {
       if (typeof snapshot.name === 'object') {
         return (
@@ -47,12 +57,11 @@ export function OrderItemsList({
       </div>
       <ul className="vibe-divide-y">
         {items.map((item: any) => {
+          const info = item.variantId ? itemData[item.variantId] : null;
           const snapshot = item.productSnapshot as any;
-          const currentProduct = item.productId
-            ? productData[item.productId]
-            : null;
-          const slug = currentProduct?.slug || snapshot?.slug;
-          const imageUrl = currentProduct?.image || snapshot?.image;
+
+          const slug = info?.slug || snapshot?.slug;
+          const imageUrl = info?.image || snapshot?.image;
           const itemName = getItemName(item);
 
           return (
@@ -86,7 +95,18 @@ export function OrderItemsList({
                     {itemName}
                   </p>
                 )}
-                <p className="vibe-text-base vibe-text-muted vibe-mt-2 vibe-text-medium">
+
+                {/* Affichage des attributs de variante (Sans badges, style sobre conforme au projet) */}
+                {info?.attributes && info.attributes.length > 0 && (
+                  <p className="vibe-text-base vibe-text-muted vibe-mt-1 vibe-text-medium">
+                    {labels.variant} :{' '}
+                    <span className="vibe-text-bold vibe-text-foreground">
+                      {info.attributes.map(a => a.value).join(', ')}
+                    </span>
+                  </p>
+                )}
+
+                <p className="vibe-text-base vibe-text-muted vibe-mt-1 vibe-text-medium">
                   {labels.quantity} :{' '}
                   <span className="vibe-text-bold vibe-text-foreground">
                     {item.quantity}

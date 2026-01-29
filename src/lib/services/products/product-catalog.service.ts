@@ -267,6 +267,13 @@ export async function getProductBySlug(
                   attribute: {
                     select: {
                       key: true,
+                      translations: {
+                        where: language ? { language } : undefined,
+                        select: {
+                          language: true,
+                          name: true,
+                        },
+                      },
                     },
                   },
                   translations: {
@@ -398,10 +405,13 @@ export function getProductViewModel(product: ProductProjection) {
     stock: v.inventory?.stock || 0,
     attributes: v.attributeValues.map(av => ({
       name:
-        av.attributeValue?.translations[0]?.displayName ||
+        av.attributeValue?.attribute.translations[0]?.name ||
         av.attributeValue?.attribute.key ||
         '',
-      value: av.attributeValue?.value || '',
+      value:
+        av.attributeValue?.translations[0]?.displayName ||
+        av.attributeValue?.value ||
+        '',
     })),
   }));
 

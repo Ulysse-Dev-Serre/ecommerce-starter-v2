@@ -432,7 +432,8 @@
       "trackPackage": "Suivre le colis",
       "apartment": "App. / Bureau",
       "productFallback": "Produit",
-      "standardShipping": "Livraison Standard"
+      "standardShipping": "Livraison Standard",
+      "variant": "Variante"
     },
     "refund": {
       "clientFallback": "Client",

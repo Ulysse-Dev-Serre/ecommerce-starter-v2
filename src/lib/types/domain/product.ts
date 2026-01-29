@@ -44,6 +44,10 @@ export interface ProductVariantProjection {
       value: string;
       attribute: {
         key: string;
+        translations: {
+          language: string;
+          name: string;
+        }[];
       };
       translations: {
         language: string;
