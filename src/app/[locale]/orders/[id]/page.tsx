@@ -4,7 +4,7 @@ import { Metadata } from 'next';
 import {
   getOrderDetailsWithData,
   getOrderMetadata,
-} from '@/lib/services/order.service';
+} from '@/lib/services/orders';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { getCurrentUser } from '@/lib/services/user.service';
