@@ -1,36 +1,16 @@
 import { prisma } from '@/lib/core/db';
 import { Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
-
-// ============================================
-// TYPES
-// ============================================
-
-export interface CreateAttributeData {
-  key: string;
-  inputType?: string;
-  isRequired?: boolean;
-  sortOrder?: number;
-  translations: Array<{
-    language: Language;
-    name: string;
-  }>;
-}
-
-export interface AddAttributeValueData {
-  value: string;
-  translations: Array<{
-    language: Language;
-    displayName: string;
-  }>;
-}
-
-// ============================================
-// FONCTIONS
-// ============================================
+import {
+  CreateAttributeData,
+  AddAttributeValueData,
+} from '@/lib/types/domain/attribute';
 
 /**
- * Récupérer tous les attributs produits
+ * Récupère tous les attributs produits avec leurs valeurs et traductions
+ *
+ * @param language - Langue optionnelle pour filtrer les traductions
+ * @returns Liste des attributs produits
  */
 export async function getProductAttributes(language?: Language) {
   logger.info({ language }, 'Fetching product attributes');
@@ -50,7 +30,10 @@ export async function getProductAttributes(language?: Language) {
 }
 
 /**
- * Récupérer un attribut par ID
+ * Récupère un attribut spécifique par son ID
+ *
+ * @param id - ID de l'attribut
+ * @returns L'attribut trouvé ou null
  */
 export async function getAttributeById(id: string) {
   logger.info({ attributeId: id }, 'Fetching attribute by ID');
@@ -69,7 +52,10 @@ export async function getAttributeById(id: string) {
 }
 
 /**
- * Créer un nouvel attribut
+ * Crée un nouvel attribut produit
+ *
+ * @param data - Données de l'attribut
+ * @returns L'attribut créé
  */
 export async function createProductAttribute(data: CreateAttributeData) {
   logger.info({ key: data.key }, 'Creating product attribute');
@@ -92,7 +78,11 @@ export async function createProductAttribute(data: CreateAttributeData) {
 }
 
 /**
- * Ajouter une valeur à un attribut
+ * Ajoute une nouvelle valeur possible à un attribut existant
+ *
+ * @param attributeId - ID de l'attribut parent
+ * @param data - Données de la valeur
+ * @returns La valeur créée
  */
 export async function addAttributeValue(
   attributeId: string,

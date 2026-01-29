@@ -1,8 +1,14 @@
 import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
+import {
+  WebhookAlertPayload,
+  InvalidSignatureAlert,
+} from '@/lib/types/domain/webhook';
 
 /**
- * Send message to Slack webhook
+ * Envoie un message vers le webhook Slack
+ *
+ * @param message - Message à envoyer
  */
 async function sendSlackAlert(message: string): Promise<void> {
   const webhookUrl = env.SLACK_WEBHOOK_URL;
@@ -32,19 +38,10 @@ async function sendSlackAlert(message: string): Promise<void> {
   }
 }
 
-export interface WebhookAlertPayload {
-  webhookId: string;
-  source: string;
-  eventId: string;
-  eventType: string;
-  error: string;
-  retryCount: number;
-  maxRetries: number;
-  timestamp: Date;
-}
-
 /**
- * Send alert when webhook processing fails after max retries
+ * Envoie une alerte lorsqu'un webhook échoue après le nombre max de retries
+ *
+ * @param alert - Détails de l'alerte
  */
 export async function alertWebhookFailure(
   alert: WebhookAlertPayload
@@ -78,14 +75,13 @@ Action Required: Check webhook_events table for event ${alert.webhookId}
 }
 
 /**
- * Send alert for invalid webhook signature
+ * Envoie une alerte de sécurité pour signature webhook invalide
+ *
+ * @param payload - Détails de l'alerte de signature
  */
-export async function alertInvalidSignature(payload: {
-  source: string;
-  signature: string;
-  error: string;
-  timestamp: Date;
-}): Promise<void> {
+export async function alertInvalidSignature(
+  payload: InvalidSignatureAlert
+): Promise<void> {
   const message = `
 🔒 SECURITY ALERT: Invalid Webhook Signature
 
