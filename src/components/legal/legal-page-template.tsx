@@ -1,4 +1,4 @@
-import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
 import React from 'react';
 
 interface LegalPageTemplateProps {

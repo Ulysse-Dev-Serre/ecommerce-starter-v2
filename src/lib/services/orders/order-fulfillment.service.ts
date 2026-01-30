@@ -6,7 +6,7 @@ import {
   createTransaction,
 } from '@/lib/integrations/shippo';
 import { SITE_CURRENCY } from '@/lib/config/site';
-import { resend, FROM_EMAIL } from '@/lib/core/resend';
+import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { render } from '@react-email/render';
 
 import fr from '@/lib/i18n/dictionaries/fr.json';

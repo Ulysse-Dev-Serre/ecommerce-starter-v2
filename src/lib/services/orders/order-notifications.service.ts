@@ -1,6 +1,6 @@
 import { OrderStatus } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
-import { resend, FROM_EMAIL } from '@/lib/core/resend';
+import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { render } from '@react-email/render';
 import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
 import { env } from '@/lib/core/env';

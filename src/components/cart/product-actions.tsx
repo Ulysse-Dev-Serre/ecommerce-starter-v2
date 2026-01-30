@@ -5,7 +5,7 @@ import { ShoppingCart, Zap, Plus, Minus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '../ui/toast-provider';
-import { trackEvent } from '@/lib/core/tracker';
+import { trackEvent } from '@/lib/client/analytics';
 
 import { API_ROUTES } from '@/lib/config/api-routes';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';

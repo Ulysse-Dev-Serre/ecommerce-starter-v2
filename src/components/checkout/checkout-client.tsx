@@ -6,7 +6,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 import AddressAutocomplete from './AddressAutocomplete';
-import { trackEvent } from '@/lib/core/tracker';
+import { trackEvent } from '@/lib/client/analytics';
 import { formatPrice } from '@/lib/utils/currency';
 
 import { env } from '@/lib/core/env';

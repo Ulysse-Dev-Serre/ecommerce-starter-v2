@@ -39,6 +39,8 @@ const serverSchema = z.object({
 
   // External Services
   SLACK_WEBHOOK_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
 
   // Storage (Local & S3)
   STORAGE_PROVIDER: z.enum(['local', 's3', 'cloudinary']).default('local'),
@@ -145,6 +147,9 @@ export const env = {
   SHIPPO_FROM_COUNTRY: process.env.SHIPPO_FROM_COUNTRY,
   SHIPPO_FROM_EMAIL: process.env.SHIPPO_FROM_EMAIL,
   SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
+  UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+
   NODE_ENV: process.env.NODE_ENV || 'development',
   LOG_LEVEL: process.env.LOG_LEVEL,
   TEST_API_KEY: process.env.TEST_API_KEY,

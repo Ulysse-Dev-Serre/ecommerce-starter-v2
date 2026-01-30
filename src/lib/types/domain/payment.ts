@@ -1,5 +1,6 @@
 import { PaymentMethod, PaymentStatus } from '@/generated/prisma';
 import Stripe from 'stripe';
+import { CheckoutCurrency, CheckoutItem } from './checkout';
 
 /**
  * Types centralisés pour le domaine Payment
@@ -73,10 +74,11 @@ export interface UpdateOrderStatusInput {
 
 /**
  * Paramètres pour créer un PaymentIntent (checkout custom)
+ * Réutilise les types de checkout pour la cohérence
  */
 export interface PaymentIntentInput {
-  items: Array<{ variantId: string; quantity: number }>;
-  currency: 'CAD' | 'USD';
+  items: CheckoutItem[];
+  currency: CheckoutCurrency;
   userId?: string;
   cartId?: string;
   anonymousId?: string;

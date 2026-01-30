@@ -2,7 +2,7 @@ import {
   VIBE_HOVER_GROUP,
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
   VIBE_ANIMATION_FADE_IN,
-} from '@/lib/vibe-styles';
+} from '@/lib/config/vibe-styles';
 import Link from 'next/link';
 import { ArrowRight, PackageOpen } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';

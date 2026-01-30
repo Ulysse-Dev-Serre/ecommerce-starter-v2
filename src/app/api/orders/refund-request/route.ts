@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { render } from '@react-email/render';
 
 import { prisma } from '@/lib/core/db';
-import { resend, FROM_EMAIL } from '@/lib/core/resend';
+import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { logger } from '@/lib/core/logger';
 import { env } from '@/lib/core/env';
 import RefundRequestAdminEmail from '@/components/emails/refund-request-admin';

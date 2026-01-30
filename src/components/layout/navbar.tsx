@@ -1,6 +1,6 @@
 'use client';
 
-import { VIBE_HOVER_GROUP } from '@/lib/vibe-styles';
+import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
 
 import {
   SignInButton,

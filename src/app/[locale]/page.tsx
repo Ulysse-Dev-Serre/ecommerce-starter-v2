@@ -1,4 +1,4 @@
-import { VIBE_ANIMATION_SLIDE_IN_BOTTOM } from '@/lib/vibe-styles';
+import { VIBE_ANIMATION_SLIDE_IN_BOTTOM } from '@/lib/config/vibe-styles';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';

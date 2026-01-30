@@ -3,7 +3,7 @@ import {
   VIBE_ANIMATION_ZOOM_IN,
   VIBE_ANIMATION_SLIDE_IN_RIGHT,
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
-} from '@/lib/vibe-styles';
+} from '@/lib/config/vibe-styles';
 import { useTranslations } from 'next-intl';
 import { PriceTotal } from '@/components/price-display';
 import Link from 'next/link';

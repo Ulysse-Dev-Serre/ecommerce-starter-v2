@@ -1,4 +1,4 @@
-import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
