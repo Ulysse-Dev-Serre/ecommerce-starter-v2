@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { toStripeAmount } from '@/lib/utils/currency';
+import { toStripeAmount } from '@/lib/integrations/stripe/utils';
 import { stripe } from '@/lib/integrations/stripe/client';
 import {
   PaymentIntentInput,

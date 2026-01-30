@@ -1,5 +1,10 @@
 /**
- * Fonction checkout universelle - utilisable partout
+ * Client-side checkout helpers
+ * Fonctions utilitaires pour le processus de checkout côté client
+ */
+
+/**
+ * Fonction checkout universelle - utilisable partout côté client
  *
  * @example
  * // Acheter 1 produit

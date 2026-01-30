@@ -2,7 +2,7 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { Language } from '@/generated/prisma';
 import { env } from '@/lib/core/env';
-import { toStripeAmount } from '@/lib/utils/currency';
+import { toStripeAmount } from '@/lib/integrations/stripe/utils';
 import { stripe } from '@/lib/integrations/stripe/client';
 import { StripeCheckoutInput } from '@/lib/types/domain/checkout';
 import Stripe from 'stripe';
