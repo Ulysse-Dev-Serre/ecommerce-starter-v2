@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 
 import AddressAutocomplete from './AddressAutocomplete';
 import { Loader2 } from 'lucide-react';
-import { CheckoutAddress } from '@/lib/types/checkout';
+import { CheckoutAddress } from '@/lib/types/ui/checkout';
 import {
   SITE_CURRENCY,
   COUNTRY_TO_CURRENCY,

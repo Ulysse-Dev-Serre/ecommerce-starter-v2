@@ -11,7 +11,7 @@ import { SignInButton } from '@clerk/nextjs';
 import { ShieldCheck } from 'lucide-react';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
-import { CartPricing } from '@/lib/types/cart';
+import { CartPricing } from '@/lib/types/ui/cart';
 
 interface CartSummaryProps {
   items: Array<{

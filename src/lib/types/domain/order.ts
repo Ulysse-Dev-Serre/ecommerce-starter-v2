@@ -1,5 +1,5 @@
 import { OrderStatus, Language } from '@/generated/prisma';
-import { CartProjection } from '../cart';
+import { CartProjection } from './cart';
 import Stripe from 'stripe';
 
 /**

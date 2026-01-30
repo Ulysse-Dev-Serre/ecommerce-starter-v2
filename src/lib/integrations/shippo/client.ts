@@ -1,92 +1,27 @@
 import { Shippo } from 'shippo';
 import { logger } from '@/lib/core/logger';
 import { env } from '@/lib/core/env';
+import type {
+  Address,
+  Parcel,
+  CustomsDeclaration,
+  ShippingRate,
+  Transaction,
+} from './types';
 
 // Initialize Shippo only if API key is present, otherwise we relies on Mock mode or error out later
 const shippoApiKey = env.SHIPPO_API_KEY;
 const shippo = shippoApiKey ? new Shippo({ apiKeyHeader: shippoApiKey }) : null;
 
-export interface Address {
-  name: string;
-  company?: string;
-  street1: string;
-  street2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string; // ISO 2 code (e.g. 'US', 'FR')
-  phone?: string;
-  email?: string;
-}
-
-export interface Parcel {
-  length: string;
-  width: string;
-  height: string;
-  distanceUnit: 'cm' | 'in' | 'ft' | 'mm' | 'm' | 'yd';
-  weight: string;
-  massUnit: 'g' | 'oz' | 'lb' | 'kg';
-}
-
-export interface CustomsItem {
-  description: string;
-  quantity: number;
-  netWeight: string;
-  massUnit: 'g' | 'oz' | 'lb' | 'kg';
-  valueAmount: string;
-  valueCurrency: string;
-  originCountry: string; // ISO 2 code
-  hsCode?: string;
-}
-
-export interface CustomsDeclaration {
-  contentsType:
-    | 'MERCHANDISE'
-    | 'GIFT'
-    | 'SAMPLE'
-    | 'RETURN_MERCHANDISE'
-    | 'HUMANITARIAN_DONATION'
-    | 'DOCUMENTS'
-    | 'OTHER';
-  contentsExplanation?: string;
-  incoterm?: 'DDP' | 'DDU';
-  eelPfc?: string;
-  b13aFilingOption?: string;
-  b13aNumber?: string;
-  nonDeliveryOption: 'RETURN' | 'ABANDON';
-  certify: boolean;
-  certifySigner: string;
-  commercialInvoice?: boolean;
-  items: CustomsItem[];
-}
-
-export interface Rate {
-  objectId?: string;
-  object_id?: string;
-  amount: string;
-  currency: string;
-  provider: string;
-  servicelevel: {
-    name: string;
-    token: string;
-  };
-  days?: number;
-  duration_terms?: string;
-}
-
-export interface Transaction {
-  objectId?: string;
-  object_id?: string;
-  status: 'SUCCESS' | 'ERROR' | 'QUEUED' | 'WAITING' | string;
-  trackingNumber?: string;
-  tracking_number?: string;
-  trackingUrl?: string;
-  tracking_url?: string;
-  labelUrl?: string;
-  label_url?: string;
-  messages?: { text: string; code?: string }[];
-  provider?: string;
-}
+// Re-export types for convenience
+export type {
+  Address,
+  Parcel,
+  CustomsDeclaration,
+  CustomsItem,
+  ShippingRate,
+  Transaction,
+} from './types';
 
 /**
  * Calculate shipping rates for a given shipment
