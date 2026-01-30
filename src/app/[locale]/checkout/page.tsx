@@ -4,9 +4,9 @@ import { getTranslations } from 'next-intl/server';
 
 import { cookies } from 'next/headers';
 
-import { CheckoutService } from '@/lib/services/checkout.service';
+import { getCheckoutSummary } from '@/lib/services/checkout';
 import { CheckoutClient } from '@/components/checkout/checkout-client';
-import { getCurrentUser } from '@/lib/services/user.service';
+import { getCurrentUser } from '@/lib/services/users';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 
@@ -34,7 +34,7 @@ export default async function CheckoutPage({
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
   // Appel au Service pour préparer les données du checkout
-  const checkoutSummary = await CheckoutService.getCheckoutSummary({
+  const checkoutSummary = await getCheckoutSummary({
     userId,
     anonymousId,
     locale,

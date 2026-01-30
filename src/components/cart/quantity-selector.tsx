@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, Loader2 } from 'lucide-react';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { updateCartItem } from '@/lib/client/cart';
+import { cn } from '@/lib/utils/cn';
 
 interface QuantitySelectorProps {
   cartItemId?: string;
@@ -48,22 +49,9 @@ export function QuantitySelector({
     debounceTimeout.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(API_ROUTES.CART.LINES(cartItemId), {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            quantity,
-          }),
-        });
-
-        if (response.ok) {
-          lastSentQuantity.current = quantity;
-          router.refresh();
-        } else {
-          setQuantity(lastSentQuantity.current);
-        }
+        await updateCartItem(cartItemId, quantity);
+        lastSentQuantity.current = quantity;
+        router.refresh();
       } catch (error) {
         setQuantity(lastSentQuantity.current);
       } finally {

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { mergeCart } from '@/lib/client/cart';
 
 export function CartMergeHandler(): null {
   const { isSignedIn, isLoaded } = useUser();
@@ -14,27 +14,19 @@ export function CartMergeHandler(): null {
   useEffect(() => {
     if (!isLoaded || !isSignedIn || hasMerged.current) return;
 
-    const mergeCart = async () => {
+    const performMerge = async () => {
       try {
-        const response = await fetch(API_ROUTES.CART.MERGE, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          hasMerged.current = true;
-          const data = await response.json();
-          if (data.data?.items?.length > 0) {
-            router.refresh();
-          }
+        const data = await mergeCart();
+        hasMerged.current = true;
+        if (data.data?.items?.length > 0) {
+          router.refresh();
         }
       } catch (error) {
         console.error('Failed to merge cart:', error);
       }
     };
 
-    void mergeCart();
+    void performMerge();
   }, [isSignedIn, isLoaded, router]);
 
   return null;

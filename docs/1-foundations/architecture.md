@@ -294,68 +294,66 @@ Configuration centrale, services métier, et utilitaires.
 
 ```
 src/lib
-├── analytics
-│   ├── cookie-config.ts
-│   ├── gtm.ts
-│   └── tracker.ts
+├── client
+│   ├── analytics.ts         # Tracking et identification (ex-tracker)
+│   ├── cart.ts              # Actions panier centralisées (Add, Update, Remove)
+│   ├── checkout.ts          # Services de paiement (Stripe Intents)
+│   ├── cookies.ts           # Manipulation des cookies côté navigateur
+│   ├── gtm.ts               # Logique Google Tag Manager Browser
+│   ├── orders.ts            # Services de commandes (Verify, Refund)
+│   ├── shipping.ts          # Services de livraison (Rates)
+│   ├── storage.ts           # Wrapper sécurisé pour localStorage/session
+│   └── admin                # Services réservés à la gestion
+│       ├── logistics.ts     # Gestion des stocks et lieux d'origine
+│       ├── orders.ts        # Gestion des commandes (Statuts, Étiquettes)
+│       └── products.ts      # Catalogue, variantes et médias produits
+
 ├── config
-│   └── site.ts
-├── db
-│   └── prisma.ts
+│   ├── api-routes.ts        # Définition centrale des routes API
+│   ├── nav-routes.ts        # Définition des menus de navigation
+│   ├── site.ts              # Configuration générale du site (devises, locales)
+│   └── ... (analytics events labels)
+
+├── core
+│   ├── cache.ts             # Service de cache (Memory/Redis)
+│   ├── db.ts                # Client Prisma Singleton
+│   ├── env.ts               # Validation des variables d'environnement
+│   └── logger.ts            # Configuration du logger (Pino)
+
 ├── i18n
-│   ├── dictionaries
-│   │   ├── en.json
-│   │   └── fr.json
-│   ├── config.ts
-│   └── request.ts
+│   ├── dictionaries/        # Fichiers JSON de traduction
+│   └── request.ts           # Middleware i18n pour Next.js
+├── integrations
+│   ├── resend/              # Client mail (Resend)
+│   ├── shippo/              # Services et types Shippo
+│   ├── storage/             # Abstraction du stockage (Supabase/S3)
+│   └── stripe/              # Client, webhooks et utils Stripe
+
 ├── middleware
-│   ├── withAuth.ts
-│   ├── withError.ts
-│   ├── withRateLimit.ts
-│   └── withValidation.ts
-├── schemas
-│   └── product.schema.ts
-├── services
-│   ├── attribute.service.ts
-│   ├── calculation.service.ts
-│   ├── cart.service.ts
-│   ├── inventory.service.ts
-│   ├── order.service.ts
-│   ├── product.service.ts
-│   ├── shippo.ts
-│   ├── user.service.ts
-│   ├── variant.service.ts
-│   ├── webhook-alert.service.ts
-│   └── webhook.service.ts
-├── storage
-│   ├── providers
-│   ├── storage.service.ts
-│   └── types.ts
-├── stripe
-│   ├── checkout.ts
-│   ├── client.ts
-│   ├── payments.ts
-│   └── webhooks.ts
-├── types
-├── utils
-│   ├── checkout.ts
-│   ├── cookies.ts
-│   ├── currency.ts
-│   ├── date.ts
-│   ├── prisma-to-json.ts
-│   ├── unit.ts
-│   └── validation.ts
-├── validators
-│   ├── admin.ts
-│   ├── cart.ts
-│   ├── checkout.ts
-│   ├── orders.ts
-│   ├── shipping.ts
-│   └── user.ts
-├── constants.ts
-├── env.ts
-├── logger.ts
-└── resend.ts
+│   ├── types.ts             # Types partagés pour les middlewares
+│   ├── withAuth.ts          # Protection des routes (Clerk + RBAC)
+│   ├── withError.ts         # Gestion globale des erreurs API
+│   ├── withRateLimit.ts     # Limitation de débit (Rate Limiting)
+│   └── withValidation.ts    # Validation Zod des requêtes
+├── services                 # Logique métier organisée par domaine
+│   ├── cart/                # Gestion du panier
+│   ├── orders/              # Gestion des commandes
+│   ├── products/            # Gestion du catalogue
+│   └── ... (payments, users, inventory, logistics)
+├── types                    # Types TypeScript centralisés
+│   ├── api/                 # Structures Req/Res API
+│   ├── domain/              # Entités métier (Order, Product, etc.)
+│   ├── ui/                  # Types dédiés à l'interface
+│   └── index.ts             # Barrel export racine
+├── utils                    # Fonctions utilitaires pures
+│   ├── cn.ts                # Fusion de classes CSS (Tailwind)
+│   ├── currency.ts          # Formatage des prix
+│   └── ... (date, unit)
+
+└── validators               # Schémas de validation Zod
+    ├── index.ts             # Barrel export & formatZodErrors
+    └── ... (product, cart, checkout, admin, etc.)
+
 ```
 
 ---

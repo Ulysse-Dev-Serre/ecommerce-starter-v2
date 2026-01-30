@@ -5,7 +5,7 @@ import { Webhook } from 'svix';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { processWebhookEvent } from '@/lib/services/webhook.service';
+import { processClerkWebhook } from '@/lib/services/webhooks';
 import { env } from '@/lib/core/env';
 
 const webhookSecret = env.CLERK_WEBHOOK_SECRET;
@@ -103,7 +103,7 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
 
   // 5. Process the webhook event
   try {
-    await processWebhookEvent((evt as any).type, (evt as any).data);
+    await processClerkWebhook((evt as any).type, (evt as any).data);
 
     logger.info(
       {

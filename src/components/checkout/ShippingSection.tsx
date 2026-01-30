@@ -4,11 +4,11 @@ import {
   VIBE_ANIMATION_SLIDE_IN_RIGHT,
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
   VIBE_HOVER_GROUP,
-} from '@/lib/vibe-styles';
+} from '@/lib/config/vibe-styles';
 import { formatPrice } from '@/lib/utils/currency';
 import { useTranslations } from 'next-intl';
 
-import { ShippingRate } from '@/lib/types/checkout';
+import { ShippingRate } from '@/lib/integrations/shippo';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin } from 'lucide-react';
 

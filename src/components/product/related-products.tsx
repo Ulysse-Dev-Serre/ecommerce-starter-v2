@@ -1,4 +1,4 @@
-import { getProducts } from '@/lib/services/product.service';
+import { getProducts } from '@/lib/services/products';
 import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
 import { ProductCard } from './product-card';

@@ -6,7 +6,7 @@ import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { stripe } from '@/lib/integrations/stripe/client';
-import { toStripeAmount } from '@/lib/utils/currency';
+import { toStripeAmount } from '@/lib/integrations/stripe/utils';
 import { SupportedCurrency } from '@/lib/config/site';
 import {
   updateIntentSchema,

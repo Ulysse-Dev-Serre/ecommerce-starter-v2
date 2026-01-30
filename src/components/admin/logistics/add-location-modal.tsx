@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, X, MapPin } from 'lucide-react';
 import { Address } from '@/lib/integrations/shippo';
 import { useTranslations } from 'next-intl';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { saveLogisticsLocation } from '@/lib/client/admin/logistics';
 
 interface AddLocationModalProps {
   onClose: () => void;
@@ -45,23 +45,7 @@ export function AddLocationModal({
     setError(null);
 
     try {
-      const url = initialData
-        ? API_ROUTES.ADMIN.LOGISTICS.ITEM(initialData.id)
-        : API_ROUTES.ADMIN.LOGISTICS.BASE;
-
-      const method = initialData ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) {
-        throw new Error(t('saveError'));
-      }
+      await saveLogisticsLocation(formData, initialData?.id);
 
       router.refresh();
       onClose();

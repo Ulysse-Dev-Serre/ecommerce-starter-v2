@@ -51,7 +51,8 @@
     "formSubmit": "Envoyer le message",
     "successTitle": "Message envoyé !",
     "successMessage": "Merci, nous vous répondrons dès que possible.",
-    "sendAnother": "Envoyer un autre message"
+    "sendAnother": "Envoyer un autre message",
+    "errorSending": "Une erreur est survenue lors de l'envoi de votre message. Veuillez réessayer."
   },
   "error": {
     "notFound": {
@@ -432,7 +433,8 @@
       "trackPackage": "Suivre le colis",
       "apartment": "App. / Bureau",
       "productFallback": "Produit",
-      "standardShipping": "Livraison Standard"
+      "standardShipping": "Livraison Standard",
+      "variant": "Variante"
     },
     "refund": {
       "clientFallback": "Client",

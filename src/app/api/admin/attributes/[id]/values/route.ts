@@ -7,8 +7,8 @@ import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import {
   addAttributeValue,
-  AddAttributeValueData,
-} from '@/lib/services/attribute.service';
+  type AddAttributeValueData,
+} from '@/lib/services/attributes';
 
 /**
  * POST /api/admin/attributes/[id]/values

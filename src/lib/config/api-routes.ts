@@ -6,6 +6,7 @@ export const API_ROUTES = {
   CHECKOUT: {
     CREATE_INTENT: '/api/checkout/create-intent',
     UPDATE_INTENT: '/api/checkout/update-intent',
+    CREATE_SESSION: '/api/checkout/create-session',
   },
   SHIPPING: {
     RATES: '/api/shipping/rates',
@@ -17,6 +18,10 @@ export const API_ROUTES = {
   PRODUCTS: {
     LIST: '/api/products',
   },
+  ANALYTICS: {
+    EVENTS: '/api/analytics/events',
+  },
+  CONTACT: '/api/contact', // À créer
   ADMIN: {
     PRODUCTS: {
       BASE: '/api/admin/products',

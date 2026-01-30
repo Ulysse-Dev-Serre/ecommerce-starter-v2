@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useToast } from '@/components/ui/toast-provider';
 import { Camera, Send, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
 
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { submitRefundRequest } from '@/lib/client/orders';
 
 interface RefundRequestFormProps {
   orderId: string;
@@ -35,24 +35,16 @@ export function RefundRequestForm({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(API_ROUTES.ORDERS.REFUND_REQUEST, {
-        method: 'POST',
-        body: (() => {
-          const fd = new FormData();
-          fd.append('orderId', orderId);
-          fd.append('reason', t('cancelOrder'));
-          fd.append('type', 'CANCELLATION');
-          return fd;
-        })(),
-      });
+      const fd = new FormData();
+      fd.append('orderId', orderId);
+      fd.append('reason', t('cancelOrder'));
+      fd.append('type', 'CANCELLATION');
 
-      if (response.ok) {
-        setIsSubmitted(true);
-        showToast(t('successTitle'), 'success');
-        window.location.reload();
-      } else {
-        showToast(t('error'), 'error');
-      }
+      await submitRefundRequest(orderId, fd);
+
+      setIsSubmitted(true);
+      showToast(t('successTitle'), 'success');
+      window.location.reload();
     } catch (err) {
       showToast(t('error'), 'error');
     } finally {
@@ -73,18 +65,10 @@ export function RefundRequestForm({
     }
 
     try {
-      const response = await fetch(API_ROUTES.ORDERS.REFUND_REQUEST, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        setIsSubmitted(true);
-        showToast(t('successTitle'), 'success');
-        window.location.reload();
-      } else {
-        showToast(t('error'), 'error');
-      }
+      await submitRefundRequest(orderId, formData);
+      setIsSubmitted(true);
+      showToast(t('successTitle'), 'success');
+      window.location.reload();
     } catch (err) {
       showToast(t('error'), 'error');
     } finally {

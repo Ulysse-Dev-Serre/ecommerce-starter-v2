@@ -8,8 +8,8 @@ import {
   getVariantById,
   updateVariant,
   deleteVariant,
-  UpdateVariantData,
-} from '@/lib/services/variant.service';
+} from '@/lib/services/variants';
+import type { UpdateVariantData } from '@/lib/types/domain/variant';
 
 /**
  * GET /api/admin/products/[id]/variants/[variantId]
@@ -64,13 +64,13 @@ async function getVariantHandler(
     }
 
     // Vérifier que la variante appartient bien au produit demandé
-    if (variant.product.id !== productId) {
+    if (variant.product?.id !== productId) {
       logger.warn(
         {
           requestId,
           action: 'variant_product_mismatch',
           variantId,
-          variantProductId: variant.product.id,
+          variantProductId: variant.product?.id,
           requestedProductId: productId,
         },
         "La variante n'appartient pas à ce produit"
@@ -195,7 +195,7 @@ async function updateVariantHandler(
       );
     }
 
-    if (variant.product.id !== productId) {
+    if (variant.product?.id !== productId) {
       return NextResponse.json(
         {
           success: false,
@@ -333,7 +333,7 @@ async function deleteVariantHandler(
       );
     }
 
-    if (variant.product.id !== productId) {
+    if (variant.product?.id !== productId) {
       return NextResponse.json(
         {
           success: false,

@@ -4,10 +4,10 @@ import { Metadata } from 'next';
 import {
   getOrderDetailsWithData,
   getOrderMetadata,
-} from '@/lib/services/order.service';
+} from '@/lib/services/orders';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
-import { getCurrentUser } from '@/lib/services/user.service';
+import { getCurrentUser } from '@/lib/services/users';
 import { OrderDetailContent } from '@/components/orders/order-detail-content';
 
 export const dynamic = 'force-dynamic';
@@ -60,7 +60,7 @@ export default async function OrderDetailPage({
     redirect(`/${locale}/sign-in`);
   }
 
-  const { order, productData } = await getOrderDetailsWithData(
+  const { order, itemData } = await getOrderDetailsWithData(
     id,
     user.id,
     locale
@@ -71,7 +71,7 @@ export default async function OrderDetailPage({
       order={order}
       user={user}
       locale={locale}
-      productData={productData}
+      itemData={itemData}
     />
   );
 }

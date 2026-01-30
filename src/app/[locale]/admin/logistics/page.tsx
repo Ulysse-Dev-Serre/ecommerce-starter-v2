@@ -20,6 +20,7 @@ export default async function LogisticsPage({
 
   // Fetch Suppliers (Locations) and serialize Decimals
   const rawSuppliers = await prisma.supplier.findMany({
+    where: { isActive: true },
     orderBy: { createdAt: 'desc' },
   });
 

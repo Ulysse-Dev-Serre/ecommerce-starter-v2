@@ -4,7 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { getOrderById } from '@/lib/services/order.service';
+import { getOrderById } from '@/lib/services/orders';
 
 /**
  * GET /api/orders/[id]

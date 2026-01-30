@@ -159,15 +159,28 @@ async function handler(
       );
     }
 
-    // Mettre à jour le statut via le service (qui gère l'envoi d'email pour SHIPPED)
-    const { updateOrderStatus } = await import('@/lib/services/order.service');
-
-    const updatedOrder = await updateOrderStatus(
-      orderId,
-      newStatus,
-      comment,
-      authContext.userId
+    // Mettre à jour le statut via le service
+    const { updateOrderStatus, sendStatusChangeEmail } = await import(
+      '@/lib/services/orders'
     );
+
+    const updatedOrder = await updateOrderStatus({
+      orderId,
+      status: newStatus,
+      comment,
+      userId: authContext.userId,
+    });
+
+    // Envoyer l'email approprié basé sur le nouveau statut
+    try {
+      await sendStatusChangeEmail(updatedOrder, newStatus as OrderStatus);
+    } catch (emailError) {
+      logger.error(
+        { error: emailError, orderId },
+        'Failed to send status change email'
+      );
+      // Ne pas bloquer la réponse si l'email échoue
+    }
 
     logger.info(
       {

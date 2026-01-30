@@ -1,7 +1,10 @@
-import { VIBE_HOVER_GROUP, VIBE_ANIMATION_FADE_IN } from '@/lib/vibe-styles';
+import {
+  VIBE_HOVER_GROUP,
+  VIBE_ANIMATION_FADE_IN,
+} from '@/lib/config/vibe-styles';
 import NextLink from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -22,14 +25,22 @@ interface OrderDetailContentProps {
   order: OrderDetail;
   user: { firstName: string | null; email: string };
   locale: string;
-  productData: Record<string, { image?: string; slug: string; name?: string }>;
+  itemData: Record<
+    string,
+    {
+      image?: string;
+      slug: string;
+      name: string;
+      attributes: { name: string; value: string }[];
+    }
+  >;
 }
 
 export async function OrderDetailContent({
   order,
   user,
   locale,
-  productData,
+  itemData,
 }: OrderDetailContentProps) {
   const t = await getTranslations({ locale, namespace: 'orders.detail' });
   const tCommon = await getTranslations({ locale, namespace: 'common' });
@@ -56,6 +67,7 @@ export async function OrderDetailContent({
     itemsTitle: t('items'),
     quantity: tCommon('quantity'),
     productFallback: t('productFallback'),
+    variant: t('variant'),
   };
 
   const summaryLabels = {
@@ -144,7 +156,7 @@ export async function OrderDetailContent({
 
             <OrderItemsList
               items={order.items}
-              productData={productData}
+              itemData={itemData}
               currency={order.currency}
               locale={locale}
               labels={itemsLabels}

@@ -3,7 +3,7 @@ import {
   VIBE_ANIMATION_ZOOM_IN,
   VIBE_ANIMATION_SLIDE_IN_RIGHT,
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
-} from '@/lib/vibe-styles';
+} from '@/lib/config/vibe-styles';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -11,7 +11,7 @@ import { X } from 'lucide-react';
 import { PriceDisplay } from '@/components/price-display';
 import { QuantitySelector } from '@/components/cart/quantity-selector';
 
-import { CartItem as CartItemType } from '@/lib/types/cart';
+import { CartItem as CartItemType } from '@/lib/types/ui/cart';
 
 interface CartItemProps {
   item: CartItemType;

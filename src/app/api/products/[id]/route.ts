@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ProductStatus, Language } from '../../../../generated/prisma';
-import { logger } from '../../../../lib/core/logger';
-import { withError } from '../../../../lib/middleware/withError';
-import {
-  getProductBySlug,
-  isProductAvailable,
-} from '../../../../lib/services/product.service';
+import { ProductStatus, Language } from '@/generated/prisma';
+import { logger } from '@/lib/core/logger';
+import { withError } from '@/lib/middleware/withError';
+import { getProductBySlug, isProductAvailable } from '@/lib/services/products';
 
 /**
  * GET /api/products/[id]

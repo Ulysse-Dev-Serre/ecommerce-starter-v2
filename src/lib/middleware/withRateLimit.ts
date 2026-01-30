@@ -9,12 +9,11 @@ interface RateLimitConfig {
   message?: string;
 }
 
-// Stockage en mémoire des requêtes (simple pour début, à remplacer par Redis en prod)
-const requestStore = new Map<string, { count: number; resetTime: number }>();
+import { cache } from '@/lib/core/cache';
 
 /**
- * Middleware de rate limiting simple
- * Pour production, utiliser Upstash Redis ou similaire
+ * Middleware de rate limiting
+ * Utilise le service de cache pour supporter Memory (dev) ou Redis (prod)
  */
 export function createRateLimiter(config: RateLimitConfig) {
   const {
@@ -24,29 +23,12 @@ export function createRateLimiter(config: RateLimitConfig) {
   } = config;
 
   return async (req: NextRequest): Promise<NextResponse | null> => {
-    // Identifier l'utilisateur (IP ou userId si authentifié)
     const identifier = getIdentifier(req);
+    const key = `ratelimit:${identifier}:${req.nextUrl.pathname}`;
+
+    // Utilisation du service de cache centralisé
+    const record = await cache.increment(key, windowMs);
     const now = Date.now();
-    const key = `${identifier}:${req.nextUrl.pathname}`;
-
-    // Nettoyer les anciennes entrées périodiquement
-    cleanupOldEntries(now);
-
-    // Récupérer ou créer l'entrée
-    let record = requestStore.get(key);
-
-    if (!record || now > record.resetTime) {
-      // Nouvelle fenêtre
-      record = {
-        count: 1,
-        resetTime: now + windowMs,
-      };
-      requestStore.set(key, record);
-      return null; // Pas de limite atteinte
-    }
-
-    // Incrémenter le compteur
-    record.count++;
 
     if (record.count > maxRequests) {
       const retryAfter = Math.ceil((record.resetTime - now) / 1000);
@@ -83,7 +65,6 @@ export function createRateLimiter(config: RateLimitConfig) {
       );
     }
 
-    // Limite pas encore atteinte
     return null;
   };
 }
@@ -92,46 +73,14 @@ export function createRateLimiter(config: RateLimitConfig) {
  * Obtenir un identifiant unique pour le rate limiting
  */
 function getIdentifier(req: NextRequest): string {
-  // Priorité : userId Clerk > IP
   const clerkId = req.headers.get('x-clerk-user-id');
   if (clerkId) return `user:${clerkId}`;
 
-  // IP depuis différents headers (selon le proxy/CDN)
   const forwarded = req.headers.get('x-forwarded-for');
   const realIp = req.headers.get('x-real-ip');
   const ip = forwarded?.split(',')[0] ?? realIp ?? 'unknown';
 
   return `ip:${ip}`;
-}
-
-/**
- * Nettoyer les entrées expirées (éviter fuite mémoire)
- */
-function cleanupOldEntries(now: number): void {
-  // Nettoyer toutes les 5 minutes
-  const lastCleanup = (globalThis as any).__rateLimitLastCleanup ?? 0;
-  if (now - lastCleanup < 5 * 60 * 1000) return;
-
-  (globalThis as any).__rateLimitLastCleanup = now;
-
-  let cleaned = 0;
-  for (const [key, record] of requestStore.entries()) {
-    if (now > record.resetTime) {
-      requestStore.delete(key);
-      cleaned++;
-    }
-  }
-
-  if (cleaned > 0) {
-    logger.debug(
-      {
-        action: 'rate_limit_cleanup',
-        cleaned,
-        remaining: requestStore.size,
-      },
-      `Cleaned ${cleaned} expired rate limit entries`
-    );
-  }
 }
 
 /**

@@ -12,7 +12,18 @@ import {
   SupportedLocale,
   SUPPORTED_CURRENCIES,
 } from '@/lib/config/site';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import {
+  getProductVariants,
+  getProductMedia,
+  uploadProductMedia,
+  deleteProductMedia,
+  reorderProductMedia,
+  updateProduct,
+  createProduct,
+  updateProductVariant,
+  deleteProductVariant,
+  addSimpleVariants,
+} from '@/lib/client/admin/products';
 
 import { ProductBasicInfo } from './product-basic-info';
 import { ProductMediaManager } from './product-media-manager';
@@ -163,9 +174,7 @@ export function ProductForm({
 
   const loadVariants = async (id: string) => {
     try {
-      const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.VARIANTS(id));
-      if (!response.ok) return;
-      const data = await response.json();
+      const data = await getProductVariants(id);
       setVariants(data.data || []);
     } catch (err) {
       console.error(err);
@@ -174,11 +183,7 @@ export function ProductForm({
 
   const loadMedia = async (id: string) => {
     try {
-      const response = await fetch(
-        `${API_ROUTES.ADMIN.MEDIA.BASE}?productId=${id}`
-      );
-      if (!response.ok) return;
-      const data = await response.json();
+      const data = await getProductMedia(id);
       setMedia(data.data || []);
     } catch (err) {
       console.error(err);
@@ -205,15 +210,7 @@ export function ProductForm({
         if (media.length === 0 && i === 0)
           formDataUpload.append('isPrimary', 'true');
 
-        const response = await fetch(API_ROUTES.ADMIN.MEDIA.UPLOAD, {
-          method: 'POST',
-          body: formDataUpload,
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.message || 'Failed to upload');
-        }
+        await uploadProductMedia(formDataUpload);
       }
       await loadMedia(productId);
       setSuccessMessage(t('messages.mediaUploaded'));
@@ -233,10 +230,7 @@ export function ProductForm({
     if (!confirm(t('deleteMediaConfirm'))) return;
 
     try {
-      const response = await fetch(API_ROUTES.ADMIN.MEDIA.ITEM(mediaId), {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error(t('messages.errorDeletingProduct'));
+      await deleteProductMedia(mediaId);
       setSuccessMessage(t('messages.mediaDeleted'));
       setMedia(media.filter(m => m.id !== mediaId));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -267,17 +261,11 @@ export function ProductForm({
     reorderTimeoutRef.current = setTimeout(async () => {
       try {
         setReorderingMedia(true);
-        const response = await fetch(API_ROUTES.ADMIN.MEDIA.REORDER, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            media: updatedMedia.map(m => ({
-              id: m.id,
-              sortOrder: m.sortOrder,
-            })),
-          }),
-        });
-        if (!response.ok) throw new Error(t('messages.errorReorderingMedia'));
+        const mediaOrders = updatedMedia.map(m => ({
+          id: m.id,
+          sortOrder: m.sortOrder,
+        }));
+        await reorderProductMedia(mediaOrders);
       } catch (err) {
         console.error(err);
         await loadMedia(productId);
@@ -311,27 +299,19 @@ export function ProductForm({
         },
       };
 
-      const response = await fetch(
-        productId
-          ? API_ROUTES.ADMIN.PRODUCTS.ITEM(productId)
-          : API_ROUTES.ADMIN.PRODUCTS.BASE,
-        {
-          method: productId ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || t('messages.errorUpdatingProduct'));
+      let data;
+      if (productId) {
+        data = await updateProduct(productId, payload);
+      } else {
+        data = await createProduct(payload);
+      }
 
       setSuccessMessage(
         productId ? t('messages.productUpdated') : t('messages.productCreated')
       );
 
-      if (!productId && data.data?.id) {
-        router.push(`/${locale}/admin/products/${data.data.id}/edit`);
+      if (!productId) {
+        router.push(`/${locale}/admin/products`);
       } else {
         router.refresh();
       }
@@ -352,15 +332,7 @@ export function ProductForm({
       if (updates.stock !== undefined)
         payload.inventory = { stock: updates.stock };
 
-      const response = await fetch(
-        API_ROUTES.ADMIN.PRODUCTS.VARIANT_ITEM(productId, variantId),
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!response.ok) throw new Error(t('messages.errorUpdatingProduct'));
+      await updateProductVariant(productId, variantId, payload);
       await loadVariants(productId);
       setSuccessMessage(t('messages.variantUpdated'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -378,11 +350,7 @@ export function ProductForm({
     if (!productId || !confirm(t('deleteVariantConfirm', { sku: variantName })))
       return;
     try {
-      const response = await fetch(
-        API_ROUTES.ADMIN.PRODUCTS.VARIANT_ITEM(productId, variantId),
-        { method: 'DELETE' }
-      );
-      if (!response.ok) throw new Error(t('messages.errorDeletingProduct'));
+      await deleteProductVariant(productId, variantId);
       await loadVariants(productId);
       setSuccessMessage(t('messages.variantDeleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -396,28 +364,18 @@ export function ProductForm({
   const handleSaveNewVariants = async () => {
     if (!productId || newVariants.length === 0) return;
     try {
-      const payload = {
-        variants: newVariants.map(v => ({
-          nameEN: v.nameEN,
-          nameFR: v.nameFR,
-          prices: Object.fromEntries(
-            Object.entries(v.prices).map(([c, p]) => [
-              c,
-              p ? parseFloat(p) : null,
-            ])
-          ),
-          stock: parseInt(v.stock) || 0,
-        })),
-      };
-      const response = await fetch(
-        API_ROUTES.ADMIN.PRODUCTS.VARIANTS_SIMPLE(productId),
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!response.ok) throw new Error(t('messages.errorCreatingProduct'));
+      const variantPayload = newVariants.map(v => ({
+        nameEN: v.nameEN,
+        nameFR: v.nameFR,
+        prices: Object.fromEntries(
+          Object.entries(v.prices).map(([c, p]) => [
+            c,
+            p ? parseFloat(p) : null,
+          ])
+        ),
+        stock: parseInt(v.stock) || 0,
+      }));
+      await addSimpleVariants(productId, variantPayload);
       await loadVariants(productId);
       setNewVariants([]);
       setSuccessMessage(t('messages.variantsAdded'));

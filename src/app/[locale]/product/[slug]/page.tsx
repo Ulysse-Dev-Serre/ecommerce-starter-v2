@@ -1,4 +1,4 @@
-import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/vibe-styles';
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
@@ -8,10 +8,7 @@ import { env } from '@/lib/core/env';
 
 import { ImageGallery } from '@/components/product/image-gallery';
 import { JsonLd } from '@/components/seo/json-ld';
-import {
-  getProductBySlug,
-  getProductViewModel,
-} from '@/lib/services/product.service';
+import { getProductBySlug, getProductViewModel } from '@/lib/services/products';
 import { ProductClient } from './product-client';
 import { RelatedProducts } from '@/components/product/related-products';
 import { siteConfig } from '@/lib/config/site';

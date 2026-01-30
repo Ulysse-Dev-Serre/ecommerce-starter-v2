@@ -5,9 +5,9 @@ import { ShoppingCart, Zap, Plus, Minus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useToast } from '../ui/toast-provider';
-import { trackEvent } from '@/lib/core/tracker';
+import { trackEvent } from '@/lib/client/analytics';
 
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { addToCart } from '@/lib/client/cart';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 
@@ -44,28 +44,14 @@ export function ProductActions({
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
     try {
-      const response = await fetch(API_ROUTES.CART.LINES(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          variantId,
-          quantity,
-        }),
-      });
-
-      if (response.ok) {
-        showToast(t('addedToCart', { count: quantity }), 'success');
-        void trackEvent(
-          ANALYTICS_EVENTS.ADD_TO_CART,
-          { variantId, quantity, productName },
-          productName
-        );
-        router.refresh();
-      } else {
-        throw new Error('Failed to add to cart');
-      }
+      await addToCart(variantId, quantity);
+      showToast(t('addedToCart', { count: quantity }), 'success');
+      void trackEvent(
+        ANALYTICS_EVENTS.ADD_TO_CART,
+        { variantId, quantity, productName },
+        productName
+      );
+      router.refresh();
     } catch (error) {
       console.error('Failed to add to cart:', error);
       showToast(tCommon('error'), 'error');

@@ -4,17 +4,17 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import {
-  CreateVariantsSchema,
-  formatZodErrors,
-} from '@/lib/validators/product';
+import { CreateVariantsSchema } from '@/lib/validators/product';
+import { formatZodErrors } from '@/lib/validators';
 import {
   getProductVariants,
   createVariants,
   generateVariantCombinations,
+} from '@/lib/services/variants';
+import type {
   CreateVariantData,
   GenerateVariantsConfig,
-} from '@/lib/services/variant.service';
+} from '@/lib/types/domain/variant';
 
 /**
  * GET /api/admin/products/[id]/variants

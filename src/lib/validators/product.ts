@@ -212,13 +212,3 @@ export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
 export type CreateVariantInput = z.infer<typeof CreateVariantSchema>;
 export type CreateVariantsInput = z.infer<typeof CreateVariantsSchema>;
 export type UpdateVariantInput = z.infer<typeof UpdateVariantSchema>;
-
-export function formatZodErrors(
-  error: z.ZodError
-): { field: string; message: string }[] {
-  const issues = error.issues || [];
-  return issues.map(err => ({
-    field: err.path?.join('.') || '',
-    message: err.message,
-  }));
-}

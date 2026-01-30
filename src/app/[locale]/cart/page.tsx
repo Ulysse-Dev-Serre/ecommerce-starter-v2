@@ -6,11 +6,11 @@ import { auth } from '@clerk/nextjs/server';
 
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { getCartPageData } from '@/lib/services/cart.service';
-import { getCurrentUser } from '@/lib/services/user.service';
+import { getCartPageData } from '@/lib/services/cart';
+import { getCurrentUser } from '@/lib/services/users';
 
 import { CartClient } from './cart-client';
-import { Cart } from '@/lib/types/cart';
+import { Cart } from '@/lib/types/ui/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 export const dynamic = 'force-dynamic';

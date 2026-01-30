@@ -3,7 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { render } from '@react-email/render';
 
 import { prisma } from '@/lib/core/db';
-import { resend, FROM_EMAIL } from '@/lib/core/resend';
+import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { logger } from '@/lib/core/logger';
 import { env } from '@/lib/core/env';
 import RefundRequestAdminEmail from '@/components/emails/refund-request-admin';
@@ -61,15 +61,15 @@ async function handler(request: NextRequest) {
   const newStatus = isCancellation ? 'CANCELLED' : 'REFUND_REQUESTED';
 
   // Mettre à jour le statut via le service centralisé
-  const { updateOrderStatus } = await import('@/lib/services/order.service');
-  await updateOrderStatus(
-    order.id,
-    newStatus as any,
-    isCancellation
+  const { updateOrderStatus } = await import('@/lib/services/orders');
+  await updateOrderStatus({
+    orderId: order.id,
+    status: newStatus as any,
+    comment: isCancellation
       ? `Annulation immédiate par le client.`
       : `Remboursement demandé : ${reason.substring(0, 500)}${file ? ' (Image jointe)' : ''}`,
-    user.id
-  );
+    userId: user.id,
+  });
 
   // Send email to admin
   const adminEmail = env.ADMIN_EMAIL;
