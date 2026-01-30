@@ -13,7 +13,8 @@ import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { useToast } from '@/components/ui/toast-provider';
 import { siteTokens } from '@/styles/themes/tokens';
-import { CheckoutAddress, ShippingRate } from '@/lib/types/checkout';
+import { CheckoutAddress } from '@/lib/types/ui/checkout';
+import { ShippingRate } from '@/lib/integrations/shippo';
 import { API_ROUTES } from '@/lib/config/api-routes';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 

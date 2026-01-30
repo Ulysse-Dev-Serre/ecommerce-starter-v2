@@ -14,7 +14,7 @@ import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
-import { Cart } from '@/lib/types/cart';
+import { Cart } from '@/lib/types/ui/cart';
 
 interface CartClientProps {
   cart: Cart | null;

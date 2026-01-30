@@ -10,7 +10,7 @@ import { getCartPageData } from '@/lib/services/cart';
 import { getCurrentUser } from '@/lib/services/users';
 
 import { CartClient } from './cart-client';
-import { Cart } from '@/lib/types/cart';
+import { Cart } from '@/lib/types/ui/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 export const dynamic = 'force-dynamic';

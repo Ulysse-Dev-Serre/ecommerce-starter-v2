@@ -11,7 +11,7 @@ import { X } from 'lucide-react';
 import { PriceDisplay } from '@/components/price-display';
 import { QuantitySelector } from '@/components/cart/quantity-selector';
 
-import { CartItem as CartItemType } from '@/lib/types/cart';
+import { CartItem as CartItemType } from '@/lib/types/ui/cart';
 
 interface CartItemProps {
   item: CartItemType;

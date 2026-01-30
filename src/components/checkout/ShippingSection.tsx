@@ -8,7 +8,7 @@ import {
 import { formatPrice } from '@/lib/utils/currency';
 import { useTranslations } from 'next-intl';
 
-import { ShippingRate } from '@/lib/types/checkout';
+import { ShippingRate } from '@/lib/integrations/shippo';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin } from 'lucide-react';
 

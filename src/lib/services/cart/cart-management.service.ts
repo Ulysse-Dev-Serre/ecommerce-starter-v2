@@ -3,7 +3,7 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { SITE_CURRENCY } from '@/lib/config/site';
 import { CartProjection } from '@/lib/types/domain/cart';
-import { Cart } from '@/lib/types/cart';
+import { Cart } from '@/lib/types/ui/cart';
 
 /**
  * Get detailed cart data for the cart page (including translations and primary media)
