@@ -3,7 +3,10 @@ import { cookies } from 'next/headers';
 
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
-import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import {
+  OptionalAuthContext,
+  withOptionalAuth,
+} from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getOrCreateCart } from '@/lib/services/cart';
@@ -16,14 +19,15 @@ import {
   createIntentSchema,
   type CreateIntentInput,
 } from '@/lib/validators/checkout';
+import { resolveCartIdentity } from '@/lib/services/cart/identity';
 
 async function createIntentHandler(
   request: NextRequest,
-  authContext: AuthContext,
+  authContext: OptionalAuthContext,
   data: CreateIntentInput
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const userId = authContext.userId;
+  const { userId, anonymousId } = await resolveCartIdentity(authContext);
 
   // Data est déjà validé et paré par withValidation middleware
   const {
@@ -54,7 +58,7 @@ async function createIntentHandler(
     cartIdForIntent = 'direct_purchase';
   } else {
     // Mode 2: Panier (Standard)
-    const cart = await getOrCreateCart(userId, undefined);
+    const cart = await getOrCreateCart(userId, anonymousId);
 
     // LOG 1: BODY REÇU
     logger.info(
@@ -95,7 +99,7 @@ async function createIntentHandler(
       currency,
       userId,
       cartId: cartIdForIntent,
-      anonymousId: undefined,
+      anonymousId,
       metadata: {
         locale,
         ...(directItem
@@ -146,7 +150,7 @@ async function createIntentHandler(
 }
 
 export const POST = withError(
-  withAuth(
+  withOptionalAuth(
     withRateLimit(
       withValidation(createIntentSchema, createIntentHandler),
       RateLimits.CHECKOUT

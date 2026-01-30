@@ -7,7 +7,8 @@ import Stripe from 'stripe';
  */
 export interface CreateOrderFromCartInput {
   cart: CartProjection;
-  userId: string;
+  userId?: string | null;
+  guestEmail?: string | null;
   paymentIntent: Stripe.PaymentIntent;
   shippingAddress?: any;
   billingAddress?: any;

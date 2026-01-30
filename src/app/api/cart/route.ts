@@ -8,6 +8,7 @@ import {
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
 import { getOrCreateCart } from '@/lib/services/cart';
+import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import { env } from '@/lib/core/env';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 
@@ -17,22 +18,11 @@ async function getCartHandler(
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
-  let userId: string | undefined;
-  let anonymousId: string | undefined;
-  let newAnonymousId: string | undefined;
-
-  if (authContext.isAuthenticated) {
-    userId = authContext.userId;
-  } else {
-    const cookieStore = await cookies();
-    anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
-
-    // Créer un nouvel ID anonyme si nécessaire
-    if (!anonymousId) {
-      newAnonymousId = crypto.randomUUID();
-      anonymousId = newAnonymousId;
-    }
-  }
+  // Résoudre l'identité (User ou Guest)
+  const { userId, anonymousId, newAnonymousId } = await resolveCartIdentity(
+    authContext,
+    true // Créer un ID anonyme si nécessaire
+  );
 
   logger.info(
     {

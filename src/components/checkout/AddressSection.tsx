@@ -19,6 +19,8 @@ interface AddressSectionProps {
   setTempAddress: (address: CheckoutAddress) => void;
   tempName: string;
   setTempName: (name: string) => void;
+  email: string;
+  setEmail: (email: string) => void;
   phone: string;
   setPhone: (phone: string) => void;
   isAddressReady: boolean;
@@ -33,6 +35,8 @@ export function AddressSection({
   setTempAddress,
   tempName,
   setTempName,
+  email,
+  setEmail,
   phone,
   setPhone,
   isAddressReady,
@@ -86,6 +90,9 @@ export function AddressSection({
         </div>
         <div className="vibe-text-medium-foreground vibe-leading-relaxed">
           <p className="vibe-mb-1 vibe-font-bold">{tempName}</p>
+          <p className="vibe-text-sm vibe-text-muted-foreground vibe-mb-2">
+            {email}
+          </p>
           <p>{tempAddress.line1}</p>
           {tempAddress.line2 && <p>{tempAddress.line2}</p>}
           <p>
@@ -104,13 +111,22 @@ export function AddressSection({
     <section className="vibe-container-sm">
       <h2 className="vibe-section-title">{t('shippingAddress')}</h2>
       <div className="vibe-stack-y-4">
-        {/* Name & Phone */}
+        {/* Name & Email & Phone */}
         <div className="vibe-grid-form">
           <FormInput
             label={t('fullName')}
             required
             value={tempName}
             onChange={e => setTempName(e.target.value)}
+          />
+
+          <FormInput
+            label={t('email')} // Assurez-vous d'avoir la clé de traduction 'email'
+            type="email"
+            required
+            placeholder={t('emailPlaceholder')}
+            value={email}
+            onChange={e => setEmail(e.target.value)}
           />
 
           <div>
@@ -236,10 +252,10 @@ export function AddressSection({
       <div className="vibe-mt-8">
         <button
           onClick={onCalculateShipping}
-          disabled={!isAddressReady || isLoading || !phone}
+          disabled={!isAddressReady || isLoading || !phone || !email}
           className={`vibe-button-primary vibe-btn-full-lg vibe-h-12
             ${
-              isAddressReady && !isLoading && phone
+              isAddressReady && !isLoading && phone && email
                 ? ''
                 : 'vibe-opacity-50 vibe-cursor-not-allowed vibe-shadow-none'
             }`}

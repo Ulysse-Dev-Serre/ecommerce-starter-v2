@@ -434,11 +434,21 @@ async function handlePaymentIntentSucceeded(
     'DEBUG: Full Payment Intent Object'
   );
 
-  const userId = paymentIntent.metadata?.userId;
+  const userId = paymentIntent.metadata?.userId || '';
+  const anonymousId = paymentIntent.metadata?.anonymousId;
   const itemsMetadata = paymentIntent.metadata?.items;
 
-  if (!userId || !itemsMetadata) {
-    // ...
+  // We require items metadata, but userId can be empty for guest checkout
+  // If both userId and anonymousId are missing, that's suspicious but we'll fallback to guest logic
+  if (!itemsMetadata) {
+    logger.warn(
+      {
+        requestId,
+        paymentIntentId: paymentIntent.id,
+        reason: 'missing_metadata',
+      },
+      'Skipping order creation: Missing items metadata'
+    );
     return;
   }
 
@@ -511,7 +521,8 @@ async function handlePaymentIntentSucceeded(
 
   const order = await createOrderFromCart({
     cart: virtualCart as any,
-    userId,
+    userId: userId || undefined, // Si userId est vide (guest), on passe undefined
+    guestEmail: !userId ? paymentIntent.receipt_email : undefined, // Si guest, on sauvegarde l'email
     paymentIntent,
     shippingAddress,
   });

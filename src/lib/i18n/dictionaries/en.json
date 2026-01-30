@@ -372,7 +372,9 @@
     },
     "noShippingRates": "No shipping rates found for this address.",
     "edit": "Edit",
-    "continueToPayment": "Continue to Payment"
+    "continueToPayment": "Continue to Payment",
+    "email": "Email Address",
+    "emailPlaceholder": "your@email.com"
   },
   "footer": {
     "about": "About",
@@ -561,10 +563,12 @@
     "processing": "Processing your payment...",
     "title": "Payment Successful!",
     "message": "Your order has been confirmed and is being processed.",
+    "guestMessage": "Your order has been confirmed successfully. A confirmation email has been sent to your address.",
     "orderNumber": "Order Number",
     "sessionId": "Transaction ID",
     "waitMessage": "Please wait while we confirm your order...",
     "backToShop": "Back to shop",
+    "checkEmail": "Check my emails",
     "error": "An error occurred while verifying the order.",
     "timeout": "Order verification timeout. Please check your email for confirmation.",
     "noId": "No session or payment ID provided.",

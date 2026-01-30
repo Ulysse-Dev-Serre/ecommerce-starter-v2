@@ -31,6 +31,7 @@ export async function generateOrderNumber(): Promise<string> {
 export async function createOrderFromCart({
   cart,
   userId,
+  guestEmail,
   paymentIntent,
   shippingAddress,
   billingAddress,
@@ -80,7 +81,8 @@ export async function createOrderFromCart({
   const order = await prisma.order.create({
     data: {
       orderNumber,
-      userId,
+      userId: userId || null, // Ensure explicit null if undefined/empty
+      guestEmail: guestEmail || null,
       status: OrderStatus.PAID,
       currency: cart.currency,
       subtotalAmount,

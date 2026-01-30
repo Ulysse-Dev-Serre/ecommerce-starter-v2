@@ -8,12 +8,19 @@ import {
 } from '@/lib/config/vibe-styles';
 
 import { useEffect, useState } from 'react';
-import { Loader2, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
+import {
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  ShoppingBag,
+  Mail,
+} from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { verifyOrder } from '@/lib/client/orders';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import { useUser } from '@clerk/nextjs';
 
 interface CheckoutSuccessClientProps {
   locale: string;
@@ -26,10 +33,29 @@ export function CheckoutSuccessClient({
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const paymentIntentId = searchParams.get('payment_intent');
+  const redirectStatus = searchParams.get('redirect_status');
+
+  const { isLoaded, isSignedIn } = useUser();
+
   const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [isGuestSuccess, setIsGuestSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // On attend que l'état d'auth soit chargé
+    if (!isLoaded) return;
+
+    // SCÉNARIO GUEST : On se fie au statut de redirection Stripe
+    // On ne fait pas de polling API pour éviter les erreurs 500 sur /verify
+    if (!isSignedIn) {
+      if (redirectStatus === 'succeeded') {
+        setOrderConfirmed(true);
+        setIsGuestSuccess(true);
+      }
+      return;
+    }
+
+    // SCÉNARIO AUTHENTIFIÉ : On vérifie la commande et on redirige
     const identifier = sessionId || paymentIntentId;
 
     if (!identifier) {
@@ -47,6 +73,7 @@ export function CheckoutSuccessClient({
 
         if (data.exists && data.orderNumber) {
           setOrderConfirmed(true);
+          // Redirection uniquement pour les utilisateurs connectés
           setTimeout(() => {
             window.location.href = `/${locale}${NAV_ROUTES.ORDERS}/${data.orderNumber}`;
           }, 2000);
@@ -76,7 +103,15 @@ export function CheckoutSuccessClient({
 
       return () => clearInterval(interval);
     });
-  }, [sessionId, paymentIntentId, locale, t]);
+  }, [
+    sessionId,
+    paymentIntentId,
+    locale,
+    t,
+    isLoaded,
+    isSignedIn,
+    redirectStatus,
+  ]);
 
   if (error) {
     return (
@@ -101,6 +136,48 @@ export function CheckoutSuccessClient({
     );
   }
 
+  // UI POUR LES INVITÉS (GUESTS)
+  if (isGuestSuccess) {
+    return (
+      <div className="vibe-full-page-center vibe-animate-fade-in">
+        <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">
+          <div className="vibe-status-icon-box vibe-relative">
+            <CheckCircle
+              className={`vibe-icon-xxxl vibe-text-success vibe-animate-zoom-in ${VIBE_ANIMATION_ZOOM_IN}`}
+            />
+          </div>
+
+          <h2 className="vibe-status-title vibe-text-h1-status">
+            {t('title')}
+          </h2>
+
+          <p className="vibe-status-desc vibe-text-p-status">
+            {t('guestMessage')}
+          </p>
+
+          <div className="vibe-flex vibe-flex-col vibe-gap-4 vibe-w-full vibe-max-w-xs vibe-mt-6">
+            <a
+              href="mailto:"
+              className="vibe-button-primary vibe-btn-full-lg vibe-flex vibe-items-center vibe-justify-center vibe-gap-2"
+            >
+              <Mail className="vibe-w-5 vibe-h-5" />
+              {t('checkEmail')}
+            </a>
+
+            <Link
+              href={`/${locale}/shop`}
+              className="vibe-button-secondary vibe-btn-full-lg vibe-flex vibe-items-center vibe-justify-center vibe-gap-2"
+            >
+              <ShoppingBag className="vibe-w-5 vibe-h-5" />
+              {t('backToShop')}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // UI DE CHARGEMENT / REDIRECTION (Authentifiés)
   return (
     <div className="vibe-full-page-center vibe-animate-fade-in">
       <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">

@@ -202,6 +202,7 @@ export function CheckoutForm({
   });
   const [tempName, setTempName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
+  const [email, setEmail] = useState<string>(userEmail || '');
   const [isAddressReady, setIsAddressReady] = useState(false);
 
   // Form validation
@@ -209,13 +210,14 @@ export function CheckoutForm({
     const isReady =
       tempName?.trim() !== '' &&
       phone?.trim().length >= 10 &&
+      email?.trim() !== '' && // Validate Email
       tempAddress?.line1?.trim() !== '' &&
       tempAddress?.city?.trim() !== '' &&
       tempAddress?.state?.trim() !== '' &&
       tempAddress?.postal_code?.trim() !== '' &&
       tempAddress?.country?.trim() !== '';
     setIsAddressReady(isReady);
-  }, [tempName, phone, tempAddress]);
+  }, [tempName, phone, tempAddress, email]);
 
   const [total, setTotal] = useState(initialTotal);
 
@@ -250,7 +252,7 @@ export function CheckoutForm({
 
       const finalShippingDetails = {
         ...detailsToSend,
-        email: userEmail,
+        email: email, // Use local email state
       };
 
       await updatePaymentIntentAction({
@@ -290,7 +292,7 @@ export function CheckoutForm({
         state: tempAddress.state,
         zip: tempAddress.postal_code,
         country: tempAddress.country,
-        email: userEmail || '',
+        email: email || '', // Use local email state
         phone: formattedPhone,
       });
 
@@ -386,6 +388,8 @@ export function CheckoutForm({
           setTempName={setTempName}
           phone={phone}
           setPhone={setPhone}
+          email={email} // Pass email
+          setEmail={setEmail} // Pass setEmail
           isAddressReady={isAddressReady}
           isLoading={isLoading}
           onCalculateShipping={handleCalculateShipping}
@@ -430,7 +434,7 @@ export function CheckoutForm({
                 elements={elements}
                 selectedRate={selectedRate}
                 onPay={handlePay}
-                userEmail={userEmail}
+                userEmail={email} // Pass current email state
               />
             </div>
           )}

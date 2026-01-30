@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
-import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import {
+  OptionalAuthContext,
+  withOptionalAuth,
+} from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { stripe } from '@/lib/integrations/stripe/client';
@@ -16,7 +19,7 @@ import { env } from '@/lib/core/env';
 
 async function updateIntentHandler(
   request: NextRequest,
-  authContext: AuthContext,
+  authContext: OptionalAuthContext,
   data: UpdateIntentInput
 ): Promise<NextResponse> {
   // Data is already validated by withValidation
@@ -188,7 +191,7 @@ async function updateIntentHandler(
 }
 
 export const POST = withError(
-  withAuth(
+  withOptionalAuth(
     withRateLimit(
       withValidation(updateIntentSchema, updateIntentHandler),
       RateLimits.CHECKOUT

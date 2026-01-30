@@ -7,6 +7,7 @@ import { withError } from '@/lib/middleware/withError';
 import { env } from '@/lib/core/env';
 import { mergeAnonymousCartToUser } from '@/lib/services/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
+import { resolveCartIdentity } from '@/lib/services/cart/identity';
 
 async function mergeCartHandler(
   _request: NextRequest,
@@ -14,6 +15,9 @@ async function mergeCartHandler(
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
+  // Pour le merge, on a besoin de l'ID anonyme spécifiquement
+  // Note: On force AuthContext typé 'AuthContext' (authenticated only) via le middleware withAuth utilisé plus bas
+  // Mais ici on veut juste l'ID cookie existant sans en créer un nouveau
   const cookieStore = await cookies();
   const anonymousId = cookieStore.get(CART_COOKIE_NAME)?.value;
 

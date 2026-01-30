@@ -375,7 +375,9 @@
     },
     "noShippingRates": "Aucune option de livraison trouvée pour cette adresse.",
     "edit": "Modifier",
-    "continueToPayment": "Continuer vers le paiement"
+    "continueToPayment": "Continuer vers le paiement",
+    "email": "Adresse Email",
+    "emailPlaceholder": "votre@email.com"
   },
   "footer": {
     "about": "À propos",
@@ -564,10 +566,12 @@
     "processing": "Traitement de votre paiement en cours...",
     "title": "Paiement réussi !",
     "message": "Votre commande a été confirmée et est en cours de traitement.",
+    "guestMessage": "Votre commande a été confirmée avec succès. Un email de confirmation a été envoyé à votre adresse.",
     "orderNumber": "Numéro de commande",
     "sessionId": "ID de transaction",
     "waitMessage": "Veuillez patienter pendant que nous confirmons votre commande...",
     "backToShop": "Retour à la boutique",
+    "checkEmail": "Consulter mes emails",
     "error": "Une erreur est survenue lors de la vérification de la commande.",
     "timeout": "Délai d'attente dépassé pour la vérification de la commande. Veuillez vérifier vos emails pour la confirmation.",
     "noId": "Aucun identifiant de session ou de paiement fourni.",
