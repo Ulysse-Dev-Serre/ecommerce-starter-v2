@@ -84,8 +84,9 @@ export async function DELETE(
     // Schema has deletedAt? No, only isActive.
     // We set isActive = false.
 
-    await prisma.supplier.delete({
+    await prisma.supplier.update({
       where: { id },
+      data: { isActive: false },
     });
 
     return NextResponse.json({ success: true });

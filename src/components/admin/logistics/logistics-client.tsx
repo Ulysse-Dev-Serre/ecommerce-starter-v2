@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Truck, MapPin, Plus, Trash2, Edit } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { deleteLogisticsLocation } from '@/lib/client/admin/logistics';
 import { AddLocationModal } from './add-location-modal';
 
 interface LogisticsClientProps {
@@ -26,14 +26,8 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
   const handleDelete = async (id: string, name: string) => {
     if (confirm(t('deleteConfirm', { name }))) {
       try {
-        const res = await fetch(API_ROUTES.ADMIN.LOGISTICS.ITEM(id), {
-          method: 'DELETE',
-        });
-        if (res.ok) {
-          router.refresh();
-        } else {
-          alert(t('deleteError'));
-        }
+        await deleteLogisticsLocation(id);
+        router.refresh();
       } catch (err) {
         console.error(err);
         alert(t('deleteError'));

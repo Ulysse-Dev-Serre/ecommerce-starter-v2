@@ -1,6 +1,6 @@
 'use client';
 
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { removeFromCart } from '@/lib/client/cart';
 import { useToast } from '@/components/ui/toast-provider';
 
 import { useState } from 'react';
@@ -32,16 +32,9 @@ export function CartClient({ cart, locale }: CartClientProps) {
   const handleRemove = async (itemId: string) => {
     setLoadingItems(prev => new Set(prev).add(itemId));
     try {
-      const response = await fetch(API_ROUTES.CART.LINES(itemId), {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        showToast(t('itemRemoved'), 'success');
-        router.refresh();
-      } else {
-        throw new Error(t('errorRemovingItem'));
-      }
+      await removeFromCart(itemId);
+      showToast(t('itemRemoved'), 'success');
+      router.refresh();
     } catch (error) {
       showToast(t('errorRemovingItem'), 'error');
     } finally {

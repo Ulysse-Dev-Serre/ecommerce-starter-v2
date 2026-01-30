@@ -40,7 +40,7 @@ export function OrderSummary({
       <div className="vibe-stack-y-4 vibe-text-xs-muted">
         {/* Items List */}
         {summaryItems && summaryItems.length > 0 && (
-          <div className="mb-6 vibe-list-stack vibe-scrollable-area custom-scrollbar max-h-[40vh]">
+          <div className="vibe-mb-6 vibe-list-stack vibe-scrollable-area custom-scrollbar max-h-[40vh]">
             {summaryItems.map((item, idx) => (
               <div
                 key={idx}
@@ -54,7 +54,7 @@ export function OrderSummary({
                       src={item.image}
                       alt={item.name}
                       fill
-                      className="object-cover"
+                      className="vibe-image-cover"
                       sizes="64px"
                     />
                   ) : (
