@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ZodSchema, ZodError } from 'zod';
+import { ZodSchema } from 'zod';
 import { logger } from '@/lib/core/logger';
-
-type ApiHandler<T> = (
-  request: NextRequest,
-  ...args: any[]
-) => Promise<NextResponse> | NextResponse;
+import { ApiHandler } from './types';
+import { formatZodErrors } from '@/lib/validators';
 
 /**
  * Middleware de validation Zod pour API Routes
@@ -48,10 +45,7 @@ export function withValidation<T>(
           {
             success: false,
             error: 'Validation Error',
-            details: error.issues.map((e: any) => ({
-              path: e.path.join('.'),
-              message: e.message,
-            })),
+            details: formatZodErrors(error),
           },
           { status: 400 }
         );
