@@ -97,3 +97,22 @@ export interface CheckoutContext {
   itemCount: number;
   totalAmount: number;
 }
+
+// ==================== Intent Options ====================
+
+export interface CreateIntentOptions {
+  cartId: string;
+  currency: string;
+  locale: string;
+  directItem?: {
+    variantId: string;
+    quantity: number;
+  };
+}
+
+export interface UpdateIntentOptions {
+  paymentIntentId: string;
+  shippingRate: any;
+  currency: string;
+  shippingDetails: any;
+}

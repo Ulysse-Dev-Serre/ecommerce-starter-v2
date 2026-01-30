@@ -1,12 +1,6 @@
 import { getCookie, setCookie } from './cookies';
-
-export interface UTMData {
-  utmSource?: string;
-  utmMedium?: string;
-  utmCampaign?: string;
-  utmContent?: string;
-  utmTerm?: string;
-}
+import { API_ROUTES } from '@/lib/config/api-routes';
+import { UTMData } from '@/lib/types/domain/analytics';
 
 const UTM_COOKIE_NAME = 'last_utm_data';
 const ANONYMOUS_ID_COOKIE = 'analytics_anon_id';
@@ -67,7 +61,7 @@ export async function trackEvent(
 
   try {
     // On envoie à notre propre API interne
-    await fetch('/api/analytics/events', {
+    await fetch(API_ROUTES.ANALYTICS.EVENTS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
