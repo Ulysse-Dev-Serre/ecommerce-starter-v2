@@ -4,7 +4,8 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { UpdateProductSchema, formatZodErrors } from '@/lib/validators/product';
+import { UpdateProductSchema } from '@/lib/validators/product';
+import { formatZodErrors } from '@/lib/validators';
 import { Language } from '@/generated/prisma';
 import {
   getProductByIdSimple,

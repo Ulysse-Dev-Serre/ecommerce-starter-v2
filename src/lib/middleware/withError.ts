@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { env } from '@/lib/core/env';
-
 import { logger } from '@/lib/core/logger';
 
-type ApiHandler = (...args: any[]) => Promise<NextResponse> | NextResponse;
+// Type helper pour éviter l'erreur de spread avec rest parameters
+type AnyHandler = (...args: any[]) => Promise<NextResponse> | NextResponse;
 
-export function withError(handler: ApiHandler) {
+export function withError(handler: AnyHandler): AnyHandler {
   return async (...args: any[]) => {
     try {
       return await handler(...args);
