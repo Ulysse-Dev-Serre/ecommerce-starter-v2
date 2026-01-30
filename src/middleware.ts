@@ -1,4 +1,4 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { i18n } from '@/lib/i18n/config';
@@ -6,7 +6,16 @@ import { env } from '@/lib/core/env';
 
 const { locales, defaultLocale } = i18n;
 
-// Fonction simple pour générer un ID unique compatible Edge Runtime
+// Matchers pour les routes protégées
+const isAdminRoute = createRouteMatcher(['/admin(.*)', '/:locale/admin(.*)']);
+const isAccountRoute = createRouteMatcher([
+  '/account(.*)',
+  '/:locale/account(.*)',
+  '/orders(.*)',
+  '/:locale/orders(.*)',
+]);
+
+// Fonction pour générer un ID unique compatible Edge Runtime
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -18,16 +27,31 @@ function pathnameIsMissingLocale(pathname: string): boolean {
   );
 }
 
-// Logger minimal pour middleware - seulement erreurs et redirections importantes
+/**
+ * Applique les en-têtes de sécurité recommandés
+ */
+function applySecurityHeaders(response: NextResponse) {
+  const headers = response.headers;
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'origin-when-cross-origin');
+  headers.set(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains'
+  );
+  return response;
+}
+
+// Logger minimal pour middleware
 function logMiddleware(
   level: 'INFO' | 'WARN' | 'ERROR',
   data: Record<string, unknown>,
   message: string
 ): void {
   const shouldLog =
-    level === 'ERROR' || // Toujours logger les erreurs
-    (level === 'WARN' && env.NODE_ENV !== 'production') || // Warnings en dev/staging
-    (level === 'INFO' && env.NODE_ENV === 'development'); // Info seulement en dev
+    level === 'ERROR' ||
+    (level === 'WARN' && env.NODE_ENV !== 'production') ||
+    (level === 'INFO' && env.NODE_ENV === 'development');
 
   if (shouldLog) {
     const logEntry = {
@@ -37,22 +61,17 @@ function logMiddleware(
       ...data,
       message,
     };
-
-    if (level === 'ERROR') {
-      console.error(JSON.stringify(logEntry));
-    } else if (level === 'WARN') {
-      console.warn(JSON.stringify(logEntry));
-    } else {
-      console.info(JSON.stringify(logEntry));
-    }
+    console[level.toLowerCase() as 'info' | 'warn' | 'error'](
+      JSON.stringify(logEntry)
+    );
   }
 }
 
-export default clerkMiddleware((auth, req: NextRequest) => {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   const pathname = req.nextUrl.pathname;
   const requestId = req.headers.get('x-request-id') ?? generateRequestId();
 
-  // Ignorer les fichiers statiques silencieusement
+  // 1. Ignorer les fichiers statiques
   if (
     pathname.startsWith('/_next') ||
     pathname.includes('.') ||
@@ -61,17 +80,20 @@ export default clerkMiddleware((auth, req: NextRequest) => {
     return NextResponse.next();
   }
 
-  // NE PAS rediriger les routes API vers une locale
-  // On les laisse passer pour que Clerk puisse les traiter, mais on arrête le middleware ici
-  if (pathname.startsWith('/api')) {
-    return NextResponse.next();
+  // 2. Protection des routes (Centralisée)
+  if (isAdminRoute(req)) {
+    // Force la protection Clerk pour tout le dossier /admin
+    await auth.protect();
+  } else if (isAccountRoute(req)) {
+    // Optionnel: protéger les comptes et commandes clients
+    await auth.protect();
   }
 
-  // Logger seulement les redirections importantes (pas les visites normales)
-  if (pathnameIsMissingLocale(pathname)) {
+  // 3. Gestion de la locale (I18n)
+  if (pathnameIsMissingLocale(pathname) && !pathname.startsWith('/api')) {
     let targetLocale: string = defaultLocale;
 
-    // Si c'est une route admin, on utilise ADMIN_LOCALE
+    // Si c'est une route admin, on force ADMIN_LOCALE
     if (pathname.startsWith('/admin')) {
       targetLocale = env.ADMIN_LOCALE;
     }
@@ -83,24 +105,22 @@ export default clerkMiddleware((auth, req: NextRequest) => {
         action: 'i18n_redirect',
         from: pathname,
         to: `/${targetLocale}${pathname}`,
-        userAgent: req.headers.get('user-agent')?.substring(0, 100),
       },
-      'Locale missing - redirecting to default'
+      'Locale missing - redirecting'
     );
 
-    const response = NextResponse.redirect(
+    const redirectResponse = NextResponse.redirect(
       new URL(`/${targetLocale}${pathname}`, req.url),
       301
     );
-    response.headers.set('x-request-id', requestId);
-    return response;
+    redirectResponse.headers.set('x-request-id', requestId);
+    return applySecurityHeaders(redirectResponse);
   }
 
-  // Ajouter requestId à toutes les réponses sans logger
+  // 4. Réponse normale avec headers de sécurité
   const response = NextResponse.next();
   response.headers.set('x-request-id', requestId);
-
-  return response;
+  return applySecurityHeaders(response);
 });
 
 export const config = {

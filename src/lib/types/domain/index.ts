@@ -11,3 +11,4 @@ export * from './inventory';
 export * from './payment';
 export * from './variant';
 export * from './webhook';
+export * from './analytics';

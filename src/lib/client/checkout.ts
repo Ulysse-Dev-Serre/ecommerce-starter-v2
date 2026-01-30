@@ -3,23 +3,10 @@
  */
 
 import { API_ROUTES } from '@/lib/config/api-routes';
-
-export interface CreateIntentOptions {
-  cartId: string;
-  currency: string;
-  locale: string;
-  directItem?: {
-    variantId: string;
-    quantity: number;
-  };
-}
-
-export interface UpdateIntentOptions {
-  paymentIntentId: string;
-  shippingRate: any;
-  currency: string;
-  shippingDetails: any;
-}
+import {
+  CreateIntentOptions,
+  UpdateIntentOptions,
+} from '@/lib/types/domain/checkout';
 
 /**
  * Create a Stripe Payment Intent
@@ -64,7 +51,7 @@ export async function createCheckoutSession(
   items: Array<{ variantId: string; quantity: number }>,
   locale: string
 ) {
-  const response = await fetch('/api/checkout/create-session', {
+  const response = await fetch(API_ROUTES.CHECKOUT.CREATE_SESSION, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

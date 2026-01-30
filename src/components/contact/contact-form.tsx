@@ -3,19 +3,33 @@
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { submitContactMessage } from '@/lib/client/contact';
 
 export function ContactForm() {
   const t = useTranslations('contact');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const data = {
+        name: formData.get('name') as string,
+        email: formData.get('email') as string,
+        message: formData.get('message') as string,
+      };
+
+      await submitContactMessage(data);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error(error);
+      alert(t('errorSending'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {
@@ -57,6 +71,7 @@ export function ContactForm() {
         <input
           type="text"
           id="name"
+          name="name"
           className="vibe-input"
           placeholder={t('formNamePlaceholder')}
           disabled={isSubmitting}
@@ -71,6 +86,7 @@ export function ContactForm() {
         <input
           type="email"
           id="email"
+          name="email"
           className="vibe-input"
           placeholder={t('formEmailPlaceholder')}
           disabled={isSubmitting}
@@ -84,6 +100,7 @@ export function ContactForm() {
         </label>
         <textarea
           id="message"
+          name="message"
           rows={5}
           className="vibe-input h-auto vibe-pt-2 resize-none"
           placeholder={t('formMessagePlaceholder')}

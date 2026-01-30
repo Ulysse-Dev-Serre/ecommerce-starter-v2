@@ -3,18 +3,7 @@
  */
 
 import { API_ROUTES } from '@/lib/config/api-routes';
-
-export interface ShippingAddress {
-  name: string;
-  street1: string;
-  street2?: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-  email: string;
-  phone: string;
-}
+import { ShippingAddress } from '@/lib/types/domain/shipping';
 
 /**
  * Fetch shipping rates for a cart and address
