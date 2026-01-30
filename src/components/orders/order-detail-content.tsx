@@ -1,4 +1,7 @@
-import { VIBE_HOVER_GROUP, VIBE_ANIMATION_FADE_IN } from '@/lib/vibe-styles';
+import {
+  VIBE_HOVER_GROUP,
+  VIBE_ANIMATION_FADE_IN,
+} from '@/lib/config/vibe-styles';
 import NextLink from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';

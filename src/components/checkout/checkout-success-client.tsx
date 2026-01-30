@@ -5,7 +5,7 @@ import {
   VIBE_ANIMATION_ZOOM_IN,
   VIBE_ANIMATION_SLIDE_IN_RIGHT,
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
-} from '@/lib/vibe-styles';
+} from '@/lib/config/vibe-styles';
 
 import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';

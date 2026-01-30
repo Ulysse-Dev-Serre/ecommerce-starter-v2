@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
 import { VariantButton } from '@/components/ui/variant-button';
-import { trackEvent } from '@/lib/core/tracker';
+import { trackEvent } from '@/lib/client/analytics';
 
 interface Variant {
   id: string;

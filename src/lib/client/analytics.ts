@@ -1,4 +1,4 @@
-import { getCookie, setCookie } from '../utils/cookies';
+import { getCookie, setCookie } from './cookies';
 
 export interface UTMData {
   utmSource?: string;

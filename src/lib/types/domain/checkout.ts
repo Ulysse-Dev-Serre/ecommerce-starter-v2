@@ -63,18 +63,6 @@ export interface StripeCheckoutInput {
   cancelUrl: string;
 }
 
-/**
- * Paramètres pour créer un PaymentIntent (checkout custom)
- */
-export interface PaymentIntentInput {
-  items: CheckoutItem[];
-  currency: CheckoutCurrency;
-  userId?: string;
-  cartId?: string;
-  anonymousId?: string;
-  metadata?: Record<string, string>;
-}
-
 // ==================== Outputs (Résultats) ====================
 
 /**

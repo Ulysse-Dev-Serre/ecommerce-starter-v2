@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { captureAndSaveUTM, trackEvent } from '@/lib/core/tracker';
+import { captureAndSaveUTM, trackEvent } from '@/lib/client/analytics';
 
 export function AnalyticsTracker() {
   const pathname = usePathname();

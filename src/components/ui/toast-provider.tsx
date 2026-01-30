@@ -1,6 +1,6 @@
 'use client';
 
-import { VIBE_ANIMATION_SLIDE_IN_RIGHT } from '@/lib/vibe-styles';
+import { VIBE_ANIMATION_SLIDE_IN_RIGHT } from '@/lib/config/vibe-styles';
 import { createContext, useContext, useState, useCallback } from 'react';
 
 import { CheckCircle, X } from 'lucide-react';

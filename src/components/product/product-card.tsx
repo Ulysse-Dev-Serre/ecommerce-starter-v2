@@ -1,4 +1,4 @@
-import { VIBE_HOVER_GROUP } from '@/lib/vibe-styles';
+import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PriceDisplay } from '@/components/price-display';
