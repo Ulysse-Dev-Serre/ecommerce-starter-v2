@@ -62,29 +62,3 @@ export function formatPrice(
 
   return formatted;
 }
-
-/**
- * Convertit un montant en centimes pour Stripe
- */
-export function toStripeAmount(
-  amount: number | string,
-  currency: SupportedCurrency
-): number {
-  if (!currency) throw new Error('toStripeAmount: currency is required');
-  const numericAmount =
-    typeof amount === 'string' ? parseFloat(amount) : amount;
-  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
-  return Math.round(numericAmount * Math.pow(10, decimals));
-}
-
-/**
- * Convertit un montant Stripe (centimes) en nombre décimal
- */
-export function fromStripeAmount(
-  stripeAmount: number,
-  currency: SupportedCurrency
-): number {
-  if (!currency) throw new Error('fromStripeAmount: currency is required');
-  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
-  return stripeAmount / Math.pow(10, decimals);
-}
