@@ -6,7 +6,10 @@ import { Package, RefreshCcw, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import {
+  updateAdminOrderStatus,
+  handleAdminReturnLabel,
+} from '@/lib/client/admin/orders';
 
 interface StatusActionsProps {
   orderId: string;
@@ -80,21 +83,10 @@ export function StatusActions({
 
     try {
       const statusLabel = getStatusLabel(newStatus);
-      const response = await fetch(API_ROUTES.ADMIN.ORDERS.STATUS(orderId), {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus,
-          comment: t('statusChangedByAdmin', { status: statusLabel }),
-        }),
+      await updateAdminOrderStatus(orderId, {
+        status: newStatus,
+        comment: t('statusChangedByAdmin', { status: statusLabel }),
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || t('errorUpdate'));
-      }
 
       if (onStatusChange) {
         onStatusChange(newStatus);
@@ -117,20 +109,10 @@ export function StatusActions({
 
     try {
       // Step 1: Fetch cheapest rate for preview
-      const previewRes = await fetch(
-        `${API_ROUTES.ADMIN.ORDERS.RETURN_LABEL(orderId)}?preview=true`,
-        {
-          method: 'POST',
-        }
-      );
-
-      if (!previewRes.ok) {
-        const data = await previewRes.json();
-        throw new Error(data.message || t('errorRates'));
-      }
-
-      const { data: previewData } = await previewRes.json();
-      const { amount, currency, provider } = previewData;
+      const previewData = await handleAdminReturnLabel(orderId, {
+        preview: true,
+      });
+      const { amount, currency, provider } = previewData.data;
 
       // Step 2: Show confirmation with price
       const confirmMsg = t('confirmReturnLabel', {
@@ -145,17 +127,7 @@ export function StatusActions({
       }
 
       // Step 3: Purchase the label
-      const response = await fetch(
-        API_ROUTES.ADMIN.ORDERS.RETURN_LABEL(orderId),
-        {
-          method: 'POST',
-        }
-      );
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || t('errorLabel'));
-      }
+      await handleAdminReturnLabel(orderId);
 
       setSuccess(t('labelGenerated'));
     } catch (err) {

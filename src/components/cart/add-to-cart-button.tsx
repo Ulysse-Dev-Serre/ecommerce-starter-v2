@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { addToCart } from '@/lib/client/cart';
 import { useToast } from '@/components/ui/toast-provider';
 
 interface AddToCartButtonProps {
@@ -33,23 +33,9 @@ export function AddToCartButton({
   const handleAddToCart = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(API_ROUTES.CART.LINES(), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          variantId,
-          quantity,
-        }),
-      });
-
-      if (response.ok) {
-        showToast(tProduct('addedToCart', { count: quantity }), 'success');
-        router.refresh();
-      } else {
-        throw new Error('Failed to add to cart');
-      }
+      await addToCart(variantId, quantity);
+      showToast(tProduct('addedToCart', { count: quantity }), 'success');
+      router.refresh();
     } catch (error) {
       console.error('Failed to add to cart:', error);
       showToast(tCommon('error'), 'error');

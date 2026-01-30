@@ -15,7 +15,11 @@ import { useToast } from '@/components/ui/toast-provider';
 import { siteTokens } from '@/styles/themes/tokens';
 import { CheckoutAddress } from '@/lib/types/ui/checkout';
 import { ShippingRate } from '@/lib/integrations/shippo';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import {
+  createPaymentIntent as createPaymentIntentAction,
+  updatePaymentIntent as updatePaymentIntentAction,
+} from '@/lib/client/checkout';
+import { getShippingRates } from '@/lib/client/shipping';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 
 import { OrderSummary } from './OrderSummary';
@@ -77,21 +81,17 @@ export function CheckoutClient({
     initialized.current = true;
 
     // Create intent
-    void fetch(API_ROUTES.CHECKOUT.CREATE_INTENT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cartId,
-        currency,
-        locale, // Ajout du locale pour les e-mails transactionnels
-        directItem, // Ajout du paramètre optionnel pour achat direct
-      }),
+    createPaymentIntentAction({
+      cartId,
+      currency,
+      locale,
+      directItem,
     })
-      .then(res => res.json())
-      .then(data => {
+      .then((data: any) => {
         if (data.clientSecret) setClientSecret(data.clientSecret);
         else setError(t('errorInit'));
-      });
+      })
+      .catch(() => setError(t('errorInit')));
   }, [cartId, currency, directVariantId, directQuantity]);
 
   if (error)
@@ -253,15 +253,11 @@ export function CheckoutForm({
         email: userEmail,
       };
 
-      await fetch(API_ROUTES.CHECKOUT.UPDATE_INTENT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentIntentId,
-          shippingRate: rate,
-          currency,
-          shippingDetails: finalShippingDetails,
-        }),
+      await updatePaymentIntentAction({
+        paymentIntentId,
+        shippingRate: rate,
+        currency,
+        shippingDetails: finalShippingDetails,
       });
     } catch (err) {
       logger.error({ err }, 'Failed to update shipping cost');
@@ -286,28 +282,17 @@ export function CheckoutForm({
         ? cleanPhone
         : `1${cleanPhone}`;
 
-      const addressPayload = {
-        cartId: cartId,
-        addressTo: {
-          name: tempName || t('anonymousCustomer'),
-          street1: tempAddress.line1,
-          street2: tempAddress.line2 || '',
-          city: tempAddress.city,
-          state: tempAddress.state,
-          zip: tempAddress.postal_code,
-          country: tempAddress.country,
-          email: userEmail || '',
-          phone: formattedPhone,
-        },
-      };
-
-      const response = await fetch(API_ROUTES.SHIPPING.RATES, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(addressPayload),
+      const data = await getShippingRates(cartId, {
+        name: tempName || t('anonymousCustomer'),
+        street1: tempAddress.line1,
+        street2: tempAddress.line2 || '',
+        city: tempAddress.city,
+        state: tempAddress.state,
+        zip: tempAddress.postal_code,
+        country: tempAddress.country,
+        email: userEmail || '',
+        phone: formattedPhone,
       });
-
-      const data = await response.json();
 
       if (data.rates && data.rates.length > 0) {
         setShippingRates(data.rates);

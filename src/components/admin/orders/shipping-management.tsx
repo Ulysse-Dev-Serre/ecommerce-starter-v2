@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Truck, ExternalLink, Printer, Box, AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { purchaseOrderLabel } from '@/lib/client/admin/orders';
 
 interface ShippingManagementProps {
   orderId: string;
@@ -39,15 +39,7 @@ export function ShippingManagement({
   const handlePurchaseLabel = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(API_ROUTES.ADMIN.ORDERS.PURCHASE_LABEL(orderId), {
-        method: 'POST',
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || t('errorPurchase'));
-      }
+      await purchaseOrderLabel(orderId);
 
       alert(t('successPurchase'));
       router.refresh();

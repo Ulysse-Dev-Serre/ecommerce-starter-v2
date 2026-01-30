@@ -20,7 +20,11 @@ import {
 } from '@dnd-kit/sortable';
 import { useTranslations, useLocale } from 'next-intl';
 import { formatPrice } from '@/lib/utils/currency';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import {
+  getAdminProducts,
+  deleteProduct,
+  reorderProducts,
+} from '@/lib/client/admin/products';
 import { ProductStatsGrid } from './product-stats-grid';
 import { SortableProductRow } from './product-row';
 
@@ -90,13 +94,10 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     setStatusFilter(status);
     setLoading(true);
     try {
-      const params = new URLSearchParams({
+      const data = await getAdminProducts({
         language: locale.toUpperCase(),
-        ...(status !== 'all' && { status: status }),
+        status: status,
       });
-      const response = await fetch(`${API_ROUTES.PRODUCTS.LIST}?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch');
-      const data = await response.json();
       const sorted = (data.data || []).sort(
         (a: LocalProduct, b: LocalProduct) => a.sortOrder - b.sortOrder
       );
@@ -163,10 +164,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     if (!confirm(t('deleteConfirm'))) return;
     setDeletingId(productId);
     try {
-      const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.ITEM(productId), {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Delete failed');
+      await deleteProduct(productId);
       setProducts(products.filter(p => p.id !== productId));
     } catch (e) {
       console.error(e);
@@ -193,18 +191,11 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
 
     try {
       setIsSavingOrder(true);
-      const payload = {
-        products: updatedProducts.map(p => ({
-          id: p.id,
-          sortOrder: p.sortOrder,
-        })),
-      };
-      const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.REORDER, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error(t('messages.errorReorderingProducts'));
+      const productOrders = updatedProducts.map(p => ({
+        id: p.id,
+        sortOrder: p.sortOrder,
+      }));
+      await reorderProducts(productOrders);
     } catch (err) {
       console.error('Failed to save order:', err);
       await handleStatusChange(statusFilter);

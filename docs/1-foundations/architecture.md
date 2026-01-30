@@ -295,9 +295,18 @@ Configuration centrale, services métier, et utilitaires.
 ```
 src/lib
 ├── client
-│   ├── analytics.ts         # Tracking et identification (ex-tracker)
-│   ├── checkout.ts          # Helpers client-side pour le checkout
-│   └── cookies.ts           # Manipulation des cookies côté navigateur
+│   ├── analytics.ts         # Tracking et identification (ex-tracker)
+│   ├── cart.ts              # Actions panier centralisées (Add, Update, Remove)
+│   ├── checkout.ts          # Services de paiement (Stripe Intents)
+│   ├── cookies.ts           # Manipulation des cookies côté navigateur
+│   ├── gtm.ts               # Logique Google Tag Manager Browser
+│   ├── orders.ts            # Services de commandes (Verify, Refund)
+│   ├── shipping.ts          # Services de livraison (Rates)
+│   ├── storage.ts           # Wrapper sécurisé pour localStorage/session
+│   └── admin                # Services réservés à la gestion
+│       ├── logistics.ts     # Gestion des stocks et lieux d'origine
+│       ├── orders.ts        # Gestion des commandes (Statuts, Étiquettes)
+│       └── products.ts      # Catalogue, variantes et médias produits
 
 ├── config
 │   ├── api-routes.ts        # Définition centrale des routes API

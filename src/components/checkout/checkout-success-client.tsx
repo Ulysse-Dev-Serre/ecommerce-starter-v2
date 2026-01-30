@@ -12,7 +12,7 @@ import { Loader2, CheckCircle, AlertCircle, ShoppingBag } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { API_ROUTES } from '@/lib/config/api-routes';
+import { verifyOrder } from '@/lib/client/orders';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
 
 interface CheckoutSuccessClientProps {
@@ -42,17 +42,8 @@ export function CheckoutSuccessClient({
 
     const checkOrder = async () => {
       try {
-        const params = new URLSearchParams();
-        if (paymentIntentId) {
-          params.set('payment_intent_id', paymentIntentId);
-        } else {
-          params.set('session_id', identifier);
-        }
-
-        const url = `${API_ROUTES.ORDERS.VERIFY}?${params.toString()}`;
-
-        const response = await fetch(url);
-        const data = await response.json();
+        const identifierToVerify = paymentIntentId || identifier;
+        const data = await verifyOrder(identifierToVerify);
 
         if (data.exists && data.orderNumber) {
           setOrderConfirmed(true);
