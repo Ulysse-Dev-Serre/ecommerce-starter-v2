@@ -377,7 +377,8 @@
     "edit": "Modifier",
     "continueToPayment": "Continuer vers le paiement",
     "email": "Adresse Email",
-    "emailPlaceholder": "votre@email.com"
+    "emailPlaceholder": "votre@email.com",
+    "errorFetchingRates": "Impossible de calculer les frais de port. Veuillez vérifier votre adresse."
   },
   "footer": {
     "about": "À propos",

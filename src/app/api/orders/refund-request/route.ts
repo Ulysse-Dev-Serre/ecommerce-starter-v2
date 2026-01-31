@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { render } from '@react-email/render';
 
 import { prisma } from '@/lib/core/db';
@@ -9,11 +8,14 @@ import { env } from '@/lib/core/env';
 import RefundRequestAdminEmail from '@/components/emails/refund-request-admin';
 
 import { withError } from '@/lib/middleware/withError';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { updateOrderStatus } from '@/lib/services/orders'; // Static import
 
-async function handler(request: NextRequest) {
-  const { userId: clerkId } = await auth();
-  if (!clerkId) {
+async function handler(request: NextRequest, authContext: AuthContext) {
+  const userId = authContext.userId;
+
+  if (!userId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -29,9 +31,9 @@ async function handler(request: NextRequest) {
     );
   }
 
-  // Verify order ownership
+  // Verify order ownership and fetch user details for email
   const user = await prisma.user.findUnique({
-    where: { clerkId },
+    where: { id: userId },
     select: { id: true, email: true, firstName: true, lastName: true },
   });
 
@@ -44,7 +46,14 @@ async function handler(request: NextRequest) {
   });
 
   if (!order || order.userId !== user.id) {
-    return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    logger.warn(
+      { orderId, userId, action: 'refund_request' },
+      'Unauthorized refund attempt'
+    );
+    return NextResponse.json(
+      { error: 'Order not found or access denied' },
+      { status: 404 }
+    );
   }
 
   // Prepare attachment if file exists
@@ -59,15 +68,15 @@ async function handler(request: NextRequest) {
 
   const isCancellation = formData.get('type') === 'CANCELLATION';
   const newStatus = isCancellation ? 'CANCELLED' : 'REFUND_REQUESTED';
+  const comment = isCancellation
+    ? `Annulation immédiate par le client.`
+    : `Remboursement demandé : ${reason.substring(0, 500)}${file ? ' (Image jointe)' : ''}`;
 
-  // Mettre à jour le statut via le service centralisé
-  const { updateOrderStatus } = await import('@/lib/services/orders');
+  // Update status via service
   await updateOrderStatus({
     orderId: order.id,
     status: newStatus as any,
-    comment: isCancellation
-      ? `Annulation immédiate par le client.`
-      : `Remboursement demandé : ${reason.substring(0, 500)}${file ? ' (Image jointe)' : ''}`,
+    comment,
     userId: user.id,
   });
 
@@ -88,7 +97,7 @@ async function handler(request: NextRequest) {
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: adminEmail,
-      subject: `⚠️ Demande de remboursement - Commande ${order.orderNumber}`,
+      subject: `⚠️ Refund Request - Order ${order.orderNumber}`,
       html: emailHtml,
       attachments: attachments,
     });
@@ -106,4 +115,6 @@ async function handler(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-export const POST = withError(withRateLimit(handler, RateLimits.STRICT));
+export const POST = withError(
+  withRateLimit(withAuth(handler), RateLimits.STRICT)
+);

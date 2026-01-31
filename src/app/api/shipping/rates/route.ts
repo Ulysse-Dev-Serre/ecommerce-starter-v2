@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShippingRates, Address, Parcel } from '@/lib/integrations/shippo';
+import { getShippingRates, Address } from '@/lib/integrations/shippo';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
@@ -11,6 +11,22 @@ import {
   ShippingRequestInput,
 } from '@/lib/validators/shipping';
 import { CAD_TO_USD_RATE, SITE_CURRENCY } from '@/lib/config/site';
+
+const DEFAULT_CUSTOMS_DESCRIPTION = 'Merchandise';
+
+// --- HELPER: Format Delivery Time ---
+function formatDeliveryTime(rate: any) {
+  if (rate.duration_terms) {
+    return rate.duration_terms
+      .replace(/days?/i, 'Jours')
+      .replace(/day?/i, 'Jour')
+      .trim();
+  }
+  if (rate.days) {
+    return `${rate.days} Jour${rate.days > 1 ? 's' : ''}`;
+  }
+  return null;
+}
 
 // Initializing defaults (Will be overridden by DB values if found)
 async function handler(
@@ -45,7 +61,7 @@ async function handler(
 
     let customsDeclaration = undefined;
 
-    // Determine Origin Address
+    // --- STEP 1: Determine Origin Address ---
     // Priority: 1. Product specific origin, 2. Default Local Stock, 3. Environment Variables
     let originAddress: Address = {
       name: env.SHIPPO_FROM_NAME || '',
@@ -63,7 +79,7 @@ async function handler(
     let originIncoterm = 'DDU'; // Default
 
     if (cartId) {
-      const cart = (await prisma.cart.findUnique({
+      const cart = await prisma.cart.findUnique({
         where: { id: cartId },
         include: {
           items: {
@@ -81,58 +97,78 @@ async function handler(
                     },
                   },
                 },
-              } as any,
+              },
             },
           },
         },
-      })) as any;
+      });
 
       if (cart && cart.items.length > 0) {
         logger.info({ itemCount: cart.items.length }, 'Cart found with items');
 
         // Check if the first item has a specific shipping origin
-        const firstProduct = cart.items[0]?.variant?.product;
+        const firstItem = cart.items[0];
+        const firstVariant = firstItem.variant;
+        const firstProduct = firstVariant?.product;
 
         if (firstProduct?.shippingOrigin) {
-          const addr = firstProduct.shippingOrigin.address as any;
+          const originData = firstProduct.shippingOrigin;
+          const addr = originData.address as unknown as {
+            street1: string;
+            street2?: string;
+            city: string;
+            state: string;
+            zip: string;
+            country: string;
+            phone?: string;
+            email?: string;
+          };
+
           if (addr && addr.street1) {
             originAddress = {
-              name: firstProduct.shippingOrigin.name,
+              name: originData.name,
               street1: addr.street1,
-              street2: addr.street2,
+              street2: addr.street2 || '',
               city: addr.city,
               state: addr.state,
               zip: addr.zip,
               country: addr.country,
-              phone: addr.phone,
-              email: addr.email,
+              phone: addr.phone || '',
+              email: addr.email || '',
             };
-            usedSupplierId = firstProduct.shippingOrigin.id;
+            usedSupplierId = originData.id;
             originIncoterm =
-              firstProduct.incoterm ||
-              firstProduct.shippingOrigin.incoterm ||
-              'DDU';
+              firstProduct.incoterm || originData.incoterm || 'DDU';
           }
         } else {
-          // Try to find a default Local Stock supplier if no specific origin
-          // Note: Ideally query this outside if we want it global, but per-cart context is fine
+          // Try to find a default Local Stock supplier
           const defaultSupplier = await prisma.supplier.findFirst({
             where: { type: 'LOCAL_STOCK', isActive: true },
             orderBy: { createdAt: 'asc' },
           });
 
           if (defaultSupplier && defaultSupplier.address) {
-            const addr = defaultSupplier.address as any;
+            const addr = defaultSupplier.address as unknown as {
+              street1: string;
+              street2?: string;
+              city: string;
+              state: string;
+              zip: string;
+              country: string;
+              phone?: string;
+              email?: string;
+            };
+
             originAddress = {
               name: defaultSupplier.name,
               street1: addr.street1,
-              street2: addr.street2,
+              street2: addr.street2 || '',
               city: addr.city,
               state: addr.state,
               zip: addr.zip,
               country: addr.country,
-              phone: addr.phone,
-              email: addr.email,
+              phone: addr.phone || '',
+              email: addr.email || '',
             };
             usedSupplierId = defaultSupplier.id;
             originIncoterm = defaultSupplier.incoterm || 'DDU';
@@ -149,47 +185,67 @@ async function handler(
           'Shipping Origin Determined'
         );
 
+        // --- STEP 2: Calculate Parcel Dimensions (Basic Stacking) ---
         let calculatedWeight = 0;
         let maxL = 0;
         let maxW = 0;
         let sumH = 0;
 
-        cart.items.forEach((item: any) => {
+        cart.items.forEach(item => {
+          const variant = item.variant;
+          const product = variant?.product;
+
           // Weight: Variant specific > Product default > 0
-          let valW = item.variant?.weight ? Number(item.variant.weight) : 0;
-          if (valW === 0 && item.variant?.product?.weight) {
-            valW = Number(item.variant.product.weight);
+          let valW = variant?.weight ? Number(variant.weight) : 0;
+          if (valW === 0 && product?.weight) {
+            valW = Number(product.weight);
           }
           calculatedWeight += valW * item.quantity;
 
           // Dimensions: Variant specific > Product default
-          let dim = item.variant?.dimensions as any;
-          if ((!dim || !dim.length) && item.variant?.product?.dimensions) {
-            dim = item.variant.product.dimensions as any;
+          let dim: any = variant?.dimensions;
+          if (!dim && product?.dimensions) {
+            dim = product.dimensions;
           }
 
-          if (dim && dim.length && dim.width && dim.height) {
-            const l = Number(dim.length) || 0;
-            const width = Number(dim.width) || 0;
-            const h = Number(dim.height) || 0;
+          // Parse dimensions from JSON object { length, width, height }
+          const l = Number(dim?.length || 0);
+          const w = Number(dim?.width || 0);
+          const h = Number(dim?.height || 0);
 
-            if (l > maxL) maxL = l;
-            if (width > maxW) maxW = width;
-            sumH += h * item.quantity; // Simple vertical stacking logic
+          if (l > 0 && w > 0 && h > 0) {
+            maxL = Math.max(maxL, l);
+            maxW = Math.max(maxW, w);
+            sumH += h * item.quantity;
           }
         });
 
         if (calculatedWeight > 0) {
           totalWeight = Math.round(calculatedWeight * 10) / 10;
         }
+        if (totalWeight <= 0) {
+          const errorMsg =
+            'Critical Data Error: Total shipment weight is 0. Please verify product weights.';
+          logger.error({ cartId }, errorMsg);
+          throw new Error(
+            'Unable to calculate shipping: Invalid shipment weight.'
+          );
+        }
 
         if (maxL > 0 && maxW > 0 && sumH > 0) {
           parcelLength = maxL.toString();
           parcelWidth = maxW.toString();
           parcelHeight = sumH.toString();
+        } else {
+          const errorMsg =
+            'Critical Data Error: No dimensions found for products in cart. Cannot calculate shipping rates.';
+          logger.error({ cartId }, errorMsg);
+          throw new Error(
+            'Unable to calculate shipping: Missing product dimensions.'
+          );
         }
 
-        // Customs Logic
+        // --- STEP 3: Customs Declaration (International Only) ---
         if (addressTo.country !== 'CA' && originAddress.country === 'CA') {
           logger.info({
             msg: 'International shipment detected. Preparing customs declaration.',
@@ -197,46 +253,45 @@ async function handler(
 
           // Determine Customs Explanation (Product specific > Default)
           const exportExplanation =
-            firstProduct?.exportExplanation || 'Merchandise';
+            firstProduct?.exportExplanation || DEFAULT_CUSTOMS_DESCRIPTION;
 
           // Determine B13A (Env > Default)
           const b13aOption = env.SHIPPO_EXPORT_B13A_OPTION;
           const b13aNumber = env.SHIPPO_EXPORT_B13A_NUMBER;
-          logger.info(
-            { b13aOption, b13aNumber },
-            'DEBUG: B13A Values from Env'
-          );
 
-          const customsItems = cart.items.map((item: any) => {
-            const weight = item.variant?.weight
-              ? Number(item.variant.weight)
-              : 0.5;
-            let unitPrice = '10.00';
+          const customsItems = cart.items.map(item => {
+            const variant = item.variant;
+            const product = variant?.product;
 
+            const weight = variant?.weight ? Number(variant.weight) : 0.5;
             if (
-              item.variant?.pricing &&
-              Array.isArray(item.variant.pricing) &&
-              item.variant.pricing.length > 0
+              !variant?.pricing ||
+              !Array.isArray(variant.pricing) ||
+              variant.pricing.length === 0 ||
+              !variant.pricing[0].price
             ) {
-              unitPrice = item.variant.pricing[0].price?.toString() || '10.00';
-            } else if (item.variant?.product?.price) {
-              unitPrice = item.variant.product.price.toString();
-            } else if (item.variant?.price?.amount) {
-              unitPrice = item.variant.price.amount?.toString() || '10.00';
+              const errorMsg = `Critical Data Error: Missing price for variant SKU: ${
+                variant?.sku || 'UNKNOWN'
+              }. Cannot generate customs declaration.`;
+              logger.error({ variantId: variant?.id }, errorMsg);
+              throw new Error(errorMsg);
             }
 
+            const unitPrice = variant.pricing[0].price.toString();
+
+            const description = (
+              product?.translations?.[0]?.name || DEFAULT_CUSTOMS_DESCRIPTION
+            ).trim();
+
             return {
-              description: (
-                item.variant?.product?.translations?.[0]?.name || 'Merchandise'
-              ).trim(),
+              description,
               quantity: item.quantity,
               netWeight: (Math.round(weight * 10) / 10).toString(),
               massUnit: 'kg' as const,
               valueAmount: unitPrice,
               valueCurrency: 'CAD',
-              originCountry:
-                item.variant?.product?.originCountry || originAddress.country,
-              hsCode: item.variant?.product?.hsCode || undefined,
+              originCountry: product?.originCountry || originAddress.country,
+              hsCode: product?.hsCode || undefined,
             };
           });
 
@@ -249,8 +304,6 @@ async function handler(
             commercialInvoice: true,
             incoterm: originIncoterm as any,
             eelPfc: undefined,
-            // Only send B13A info if explicitly required/filed.
-            // For 'NOT_REQUIRED' (low value < 2K), omitting fields lets Shippo/Carrier handle exemption automatically.
             b13aFilingOption:
               b13aOption && b13aOption !== 'NOT_REQUIRED'
                 ? b13aOption
@@ -295,7 +348,7 @@ async function handler(
       },
     ];
 
-    // DEBUG: Log full customs declaration for verification (ACEUM, HS Codes)
+    // DEBUG: Log full customs declaration for verification
     if (customsDeclaration) {
       logger.info(
         {
@@ -311,7 +364,7 @@ async function handler(
       );
     }
 
-    // Call Shippo service with Dynamic Origin
+    // --- STEP 4: Call Shippo Service ---
     const shipment = await getShippingRates(
       originAddress,
       addressTo,
@@ -332,8 +385,7 @@ async function handler(
       'Shipping rates fetched successfully'
     );
 
-    // FILTERING & RENAMING LOGIC
-    // We want to simplify choices for the user: 1. Standard, 2. Express
+    // --- STEP 5: Filtering & Renaming Logic ---
     let filteredRates: any[] = [];
 
     if (shipment.rates) {
@@ -353,31 +405,16 @@ async function handler(
         // CURRENCY CONVERSION (Shippo CAD -> Site USD)
         if (rate.currency === 'CAD' && SITE_CURRENCY === 'USD') {
           finalPrice = price * CAD_TO_USD_RATE;
-          // Update the rate object to reflect the new currency/amount
           rate.amount = finalPrice.toFixed(2);
           rate.currency = 'USD';
         }
-
-        // Helper to format time
-        const formatTime = (r: any) => {
-          if (r.duration_terms) {
-            return r.duration_terms
-              .replace(/days?/i, 'Jours')
-              .replace(/day?/i, 'Jour')
-              .trim();
-          }
-          if (r.days) {
-            return `${r.days} Jour${r.days > 1 ? 's' : ''}`;
-          }
-          return null;
-        };
 
         // 1. STANDARD Strategy
         if (name.includes('standard')) {
           if (!bestStandard || finalPrice < parseFloat(bestStandard.amount)) {
             bestStandard = { ...rate };
             bestStandard.displayName = 'Standard';
-            bestStandard.displayTime = formatTime(rate) || '3-7 Jours';
+            bestStandard.displayTime = formatDeliveryTime(rate) || '3-7 Jours';
           }
         }
         // 2. EXPRESS Strategy
@@ -390,7 +427,7 @@ async function handler(
           if (!bestExpress || finalPrice < parseFloat(bestExpress.amount)) {
             bestExpress = { ...rate };
             bestExpress.displayName = 'Express';
-            bestExpress.displayTime = formatTime(rate) || '1-3 Jours';
+            bestExpress.displayTime = formatDeliveryTime(rate) || '1-3 Jours';
           }
         }
       }

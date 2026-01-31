@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { prisma } from '../../../../lib/core/db';
-import { logger } from '../../../../lib/core/logger';
-import { AuthContext, withAuth } from '../../../../lib/middleware/withAuth';
-import { withError } from '../../../../lib/middleware/withError';
-import {
-  withRateLimit,
-  RateLimits,
-} from '../../../../lib/middleware/withRateLimit';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 async function verifyOrderHandler(
   request: NextRequest,
@@ -38,6 +35,7 @@ async function verifyOrderHandler(
 
   try {
     // SECURITY: Search payment with ownership check
+    // We strictly verify that the payment belongs to the authenticated user
     const payment = await prisma.payment.findFirst({
       where: {
         OR: [
@@ -45,7 +43,6 @@ async function verifyOrderHandler(
           { transactionData: { path: ['id'], equals: identifier } },
         ],
         status: 'COMPLETED',
-        // CRITICAL: Verify ownership
         order: {
           userId: authContext.userId,
         },
@@ -63,7 +60,7 @@ async function verifyOrderHandler(
     });
 
     if (payment?.order) {
-      // SECURITY: Double-check ownership (defense in depth)
+      // Defense in depth: Verify ownership again (though query filtered it)
       if (payment.order.userId !== authContext.userId) {
         logger.warn(
           {
@@ -71,7 +68,7 @@ async function verifyOrderHandler(
             sessionId,
             orderUserId: payment.order.userId,
             requestUserId: authContext.userId,
-            reason: 'Ownership mismatch',
+            reason: 'Ownership mismatch (Post-query check)',
           },
           'Security: Attempted unauthorized order access'
         );
@@ -96,55 +93,12 @@ async function verifyOrderHandler(
       });
     }
 
-    // Fallback : chercher via les metadata dans webhookEvent
-    const webhookEvent = await prisma.webhookEvent.findFirst({
-      where: {
-        source: 'stripe',
-        processed: true,
-        eventType: {
-          in: ['payment_intent.succeeded', 'checkout.session.completed'],
-        },
-      },
-      orderBy: {
-        processedAt: 'desc',
-      },
-      take: 1,
-    });
-
-    if (webhookEvent) {
-      // Vérifier si une commande a été créée récemment
-      const recentOrder = await prisma.order.findFirst({
-        where: {
-          createdAt: {
-            gte: new Date(Date.now() - 60000), // Dans les 60 dernières secondes
-          },
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        select: {
-          orderNumber: true,
-          id: true,
-          createdAt: true,
-        },
-      });
-
-      if (recentOrder) {
-        return NextResponse.json({
-          exists: true,
-          orderNumber: recentOrder.orderNumber,
-          orderId: recentOrder.id,
-          createdAt: recentOrder.createdAt,
-        });
-      }
-    }
-
     logger.info(
       {
         requestId,
         sessionId,
       },
-      'Order not found yet for session'
+      'Order not found for session'
     );
 
     return NextResponse.json({

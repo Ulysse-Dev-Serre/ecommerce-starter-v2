@@ -374,7 +374,8 @@
     "edit": "Edit",
     "continueToPayment": "Continue to Payment",
     "email": "Email Address",
-    "emailPlaceholder": "your@email.com"
+    "emailPlaceholder": "your@email.com",
+    "errorFetchingRates": "Unable to calculate shipping rates. Please check your address."
   },
   "footer": {
     "about": "About",

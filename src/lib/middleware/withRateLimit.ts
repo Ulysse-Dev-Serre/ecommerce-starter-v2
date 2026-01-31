@@ -83,13 +83,12 @@ function getIdentifier(req: NextRequest): string {
   return `ip:${ip}`;
 }
 
+import { ApiHandler } from './types';
+
 /**
  * Middleware wrapper pour API routes
  */
-export function withRateLimit(
-  handler: (req: NextRequest, ...args: any[]) => Promise<NextResponse>,
-  config: RateLimitConfig
-) {
+export function withRateLimit(handler: ApiHandler, config: RateLimitConfig) {
   const rateLimiter = createRateLimiter(config);
 
   return async (req: NextRequest, ...args: any[]): Promise<NextResponse> => {

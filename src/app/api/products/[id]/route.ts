@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ProductStatus, Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getProductBySlug, isProductAvailable } from '@/lib/services/products';
 
 /**
@@ -81,7 +82,7 @@ async function getProductHandler(
     `Product retrieved: ${id}`
   );
 
-  const response: any = {
+  const response = {
     success: true,
     requestId,
     data: product,
@@ -90,17 +91,11 @@ async function getProductHandler(
       isDraft,
       hasStock,
       variantsCount: product.variants.length,
+      seoIndex: !isDraft, // Integrated logic
+      stockStatus: !hasStock ? 'out_of_stock' : 'in_stock', // Explicit status
     },
     timestamp: new Date().toISOString(),
   };
-
-  if (isDraft) {
-    response.meta.seoIndex = false;
-  }
-
-  if (!hasStock) {
-    response.meta.stockStatus = 'out_of_stock';
-  }
 
   return NextResponse.json(response, {
     headers: {
@@ -109,4 +104,6 @@ async function getProductHandler(
   });
 }
 
-export const GET = withError(getProductHandler);
+export const GET = withError(
+  withRateLimit(getProductHandler, RateLimits.PUBLIC)
+);

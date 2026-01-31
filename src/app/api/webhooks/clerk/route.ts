@@ -1,6 +1,7 @@
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
+import { WebhookEvent } from '@clerk/nextjs/server';
 
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
@@ -75,19 +76,20 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
 
   // 4. Verify signature BEFORE parsing
   const webhook = new Webhook(webhookSecret);
-  let evt: unknown;
+  let evt: WebhookEvent;
 
   try {
     evt = webhook.verify(body, {
       'svix-id': svixId,
       'svix-timestamp': svixTimestamp,
       'svix-signature': svixSignature,
-    });
+    }) as WebhookEvent;
+
     logger.info(
       {
         action: 'webhook_signature_verified',
-        eventType: (evt as any)?.type,
-        userId: (evt as any)?.data?.id,
+        eventType: evt.type,
+        userId: evt.data && 'id' in evt.data ? evt.data.id : undefined,
       },
       'Webhook signature verified and parsed'
     );
@@ -103,27 +105,27 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
 
   // 5. Process the webhook event
   try {
-    await processClerkWebhook((evt as any).type, (evt as any).data);
+    await processClerkWebhook(evt.type, evt.data as any);
 
     logger.info(
       {
         action: 'webhook_processed_successfully',
-        eventType: (evt as any).type,
-        userId: (evt as any).data?.id,
+        eventType: evt.type,
+        userId: evt.data && 'id' in evt.data ? evt.data.id : undefined,
       },
       'Webhook processed successfully'
     );
 
     return NextResponse.json({
       success: true,
-      eventType: (evt as any).type,
+      eventType: evt.type,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     logger.error(
       {
         action: 'webhook_processing_failed',
-        eventType: (evt as any).type,
+        eventType: evt.type,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
       'Failed to process webhook event'
@@ -133,7 +135,7 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: false,
       error: 'Processing failed',
-      eventType: (evt as any).type,
+      eventType: evt.type,
       timestamp: new Date().toISOString(),
     });
   }
