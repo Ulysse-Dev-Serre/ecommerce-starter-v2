@@ -2,6 +2,9 @@ import { OrderStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { stripe } from '@/lib/integrations/stripe/client';
+import { orderRepository } from '@/lib/repositories/order.repository';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { incrementStock } from '@/lib/services/inventory';
 import {
   RefundInput,
   RefundResult,
@@ -18,13 +21,10 @@ import {
 export async function processRefund(input: RefundInput): Promise<RefundResult> {
   const { orderId, amount, reason } = input;
 
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { payments: true },
-  });
+  const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   const stripePayment = order.payments.find(
@@ -32,7 +32,11 @@ export async function processRefund(input: RefundInput): Promise<RefundResult> {
   );
 
   if (!stripePayment?.externalId) {
-    throw new Error('No Stripe payment found for this order');
+    throw new AppError(
+      ErrorCode.PAYMENT_FAILED,
+      'No Stripe payment found for this order',
+      400
+    );
   }
 
   try {
@@ -78,22 +82,14 @@ export async function processRefund(input: RefundInput): Promise<RefundResult> {
  * @param input - Paramètres de mise à jour
  * @returns Commande mise à jour
  */
-import { incrementStock } from '@/lib/services/inventory';
-
 export async function updateOrderStatus(input: UpdateOrderStatusInput) {
   const { orderId, status, comment, userId } = input;
 
   // 1. Fetch current order state with items (needed for restocking)
-  const existingOrder = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      payments: true,
-      items: true,
-    },
-  });
+  const existingOrder = await orderRepository.findById(orderId);
 
   if (!existingOrder) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   // 2. Process External Refund (Stripe) BEFORE DB updates
@@ -122,7 +118,11 @@ export async function updateOrderStatus(input: UpdateOrderStatusInput) {
         } else {
           logger.error({ error, orderId }, 'Stripe refund failed');
           // Block the local update if Stripe refund fails for other reasons
-          throw new Error(`Stripe refund failed: ${error.message}`);
+          throw new AppError(
+            ErrorCode.PAYMENT_FAILED,
+            `Stripe refund failed: ${error.message}`,
+            500
+          );
         }
       }
     }

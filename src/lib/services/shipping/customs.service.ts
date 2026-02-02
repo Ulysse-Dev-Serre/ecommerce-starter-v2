@@ -18,6 +18,14 @@ export class CustomsService {
       return undefined;
     }
 
+    if (!originAddress.name) {
+      throw new AppError(
+        ErrorCode.SHIPPING_DATA_MISSING,
+        'Missing sender name for customs declaration. Please check logistics settings.',
+        400
+      );
+    }
+
     const firstProduct = items[0].variant.product;
     const exportExplanation = firstProduct.exportExplanation;
 

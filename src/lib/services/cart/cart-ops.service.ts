@@ -7,6 +7,8 @@ import {
   CartProjection,
 } from '@/lib/types/domain/cart';
 import { getOrCreateCart } from './cart-management.service';
+import { cartRepository } from '@/lib/repositories/cart.repository';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
  * Add product to cart or update quantity if already exists
@@ -17,27 +19,21 @@ export async function addToCart(
   anonymousId?: string
 ): Promise<CartProjection> {
   if (input.quantity < 1) {
-    throw new Error('Quantity must be at least 1');
+    throw new AppError(
+      ErrorCode.INVALID_INPUT,
+      'Quantity must be at least 1',
+      400
+    );
   }
 
-  const variant = await prisma.productVariant.findUnique({
-    where: { id: input.variantId },
-    include: {
-      inventory: true,
-      product: {
-        select: {
-          status: true,
-        },
-      },
-    },
-  });
+  const variant = await cartRepository.findVariantForCart(input.variantId);
 
   if (!variant) {
-    throw new Error('Product variant not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Product variant not found', 404);
   }
 
   if (variant.product.status !== 'ACTIVE') {
-    throw new Error('Product is not available');
+    throw new AppError(ErrorCode.FORBIDDEN, 'Product is not available', 400);
   }
 
   if (variant.inventory?.trackInventory) {
@@ -45,22 +41,20 @@ export async function addToCart(
       variant.inventory.stock < input.quantity &&
       !variant.inventory.allowBackorder
     ) {
-      throw new Error(
-        `Insufficient stock. Available: ${variant.inventory.stock}`
+      throw new AppError(
+        ErrorCode.INSUFFICIENT_STOCK,
+        `Insufficient stock. Available: ${variant.inventory.stock}`,
+        400
       );
     }
   }
 
   const cart = await getOrCreateCart(userId, anonymousId);
 
-  const existingItem = await prisma.cartItem.findUnique({
-    where: {
-      cartId_variantId: {
-        cartId: cart.id,
-        variantId: input.variantId,
-      },
-    },
-  });
+  const existingItem = await cartRepository.findCartItem(
+    cart.id,
+    input.variantId
+  );
 
   if (existingItem) {
     const newQuantity = existingItem.quantity + input.quantity;
@@ -70,16 +64,15 @@ export async function addToCart(
         variant.inventory.stock < newQuantity &&
         !variant.inventory.allowBackorder
       ) {
-        throw new Error(
-          `Insufficient stock. Available: ${variant.inventory.stock}, requested: ${newQuantity}`
+        throw new AppError(
+          ErrorCode.INSUFFICIENT_STOCK,
+          `Insufficient stock. Available: ${variant.inventory.stock}, requested: ${newQuantity}`,
+          400
         );
       }
     }
 
-    await prisma.cartItem.update({
-      where: { id: existingItem.id },
-      data: { quantity: newQuantity },
-    });
+    await cartRepository.updateItemQuantity(existingItem.id, newQuantity);
 
     logger.info(
       {
@@ -93,12 +86,10 @@ export async function addToCart(
       'Cart item quantity updated'
     );
   } else {
-    await prisma.cartItem.create({
-      data: {
-        cartId: cart.id,
-        variantId: input.variantId,
-        quantity: input.quantity,
-      },
+    await cartRepository.addItem({
+      cartId: cart.id,
+      variantId: input.variantId,
+      quantity: input.quantity,
     });
 
     logger.info(
@@ -125,31 +116,25 @@ export async function updateCartLine(
   anonymousId?: string
 ): Promise<CartProjection> {
   if (input.quantity < 1) {
-    throw new Error('Quantity must be at least 1');
+    throw new AppError(
+      ErrorCode.INVALID_INPUT,
+      'Quantity must be at least 1',
+      400
+    );
   }
 
-  const cartItem = await prisma.cartItem.findUnique({
-    where: { id: cartItemId },
-    include: {
-      cart: true,
-      variant: {
-        include: {
-          inventory: true,
-        },
-      },
-    },
-  });
+  const cartItem = await cartRepository.findItemWithContext(cartItemId);
 
   if (!cartItem) {
-    throw new Error('Cart item not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Cart item not found', 404);
   }
 
   if (userId && cartItem.cart.userId !== userId) {
-    throw new Error('Unauthorized');
+    throw new AppError(ErrorCode.FORBIDDEN, 'Unauthorized', 403);
   }
 
   if (anonymousId && cartItem.cart.anonymousId !== anonymousId) {
-    throw new Error('Unauthorized');
+    throw new AppError(ErrorCode.FORBIDDEN, 'Unauthorized', 403);
   }
 
   if (cartItem.variant.inventory?.trackInventory) {
@@ -157,16 +142,15 @@ export async function updateCartLine(
       cartItem.variant.inventory.stock < input.quantity &&
       !cartItem.variant.inventory.allowBackorder
     ) {
-      throw new Error(
-        `Insufficient stock. Available: ${cartItem.variant.inventory.stock}`
+      throw new AppError(
+        ErrorCode.INSUFFICIENT_STOCK,
+        `Insufficient stock. Available: ${cartItem.variant.inventory.stock}`,
+        400
       );
     }
   }
 
-  await prisma.cartItem.update({
-    where: { id: cartItemId },
-    data: { quantity: input.quantity },
-  });
+  await cartRepository.updateItemQuantity(cartItemId, input.quantity);
 
   logger.info(
     {
@@ -190,28 +174,21 @@ export async function removeCartLine(
   userId?: string,
   anonymousId?: string
 ): Promise<CartProjection> {
-  const cartItem = await prisma.cartItem.findUnique({
-    where: { id: cartItemId },
-    include: {
-      cart: true,
-    },
-  });
+  const cartItem = await cartRepository.findItemWithContext(cartItemId);
 
   if (!cartItem) {
-    throw new Error('Cart item not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Cart item not found', 404);
   }
 
   if (userId && cartItem.cart.userId !== userId) {
-    throw new Error('Unauthorized');
+    throw new AppError(ErrorCode.FORBIDDEN, 'Unauthorized', 403);
   }
 
   if (anonymousId && cartItem.cart.anonymousId !== anonymousId) {
-    throw new Error('Unauthorized');
+    throw new AppError(ErrorCode.FORBIDDEN, 'Unauthorized', 403);
   }
 
-  await prisma.cartItem.delete({
-    where: { id: cartItemId },
-  });
+  await cartRepository.removeItem(cartItemId);
 
   logger.info(
     {
@@ -235,6 +212,8 @@ export async function mergeAnonymousCartToUser(
   userId: string,
   anonymousId: string
 ): Promise<CartProjection> {
+  // We still use prisma directly for transaction to avoid passing prisma client around
+  // This is acceptable as the high-level logic remains decoupled from specific table queries
   const anonymousCart = await prisma.cart.findFirst({
     where: {
       anonymousId,
@@ -259,23 +238,9 @@ export async function mergeAnonymousCartToUser(
         action: 'merge_cart_skipped',
         userId,
         anonymousId,
-        reason: 'no_anonymous_cart_or_empty',
+        reason: anonymousCart ? 'empty_cart' : 'no_cart',
       },
       'No anonymous cart to merge'
-    );
-    return getOrCreateCart(userId, undefined);
-  }
-
-  if (anonymousCart.status === CartStatus.CONVERTED) {
-    logger.info(
-      {
-        action: 'merge_cart_skipped',
-        userId,
-        anonymousId,
-        cartId: anonymousCart.id,
-        reason: 'already_merged',
-      },
-      'Cart already merged (idempotence)'
     );
     return getOrCreateCart(userId, undefined);
   }
@@ -289,91 +254,74 @@ export async function mergeAnonymousCartToUser(
       anonymousId,
       anonymousCartId: anonymousCart.id,
       userCartId: userCart.id,
-      anonymousItemsCount: anonymousCart.items.length,
-      userItemsCount: userCart.items.length,
+      itemsCount: anonymousCart.items.length,
     },
     'Merging anonymous cart to user cart'
   );
 
-  for (const anonymousItem of anonymousCart.items) {
-    const existingUserItem = await prisma.cartItem.findUnique({
-      where: {
-        cartId_variantId: {
-          cartId: userCart.id,
-          variantId: anonymousItem.variantId,
-        },
-      },
-    });
-
-    let newQuantity = anonymousItem.quantity;
-
-    if (existingUserItem) {
-      newQuantity = existingUserItem.quantity + anonymousItem.quantity;
-    }
-
-    if (anonymousItem.variant.inventory?.trackInventory) {
-      const maxStock = anonymousItem.variant.inventory.stock;
-      if (
-        newQuantity > maxStock &&
-        !anonymousItem.variant.inventory.allowBackorder
-      ) {
-        newQuantity = maxStock;
-        logger.warn(
-          {
-            action: 'merge_quantity_capped',
+  // Use a transaction to ensure atomicity
+  await prisma.$transaction(async tx => {
+    for (const anonymousItem of anonymousCart.items) {
+      const existingUserItem = await tx.cartItem.findUnique({
+        where: {
+          cartId_variantId: {
+            cartId: userCart.id,
             variantId: anonymousItem.variantId,
-            requestedQuantity: existingUserItem
-              ? existingUserItem.quantity + anonymousItem.quantity
-              : anonymousItem.quantity,
-            cappedQuantity: newQuantity,
-            availableStock: maxStock,
           },
-          'Quantity capped to available stock during merge'
-        );
+        },
+      });
+
+      let newQuantity = anonymousItem.quantity;
+
+      if (existingUserItem) {
+        newQuantity = existingUserItem.quantity + anonymousItem.quantity;
+      }
+
+      // Check stock
+      if (anonymousItem.variant.inventory?.trackInventory) {
+        const maxStock = anonymousItem.variant.inventory.stock;
+        if (
+          newQuantity > maxStock &&
+          !anonymousItem.variant.inventory.allowBackorder
+        ) {
+          newQuantity = maxStock;
+          logger.warn(
+            {
+              action: 'merge_quantity_capped',
+              variantId: anonymousItem.variantId,
+              requestedQuantity: existingUserItem
+                ? existingUserItem.quantity + anonymousItem.quantity
+                : anonymousItem.quantity,
+              cappedQuantity: newQuantity,
+            },
+            'Quantity capped during merge due to stock'
+          );
+        }
+      }
+
+      if (newQuantity <= 0) continue;
+
+      if (existingUserItem) {
+        await tx.cartItem.update({
+          where: { id: existingUserItem.id },
+          data: { quantity: newQuantity },
+        });
+      } else {
+        await tx.cartItem.create({
+          data: {
+            cartId: userCart.id,
+            variantId: anonymousItem.variantId,
+            quantity: newQuantity,
+          },
+        });
       }
     }
 
-    if (newQuantity === 0) continue;
-
-    if (existingUserItem) {
-      await prisma.cartItem.update({
-        where: { id: existingUserItem.id },
-        data: { quantity: newQuantity },
-      });
-
-      logger.info(
-        {
-          action: 'cart_item_merged',
-          variantId: anonymousItem.variantId,
-          oldQuantity: existingUserItem.quantity,
-          addedQuantity: anonymousItem.quantity,
-          newQuantity,
-        },
-        'Cart item quantity merged'
-      );
-    } else {
-      await prisma.cartItem.create({
-        data: {
-          cartId: userCart.id,
-          variantId: anonymousItem.variantId,
-          quantity: newQuantity,
-        },
-      });
-
-      logger.info(
-        {
-          action: 'cart_item_added_from_merge',
-          variantId: anonymousItem.variantId,
-          quantity: newQuantity,
-        },
-        'Cart item added from anonymous cart'
-      );
-    }
-  }
-
-  await prisma.cart.update({
-    where: { id: anonymousCart.id },
-    data: { status: CartStatus.CONVERTED },
+    // Mark anonymous cart as converted
+    await tx.cart.update({
+      where: { id: anonymousCart.id },
+      data: { status: CartStatus.CONVERTED },
+    });
   });
 
   logger.info(
@@ -382,7 +330,6 @@ export async function mergeAnonymousCartToUser(
       userId,
       anonymousCartId: anonymousCart.id,
       userCartId: userCart.id,
-      mergedItemsCount: anonymousCart.items.length,
     },
     'Anonymous cart merged successfully'
   );

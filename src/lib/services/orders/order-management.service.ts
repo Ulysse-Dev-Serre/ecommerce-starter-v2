@@ -1,35 +1,34 @@
-import { Language } from '@/generated/prisma';
+import { Language, OrderStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
+import {
+  orderRepository,
+  OrderFilters,
+  PaginationParams,
+} from '@/lib/repositories/order.repository';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { cache } from '@/lib/core/cache';
 
 /**
  * Récupère une commande par son ID
  * Vérifie que la commande appartient bien à l'utilisateur
  */
 export async function getOrderById(orderId: string, userId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      items: true,
-      payments: true,
-      shipments: true,
-    },
-  });
+  const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   if (order.userId !== userId) {
-    throw new Error('Unauthorized: This order does not belong to you');
+    throw new AppError(
+      ErrorCode.FORBIDDEN,
+      'Unauthorized: This order does not belong to you',
+      403
+    );
   }
 
   return order;
 }
-
-/**
- * Récupère les données minimales d'une commande pour SEO/Metadata
- */
-import { cache } from '@/lib/core/cache';
 
 /**
  * Récupère les données minimales d'une commande pour SEO/Metadata
@@ -64,6 +63,7 @@ export async function getOrderMetadata(idOrNumber: string) {
  * Vérifie que la commande appartient bien à l'utilisateur
  */
 export async function getOrderByNumber(orderNumber: string, userId: string) {
+  // Optionnel: On pourrait ajouter findByNumber dans le repository if needed
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: {
@@ -74,11 +74,15 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
   });
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   if (order.userId !== userId) {
-    throw new Error('Unauthorized: This order does not belong to you');
+    throw new AppError(
+      ErrorCode.FORBIDDEN,
+      'Unauthorized: This order does not belong to you',
+      403
+    );
   }
 
   return order;
@@ -215,52 +219,37 @@ export async function getUserOrders(userId: string) {
 }
 
 /**
+ * Liste des commandes pour l'admin avec filtres et pagination
+ */
+export async function listOrdersAdmin(
+  filters: OrderFilters,
+  pagination: PaginationParams
+) {
+  const [orders, total] = await Promise.all([
+    orderRepository.findMany(filters, pagination),
+    orderRepository.count(filters),
+  ]);
+
+  const totalPages = Math.ceil(total / pagination.limit);
+
+  return {
+    orders,
+    pagination: {
+      ...pagination,
+      total,
+      totalPages,
+    },
+  };
+}
+
+/**
  * Récupère une commande par ID pour l'admin (sans restriction utilisateur)
  */
 export async function getOrderByIdAdmin(orderId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          clerkId: true,
-        },
-      },
-      items: {
-        include: {
-          product: {
-            select: {
-              id: true,
-              slug: true,
-              translations: true,
-              media: {
-                where: { isPrimary: true },
-                take: 1,
-              },
-            },
-          },
-          variant: {
-            select: {
-              id: true,
-              sku: true,
-            },
-          },
-        },
-      },
-      payments: true,
-      shipments: true,
-      statusHistory: {
-        orderBy: { createdAt: 'desc' },
-      },
-    },
-  });
+  const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   return order;

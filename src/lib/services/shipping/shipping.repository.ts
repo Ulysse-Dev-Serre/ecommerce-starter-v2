@@ -41,27 +41,7 @@ export class ShippingRepository {
     const includeFields =
       SHIPPING_VARIANT_INCLUDE satisfies Prisma.ProductVariantInclude;
 
-    if (cartId) {
-      const cart = await prisma.cart.findUnique({
-        where: { id: cartId },
-        include: {
-          items: {
-            include: {
-              variant: {
-                include: includeFields,
-              },
-            },
-          },
-        },
-      });
-
-      if (cart && cart.items.length > 0) {
-        shippingItems = cart.items.map(item => ({
-          quantity: item.quantity,
-          variant: item.variant as ShippingVariantWithRelations,
-        }));
-      }
-    } else if (manualItems && manualItems.length > 0) {
+    if (manualItems && manualItems.length > 0) {
       const variantIds = manualItems.map(i => i.variantId);
       const variants = await prisma.productVariant.findMany({
         where: { id: { in: variantIds } },
@@ -82,6 +62,26 @@ export class ShippingRepository {
           variant: variant as ShippingVariantWithRelations,
         };
       });
+    } else if (cartId) {
+      const cart = await prisma.cart.findUnique({
+        where: { id: cartId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: includeFields,
+              },
+            },
+          },
+        },
+      });
+
+      if (cart && cart.items.length > 0) {
+        shippingItems = cart.items.map(item => ({
+          quantity: item.quantity,
+          variant: item.variant as ShippingVariantWithRelations,
+        }));
+      }
     }
 
     return shippingItems;
