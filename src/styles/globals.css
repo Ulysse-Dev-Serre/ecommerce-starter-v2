@@ -1,8 +1,8 @@
-/**
- * Thème Neutral - Boutique générique
- * Palette équilibrée pour n'importe quel type de produit
+@import 'tailwindcss';
 
- PETITE NOTE POUR LE CHECKOUT JE VAIS M'INSPIRER DE CE SITE https://www.clearly.ca/en-ca/checkout/shipping
+/* 
+ * 🎨 SYSTÈME DE THÈME CENTRALISÉ (Vibe)
+ * Définition des variables de couleurs et styles de base
  */
 
 :root {
@@ -62,3 +62,45 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-button: var(--shadow-sm);
 }
+
+@theme inline {
+  /* Tailwind color mapping to our CSS vars */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-focus: var(--border-focus);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  /* Shadow mapping */
+  --shadow-sm: var(--shadow);
+  --shadow-lg: var(--shadow-lg);
+
+  /* Font families */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Base styles */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ✨ VIBE UTILITIES */
+@import './vibe-utilities.css';

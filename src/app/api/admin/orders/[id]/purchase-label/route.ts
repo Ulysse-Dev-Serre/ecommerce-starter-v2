@@ -1,11 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import type { AuthContext } from '@/lib/middleware/withAuth';
-import { env } from '@/lib/core/env';
+import { ShippingService } from '@/lib/services/shipping/shipping.service';
+import {
+  ShippingItem,
+  SHIPPING_VARIANT_INCLUDE,
+} from '@/lib/services/shipping/shipping.repository';
+import { createTransaction, getRate } from '@/lib/integrations/shippo';
+
+async function previewLabelHandler(
+  request: Request,
+  context: { params: Promise<{ id: string }> },
+  authContext: AuthContext
+): Promise<NextResponse> {
+  const params = await context.params;
+  const orderId = params.id;
+  const { role } = authContext;
+
+  if (role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        payments: true,
+      },
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    const payment = order.payments.find(p => p.status === 'COMPLETED');
+    const metadata = payment?.transactionData
+      ? (payment.transactionData as any).metadata || {}
+      : {};
+
+    const rateId = metadata.shipping_rate_id;
+
+    if (!rateId) {
+      return NextResponse.json({ error: 'errorRates' }, { status: 400 });
+    }
+
+    const rate = await getRate(rateId);
+
+    return NextResponse.json({
+      amount: rate.amount,
+      currency: rate.currency,
+      provider: rate.provider,
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
 
 async function purchaseLabelHandler(
   request: Request,
@@ -14,24 +67,14 @@ async function purchaseLabelHandler(
 ): Promise<NextResponse> {
   const params = await context.params;
   const orderId = params.id;
-
   const { role, userId } = authContext;
 
   logger.info(
-    {
-      role,
-      userId,
-      orderId,
-    },
+    { role, userId, orderId },
     'Checking permission for purchase-label'
   );
 
-  // Redundant check for safety
   if (role !== 'ADMIN') {
-    logger.warn(
-      { role, userId },
-      'Unauthorized access attempt to purchase-label'
-    );
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
@@ -42,6 +85,13 @@ async function purchaseLabelHandler(
         user: true,
         shipments: true,
         payments: true,
+        items: {
+          include: {
+            variant: {
+              include: SHIPPING_VARIANT_INCLUDE,
+            },
+          },
+        },
       },
     });
 
@@ -66,170 +116,54 @@ async function purchaseLabelHandler(
 
     let rateId = metadata.shipping_rate_id;
 
-    logger.info({ orderId, rateId }, 'Attempting to purchase shipping label');
-
+    // RECALCULATION LOGIC: Use ShippingService if rate is missing or expired
     if (!rateId) {
-      logger.warn(
+      logger.info(
         { orderId },
-        'No shipping rate found in metadata, recalculating...'
+        'No shipping rate found in metadata, recalculating with ShippingService...'
       );
 
-      try {
-        const { getShippingRates } = await import('@/lib/integrations/shippo');
+      const shippingItems: ShippingItem[] = order.items.map(item => ({
+        quantity: item.quantity,
+        variant: item.variant as any,
+      }));
 
-        const shippingAddress = order.shippingAddress as any;
+      const addressTo = order.shippingAddress as any;
 
-        logger.info(
-          {
-            rawShippingAddress: shippingAddress,
-            type: typeof shippingAddress,
-            keys: shippingAddress ? Object.keys(shippingAddress) : [],
-          },
-          'DEBUG: Raw Shipping Address from DB'
-        );
+      const { rates } = await ShippingService.calculateRates(
+        addressTo,
+        shippingItems
+      );
 
-        if (!shippingAddress) {
-          return NextResponse.json(
-            { error: 'No shipping address to calculate rates' },
-            { status: 400 }
-          );
-        }
-
-        const addressFrom = {
-          name: env.SHIPPO_FROM_NAME || '',
-          company: env.SHIPPO_FROM_COMPANY || '',
-          street1: env.SHIPPO_FROM_STREET1 || '',
-          city: env.SHIPPO_FROM_CITY || '',
-          state: env.SHIPPO_FROM_STATE || '',
-          zip: env.SHIPPO_FROM_ZIP || '',
-          country: env.SHIPPO_FROM_COUNTRY || 'CA',
-          email: env.SHIPPO_FROM_EMAIL || '',
-          phone: env.SHIPPO_FROM_PHONE || '',
-        };
-
-        const addressTo = {
-          name:
-            shippingAddress.name ||
-            `${shippingAddress.firstName || ''} ${shippingAddress.lastName || ''}`.trim() ||
-            'Customer',
-          street1:
-            shippingAddress.street1 ||
-            shippingAddress.street ||
-            shippingAddress.address1 ||
-            '',
-          street2:
-            shippingAddress.street2 ||
-            shippingAddress.apartment ||
-            shippingAddress.address2 ||
-            '',
-          city: shippingAddress.city || '',
-          state:
-            shippingAddress.state ||
-            shippingAddress.province ||
-            shippingAddress.region ||
-            'QC', // Default to QC if missing, safety net
-          zip:
-            shippingAddress.postalCode ||
-            shippingAddress.zipCode ||
-            shippingAddress.zip ||
-            '',
-          country:
-            shippingAddress.country || shippingAddress.countryCode || 'CA',
-          email:
-            order.user?.email ||
-            shippingAddress.email ||
-            'customer@example.com',
-          phone: shippingAddress.phone || '555-555-5555',
-        };
-
-        // Validation de base avant envoi
-        if (
-          !addressTo.street1 ||
-          !addressTo.city ||
-          !addressTo.zip ||
-          !addressTo.country
-        ) {
-          logger.error(
-            { addressTo },
-            'Incomplete address for shipping calculation'
-          );
-          return NextResponse.json(
-            {
-              error:
-                'Incomplete shipping address: ' + JSON.stringify(addressTo),
-            },
-            { status: 400 }
-          );
-        }
-
-        const parcels = [
-          {
-            length: '20',
-            width: '15',
-            height: '10',
-            distanceUnit: 'cm' as const,
-            weight: '1',
-            massUnit: 'kg' as const,
-          },
-        ];
-
-        const shipment = await getShippingRates(
-          addressFrom,
-          addressTo,
-          parcels
-        );
-
-        if (shipment && shipment.rates && shipment.rates.length > 0) {
-          const firstRate = shipment.rates[0] as any;
-          logger.info(
-            { firstRateKeys: Object.keys(firstRate), firstRate },
-            'DEBUG: First Rate Object'
-          );
-
-          // Support both SDK conventions
-          rateId = firstRate.object_id || firstRate.objectId || firstRate.id;
-
-          if (!rateId) {
-            logger.error({ msg: 'Rate ID not found in rate object' });
-            return NextResponse.json(
-              { error: 'Rate ID missing from calculation' },
-              { status: 400 }
-            );
-          }
-
-          logger.info({ orderId, rateId }, 'Found fallback rate');
-        } else {
-          return NextResponse.json(
-            { error: 'Could not calculate new rates' },
-            { status: 400 }
-          );
-        }
-      } catch (calcError: any) {
-        logger.error({ error: calcError }, 'Failed to recalculate rates');
+      if (rates && rates.length > 0) {
+        // Automatically pick the cheapest rate for the recalculation
+        const cheapestRate = rates.sort(
+          (a, b) => parseFloat(a.amount) - parseFloat(b.amount)
+        )[0];
+        rateId =
+          (cheapestRate as any).object_id ||
+          (cheapestRate as any).objectId ||
+          (cheapestRate as any).id;
+      } else {
         return NextResponse.json(
-          {
-            error:
-              'No shipping rate found and failed to recalculate. ' +
-              calcError.message,
-          },
+          { error: 'Could not calculate new shipping rates' },
           { status: 400 }
         );
       }
     }
 
-    const { createTransaction } = await import('@/lib/integrations/shippo');
-
-    if (typeof rateId !== 'string') {
+    if (!rateId) {
       return NextResponse.json(
-        { error: 'Invalid rate ID format' },
+        { error: 'Rate ID missing and recalculation failed' },
         { status: 400 }
       );
     }
 
+    // Purchase the label
     const transaction = await createTransaction(rateId);
 
     if (transaction.status !== 'SUCCESS') {
-      logger.error({ transaction }, 'Shippo transaction failed');
+      logger.error({ transaction, rateId }, 'Shippo transaction failed');
       return NextResponse.json(
         {
           error: 'Failed to purchase label',
@@ -244,10 +178,7 @@ async function purchaseLabelHandler(
       (transaction as any).trackingNumber;
     const labelUrl =
       (transaction as any).label_url || (transaction as any).labelUrl;
-    const carrier =
-      (transaction as any).rate && (transaction as any).rate.provider
-        ? (transaction as any).rate.provider
-        : 'Shippo';
+    const carrier = (transaction as any).rate?.provider || 'Shippo';
 
     // Create Shipment record
     await prisma.shipment.create({
@@ -260,20 +191,9 @@ async function purchaseLabelHandler(
       },
     });
 
-    // We DO NOT update the order status to SHIPPED automatically here.
-    // The admin will manually set it to SHIPPED when they physically drop the package.
-    /*
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: 'SHIPPED',
-      },
-    });
-    */
-
     logger.info(
       { orderId, trackingNumber },
-      'Shipping label purchased successfully'
+      'Shipping label purchased successfully via refactored Admin API'
     );
 
     return NextResponse.json({
@@ -289,6 +209,10 @@ async function purchaseLabelHandler(
     );
   }
 }
+
+export const GET = withError(
+  withAdmin(withRateLimit(previewLabelHandler, RateLimits.ADMIN))
+);
 
 export const POST = withError(
   withAdmin(withRateLimit(purchaseLabelHandler, RateLimits.ADMIN))

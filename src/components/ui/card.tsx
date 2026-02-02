@@ -9,7 +9,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          'vibe-card', // Use our semantic centralized class
+          'bg-card text-card-foreground border border-border shadow-sm rounded-xl p-6 transition-all duration-300',
           className
         )}
         {...props}

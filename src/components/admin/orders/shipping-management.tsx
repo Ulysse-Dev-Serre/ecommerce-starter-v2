@@ -39,12 +39,37 @@ export function ShippingManagement({
   const handlePurchaseLabel = async () => {
     try {
       setIsLoading(true);
+
+      // 1. Fetch real price preview
+      const response = await fetch(
+        `/api/admin/orders/${orderId}/purchase-label`
+      );
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'errorPurchase');
+      }
+
+      const preview = await response.json();
+      const realPrice = `${preview.amount} ${preview.currency}`;
+      const customerPaid = shippingCost
+        ? `${shippingCost} ${currency}`
+        : t('na');
+
+      // 2. Ask for confirmation
+      const confirmMessage = `${t('purchaseConfirmPrice', { price: realPrice })}\n${t('purchaseConfirmPaid', { amount: customerPaid })}\n\n${t('purchaseConfirmQuestion')}`;
+
+      if (!window.confirm(confirmMessage)) {
+        setIsLoading(false);
+        return;
+      }
+
+      // 3. Proceed with purchase
       await purchaseOrderLabel(orderId);
 
       alert(t('successPurchase'));
       router.refresh();
     } catch (error: any) {
-      alert(`Error: ${error.message}`);
+      alert(t('errorPrefix', { message: t(error.message) }));
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +122,7 @@ export function ShippingManagement({
                 </p>
                 <p className="text-sm admin-text-subtle">
                   {hasLabel
-                    ? `${t('tracking')}: ${shipment?.trackingCode || 'N/A'}`
+                    ? `${t('tracking')}: ${shipment?.trackingCode || t('na')}`
                     : t('standardShipping')}
                 </p>
               </div>

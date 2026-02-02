@@ -122,27 +122,29 @@ export default async function ProductPage({
   };
 
   return (
-    <div className="vibe-flex-1 vibe-section-py vibe-animate-fade-in">
+    <div className="flex-1 py-8 lg:py-12 duration-500">
       <JsonLd data={productJsonLd} />
       <JsonLd data={breadcrumbJsonLd} />
 
-      <div className="vibe-layout-container">
-        <div className="vibe-grid-2-cols-wide">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <ImageGallery
             images={images}
             productName={translation?.name || product.slug}
             locale={locale}
           />
 
-          <div className="vibe-stack-y-8">
+          <div className="space-y-8">
             <div>
-              <h1 className="vibe-page-header vibe-text-left">
+              <h1 className="text-3xl font-bold mb-8 text-left">
                 {translation?.name || product.slug}
               </h1>
             </div>
 
             {translation?.shortDescription && (
-              <p className="vibe-description">{translation.shortDescription}</p>
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                {translation.shortDescription}
+              </p>
             )}
 
             <ProductClient
@@ -155,12 +157,14 @@ export default async function ProductPage({
             />
 
             {translation?.description && (
-              <div className="vibe-pt-8 vibe-section-divider-top">
-                <h3 className="vibe-section-title vibe-text-left vibe-border-none vibe-pb-0">
+              <div className="vibe-pt-8 border-t border-border pt-4 mt-4">
+                <h3 className="text-xl font-bold mb-6 text-foreground border-b border-border pb-4 text-left vibe-border-none vibe-pb-0">
                   {tProduct('title')}
                 </h3>
-                <div className={`${VIBE_TYPOGRAPHY_PROSE} vibe-text-muted`}>
-                  <p className="vibe-whitespace-pre-line vibe-leading-relaxed">
+                <div
+                  className={`${VIBE_TYPOGRAPHY_PROSE} text-muted-foreground`}
+                >
+                  <p className="whitespace-pre-line leading-relaxed">
                     {translation.description}
                   </p>
                 </div>
@@ -169,7 +173,7 @@ export default async function ProductPage({
           </div>
         </div>
 
-        <div className="vibe-mt-20">
+        <div className="mt-20">
           <RelatedProducts currentProductId={product.id} locale={locale} />
         </div>
       </div>

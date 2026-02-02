@@ -11,20 +11,20 @@ export function StatusBadge({ status, label, className }: StatusBadgeProps) {
   const getStatusClass = (s: string) => {
     switch (s) {
       case 'PAID':
-        return 'vibe-badge-success';
+        return 'bg-success/10 text-success border-success/20';
       case 'SHIPPED':
       case 'IN_TRANSIT':
-        return 'vibe-badge-info';
+        return 'bg-info/10 text-info border-info/20';
       case 'DELIVERED':
-        return 'vibe-badge-primary';
+        return 'bg-primary/10 text-primary border-primary/20';
       case 'CANCELLED':
       case 'REFUNDED':
-        return 'vibe-badge-error';
+        return 'bg-error/10 text-error border-error/20';
       case 'REFUND_REQUESTED':
-        return 'vibe-badge-urgent';
+        return 'bg-error text-white animate-pulse shadow-md border-error/80';
       case 'PENDING':
       default:
-        return 'vibe-badge-muted';
+        return 'bg-muted text-muted-foreground border-border';
     }
   };
 

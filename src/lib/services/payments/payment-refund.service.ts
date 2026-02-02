@@ -78,68 +78,103 @@ export async function processRefund(input: RefundInput): Promise<RefundResult> {
  * @param input - Paramètres de mise à jour
  * @returns Commande mise à jour
  */
+import { incrementStock } from '@/lib/services/inventory';
+
 export async function updateOrderStatus(input: UpdateOrderStatusInput) {
   const { orderId, status, comment, userId } = input;
 
-  // Logic to process Stripe refund before updating local status
+  // 1. Fetch current order state with items (needed for restocking)
+  const existingOrder = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      payments: true,
+      items: true,
+    },
+  });
+
+  if (!existingOrder) {
+    throw new Error('Order not found');
+  }
+
+  // 2. Process External Refund (Stripe) BEFORE DB updates
+  // We want to ensure we can actually refund the money before marking it as refunded in our system.
   if (status === 'REFUNDED' || status === 'CANCELLED') {
-    const existingOrder = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: { payments: true },
-    });
+    const stripePayment = existingOrder.payments.find(
+      p => p.method === 'STRIPE' && p.status === 'COMPLETED'
+    );
 
-    if (existingOrder) {
-      const stripePayment = existingOrder.payments.find(
-        p => p.method === 'STRIPE' && p.status === 'COMPLETED'
-      );
-
-      if (stripePayment?.externalId) {
-        try {
-          await stripe.refunds.create({
-            payment_intent: stripePayment.externalId,
-          });
-          logger.info(
-            { orderId, paymentIntent: stripePayment.externalId },
-            'Stripe refund executed successfully'
+    if (stripePayment?.externalId) {
+      try {
+        await stripe.refunds.create({
+          payment_intent: stripePayment.externalId,
+        });
+        logger.info(
+          { orderId, paymentIntent: stripePayment.externalId },
+          'Stripe refund executed successfully'
+        );
+      } catch (error: any) {
+        // If already refunded, allow the function to proceed to update local status
+        if (error.code === 'charge_already_refunded') {
+          logger.warn(
+            { orderId },
+            'Charge already refunded in Stripe, proceeding with local status update'
           );
-        } catch (error: any) {
-          // If already refunded, allow the function to proceed to update local status
-          if (error.code === 'charge_already_refunded') {
-            logger.warn(
-              { orderId },
-              'Charge already refunded in Stripe, proceeding with local status update'
-            );
-          } else {
-            logger.error({ error, orderId }, 'Stripe refund failed');
-            // Block the local update if Stripe refund fails for other reasons
-            throw new Error(`Stripe refund failed: ${error.message}`);
-          }
+        } else {
+          logger.error({ error, orderId }, 'Stripe refund failed');
+          // Block the local update if Stripe refund fails for other reasons
+          throw new Error(`Stripe refund failed: ${error.message}`);
         }
       }
     }
   }
 
-  const order = await prisma.order.update({
-    where: { id: orderId },
-    data: {
-      status: status as OrderStatus,
-      statusHistory: {
-        create: {
-          status: status as OrderStatus,
-          comment,
-          createdBy: userId,
+  // 3. Atomic DB Update: Status Change + Stock Restoration
+  const updatedOrder = await prisma.$transaction(async tx => {
+    // Update status
+    const order = await tx.order.update({
+      where: { id: orderId },
+      data: {
+        status: status as OrderStatus,
+        statusHistory: {
+          create: {
+            status: status as OrderStatus,
+            comment,
+            createdBy: userId,
+          },
         },
       },
-    },
-    include: {
-      statusHistory: {
-        orderBy: { createdAt: 'desc' },
-        take: 1,
+      include: {
+        statusHistory: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        shipments: true,
+        payments: true,
+        user: true,
+        items: true,
       },
-      shipments: true,
-      payments: true,
-      user: true,
-    },
+    });
+
+    // If order is now Cancelled or Refunded, restore stock
+    if (
+      (status === 'REFUNDED' || status === 'CANCELLED') &&
+      existingOrder.status !== 'REFUNDED' &&
+      existingOrder.status !== 'CANCELLED'
+    ) {
+      await incrementStock(
+        existingOrder.items
+          .map(item => ({
+            variantId: item.variantId || '',
+            quantity: item.quantity,
+          }))
+          .filter(i => i.variantId), // Safety filter
+        tx
+      );
+
+      logger.info({ orderId }, 'Stock restored during cancellation/refund');
+    }
+
+    return order;
   });
 
   logger.info(
@@ -148,8 +183,8 @@ export async function updateOrderStatus(input: UpdateOrderStatusInput) {
       newStatus: status,
       updatedBy: userId,
     },
-    'Order status updated'
+    'Order status updated (Atomic Transaction)'
   );
 
-  return order;
+  return updatedOrder;
 }

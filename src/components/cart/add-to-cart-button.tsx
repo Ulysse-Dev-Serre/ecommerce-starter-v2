@@ -52,13 +52,13 @@ export function AddToCartButton({
       disabled={disabled || isLoading}
       className={cn(
         'vibe-button-primary',
-        fullWidth ? 'vibe-btn-full-lg' : 'vibe-btn-sm-h10'
+        fullWidth ? 'w-full h-12' : 'h-10 px-6'
       )}
     >
       {isLoading ? (
-        <Loader2 className="vibe-icon-sm vibe-icon-spin" />
+        <Loader2 className="h-5 w-5 animate-spin" />
       ) : (
-        <ShoppingCart className="vibe-icon-sm" />
+        <ShoppingCart className="h-5 w-5" />
       )}
       <span>{isLoading ? tProduct('adding') : label}</span>
     </button>

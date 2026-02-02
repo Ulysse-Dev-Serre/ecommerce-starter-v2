@@ -17,7 +17,7 @@ export function ShopPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <div className="vibe-mt-20 vibe-flex-center vibe-gap-3">
+    <div className="mt-20 vibe-flex-center gap-3">
       {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => {
         const isPrev = p === currentPage - 1;
         const isNext = p === currentPage + 1;
@@ -30,8 +30,8 @@ export function ShopPagination({
             className={cn(
               'vibe-pagination-item',
               p === currentPage
-                ? 'vibe-pagination-active'
-                : 'vibe-pagination-inactive'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'bg-card border border-border text-muted-foreground hover:border-primary/50 hover:text-primary'
             )}
           >
             {p}

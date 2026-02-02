@@ -23,7 +23,7 @@ export default async function CategoriesPage({
       </div>
 
       <div className="admin-card text-center py-12">
-        <p className="vibe-admin-text-subtle">{t('comingSoon')}</p>
+        <p className="text-muted-foreground">{t('comingSoon')}</p>
       </div>
     </div>
   );

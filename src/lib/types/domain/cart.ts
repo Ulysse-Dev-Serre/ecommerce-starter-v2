@@ -31,9 +31,13 @@ export interface CartProjection {
     variant: {
       id: string;
       sku: string;
+      weight: string;
+      dimensions: any;
       product: {
         id: string;
         slug: string;
+        weight?: string;
+        dimensions?: any;
         translations: {
           language: string;
           name: string;

@@ -20,28 +20,34 @@ export function Footer({ locale }: FooterProps): React.JSX.Element {
   const storeName = siteConfig.name;
 
   return (
-    <footer className="vibe-footer">
-      <div className="vibe-layout-container vibe-section-py">
-        <div className="vibe-footer-grid">
+    <footer className="bg-background border-t border-border mt-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="vibe-grid-layout !gap-8 !grid-cols-1 md:!grid-cols-3">
           {/* Brand & Copyright */}
           <div>
-            <h3 className="vibe-footer-title">{storeName}</h3>
-            <p className="vibe-text-xs vibe-text-muted">
+            <h3 className="text-lg font-bold mb-4 text-primary">{storeName}</h3>
+            <p className="vibe-text-xs text-muted-foreground">
               {t('copyright', { year: year.toString(), storeName })}
             </p>
           </div>
 
           {/* Links Column 1: Shop */}
           <div>
-            <h4 className="vibe-footer-subtitle">{tShop('title')}</h4>
-            <ul className="vibe-list-stack-sm vibe-text-xs vibe-text-muted">
+            <h4 className="font-semibold mb-4">{tShop('title')}</h4>
+            <ul className="flex flex-col gap-2 vibe-text-xs text-muted-foreground">
               <li>
-                <Link href={`/${locale}/shop`} className="vibe-footer-link">
+                <Link
+                  href={`/${locale}/shop`}
+                  className="hover:text-primary transition-colors"
+                >
                   {tShop('title')}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/cart`} className="vibe-footer-link">
+                <Link
+                  href={`/${locale}/cart`}
+                  className="hover:text-primary transition-colors"
+                >
                   {tCart('title')}
                 </Link>
               </li>
@@ -50,20 +56,29 @@ export function Footer({ locale }: FooterProps): React.JSX.Element {
 
           {/* Links Column 2: Legal */}
           <div>
-            <h4 className="vibe-footer-subtitle">{t('legal')}</h4>
-            <ul className="vibe-list-stack-sm vibe-text-xs vibe-text-muted">
+            <h4 className="font-semibold mb-4">{t('legal')}</h4>
+            <ul className="flex flex-col gap-2 vibe-text-xs text-muted-foreground">
               <li>
-                <Link href={`/${locale}/privacy`} className="vibe-footer-link">
+                <Link
+                  href={`/${locale}/privacy`}
+                  className="hover:text-primary transition-colors"
+                >
                   {t('privacy')}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/terms`} className="vibe-footer-link">
+                <Link
+                  href={`/${locale}/terms`}
+                  className="hover:text-primary transition-colors"
+                >
                   {t('terms')}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/refund`} className="vibe-footer-link">
+                <Link
+                  href={`/${locale}/refund`}
+                  className="hover:text-primary transition-colors"
+                >
                   {t('refund')}
                 </Link>
               </li>

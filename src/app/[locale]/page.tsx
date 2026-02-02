@@ -59,35 +59,44 @@ export default async function Home({
   );
 
   return (
-    <div className="vibe-flex-1">
-      <section className="vibe-hero-section">
-        <div className="vibe-layout-container vibe-text-center">
-          <h1 className="vibe-hero-title">{t('heroTitle')}</h1>
-          <p className="vibe-hero-subtitle">{t('heroSubtitle')}</p>
+    <div className="flex-1">
+      <section className="bg-gradient-to-r from-muted/50 to-background border-b border-border vibe-section-py">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground">
+            {t('heroTitle')}
+          </h1>
+          <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
+            {t('heroSubtitle')}
+          </p>
         </div>
       </section>
 
-      <section className="vibe-section-py">
-        <div className="vibe-layout-container">
-          <div className="vibe-flex-between-items-end vibe-mb-12">
+      <section className="py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end vibe-mb-12">
             <div>
-              <h2 className="vibe-h2">{t('featuredProducts')}</h2>
-              <div className="vibe-divider" />
+              <h2 className="text-3xl font-bold text-foreground">
+                {t('featuredProducts')}
+              </h2>
+              <div className="h-1.5 w-20 bg-primary mt-3 rounded-full" />
             </div>
-            <Link href={`/${locale}/shop`} className="vibe-link-action">
+            <Link
+              href={`/${locale}/shop`}
+              className="text-primary font-bold hover:underline underline-offset-4 inline-flex items-center"
+            >
               {t('viewAll')}{' '}
-              <ArrowRight className="vibe-inline-block vibe-icon-sm vibe-ml-1" />
+              <ArrowRight className="inline-block h-5 w-5 ml-1" />
             </Link>
           </div>
 
           {featuredProducts.length === 0 ? (
             <div className="vibe-info-box">
-              <p className="vibe-text-price-xl vibe-text-muted">
+              <p className="text-2xl font-bold text-foreground text-muted-foreground">
                 {t('noFeaturedProducts')}
               </p>
             </div>
           ) : (
-            <div className="vibe-grid-4-cols">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredProducts.map((product, idx) => (
                 <div
                   key={product.id}

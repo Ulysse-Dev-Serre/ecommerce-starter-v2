@@ -8,6 +8,7 @@ import { OrderSummary } from '@/components/admin/orders/order-summary';
 import { OrderPaymentInfo } from '@/components/admin/orders/order-payment-info';
 import { OrderCustomerCard } from '@/components/admin/orders/order-customer-card';
 import { OrderShippingCard } from '@/components/admin/orders/order-shipping-card';
+import { OrderPackingCard } from '@/components/admin/orders/order-packing-card';
 import { OrderHistoryTimeline } from '@/components/admin/orders/order-history-timeline';
 import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 
@@ -97,6 +98,7 @@ export default async function OrderDetailPage({
             address={order.shippingAddress}
             user={order.user}
           />
+          <OrderPackingCard packingResult={order.packingResult} />
           <OrderHistoryTimeline statusHistory={order.statusHistory} />
         </div>
       </div>

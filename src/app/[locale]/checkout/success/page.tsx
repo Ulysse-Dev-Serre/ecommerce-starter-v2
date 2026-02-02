@@ -32,10 +32,10 @@ export default async function CheckoutSuccessPage({
   const t = await getTranslations({ locale, namespace: 'checkoutSuccess' });
 
   return (
-    <div className="vibe-section-py vibe-flex-grow">
-      <div className="vibe-layout-container">
+    <div className="py-8 lg:py-12 flex-grow">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* H1 visible immediately for SEO/Accessibility while the client component verifies the order */}
-        <h1 className="vibe-page-header">{t('title')}</h1>
+        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
         <Suspense fallback={<LoadingState />}>
           <CheckoutSuccessClient locale={locale} />

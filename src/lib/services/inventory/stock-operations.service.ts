@@ -1,16 +1,23 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { StockItem } from '@/lib/types/domain/inventory';
+import { Prisma } from '@/generated/prisma';
 
 /**
  * Décrémente le stock et libère la réservation
  * Utilisé lors de la confirmation d'une commande
  *
  * @param items - Items à décrémenter
+ * @param tx - Transaction client optionnelle
  */
-export async function decrementStock(items: StockItem[]): Promise<void> {
+export async function decrementStock(
+  items: StockItem[],
+  tx?: Prisma.TransactionClient
+): Promise<void> {
+  const client = tx || prisma;
+
   for (const item of items) {
-    await prisma.productVariantInventory.update({
+    await client.productVariantInventory.update({
       where: { variantId: item.variantId },
       data: {
         stock: {
@@ -26,6 +33,7 @@ export async function decrementStock(items: StockItem[]): Promise<void> {
       {
         variantId: item.variantId,
         quantity: item.quantity,
+        inTransaction: !!tx,
       },
       'Stock decremented'
     );
@@ -37,10 +45,16 @@ export async function decrementStock(items: StockItem[]): Promise<void> {
  * Utilisé lors d'un refund ou annulation de commande
  *
  * @param items - Items à incrémenter
+ * @param tx - Transaction client optionnelle
  */
-export async function incrementStock(items: StockItem[]): Promise<void> {
+export async function incrementStock(
+  items: StockItem[],
+  tx?: Prisma.TransactionClient
+): Promise<void> {
+  const client = tx || prisma;
+
   for (const item of items) {
-    await prisma.productVariantInventory.update({
+    await client.productVariantInventory.update({
       where: { variantId: item.variantId },
       data: {
         stock: {
@@ -53,6 +67,7 @@ export async function incrementStock(items: StockItem[]): Promise<void> {
       {
         variantId: item.variantId,
         quantity: item.quantity,
+        inTransaction: !!tx,
       },
       'Stock incremented (refund)'
     );

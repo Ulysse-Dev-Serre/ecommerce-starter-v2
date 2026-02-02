@@ -90,3 +90,82 @@ export const CART_COOKIE_NAME = 'cart_anonymous_id';
  * =============================================================================
  */
 export const LEGAL_LAST_UPDATED = new Date('2025-01-01');
+
+/**
+ * =============================================================================
+ * SHIPPING CONFIGURATION
+ * =============================================================================
+ */
+export const SHIPPING_UNITS = {
+  DISTANCE: 'cm',
+  MASS: 'kg',
+} as const;
+
+/**
+ * Filter to only show rates from specific providers (lowercase).
+ * If empty, all providers are shown.
+ * Example: ['ups', 'fedex']
+ */
+export const SHIPPING_PROVIDERS_FILTER: string[] = ['ups'];
+
+/**
+ * Default Incoterm for shipping (DDU = Delivered Duty Unpaid).
+ * Change to 'DDP' if you handle duties/taxes for the customer.
+ */
+export const DEFAULT_SHIPPING_INCOTERM = 'DDP';
+
+/**
+ * Filter keywords to categorize shipping rates (lowercase).
+ * Used to group rates into "Standard" and "Express" categories.
+ */
+export const SHIPPING_STRATEGIES = {
+  STANDARD: {
+    LABEL: 'Standard',
+    KEYWORDS: ['standard', 'ground'],
+    EXCLUDES: [],
+  },
+  EXPRESS: {
+    LABEL: 'Express',
+    KEYWORDS: ['express', 'saver', 'next day'],
+    EXCLUDES: ['early', 'plus', '3 day'],
+  },
+} as const;
+
+/**
+ * Standard box sizes for shipping (Dimensions in cm, weight in kg).
+ * Used by the 3D Bin Packing algorithm to optimize parcel selection.
+ */
+export const SHIPPING_BOX_CATALOG = [
+  {
+    id: 'box-small',
+    name: 'Small Box',
+    width: 20,
+    length: 15,
+    height: 10,
+    maxWeight: 5,
+  },
+  {
+    id: 'box-medium',
+    name: 'Medium Box',
+    width: 35,
+    length: 25,
+    height: 20,
+    maxWeight: 10,
+  },
+  {
+    id: 'box-large',
+    name: 'Large Box',
+    width: 50,
+    length: 40,
+    height: 35,
+    maxWeight: 25,
+  },
+  {
+    id: 'envelope-padded',
+    name: 'Padded Envelope',
+    width: 25,
+    length: 18,
+    height: 2,
+    maxWeight: 1,
+  },
+] as const;

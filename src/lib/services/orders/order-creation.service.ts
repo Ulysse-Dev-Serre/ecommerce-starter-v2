@@ -6,6 +6,7 @@ import { i18n } from '@/lib/i18n/config';
 import { calculateCart, type Currency } from '../calculations';
 import { decrementStock } from '../inventory';
 import { CreateOrderFromCartInput } from '@/lib/types/domain/order';
+import { PackingService, PackableItem } from '../shipping/packing.service';
 
 /**
  * Génère un numéro de commande unique
@@ -78,71 +79,118 @@ export async function createOrderFromCart({
   // tout en ayant logué l'alerte si un écart existait avec Stripe.
   const totalAmount = calculatedTotal;
 
-  const order = await prisma.order.create({
-    data: {
-      orderNumber,
-      userId: userId || null, // Ensure explicit null if undefined/empty
-      guestEmail: guestEmail || null,
-      status: OrderStatus.PAID,
-      currency: cart.currency,
-      subtotalAmount,
-      taxAmount,
-      shippingAmount,
-      discountAmount,
-      totalAmount,
-      shippingAddress: shippingAddress || {},
-      billingAddress: billingAddress || {},
-      language: locale.toUpperCase() === 'FR' ? Language.FR : Language.EN,
-      // Création automatique de l'expédition si l'étiquette a été achetée
-      shipments: shipmentCreateData
-        ? {
-            create: shipmentCreateData,
-          }
-        : undefined,
-      items: {
-        create: calculation.items.map(item => {
-          const cartItem = cart.items.find(i => i.variantId === item.variantId);
-          return {
-            variantId: item.variantId,
-            productId: cartItem?.variant.product.id || '',
-            productSnapshot: {
-              name: item.productName,
-              sku: item.sku,
-              image: cartItem?.variant.media.find(m => m.isPrimary)?.url,
-            },
-            quantity: item.quantity,
-            unitPrice: parseFloat(item.unitPrice.toString()),
-            totalPrice: parseFloat(item.lineTotal.toString()),
-            currency: item.currency,
-          };
-        }),
-      },
-      payments: {
-        create: {
-          amount: paymentIntent.amount / 100,
-          currency: paymentIntent.currency.toUpperCase(),
-          method: 'STRIPE',
-          externalId: paymentIntent.id,
-          status: 'COMPLETED',
-          transactionData: paymentIntent as any,
-          processedAt: new Date(),
-        },
-      },
-    },
-    include: {
-      items: true,
-      payments: true,
-      shipments: true,
-    },
+  // 3D Packing Result persistence
+  const packableItems: PackableItem[] = cart.items.map(item => {
+    const variant = item.variant;
+    const product = variant.product;
+
+    // Fallback: Use product dimensions/weight if variant ones are missing
+    const weight = variant.weight
+      ? Number(variant.weight)
+      : Number(product.weight);
+    const dim = (variant.dimensions || product.dimensions) as {
+      width?: number;
+      length?: number;
+      height?: number;
+    } | null;
+
+    if (!dim || !dim.width || !dim.length || !dim.height || !weight) {
+      const errorMsg = `Critical Error: Missing dimensions or weight for SKU: ${variant.sku}. 0 Fallback Policy is enforced. Order creation aborted.`;
+      logger.error({ sku: variant.sku, productId: product.id }, errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    return {
+      id: variant.sku,
+      width: Number(dim.width),
+      length: Number(dim.length),
+      height: Number(dim.height),
+      weight: weight,
+      quantity: item.quantity,
+    };
   });
 
-  // Décrémenter le stock
-  await decrementStock(
-    cart.items.map(item => ({
-      variantId: item.variant.id,
-      quantity: item.quantity,
-    }))
-  );
+  const packingResult = PackingService.pack(packableItems);
+
+  // Exécution dans une transaction pour garantir l'atomicité
+  const order = await prisma.$transaction(async tx => {
+    const newOrder = await tx.order.create({
+      data: {
+        orderNumber,
+        userId: userId || null, // Ensure explicit null if undefined/empty
+        guestEmail: guestEmail || null,
+        status: OrderStatus.PAID,
+        currency: cart.currency,
+        subtotalAmount,
+        taxAmount,
+        shippingAmount,
+        discountAmount,
+        totalAmount,
+        shippingAddress: shippingAddress || {},
+        billingAddress: billingAddress || {},
+        packingResult: packingResult as any,
+        language: (Object.values(Language) as string[]).includes(
+          locale.split('-')[0].toUpperCase()
+        )
+          ? (locale.split('-')[0].toUpperCase() as Language)
+          : Language.EN,
+
+        // Création automatique de l'expédition si l'étiquette a été achetée
+        shipments: shipmentCreateData
+          ? {
+              create: shipmentCreateData,
+            }
+          : undefined,
+        items: {
+          create: calculation.items.map(item => {
+            const cartItem = cart.items.find(
+              i => i.variantId === item.variantId
+            );
+            return {
+              variantId: item.variantId,
+              productId: cartItem?.variant.product.id || '',
+              productSnapshot: {
+                name: item.productName,
+                sku: item.sku,
+                image: cartItem?.variant.media.find(m => m.isPrimary)?.url,
+              },
+              quantity: item.quantity,
+              unitPrice: parseFloat(item.unitPrice.toString()),
+              totalPrice: parseFloat(item.lineTotal.toString()),
+              currency: item.currency,
+            };
+          }),
+        },
+        payments: {
+          create: {
+            amount: paymentIntent.amount / 100,
+            currency: paymentIntent.currency.toUpperCase(),
+            method: 'STRIPE',
+            externalId: paymentIntent.id,
+            status: 'COMPLETED',
+            transactionData: paymentIntent as any,
+            processedAt: new Date(),
+          },
+        },
+      },
+      include: {
+        items: true,
+        payments: true,
+        shipments: true,
+      },
+    });
+
+    // Décrémenter le stock dans la même transaction
+    await decrementStock(
+      cart.items.map(item => ({
+        variantId: item.variant.id,
+        quantity: item.quantity,
+      })),
+      tx
+    );
+
+    return newOrder;
+  });
 
   logger.info(
     {
@@ -151,7 +199,7 @@ export async function createOrderFromCart({
       totalAmount: order.totalAmount,
       itemsCount: calculation.items.length,
     },
-    'Order created from cart'
+    'Order created from cart (Atomic Transaction)'
   );
 
   return order;

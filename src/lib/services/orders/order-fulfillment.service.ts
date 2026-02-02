@@ -24,14 +24,28 @@ export async function createReturnLabel(
   orderId: string,
   isPreview: boolean = false
 ) {
-  const order = await prisma.order.findUnique({
+  // 0 Fallback Policy: Resolve Origin Address from the first product's Shipping Origin
+  const orderWithOrigin = await prisma.order.findUnique({
     where: { id: orderId },
     include: {
+      items: {
+        take: 1, // We assume all items in an order ship from the same origin for now, or we take the first one as the return point
+        include: {
+          product: {
+            include: {
+              shippingOrigin: true,
+            },
+          },
+        },
+      },
       user: true,
     },
   });
 
-  if (!order) throw new Error('Order not found');
+  if (!orderWithOrigin) throw new Error('Order not found');
+
+  // Use the fetched order with relations
+  const order = orderWithOrigin;
 
   const addr = order.shippingAddress as any;
   const customerAddress = {
@@ -49,26 +63,88 @@ export async function createReturnLabel(
     email: order.user?.email || addr.email,
   };
 
+  const firstProduct = order.items[0]?.product;
+  const originData = firstProduct?.shippingOrigin;
+
+  if (!originData || !originData.address) {
+    throw new Error(
+      `0 Fallback Policy: Cannot generate return label. Product ${firstProduct?.id} has no configured Shipping Origin (Supplier).`
+    );
+  }
+
+  // Validate and format the warehouse address (Return Destination)
+  // We use the simpler validation here as we are inside the service logic,
+  // but we could reuse the shared validation logic if extracted.
+  const rawAddress = originData.address as any;
   const warehouseAddress = {
-    name: 'AgTechNest Warehouse',
-    street1: '546 rue leclerc',
-    street2: 'app 7',
-    city: 'Repentigny',
-    state: 'QC',
-    zip: 'J6A7R3',
-    country: 'CA',
-    phone: env.SHIPPO_FROM_PHONE || '5140000000',
-    email: 'agtechnest@gmail.com',
+    name: originData.name,
+    street1: rawAddress.street1 || rawAddress.line1,
+    street2: rawAddress.street2 || rawAddress.line2 || '',
+    city: rawAddress.city,
+    state: rawAddress.state,
+    zip: (rawAddress.postalCode || rawAddress.zip || '').replace(/\s+/g, ''),
+    country: rawAddress.country,
+    phone: originData.contactPhone || env.SHIPPO_FROM_PHONE || '5140000000',
+    email: originData.contactEmail || 'agtechnest@gmail.com',
   };
 
-  // Prepare a generic parcel (standard box)
+  // Ensure required fields for Shippo are present
+  if (
+    !warehouseAddress.street1 ||
+    !warehouseAddress.city ||
+    !warehouseAddress.country ||
+    !warehouseAddress.zip
+  ) {
+    throw new Error(
+      `Invalid warehouse address for ${originData.name}. Missing required fields.`
+    );
+  }
+
+  // Calculate real total weight
+  // Note: We use existing order items (which already include quantity).
+  // Ideally, Prisma includes product info so we can get unit weight.
+  // Since we only fetched limited data above, we need to ensure we have weight.
+  const totalWeight = order.items.reduce((acc, item) => {
+    // We need to fetch product weight. The previous query only took 1 item deep.
+    // Let's rely on stored variant info if available or assume standard return weight logic if needed.
+    // However, to be strict, we should really use the data we have.
+    // Since 'include: { items: { include: { product: true } } }' was used (via orderWithOrigin's query logic which was a bit limited to 'take: 1'),
+    // we actually need to fetch ALL items properly to calculate weight.
+    // FIX: Let's assume for a return we might return everything OR a specific weight.
+    // For now, let's just sum up the weight of the items we know about.
+    // But wait, the previous query was `take: 1` on items! That's a bug for weight calc of the WHOLE order.
+    // We should refactor the initial query to get ALL items if we want total weight.
+    return acc + 1; // Placeholder until query is fixed below.
+  }, 0);
+
+  // FIX: Re-query to get ALL items for weight calculation
+  const fullOrderItems = await prisma.orderItem.findMany({
+    where: { orderId: order.id },
+    include: { variant: true, product: true },
+  });
+
+  const calculatedWeight = fullOrderItems.reduce((acc, item) => {
+    const unitWeight = Number(item.variant?.weight || item.product?.weight);
+
+    if (!unitWeight || unitWeight <= 0) {
+      throw new Error(
+        `0 Fallback Policy: Missing or invalid weight for product "${item.product?.slug || item.productId}". Cannot generate return label.`
+      );
+    }
+
+    return acc + unitWeight * item.quantity;
+  }, 0);
+
+  const finalWeight = calculatedWeight.toFixed(2);
+
+  // Prepare a generic parcel (sized for the return)
   const parcels = [
     {
       length: '20',
       width: '15',
       height: '10',
       distanceUnit: 'cm' as const,
-      weight: '1',
+      weight: finalWeight,
       massUnit: 'kg' as const,
     },
   ];

@@ -10,7 +10,8 @@ import { ShippingAddress } from '@/lib/types/domain/shipping';
  */
 export async function getShippingRates(
   cartId: string,
-  addressTo: ShippingAddress
+  addressTo: ShippingAddress,
+  items?: Array<{ variantId: string; quantity: number }>
 ) {
   const response = await fetch(API_ROUTES.SHIPPING.RATES, {
     method: 'POST',
@@ -18,6 +19,7 @@ export async function getShippingRates(
     body: JSON.stringify({
       cartId,
       addressTo,
+      items,
     }),
   });
 

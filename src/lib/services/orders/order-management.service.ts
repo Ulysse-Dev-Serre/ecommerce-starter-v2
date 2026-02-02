@@ -29,8 +29,20 @@ export async function getOrderById(orderId: string, userId: string) {
 /**
  * Récupère les données minimales d'une commande pour SEO/Metadata
  */
+import { cache } from '@/lib/core/cache';
+
+/**
+ * Récupère les données minimales d'une commande pour SEO/Metadata
+ */
 export async function getOrderMetadata(idOrNumber: string) {
-  return prisma.order.findFirst({
+  const cacheKey = `order:metadata:${idOrNumber}`;
+  const cached = await cache.get<{ orderNumber: string } | null>(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const order = await prisma.order.findFirst({
     where: {
       OR: [{ id: idOrNumber }, { orderNumber: idOrNumber }],
     },
@@ -38,6 +50,13 @@ export async function getOrderMetadata(idOrNumber: string) {
       orderNumber: true,
     },
   });
+
+  if (order) {
+    // Cache for 24 hours as order number never changes
+    await cache.set(cacheKey, order, 24 * 60 * 60);
+  }
+
+  return order;
 }
 
 /**

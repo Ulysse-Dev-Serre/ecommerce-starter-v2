@@ -5,6 +5,7 @@ import { PriceDisplay } from '@/components/price-display';
 import { ProductActions } from '@/components/cart/product-actions';
 import { getTranslations } from 'next-intl/server';
 import { Package } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 import { ProductProjection } from '@/lib/types/domain/product';
 
@@ -23,12 +24,12 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
   const image = primaryImage?.url || variantImage?.url;
 
   return (
-    <div
-      className={`vibe-card ${VIBE_HOVER_GROUP} vibe-flex-col-h-full vibe-hover-shadow-md`}
+    <Card
+      className={`${VIBE_HOVER_GROUP} flex flex-col h-full hover:shadow-md`}
     >
       <Link
         href={`/${locale}/product/${product.slug}`}
-        className="vibe-image-container-abs"
+        className="relative mb-4 overflow-hidden rounded-lg bg-muted aspect-square"
       >
         {image ? (
           <Image
@@ -40,11 +41,11 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
               t('productImage')
             }
             fill
-            className="vibe-object-cover group-hover:vibe-scale-110 vibe-transition-500"
+            className="vibe-object-cover group-hover:scale-110 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
-          <div className="vibe-full vibe-flex-center vibe-text-muted">
+          <div className="vibe-full vibe-flex-center text-muted-foreground">
             <Package className="vibe-w-12 vibe-h-12" />
           </div>
         )}
@@ -53,28 +54,28 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
       <div className="vibe-flex-col-flex-1">
         <Link
           href={`/${locale}/product/${product.slug}`}
-          className="vibe-block vibe-mb-1"
+          className="block vibe-mb-1"
         >
-          <h3 className="vibe-text-bold vibe-text-lg vibe-text-foreground group-hover:vibe-text-primary vibe-transition vibe-line-clamp-1">
+          <h3 className="font-bold vibe-text-lg text-foreground group-hover:text-primary transition-all duration-300 line-clamp-1">
             {translation?.name ?? product.slug}
           </h3>
         </Link>
-        <p className="vibe-text-xs vibe-text-muted vibe-mb-4 vibe-line-clamp-2 vibe-min-h-12">
+        <p className="vibe-text-xs text-muted-foreground mb-4 line-clamp-2 min-h-[3rem]">
           {translation?.shortDescription}
         </p>
 
-        <div className="vibe-mt-auto vibe-pt-4 vibe-section-divider-top">
-          <div className="vibe-mb-4">
+        <div className="vibe-mt-auto vibe-pt-4 border-t border-border pt-4 mt-4">
+          <div className="mb-4">
             <PriceDisplay
               pricing={pricing}
-              className="vibe-text-xl vibe-text-bold-foreground"
+              className="vibe-text-xl font-bold text-foreground"
               locale={locale}
             />
           </div>
           {product.variants.length > 1 ? (
             <Link
               href={`/${locale}/product/${product.slug}`}
-              className="vibe-button-secondary vibe-w-full vibe-py-3 vibe-px-4 vibe-text-xs"
+              className="vibe-button-secondary vibe-w-full vibe-py-3 px-4 vibe-text-xs"
             >
               {t('viewOptions')}
             </Link>
@@ -91,6 +92,6 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

@@ -1,7 +1,7 @@
 /**
  * Site Design Tokens
  *
- * Ces valeurs reflètent src/styles/themes/neutral.css
+ * Ces valeurs reflètent src/styles/globals.css
  * Elles sont utilisées par les composants JS qui ne peuvent pas lire les variables CSS
  * (ex: Stripe Elements, Emails, Canvas, etc.)
  *

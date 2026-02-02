@@ -55,23 +55,25 @@ export default async function ShopPage({
   );
 
   return (
-    <div className="vibe-layout-container vibe-section-py vibe-animate-fade-in">
-      <div className="vibe-mb-12 vibe-section-divider-bottom vibe-pb-8">
-        <h1 className="vibe-page-header vibe-text-foreground">{t('title')}</h1>
-        <p className="vibe-text-muted vibe-mt-2 vibe-text-lg">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 duration-500">
+      <div className="vibe-mb-12 border-b border-border pb-4 pb-8">
+        <h1 className="text-3xl font-bold mb-8 text-foreground">
+          {t('title')}
+        </h1>
+        <p className="text-muted-foreground mt-2 vibe-text-lg">
           {t('description')}
         </p>
       </div>
 
       {products.length === 0 ? (
         <div className="vibe-info-box">
-          <Search className="vibe-w-16 vibe-h-16 vibe-text-muted-soft vibe-mb-4" />
-          <p className="vibe-text-price-xl vibe-text-muted vibe-text-medium">
+          <Search className="vibe-w-16 vibe-h-16 text-muted-foreground/30 mb-4" />
+          <p className="text-2xl font-bold text-foreground text-muted-foreground font-medium">
             {t('noProducts')}
           </p>
         </div>
       ) : (
-        <div className="vibe-grid-4-cols">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product: ProductProjection, idx: number) => (
             <div
               key={product.id}

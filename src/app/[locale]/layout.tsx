@@ -20,7 +20,7 @@ import { CartMergeHandler } from '@/components/cart/cart-merge-handler';
 import Script from 'next/script';
 import { Suspense } from 'react';
 import React from 'react';
-import '../globals.css';
+import '@/styles/globals.css';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -94,7 +94,7 @@ export default async function RootLayout({
   const content = (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} vibe-antialiased vibe-flex vibe-flex-col vibe-min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased vibe-flex flex flex-col min-h-screen`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleTagManager />
@@ -105,7 +105,7 @@ export default async function RootLayout({
           <ToastProvider>
             <CartMergeHandler />
             <ConditionalNavbar locale={locale} userRole={userRole} />
-            <main className="vibe-flex-grow">{children}</main>
+            <main className="flex-grow">{children}</main>
             <ConditionalFooter locale={locale} />
           </ToastProvider>
           <Script

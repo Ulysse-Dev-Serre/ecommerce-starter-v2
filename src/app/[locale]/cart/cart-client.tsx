@@ -48,12 +48,14 @@ export function CartClient({ cart, locale }: CartClientProps) {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="vibe-empty-state">
-        <ShoppingCart className="vibe-empty-state-icon" />
-        <p className="vibe-empty-state-title">{t('emptyCart')}</p>
+      <div className="text-center py-20 bg-background border border-dashed border-border rounded-3xl mx-auto max-w-2xl px-6">
+        <ShoppingCart className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
+        <p className="text-2xl font-bold mb-8 text-foreground">
+          {t('emptyCart')}
+        </p>
         <Link
           href={`/${locale}${NAV_ROUTES.SHOP}`}
-          className="vibe-empty-state-button"
+          className="vibe-button-primary px-8 py-3 text-base"
         >
           {t('continueShopping')}
         </Link>
@@ -67,9 +69,9 @@ export function CartClient({ cart, locale }: CartClientProps) {
   }));
 
   return (
-    <div className="vibe-grid-layout">
-      <div className="vibe-grid-main">
-        <div className="vibe-list-stack">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div className="lg:col-span-8 space-y-6">
+        <div className="flex flex-col gap-4">
           {cart.items.map(item => (
             <CartItem
               key={item.id}
@@ -82,7 +84,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
         </div>
       </div>
 
-      <div className="vibe-grid-side">
+      <div className="lg:col-span-4 h-full">
         <CartSummary
           items={summaryItems}
           locale={locale}

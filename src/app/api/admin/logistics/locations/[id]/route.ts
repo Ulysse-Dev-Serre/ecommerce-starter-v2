@@ -80,13 +80,44 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Soft delete (set isActive = false) or hard delete?
-    // Schema has deletedAt? No, only isActive.
-    // We set isActive = false.
+    // Safety: Handle connected products before deactivating supplier
+    // 0 Fallback Policy: If the origin disappears, the products must not remain ACTIVE
+    await prisma.$transaction(async tx => {
+      // 1. Find all ACTIVE products using this origin
+      const affectedProducts = await tx.product.findMany({
+        where: {
+          shippingOriginId: id,
+          status: 'ACTIVE',
+        },
+        select: { id: true, slug: true },
+      });
 
-    await prisma.supplier.update({
-      where: { id },
-      data: { isActive: false },
+      if (affectedProducts.length > 0) {
+        // 2. Force DRAFT status
+        await tx.product.updateMany({
+          where: {
+            id: { in: affectedProducts.map(p => p.id) },
+          },
+          data: {
+            status: 'DRAFT',
+          },
+        });
+
+        logger.warn(
+          {
+            supplierId: id,
+            count: affectedProducts.length,
+            products: affectedProducts.map(p => p.slug),
+          },
+          'Cascade Deactivation: Products forced to DRAFT due to Supplier deactivation'
+        );
+      }
+
+      // 3. Deactivate Supplier
+      await tx.supplier.update({
+        where: { id },
+        data: { isActive: false },
+      });
     });
 
     return NextResponse.json({ success: true });

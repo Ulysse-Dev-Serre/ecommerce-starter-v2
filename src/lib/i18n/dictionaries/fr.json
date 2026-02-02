@@ -607,6 +607,12 @@
     "orders": {
       "title": "Commandes",
       "subtitle": "Gérez et suivez les commandes clients",
+      "pagination": {
+        "showing": "Affichage de",
+        "to": "à",
+        "of": "sur",
+        "orders": "commandes"
+      },
       "table": {
         "order": "Commande",
         "customer": "Client",
@@ -683,7 +689,19 @@
         "printLabel": "Imprimer l'étiquette",
         "purchaseLabel": "Acheter & Générer l'étiquette",
         "successPurchase": "Étiquette achetée avec succès",
-        "errorPurchase": "Échec de l'achat de l'étiquette"
+        "errorPurchase": "Échec de l'achat de l'étiquette",
+        "purchaseConfirmPrice": "Le coût réel de cette étiquette est de {price}.",
+        "purchaseConfirmPaid": "Le client a payé : {amount}.",
+        "purchaseConfirmQuestion": "Voulez-vous procéder à l'achat de cette étiquette ?",
+        "errorPrefix": "Erreur : {message}",
+        "na": "N/D",
+        "packingInstructions": "Instructions de colisage",
+        "noPackingInstructions": "Aucune instruction de colisage disponible pour cette commande.",
+        "packingListOptimized": "Liste de colisage (Optimisée 3D)",
+        "parcel": "Colis",
+        "dimensions": "Dimensions",
+        "weight": "Poids",
+        "contents": "Contenu"
       }
     },
     "customers": {

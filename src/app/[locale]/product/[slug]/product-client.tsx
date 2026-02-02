@@ -57,7 +57,7 @@ export function ProductClient({
   const selectedVariant = variants.find(v => v.id === selectedVariantId);
 
   if (!selectedVariant) {
-    return <div className="vibe-status-label-error">{t('outOfStock')}</div>;
+    return <div className="text-error">{t('outOfStock')}</div>;
   }
 
   const attributeGroups = variants.reduce(
@@ -101,10 +101,10 @@ export function ProductClient({
   const hasAttributes = Object.keys(attributeGroups).length > 0;
 
   return (
-    <div className="vibe-stack-y-6">
+    <div className="space-y-6">
       <PriceDisplay
         pricing={selectedVariant.pricing}
-        className="vibe-text-price-xl vibe-text-primary"
+        className="text-2xl font-bold text-foreground text-primary"
         locale={locale}
       />
 
@@ -112,7 +112,7 @@ export function ProductClient({
       {hasAttributes &&
         Object.entries(attributeGroups).map(([attributeName, values]) => (
           <div key={attributeName}>
-            <label className="vibe-block vibe-text-xs-bold vibe-mb-2">
+            <label className="block vibe-text-xs-bold vibe-mb-2">
               {attributeName}
             </label>
             <div className="vibe-flex-wrap-gap-2">
@@ -138,7 +138,7 @@ export function ProductClient({
       {/* Sélecteur par SKU (si pas d'attributs mais plusieurs variantes) */}
       {!hasAttributes && variants.length > 1 && (
         <div>
-          <label className="vibe-block vibe-text-xs-bold vibe-mb-2">
+          <label className="block vibe-text-xs-bold vibe-mb-2">
             {t('variant')}
           </label>
           <div className="vibe-flex-wrap-gap-2">
@@ -155,13 +155,13 @@ export function ProductClient({
         </div>
       )}
 
-      <div className="vibe-text-xs vibe-text-muted">
+      <div className="vibe-text-xs text-muted-foreground">
         {selectedVariant.stock > 0 ? (
-          <span className="vibe-status-label-success">
+          <span className="text-success">
             {t('inStock', { stock: selectedVariant.stock })}
           </span>
         ) : (
-          <span className="vibe-status-label-error">{t('outOfStock')}</span>
+          <span className="text-error">{t('outOfStock')}</span>
         )}
       </div>
 

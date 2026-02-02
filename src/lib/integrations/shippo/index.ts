@@ -7,6 +7,7 @@
 export {
   getShippingRates,
   getReturnShippingRates,
+  getRate,
   createTransaction,
   default as shippo,
 } from './client';

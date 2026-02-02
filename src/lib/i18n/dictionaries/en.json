@@ -604,6 +604,12 @@
     "orders": {
       "title": "Orders",
       "subtitle": "Manage and track customer orders",
+      "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "orders": "orders"
+      },
       "table": {
         "order": "Order",
         "customer": "Customer",
@@ -680,7 +686,19 @@
         "printLabel": "Print Label",
         "purchaseLabel": "Purchase & Generate Label",
         "successPurchase": "Label purchased successfully",
-        "errorPurchase": "Failed to purchase label"
+        "errorPurchase": "Failed to purchase label",
+        "purchaseConfirmPrice": "The real cost of this label is {price}.",
+        "purchaseConfirmPaid": "Customer paid: {amount}.",
+        "purchaseConfirmQuestion": "Do you want to proceed and purchase this label?",
+        "errorPrefix": "Error: {message}",
+        "na": "N/A",
+        "packingInstructions": "Packing Instructions",
+        "noPackingInstructions": "No packing instructions available for this order.",
+        "packingListOptimized": "Packing List (3D Optimized)",
+        "parcel": "Parcel",
+        "dimensions": "Dimensions",
+        "weight": "Weight",
+        "contents": "Contents"
       }
     },
     "customers": {

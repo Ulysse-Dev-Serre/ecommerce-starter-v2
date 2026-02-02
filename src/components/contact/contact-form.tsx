@@ -34,8 +34,8 @@ export function ContactForm() {
 
   if (isSubmitted) {
     return (
-      <div className="vibe-animate-fade-in vibe-flex-col-center vibe-text-center vibe-py-12">
-        <div className="vibe-icon-box-success vibe-mb-6 vibe-animate-zoom-in">
+      <div className="duration-500 vibe-flex-col-center text-center vibe-py-12">
+        <div className="vibe-icon-box-success mb-6 duration-500">
           <svg
             className="vibe-w-8 vibe-h-8"
             fill="none"
@@ -50,11 +50,13 @@ export function ContactForm() {
             />
           </svg>
         </div>
-        <h3 className="vibe-text-xl-bold vibe-mb-2">{t('successTitle')}</h3>
-        <p className="vibe-text-muted">{t('successMessage')}</p>
+        <h3 className="text-xl font-bold text-foreground vibe-mb-2">
+          {t('successTitle')}
+        </h3>
+        <p className="text-muted-foreground">{t('successMessage')}</p>
         <button
           onClick={() => setIsSubmitted(false)}
-          className="vibe-button-secondary vibe-mt-8 vibe-btn-sm-h10"
+          className="vibe-button-secondary mt-8 h-10 px-6"
         >
           {t('sendAnother')}
         </button>
@@ -63,9 +65,12 @@ export function ContactForm() {
   }
 
   return (
-    <form className="vibe-stack-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="vibe-stack-y-2">
-        <label htmlFor="name" className="vibe-text-xs-bold-muted-caps">
+        <label
+          htmlFor="name"
+          className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
+        >
           {t('formName')}
         </label>
         <input
@@ -80,7 +85,10 @@ export function ContactForm() {
       </div>
 
       <div className="vibe-stack-y-2">
-        <label htmlFor="email" className="vibe-text-xs-bold-muted-caps">
+        <label
+          htmlFor="email"
+          className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
+        >
           {t('formEmail')}
         </label>
         <input
@@ -95,14 +103,17 @@ export function ContactForm() {
       </div>
 
       <div className="vibe-stack-y-2">
-        <label htmlFor="message" className="vibe-text-xs-bold-muted-caps">
+        <label
+          htmlFor="message"
+          className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
+        >
           {t('formMessage')}
         </label>
         <textarea
           id="message"
           name="message"
           rows={5}
-          className="vibe-input h-auto vibe-pt-2 resize-none"
+          className="vibe-input h-auto pt-2 resize-none"
           placeholder={t('formMessagePlaceholder')}
           disabled={isSubmitting}
           required
@@ -111,11 +122,11 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="vibe-button-primary vibe-btn-full-lg"
+        className="vibe-button-primary w-full h-12"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
-          <Loader2 className="vibe-icon-sm vibe-icon-spin" />
+          <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
           t('formSubmit')
         )}

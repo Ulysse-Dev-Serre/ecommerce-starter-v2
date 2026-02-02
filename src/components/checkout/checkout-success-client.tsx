@@ -116,19 +116,23 @@ export function CheckoutSuccessClient({
   if (error) {
     return (
       <div
-        className={`vibe-full-page-center vibe-animate-fade-in ${VIBE_ANIMATION_FADE_IN}`}
+        className={`min-h-[60vh] flex items-center justify-center p-6 duration-500 ${VIBE_ANIMATION_FADE_IN}`}
       >
-        <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">
-          <div className="vibe-status-icon-box">
-            <AlertCircle className="vibe-icon-xxl vibe-text-error-soft" />
+        <div className="p-4 max-w-md flex-grow">
+          <div className="flex justify-center mb-6">
+            <AlertCircle className="h-16 w-16 text-error opacity-80" />
           </div>
-          <h1 className="vibe-status-title">{t('error')}</h1>
-          <p className="vibe-status-desc">{error}</p>
+          <h1 className="text-2xl font-bold text-foreground mb-4">
+            {t('error')}
+          </h1>
+          <p className="text-muted-foreground mb-8 text-lg font-medium">
+            {error}
+          </p>
           <Link
             href={`/${locale}/shop`}
-            className="vibe-button-primary vibe-btn-sm-h10 vibe-px-8"
+            className="vibe-button-primary h-10 px-6 px-8"
           >
-            <ShoppingBag className="vibe-icon-sm" />
+            <ShoppingBag className="h-5 w-5" />
             {t('backToShop')}
           </Link>
         </div>
@@ -139,26 +143,26 @@ export function CheckoutSuccessClient({
   // UI POUR LES INVITÉS (GUESTS)
   if (isGuestSuccess) {
     return (
-      <div className="vibe-full-page-center vibe-animate-fade-in">
-        <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">
-          <div className="vibe-status-icon-box vibe-relative">
+      <div className="min-h-[60vh] flex items-center justify-center p-6 duration-500">
+        <div className="p-4 max-w-md flex-grow">
+          <div className="flex justify-center mb-6 relative">
             <CheckCircle
-              className={`vibe-icon-xxxl vibe-text-success vibe-animate-zoom-in ${VIBE_ANIMATION_ZOOM_IN}`}
+              className={`h-20 w-20 text-success duration-500 ${VIBE_ANIMATION_ZOOM_IN}`}
             />
           </div>
 
-          <h2 className="vibe-status-title vibe-text-h1-status">
+          <h2 className="text-2xl font-bold text-foreground mb-4 text-3xl tracking-tight font-bold text-foreground">
             {t('title')}
           </h2>
 
-          <p className="vibe-status-desc vibe-text-p-status">
+          <p className="text-muted-foreground mb-8 text-lg font-medium text-xl text-muted-foreground">
             {t('guestMessage')}
           </p>
 
-          <div className="vibe-flex vibe-flex-col vibe-gap-4 vibe-w-full vibe-max-w-xs vibe-mt-6">
+          <div className="vibe-flex flex flex-col gap-4 vibe-w-full vibe-max-w-xs vibe-mt-6">
             <a
               href="mailto:"
-              className="vibe-button-primary vibe-btn-full-lg vibe-flex vibe-items-center vibe-justify-center vibe-gap-2"
+              className="vibe-button-primary w-full h-12 vibe-flex vibe-items-center vibe-justify-center gap-2"
             >
               <Mail className="vibe-w-5 vibe-h-5" />
               {t('checkEmail')}
@@ -166,7 +170,7 @@ export function CheckoutSuccessClient({
 
             <Link
               href={`/${locale}/shop`}
-              className="vibe-button-secondary vibe-btn-full-lg vibe-flex vibe-items-center vibe-justify-center vibe-gap-2"
+              className="vibe-button-secondary w-full h-12 vibe-flex vibe-items-center vibe-justify-center gap-2"
             >
               <ShoppingBag className="vibe-w-5 vibe-h-5" />
               {t('backToShop')}
@@ -179,28 +183,28 @@ export function CheckoutSuccessClient({
 
   // UI DE CHARGEMENT / REDIRECTION (Authentifiés)
   return (
-    <div className="vibe-full-page-center vibe-animate-fade-in">
-      <div className="vibe-status-container vibe-max-w-md vibe-flex-grow">
-        <div className="vibe-status-icon-box vibe-relative">
+    <div className="min-h-[60vh] flex items-center justify-center p-6 duration-500">
+      <div className="p-4 max-w-md flex-grow">
+        <div className="flex justify-center mb-6 relative">
           {orderConfirmed ? (
             <CheckCircle
-              className={`vibe-icon-xxxl vibe-text-success vibe-animate-zoom-in ${VIBE_ANIMATION_ZOOM_IN}`}
+              className={`h-20 w-20 text-success duration-500 ${VIBE_ANIMATION_ZOOM_IN}`}
             />
           ) : (
-            <Loader2 className="vibe-icon-xxxl vibe-text-primary vibe-icon-spin" />
+            <Loader2 className="h-20 w-20 text-primary animate-spin" />
           )}
         </div>
 
-        <h2 className="vibe-status-title vibe-text-h1-status">
+        <h2 className="text-2xl font-bold text-foreground mb-4 text-3xl tracking-tight font-bold text-foreground">
           {orderConfirmed ? t('redirecting') : t('processing')}
         </h2>
 
-        <p className="vibe-status-desc vibe-text-p-status">
+        <p className="text-muted-foreground mb-8 text-lg font-medium text-xl text-muted-foreground">
           {orderConfirmed ? t('title') : t('waitMessage')}
         </p>
 
         {!orderConfirmed && sessionId && (
-          <div className="vibe-status-code-box">
+          <div className="bg-muted/50 rounded-lg p-3 text-xs font-mono text-muted-foreground border border-border/50 break-all">
             {t('sessionId')}: {sessionId}
           </div>
         )}

@@ -12,26 +12,28 @@ export function ContactInfo({ locale }: ContactInfoProps) {
   const t = useTranslations('contact');
 
   return (
-    <div className="vibe-animate-slide-in-left vibe-stack-y-10">
+    <div className="duration-700 space-y-10">
       <div>
-        <h2 className="vibe-text-price-xl vibe-mb-4 vibe-tracking-tight">
+        <h2 className="text-2xl font-bold text-foreground mb-4 tracking-tight">
           {t('title')}
         </h2>
-        <p className="vibe-text-p-lg">{t('description')}</p>
+        <p className="text-lg text-muted-foreground leading-relaxed">
+          {t('description')}
+        </p>
       </div>
 
-      <div className="vibe-stack-y-8">
+      <div className="space-y-8">
         <div className="vibe-flex-items-start-gap-5">
-          <div className="vibe-icon-box-primary vibe-mt-1">
-            <Mail className="vibe-icon-md" />
+          <div className="bg-primary/10 text-primary p-3 rounded-lg border border-primary/20 mt-1">
+            <Mail className="h-16 w-16" />
           </div>
           <div>
-            <p className="vibe-text-xs-bold-muted-caps vibe-mb-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground vibe-mb-1">
               {t('emailLabel')}
             </p>
             <a
               href={`mailto:${SITE_EMAIL}`}
-              className="vibe-text-xl-bold hover:vibe-text-primary vibe-transition"
+              className="text-xl font-bold text-foreground hover:text-primary transition-all duration-300"
             >
               {SITE_EMAIL}
             </a>
@@ -39,32 +41,32 @@ export function ContactInfo({ locale }: ContactInfoProps) {
         </div>
 
         <div className="vibe-flex-items-start-gap-5">
-          <div className="vibe-icon-box-muted vibe-mt-1">
-            <MapPin className="vibe-icon-md" />
+          <div className="bg-muted text-foreground p-3 rounded-lg border border-border mt-1">
+            <MapPin className="h-16 w-16" />
           </div>
           <div>
-            <p className="vibe-text-xs-bold-muted-caps vibe-mb-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground vibe-mb-1">
               {t('addressLabel')}
             </p>
-            <p className="vibe-text-xl-bold whitespace-pre-line vibe-leading-snug">
+            <p className="text-xl font-bold text-foreground whitespace-pre-line leading-snug">
               {SITE_ADDRESS}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="vibe-pt-6">
+      <div className="pt-6">
         <Alert
           variant="info"
           title={t('refundTitle')}
-          className="vibe-bg-muted-soft vibe-border-border vibe-card-rounded-xl vibe-p-6"
+          className="bg-muted/30 vibe-border-border vibe-card-rounded-xl vibe-p-6"
         >
-          <div className="vibe-text-xs vibe-text-medium vibe-text-muted vibe-leading-relaxed">
+          <div className="vibe-text-xs font-medium text-muted-foreground leading-relaxed">
             {t.rich('refundText', {
               link: chunks => (
                 <Link
                   href={`/${locale}/orders`}
-                  className="vibe-text-bold vibe-text-foreground vibe-underline-primary vibe-hover-primary vibe-transition"
+                  className="font-bold text-foreground underline decoration-primary decoration-2 underline-offset-4 hover:text-primary transition-all duration-300"
                 >
                   {chunks}
                 </Link>
