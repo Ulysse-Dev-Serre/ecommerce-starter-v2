@@ -212,3 +212,42 @@ export type UpdateProductInput = z.infer<typeof UpdateProductSchema>;
 export type CreateVariantInput = z.infer<typeof CreateVariantSchema>;
 export type CreateVariantsInput = z.infer<typeof CreateVariantsSchema>;
 export type UpdateVariantInput = z.infer<typeof UpdateVariantSchema>;
+
+/**
+ * Schéma pour valider la récupération d'un produit par slug
+ */
+export const productSlugSchema = z.object({
+  id: z.string().min(1, 'Slug is required'),
+  language: z.enum(SUPPORTED_LOCALES).optional(),
+});
+
+export type ProductSlugInput = z.infer<typeof productSlugSchema>;
+
+/**
+ * Schéma pour valider la liste des produits (recherche, filtres, pagination)
+ */
+export const productSearchSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(PRODUCT_STATUSES).optional().default('ACTIVE'),
+  featured: z
+    .preprocess(
+      val =>
+        val === 'true' || val === true
+          ? true
+          : val === 'false' || val === false
+            ? false
+            : undefined,
+      z.boolean().optional()
+    )
+    .optional(),
+  search: z.string().optional(),
+  language: z.enum(SUPPORTED_LOCALES).optional(),
+  categorySlug: z.string().optional(),
+  sortBy: z
+    .enum(['createdAt', 'updatedAt', 'name', 'price'])
+    .default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+export type ProductSearchInput = z.infer<typeof productSearchSchema>;

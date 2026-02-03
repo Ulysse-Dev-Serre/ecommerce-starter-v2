@@ -29,7 +29,13 @@ async function previewLabelHandler(
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        payments: true,
+        items: {
+          include: {
+            variant: {
+              include: SHIPPING_VARIANT_INCLUDE,
+            },
+          },
+        },
       },
     });
 
@@ -37,25 +43,40 @@ async function previewLabelHandler(
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    const payment = order.payments.find(p => p.status === 'COMPLETED');
-    const metadata = payment?.transactionData
-      ? (payment.transactionData as any).metadata || {}
-      : {};
+    // Dynamic Rate Calculation
+    const mappingItems = order.items
+      .filter(item => item.variant)
+      .map(item => ({
+        variantId: item.variant!.id,
+        quantity: item.quantity,
+      }));
 
-    const rateId = metadata.shipping_rate_id;
+    const addressTo = order.shippingAddress as any;
 
-    if (!rateId) {
-      return NextResponse.json({ error: 'errorRates' }, { status: 400 });
+    // Use ShippingService.getShippingRates to match user flow logic (including filtering and currency)
+    const rates = await ShippingService.getShippingRates(undefined, {
+      addressTo,
+      items: mappingItems,
+    });
+
+    if (!rates || rates.length === 0) {
+      return NextResponse.json(
+        { error: 'No shipping rates found' },
+        { status: 404 }
+      );
     }
 
-    const rate = await getRate(rateId);
+    // Return the best rate (cheapest) by default for preview
+    const bestRate = rates[0];
 
     return NextResponse.json({
-      amount: rate.amount,
-      currency: rate.currency,
-      provider: rate.provider,
+      amount: bestRate.amount,
+      currency: bestRate.currency,
+      provider: bestRate.provider,
+      rateId: (bestRate as any).object_id || (bestRate as any).objectId, // Return ID for the POST
     });
   } catch (error: any) {
+    logger.error({ error, orderId }, 'Error calculating shipping rates');
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -84,7 +105,6 @@ async function purchaseLabelHandler(
       include: {
         user: true,
         shipments: true,
-        payments: true,
         items: {
           include: {
             variant: {
@@ -108,13 +128,16 @@ async function purchaseLabelHandler(
       );
     }
 
-    // Extract metadata from the successful payment
-    const payment = order.payments.find(p => p.status === 'COMPLETED');
-    const metadata = payment?.transactionData
-      ? (payment.transactionData as any).metadata || {}
-      : {};
+    // Parse body for optional rateId
+    let bodyRateId: string | undefined;
+    try {
+      const body = await request.json();
+      bodyRateId = body.rateId;
+    } catch {
+      // Body might be empty, ignore
+    }
 
-    let rateId = metadata.shipping_rate_id;
+    let rateId = bodyRateId;
 
     // RECALCULATION LOGIC: Use ShippingService if rate is missing or expired
     if (!rateId) {
@@ -123,23 +146,24 @@ async function purchaseLabelHandler(
         'No shipping rate found in metadata, recalculating with ShippingService...'
       );
 
-      const shippingItems: ShippingItem[] = order.items.map(item => ({
-        quantity: item.quantity,
-        variant: item.variant as any,
-      }));
+      const mappingItems = order.items
+        .filter(item => item.variant)
+        .map(item => ({
+          variantId: item.variant!.id,
+          quantity: item.quantity,
+        }));
 
       const addressTo = order.shippingAddress as any;
 
-      const { rates } = await ShippingService.calculateRates(
+      // Use ShippingService.getShippingRates to match user flow logic
+      const rates = await ShippingService.getShippingRates(undefined, {
         addressTo,
-        shippingItems
-      );
+        items: mappingItems,
+      });
 
       if (rates && rates.length > 0) {
         // Automatically pick the cheapest rate for the recalculation
-        const cheapestRate = rates.sort(
-          (a, b) => parseFloat(a.amount) - parseFloat(b.amount)
-        )[0];
+        const cheapestRate = rates[0];
         rateId =
           (cheapestRate as any).object_id ||
           (cheapestRate as any).objectId ||

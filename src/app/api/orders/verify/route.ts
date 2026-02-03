@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/core/db';
-import {
-  OptionalAuthContext,
-  withOptionalAuth,
-} from '@/lib/middleware/withAuth';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
+/**
+ * GET /api/orders/verify
+ * Vérifie l'existence d'une commande après paiement (Stripe redirect).
+ * Réservé aux utilisateurs connectés pour des raisons de sécurité.
+ */
 async function verifyOrderHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext
+  authContext: AuthContext
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
-  const { userId, anonymousId } = await resolveCartIdentity(authContext);
+  const userId = authContext.userId;
 
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get('session_id');
@@ -31,8 +32,7 @@ async function verifyOrderHandler(
     );
   }
 
-  // Search payment with ownership check
-  // We verify that the payment belongs to the authenticated user OR matches the anonymous session
+  // SECURITY: Search payment with strict ownership check
   const payment = await prisma.payment.findFirst({
     where: {
       OR: [
@@ -40,7 +40,9 @@ async function verifyOrderHandler(
         { transactionData: { path: ['id'], equals: identifier } },
       ],
       status: 'COMPLETED',
-      order: userId ? { userId } : { guestEmail: { not: null } }, // For guests, we rely on the identifier secret (PI ID)
+      order: {
+        userId: userId,
+      },
     },
     include: {
       order: {
@@ -48,25 +50,12 @@ async function verifyOrderHandler(
           orderNumber: true,
           id: true,
           createdAt: true,
-          userId: true,
         },
       },
     },
   });
 
   if (payment?.order) {
-    // If it's a user order, double check ownership
-    if (payment.order.userId && payment.order.userId !== userId) {
-      throw new AppError(
-        ErrorCode.FORBIDDEN,
-        'Unauthorized: Order ownership mismatch',
-        403
-      );
-    }
-
-    // For anonymous orders, we could check anonymousId in metadata if we want extra security
-    // but the paymentIntentId is already a secret known only to the purchaser.
-
     return NextResponse.json({
       exists: true,
       orderNumber: payment.order.orderNumber,
@@ -83,5 +72,5 @@ async function verifyOrderHandler(
 }
 
 export const GET = withError(
-  withOptionalAuth(withRateLimit(verifyOrderHandler, RateLimits.ORDER_VERIFY))
+  withAuth(withRateLimit(verifyOrderHandler, RateLimits.ORDER_VERIFY))
 );

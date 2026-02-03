@@ -6,9 +6,7 @@ import {
   shippingRequestSchema,
   ShippingRequestInput,
 } from '@/lib/validators/shipping';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { ShippingService } from '@/lib/services/shipping/shipping.service';
-import { ShippingRepository } from '@/lib/services/shipping/shipping.repository';
 
 /**
  * API Handler for fetching shipping rates.
@@ -20,43 +18,12 @@ async function handler(
   data: ShippingRequestInput
 ) {
   try {
-    const { addressTo, cartId: bodyCartId, items: bodyItems } = data;
+    const cartId = req.cookies.get('cartId')?.value || data.cartId;
 
-    // Standardize zip code
-    if (addressTo.zip) {
-      addressTo.zip = addressTo.zip.replace(/\s+/g, '');
-    }
+    // Delegate to Service (Mailbox Pattern)
+    const rates = await ShippingService.getShippingRates(cartId, data);
 
-    // Resolve cartId from cookie or body
-    let cartId = req.cookies.get('cartId')?.value;
-    if (!cartId && bodyCartId) {
-      cartId = bodyCartId;
-    }
-
-    // 1. Resolve shipping items (Enriched from Prisma via Repository)
-    const shippingItems = await ShippingRepository.resolveItems(
-      cartId,
-      bodyItems
-    );
-
-    if (shippingItems.length === 0) {
-      throw new AppError(
-        ErrorCode.SHIPPING_DATA_MISSING,
-        'No shipping items found.',
-        400
-      );
-    }
-
-    // 2. Fetch raw rates via 3D packing and Shippo
-    const { rates: rawRates } = await ShippingService.calculateRates(
-      addressTo,
-      shippingItems
-    );
-
-    // 3. Filter, convert currency and label the rates
-    const filteredRates = ShippingService.filterAndLabelRates(rawRates);
-
-    return NextResponse.json({ rates: filteredRates });
+    return NextResponse.json({ rates });
   } catch (error) {
     throw error;
   }

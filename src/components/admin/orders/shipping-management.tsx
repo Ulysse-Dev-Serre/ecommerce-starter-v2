@@ -51,6 +51,8 @@ export function ShippingManagement({
 
       const preview = await response.json();
       const realPrice = `${preview.amount} ${preview.currency}`;
+      const rateId = preview.rateId; // Capture new rateId from preview
+
       const customerPaid = shippingCost
         ? `${shippingCost} ${currency}`
         : t('na');
@@ -64,7 +66,7 @@ export function ShippingManagement({
       }
 
       // 3. Proceed with purchase
-      await purchaseOrderLabel(orderId);
+      await purchaseOrderLabel(orderId, rateId);
 
       alert(t('successPurchase'));
       router.refresh();

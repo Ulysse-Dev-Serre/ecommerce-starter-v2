@@ -6,20 +6,35 @@ import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getAllUsers } from '@/lib/services/users';
 
-// PROTECTED: Admin only
+import { userSearchSchema } from '@/lib/validators/user';
+
 async function getUsers(req: NextRequest): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
-  logger.info({ requestId, action: 'get_all_users' }, 'Fetching all users');
+  const requestId = req.headers.get('X-Request-ID') || crypto.randomUUID();
+  const { searchParams } = new URL(req.url);
 
-  // Potential improvement: Add pagination support to getAllUsers()
-  const users = await getAllUsers();
+  // Step 1: Validation
+  // Zod coerce automatically converts strings to numbers/booleans where required
+  const filters = userSearchSchema.parse({
+    page: searchParams.get('page'),
+    limit: searchParams.get('limit'),
+    search: searchParams.get('search'),
+    role: searchParams.get('role'),
+  });
 
-  // Explicitly return a Promise<NextResponse>
+  logger.info(
+    { requestId, action: 'get_all_users', filters },
+    'Fetching users'
+  );
+
+  // Step 2: Service Call
+  const result = await getAllUsers(filters);
+
+  // Distinct return logic for paginated list vs old flat list
   return NextResponse.json({
     success: true,
     requestId,
-    count: users.length,
-    users,
+    data: result.users,
+    pagination: result.pagination,
     timestamp: new Date().toISOString(),
   });
 }

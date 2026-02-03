@@ -35,7 +35,8 @@ export interface OrderDetailsWithData {
 export interface OrderWithIncludes {
   id: string;
   orderNumber: string;
-  userId: string;
+  userId: string | null;
+  guestEmail?: string | null;
   status: OrderStatus;
   currency: string;
   subtotalAmount: number;

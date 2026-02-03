@@ -7,6 +7,8 @@ import {
 } from '@/lib/repositories/order.repository';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { updateOrderStatus as updateOrderLogic } from '@/lib/services/payments/payment-refund.service';
+import { cache } from '@/lib/core/cache';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
 
 /**
  * Workflow de transition d'état valide
@@ -38,13 +40,15 @@ export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.CANCELLED]: [],
   [OrderStatus.REFUNDED]: [],
 };
-import { cache } from '@/lib/core/cache';
 
 /**
  * Récupère une commande par son ID
  * Vérifie que la commande appartient bien à l'utilisateur
  */
-export async function getOrderById(orderId: string, userId: string) {
+export async function getOrderById(
+  orderId: string,
+  userId: string
+): Promise<OrderWithIncludes> {
   const order = await orderRepository.findById(orderId);
 
   if (!order) {
@@ -59,7 +63,7 @@ export async function getOrderById(orderId: string, userId: string) {
     );
   }
 
-  return order;
+  return order as any as OrderWithIncludes;
 }
 
 /**

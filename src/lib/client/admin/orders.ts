@@ -30,11 +30,18 @@ export async function updateAdminOrderStatus(
 /**
  * Purchase a shipping label for an order
  */
-export async function purchaseOrderLabel(orderId: string) {
+/**
+ * Purchase a shipping label for an order
+ */
+export async function purchaseOrderLabel(orderId: string, rateId?: string) {
   const response = await fetch(
     API_ROUTES.ADMIN.ORDERS.PURCHASE_LABEL(orderId),
     {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ rateId }),
     }
   );
 

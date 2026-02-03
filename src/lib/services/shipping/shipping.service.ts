@@ -20,6 +20,8 @@ import { PackingService, PackableItem } from './packing.service';
 import { ShippingItem, ShippingRepository } from './shipping.repository';
 import { CustomsService } from './customs.service';
 
+import { ShippingRequestInput } from '@/lib/validators/shipping';
+
 export interface CalculateRatesResult {
   parcels: Parcel[];
   rates: ShippingRate[];
@@ -32,6 +34,45 @@ export interface CalculateRatesResult {
  * Decoupled from Persistence (Prisma) and Domain Logic (Customs, Packing).
  */
 export class ShippingService {
+  /**
+   * Main entry point for fetching shipping rates.
+   * Standardizes input, resolves items, calculates rates, and applying filtering.
+   */
+  static async getShippingRates(
+    cartId: string | undefined,
+    data: ShippingRequestInput
+  ): Promise<ShippingRate[]> {
+    const { addressTo, items: bodyItems } = data;
+
+    // Standardize zip code
+    if (addressTo.zip) {
+      addressTo.zip = addressTo.zip.replace(/\s+/g, '');
+    }
+
+    // 1. Resolve shipping items (Enriched from Prisma via Repository)
+    const shippingItems = await ShippingRepository.resolveItems(
+      cartId,
+      bodyItems
+    );
+
+    if (shippingItems.length === 0) {
+      throw new AppError(
+        ErrorCode.SHIPPING_DATA_MISSING,
+        'No shipping items found.',
+        400
+      );
+    }
+
+    // 2. Fetch raw rates via 3D packing and Shippo
+    const { rates: rawRates } = await this.calculateRates(
+      addressTo,
+      shippingItems
+    );
+
+    // 3. Filter, convert currency and label the rates
+    return this.filterAndLabelRates(rawRates);
+  }
+
   /**
    * Calculates shipping rates using 3D Packing and Shippo.
    * Orchestrates Repository, PackingService, and CustomsService.
@@ -47,6 +88,9 @@ export class ShippingService {
         400
       );
     }
+
+    // 0. Sanitize destination address (ensure no nulls from DB)
+    addressTo = this.validateAddress(addressTo, 'Destination Address');
 
     // Standardize zip code
     if (addressTo.zip) {
@@ -248,6 +292,11 @@ export class ShippingService {
         `Invalid address data from ${source}`,
         400
       );
+    }
+
+    // Map postalCode to zip if missing
+    if (!data.zip && data.postalCode) {
+      data.zip = data.postalCode;
     }
 
     const required = ['street1', 'city', 'country', 'zip', 'name'];

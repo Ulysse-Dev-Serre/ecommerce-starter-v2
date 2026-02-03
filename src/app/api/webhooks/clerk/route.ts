@@ -6,7 +6,12 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { processClerkWebhook } from '@/lib/services/webhooks';
+import {
+  userCreatedSchema,
+  userUpdatedSchema,
+  userDeletedSchema,
+} from '@/lib/validators/clerk-webhook';
+import { UserClerkService } from '@/lib/services/users/user-clerk.service';
 import { env } from '@/lib/core/env';
 
 const webhookSecret = env.CLERK_WEBHOOK_SECRET;
@@ -89,32 +94,41 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
       {
         action: 'webhook_signature_verified',
         eventType: evt.type,
-        userId: evt.data && 'id' in evt.data ? evt.data.id : undefined,
       },
-      'Webhook signature verified and parsed'
+      'Webhook signature verified'
     );
   } catch (error) {
     logger.error(
-      {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       'Webhook signature verification failed'
     );
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  // 5. Process the webhook event
+  // 5. Process the webhook event using Strict Validators
   try {
-    await processClerkWebhook(evt.type, evt.data as any);
+    const eventType = evt.type;
+    const eventData = evt.data;
 
-    logger.info(
-      {
-        action: 'webhook_processed_successfully',
-        eventType: evt.type,
-        userId: evt.data && 'id' in evt.data ? evt.data.id : undefined,
-      },
-      'Webhook processed successfully'
-    );
+    switch (eventType) {
+      case 'user.created':
+        await UserClerkService.handleUserCreated(
+          userCreatedSchema.parse(eventData)
+        );
+        break;
+      case 'user.updated':
+        await UserClerkService.handleUserUpdated(
+          userUpdatedSchema.parse(eventData)
+        );
+        break;
+      case 'user.deleted':
+        await UserClerkService.handleUserDeleted(
+          userDeletedSchema.parse(eventData)
+        );
+        break;
+      default:
+        logger.info({ eventType }, 'Unhandled webhook event type');
+    }
 
     return NextResponse.json({
       success: true,
@@ -131,12 +145,11 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
       'Failed to process webhook event'
     );
 
-    // Don't throw - return 200 to prevent Clerk retries for business logic errors
+    // Business logic errors (validation) should not trigger constant retries
     return NextResponse.json({
       success: false,
       error: 'Processing failed',
       eventType: evt.type,
-      timestamp: new Date().toISOString(),
     });
   }
 }

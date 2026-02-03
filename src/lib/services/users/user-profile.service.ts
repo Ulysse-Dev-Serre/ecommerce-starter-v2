@@ -8,23 +8,61 @@ import { UserWithBasicInfo } from '@/lib/types/domain/user';
  *
  * @returns Liste des utilisateurs triée par date de création (desc)
  */
-export async function getAllUsers(): Promise<UserWithBasicInfo[]> {
-  return prisma.user.findMany({
-    select: {
-      id: true,
-      clerkId: true,
-      email: true,
-      firstName: true,
-      lastName: true,
-      imageUrl: true,
-      role: true,
-      createdAt: true,
-      updatedAt: true,
+import { UserSearchInput } from '@/lib/validators/user';
+
+/**
+ * Récupère tous les utilisateurs avec filtres et pagination
+ * Utilisé pour l'admin user management
+ */
+export async function getAllUsers(options: Partial<UserSearchInput> = {}) {
+  const page = options.page || 1;
+  const limit = options.limit || 20;
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+
+  if (options.role) {
+    where.role = options.role;
+  }
+
+  if (options.search) {
+    where.OR = [
+      { firstName: { contains: options.search, mode: 'insensitive' } },
+      { lastName: { contains: options.search, mode: 'insensitive' } },
+      { email: { contains: options.search, mode: 'insensitive' } },
+    ];
+  }
+
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        clerkId: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        imageUrl: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.user.count({ where }),
+  ]);
+
+  return {
+    users,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  };
 }
 
 /**
