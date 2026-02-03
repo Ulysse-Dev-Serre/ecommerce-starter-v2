@@ -8,6 +8,9 @@ import {
 } from '@/lib/types/domain/payment';
 import { CheckoutCurrency, CheckoutItem } from '@/lib/types/domain/checkout';
 import Stripe from 'stripe';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { env } from '@/lib/core/env';
+import { SupportedCurrency } from '@/lib/config/site';
 
 /**
  * Crée un PaymentIntent Stripe
@@ -42,7 +45,11 @@ export async function createPaymentIntent(
   });
 
   if (variants.length !== items.length) {
-    throw new Error('Some variants not found');
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      'Some products were not found or are no longer available',
+      404
+    );
   }
 
   // 2. Calculer le montant total
@@ -51,7 +58,13 @@ export async function createPaymentIntent(
   // Calcul du sous-total des items
   items.forEach(item => {
     const variant = variants.find(v => v.id === item.variantId);
-    if (!variant) throw new Error(`Variant ${item.variantId} not found`);
+    if (!variant) {
+      throw new AppError(
+        ErrorCode.NOT_FOUND,
+        `Variant ${item.variantId} not found`,
+        404
+      );
+    }
 
     let pricing = variant.pricing.find(p => p.currency === currency);
     // Fallback simple si devise non trouvée
@@ -61,7 +74,13 @@ export async function createPaymentIntent(
       );
     }
 
-    if (!pricing) throw new Error(`Price not found for variant ${variant.sku}`);
+    if (!pricing) {
+      throw new AppError(
+        ErrorCode.NOT_FOUND,
+        `Price not found for variant ${variant.sku}`,
+        404
+      );
+    }
 
     totalAmount += Number(pricing.price) * item.quantity;
   });
@@ -131,44 +150,135 @@ export async function createPaymentIntent(
 }
 
 /**
- * Met à jour un PaymentIntent existant
- * Utilisé pour ajouter les frais de shipping après calcul
+ * Met à jour un PaymentIntent existant avec les frais de port et l'adresse.
+ * Gère également l'activation optionnelle de la taxe automatique Stripe.
  *
- * @param paymentIntentId - ID du PaymentIntent à mettre à jour
- * @param updates - Mises à jour à appliquer
+ * @param paymentIntentId - ID Stripe du PaymentIntent
+ * @param updates - Données de mise à jour (shipping cost, address, email)
  * @returns PaymentIntent mis à jour
  */
 export async function updatePaymentIntent(
   paymentIntentId: string,
-  updates: {
-    amount?: number;
-    shipping?: Stripe.PaymentIntentUpdateParams.Shipping;
-    metadata?: Record<string, string>;
+  data: {
+    shippingAmount: string;
+    currency?: SupportedCurrency;
+    shippingDetails?: {
+      name: string;
+      phone: string;
+      email?: string;
+      street1: string;
+      street2?: string | null;
+      city: string;
+      state: string;
+      zip: string;
+      country: string;
+    };
   }
 ): Promise<Stripe.PaymentIntent> {
-  logger.info(
-    {
-      action: 'payment_intent_update',
-      paymentIntentId,
-      amount: updates.amount,
+  const {
+    paymentIntentId: id,
+    shippingAmount,
+    currency,
+    shippingDetails,
+  } = {
+    ...data,
+    paymentIntentId,
+  };
+
+  // 1. Récupérer l'intent courant pour avoir le sous-total
+  const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+  const resolvedCurrency = (currency ||
+    intent.currency.toUpperCase()) as SupportedCurrency;
+
+  // Calcul du sous-total (depuis les metadata ou retrocalcul)
+  const subtotalStr = intent.metadata.subtotal;
+  let subtotal = 0;
+
+  if (subtotalStr) {
+    subtotal = Number(subtotalStr);
+  } else {
+    const previousShipping = intent.metadata.shipping_cost
+      ? Number(intent.metadata.shipping_cost)
+      : 0;
+    const previousShippingCents = toStripeAmount(
+      previousShipping.toString(),
+      resolvedCurrency
+    );
+    subtotal = intent.amount - previousShippingCents;
+  }
+
+  const shippingAmountCents = toStripeAmount(shippingAmount, resolvedCurrency);
+  const newTotalCents = subtotal + shippingAmountCents;
+
+  // 2. Préparer le payload
+  const updatePayload: Stripe.PaymentIntentUpdateParams = {
+    amount: newTotalCents,
+    metadata: {
+      ...intent.metadata,
+      shipping_cost: shippingAmount,
+      subtotal: subtotal.toString(),
     },
-    'Updating Payment Intent'
+  };
+
+  if (shippingDetails) {
+    updatePayload.shipping = {
+      name: shippingDetails.name,
+      phone: shippingDetails.phone,
+      address: {
+        line1: shippingDetails.street1,
+        line2: shippingDetails.street2 || undefined,
+        city: shippingDetails.city,
+        state: shippingDetails.state,
+        postal_code: shippingDetails.zip,
+        country: shippingDetails.country,
+      },
+    };
+
+    if (shippingDetails.email) {
+      updatePayload.receipt_email = shippingDetails.email;
+    }
+  }
+
+  // 3. Appliquer la mise à jour (avec fallback Taxe)
+  logger.info(
+    { paymentIntentId, amount: newTotalCents },
+    'Updating PaymentIntent'
   );
 
-  const paymentIntent = await stripe.paymentIntents.update(paymentIntentId, {
-    amount: updates.amount,
-    shipping: updates.shipping,
-    metadata: updates.metadata,
-  });
+  let updatedIntent: Stripe.PaymentIntent;
 
-  logger.info(
-    {
-      action: 'payment_intent_updated',
-      paymentIntentId,
-      newAmount: paymentIntent.amount,
-    },
-    'Payment Intent updated successfully'
-  );
+  try {
+    if (env.STRIPE_AUTOMATIC_TAX) {
+      try {
+        updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
+          ...updatePayload,
+          automatic_tax: { enabled: true },
+        } as any);
+      } catch (taxError) {
+        logger.warn(
+          { error: taxError },
+          'Stripe Tax activation failed, falling back'
+        );
+        updatedIntent = await stripe.paymentIntents.update(
+          paymentIntentId,
+          updatePayload
+        );
+      }
+    } else {
+      updatedIntent = await stripe.paymentIntents.update(
+        paymentIntentId,
+        updatePayload
+      );
+    }
+  } catch (error) {
+    throw new AppError(
+      ErrorCode.PAYMENT_FAILED,
+      'Failed to update payment intent',
+      500,
+      { originalError: error }
+    );
+  }
 
-  return paymentIntent;
+  return updatedIntent;
 }

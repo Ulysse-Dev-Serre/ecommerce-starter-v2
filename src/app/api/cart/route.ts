@@ -1,7 +1,5 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import {
   OptionalAuthContext,
@@ -16,67 +14,30 @@ async function getCartHandler(
   request: NextRequest,
   authContext: OptionalAuthContext
 ): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
 
-  // Résoudre l'identité (User ou Guest)
+  // Resolve identity
   const { userId, anonymousId, newAnonymousId } = await resolveCartIdentity(
     authContext,
-    true // Créer un ID anonyme si nécessaire
-  );
-
-  logger.info(
-    {
-      requestId,
-      action: 'get_cart',
-      userId: userId ?? null,
-      anonymousId: anonymousId ?? null,
-    },
-    'Fetching cart'
+    true
   );
 
   const cart = await getOrCreateCart(userId, anonymousId);
 
-  logger.info(
-    {
-      requestId,
-      action: 'cart_fetched_successfully',
-      cartId: cart.id,
-      itemsCount: cart.items.length,
-    },
-    `Cart retrieved with ${cart.items.length} items`
-  );
+  const response = NextResponse.json({
+    success: true,
+    requestId,
+    data: cart,
+    timestamp: new Date().toISOString(),
+  });
 
-  const response = NextResponse.json(
-    {
-      success: true,
-      requestId,
-      data: cart,
-      timestamp: new Date().toISOString(),
-    },
-    {
-      headers: {
-        'X-Request-ID': requestId,
-      },
-    }
-  );
-
-  // Set cookie si nouvel ID anonyme créé
   if (newAnonymousId) {
     response.cookies.set(CART_COOKIE_NAME, newAnonymousId, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60, // 30 jours
+      maxAge: 30 * 24 * 60 * 60,
     });
-
-    logger.info(
-      {
-        requestId,
-        action: 'anonymous_id_created',
-        anonymousId: newAnonymousId,
-      },
-      'Created anonymous cart ID'
-    );
   }
 
   return response;

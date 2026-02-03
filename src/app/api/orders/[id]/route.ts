@@ -53,38 +53,23 @@ async function getOrderHandler(
   authContext: AuthContext,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const { id: orderId } = await params;
   const userId = authContext.userId;
 
-  if (!userId) {
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    );
-  }
-
   logger.info(
-    {
-      requestId,
-      action: 'get_order',
-      orderId,
-      userId,
-    },
+    { requestId, action: 'get_order', orderId, userId },
     'Fetching order for user'
   );
 
-  // Le service gère déjà la vérification d'appartenance et lance une erreur si non trouvé/autorisé
+  // The service already handles ownership verification and throws AppError if needed
   const order = await getOrderById(orderId, userId);
 
-  return NextResponse.json(
-    {
-      success: true,
-      requestId,
-      data: mapOrderResponse(order),
-    },
-    { status: 200 }
-  );
+  return NextResponse.json({
+    success: true,
+    requestId,
+    data: mapOrderResponse(order),
+  });
 }
 
 export const GET = withError(

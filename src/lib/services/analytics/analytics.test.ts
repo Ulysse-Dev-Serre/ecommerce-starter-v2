@@ -10,6 +10,12 @@ vi.mock('@/lib/core/db', () => ({
     },
     analyticsEvent: {
       create: vi.fn(),
+      count: vi.fn(),
+      groupBy: vi.fn(),
+    },
+    order: {
+      count: vi.fn(),
+      groupBy: vi.fn(),
     },
   },
 }));
@@ -102,6 +108,53 @@ describe('AnalyticsService', () => {
 
       await expect(AnalyticsService.trackEvent(mockData)).rejects.toThrow(
         'DB Error'
+      );
+    });
+  });
+
+  describe('getAnalyticsSummary', () => {
+    it('should fetch and aggregate data correctly', async () => {
+      vi.mocked(prisma.analyticsEvent.count).mockResolvedValue(10);
+      vi.mocked(prisma.order.count).mockResolvedValue(5);
+      vi.mocked(prisma.order.groupBy).mockResolvedValue([
+        {
+          utmSource: 'google',
+          _count: { _all: 2 },
+          _sum: { totalAmount: 100 },
+        },
+      ] as any);
+      vi.mocked(prisma.analyticsEvent.groupBy).mockResolvedValue([
+        { utmSource: 'google', _count: { _all: 10 } },
+      ] as any);
+
+      const result = await AnalyticsService.getAnalyticsSummary(30);
+
+      expect(prisma.analyticsEvent.count).toHaveBeenCalledTimes(4);
+      expect(prisma.order.count).toHaveBeenCalled();
+      expect(prisma.order.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          by: ['utmSource'],
+        })
+      );
+      expect(prisma.analyticsEvent.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          by: ['utmSource'],
+        })
+      );
+
+      expect(result.funnel.sessions).toBe(10);
+      expect(result.funnel.purchases).toBe(5);
+      expect(result.sourceVisitors).toHaveLength(1);
+      expect(result.sourceStats).toHaveLength(1);
+    });
+
+    it('should handle errors during data fetching', async () => {
+      vi.mocked(prisma.analyticsEvent.count).mockRejectedValue(
+        new Error('Fetch failed')
+      );
+
+      await expect(AnalyticsService.getAnalyticsSummary()).rejects.toThrow(
+        'Fetch failed'
       );
     });
   });

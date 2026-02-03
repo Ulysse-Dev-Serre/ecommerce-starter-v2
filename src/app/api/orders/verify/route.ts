@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/core/db';
-import { logger } from '@/lib/core/logger';
-import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import {
+  OptionalAuthContext,
+  withOptionalAuth,
+} from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { resolveCartIdentity } from '@/lib/services/cart/identity';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 async function verifyOrderHandler(
   request: NextRequest,
-  authContext: AuthContext
+  authContext: OptionalAuthContext
 ): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const { userId, anonymousId } = await resolveCartIdentity(authContext);
+
   const { searchParams } = new URL(request.url);
   const sessionId = searchParams.get('session_id');
   const paymentIntentId = searchParams.get('payment_intent_id');
@@ -18,112 +24,64 @@ async function verifyOrderHandler(
   const identifier = sessionId || paymentIntentId;
 
   if (!identifier) {
-    return NextResponse.json(
-      { error: 'session_id or payment_intent_id is required' },
-      { status: 400 }
+    throw new AppError(
+      ErrorCode.INVALID_INPUT,
+      'session_id or payment_intent_id is required',
+      400
     );
   }
 
-  logger.info(
-    {
-      requestId,
-      identifier,
-      userId: authContext.userId,
+  // Search payment with ownership check
+  // We verify that the payment belongs to the authenticated user OR matches the anonymous session
+  const payment = await prisma.payment.findFirst({
+    where: {
+      OR: [
+        { externalId: { contains: identifier } },
+        { transactionData: { path: ['id'], equals: identifier } },
+      ],
+      status: 'COMPLETED',
+      order: userId ? { userId } : { guestEmail: { not: null } }, // For guests, we rely on the identifier secret (PI ID)
     },
-    'Verifying order for session'
-  );
-
-  try {
-    // SECURITY: Search payment with ownership check
-    // We strictly verify that the payment belongs to the authenticated user
-    const payment = await prisma.payment.findFirst({
-      where: {
-        OR: [
-          { externalId: { contains: identifier } },
-          { transactionData: { path: ['id'], equals: identifier } },
-        ],
-        status: 'COMPLETED',
-        order: {
-          userId: authContext.userId,
+    include: {
+      order: {
+        select: {
+          orderNumber: true,
+          id: true,
+          createdAt: true,
+          userId: true,
         },
       },
-      include: {
-        order: {
-          select: {
-            orderNumber: true,
-            id: true,
-            createdAt: true,
-            userId: true,
-          },
-        },
-      },
-    });
+    },
+  });
 
-    if (payment?.order) {
-      // Defense in depth: Verify ownership again (though query filtered it)
-      if (payment.order.userId !== authContext.userId) {
-        logger.warn(
-          {
-            requestId,
-            sessionId,
-            orderUserId: payment.order.userId,
-            requestUserId: authContext.userId,
-            reason: 'Ownership mismatch (Post-query check)',
-          },
-          'Security: Attempted unauthorized order access'
-        );
-        return NextResponse.json({ exists: false }, { status: 403 });
-      }
-
-      logger.info(
-        {
-          requestId,
-          sessionId,
-          orderNumber: payment.order.orderNumber,
-          userId: authContext.userId,
-        },
-        'Order found for session'
+  if (payment?.order) {
+    // If it's a user order, double check ownership
+    if (payment.order.userId && payment.order.userId !== userId) {
+      throw new AppError(
+        ErrorCode.FORBIDDEN,
+        'Unauthorized: Order ownership mismatch',
+        403
       );
-
-      return NextResponse.json({
-        exists: true,
-        orderNumber: payment.order.orderNumber,
-        orderId: payment.order.id,
-        createdAt: payment.order.createdAt,
-      });
     }
 
-    logger.info(
-      {
-        requestId,
-        sessionId,
-      },
-      'Order not found for session'
-    );
+    // For anonymous orders, we could check anonymousId in metadata if we want extra security
+    // but the paymentIntentId is already a secret known only to the purchaser.
 
     return NextResponse.json({
-      exists: false,
+      exists: true,
+      orderNumber: payment.order.orderNumber,
+      orderId: payment.order.id,
+      createdAt: payment.order.createdAt,
+      requestId,
     });
-  } catch (error) {
-    logger.error(
-      {
-        requestId,
-        sessionId,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      'Failed to verify order'
-    );
-
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error ? error.message : 'Failed to verify order',
-      },
-      { status: 500 }
-    );
   }
+
+  return NextResponse.json({
+    exists: false,
+    requestId,
+  });
 }
 
 export const GET = withError(
-  withRateLimit(withAuth(verifyOrderHandler), RateLimits.ORDER_VERIFY)
+  withOptionalAuth(withRateLimit(verifyOrderHandler, RateLimits.ORDER_VERIFY))
 );

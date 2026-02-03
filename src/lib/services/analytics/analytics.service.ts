@@ -48,4 +48,67 @@ export class AnalyticsService {
       throw error;
     }
   }
+
+  /**
+   * Get analytics summary for a given period
+   */
+  static async getAnalyticsSummary(days: number = 30) {
+    try {
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+
+      // 1. Fetch Funnel Data (Analytics Events)
+      const [sessions, productViews, cartAdds, checkouts] = await Promise.all([
+        prisma.analyticsEvent.count({
+          where: { eventType: 'page_view', createdAt: { gte: startDate } },
+        }),
+        prisma.analyticsEvent.count({
+          where: { eventType: 'view_item', createdAt: { gte: startDate } },
+        }),
+        prisma.analyticsEvent.count({
+          where: { eventType: 'add_to_cart', createdAt: { gte: startDate } },
+        }),
+        prisma.analyticsEvent.count({
+          where: { eventType: 'begin_checkout', createdAt: { gte: startDate } },
+        }),
+      ]);
+
+      // 2. Fetch Purchase Data (Orders)
+      const purchases = await prisma.order.count({
+        where: {
+          createdAt: { gte: startDate },
+          status: { not: 'CANCELLED' },
+        },
+      });
+
+      // 3. Fetch Source Data (UTM Attribution)
+      const sourceStats = await prisma.order.groupBy({
+        by: ['utmSource'],
+        _count: { _all: true },
+        _sum: { totalAmount: true },
+        where: { createdAt: { gte: startDate } },
+      });
+
+      const sourceVisitors = await prisma.analyticsEvent.groupBy({
+        by: ['utmSource'],
+        _count: { _all: true },
+        where: { eventType: 'page_view', createdAt: { gte: startDate } },
+      });
+
+      return {
+        funnel: {
+          sessions,
+          productViews,
+          cartAdds,
+          checkouts,
+          purchases,
+        },
+        sourceVisitors,
+        sourceStats,
+      };
+    } catch (error) {
+      logger.error({ error, days }, 'Failed to fetch analytics summary');
+      throw error;
+    }
+  }
 }

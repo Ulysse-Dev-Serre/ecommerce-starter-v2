@@ -4,6 +4,9 @@ Cette section regroupe tous les scripts, tests et utilitaires du projet.
 
 ## Architecture de Tests
 
+### 0. [Workflow de Refactorisation](./refactor-workflow.md)
+Guide étape par étape pour migrer une route vers le pattern **Service/Validator/Vitest**.
+
 > [!WARNING]
 > Les tests d'intégration sont actuellement en cours de migration de JavaScript vers **TypeScript**. Les anciens tests `.js` dans `tests/integration` ne sont plus exécutés par le nouveau runner Vitest.
 

@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
@@ -15,6 +14,7 @@ import {
   UpdateCartLineInput,
 } from '@/lib/validators/cart';
 import { resolveCartIdentity } from '@/lib/services/cart/identity';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 async function updateCartLineHandler(
   request: NextRequest,
@@ -22,103 +22,20 @@ async function updateCartLineHandler(
   authContext: OptionalAuthContext,
   data: UpdateCartLineInput
 ): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const { id: cartItemId } = await context.params;
-  const { quantity } = data;
 
   const { userId, anonymousId } = await resolveCartIdentity(authContext);
 
-  logger.info(
-    {
-      requestId,
-      action: 'update_cart_line',
-      cartItemId,
-      quantity,
-      userId: userId ?? null,
-      anonymousId: anonymousId ?? null,
-    },
-    'Updating cart line quantity'
-  );
+  const cart = await updateCartLine(cartItemId, data, userId, anonymousId);
 
-  try {
-    const cart = await updateCartLine(
-      cartItemId,
-      { quantity },
-      userId,
-      anonymousId
-    );
-
-    logger.info(
-      {
-        requestId,
-        action: 'cart_line_updated_successfully',
-        cartItemId,
-        cartId: cart.id,
-      },
-      'Cart line updated successfully'
-    );
-
-    return NextResponse.json(
-      {
-        success: true,
-        requestId,
-        data: cart,
-        message: 'Cart line updated',
-        timestamp: new Date().toISOString(),
-      },
-      {
-        headers: {
-          'X-Request-ID': requestId,
-        },
-      }
-    );
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-
-    logger.error(
-      {
-        requestId,
-        action: 'update_cart_line_failed',
-        error: errorMessage,
-        cartItemId,
-      },
-      'Failed to update cart line'
-    );
-
-    if (
-      errorMessage.includes('not found') ||
-      errorMessage.includes('Unauthorized')
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: errorMessage.includes('Unauthorized')
-            ? 'Unauthorized'
-            : 'Not found',
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-        },
-        { status: errorMessage.includes('Unauthorized') ? 403 : 404 }
-      );
-    }
-
-    if (errorMessage.includes('stock')) {
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: 'Insufficient stock',
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
-    }
-
-    throw error;
-  }
+  return NextResponse.json({
+    success: true,
+    requestId,
+    data: cart,
+    message: 'Cart line updated',
+    timestamp: new Date().toISOString(),
+  });
 }
 
 async function removeCartLineHandler(
@@ -126,86 +43,21 @@ async function removeCartLineHandler(
   context: { params: Promise<{ id: string }> },
   authContext: OptionalAuthContext
 ): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const { id: cartItemId } = await context.params;
 
   const { userId, anonymousId } = await resolveCartIdentity(authContext);
 
-  logger.info(
-    {
-      requestId,
-      action: 'remove_cart_line',
-      cartItemId,
-      userId: userId ?? null,
-      anonymousId: anonymousId ?? null,
-    },
-    'Removing cart line'
-  );
+  const cart = await removeCartLine(cartItemId, userId, anonymousId);
 
-  try {
-    const cart = await removeCartLine(cartItemId, userId, anonymousId);
-
-    logger.info(
-      {
-        requestId,
-        action: 'cart_line_removed_successfully',
-        cartItemId,
-        cartId: cart.id,
-      },
-      'Cart line removed successfully'
-    );
-
-    return NextResponse.json(
-      {
-        success: true,
-        requestId,
-        data: cart,
-        message: 'Cart line removed',
-        timestamp: new Date().toISOString(),
-      },
-      {
-        headers: {
-          'X-Request-ID': requestId,
-        },
-      }
-    );
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-
-    logger.error(
-      {
-        requestId,
-        action: 'remove_cart_line_failed',
-        error: errorMessage,
-        cartItemId,
-      },
-      'Failed to remove cart line'
-    );
-
-    if (
-      errorMessage.includes('not found') ||
-      errorMessage.includes('Unauthorized')
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: errorMessage.includes('Unauthorized')
-            ? 'Unauthorized'
-            : 'Not found',
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-        },
-        { status: errorMessage.includes('Unauthorized') ? 403 : 404 }
-      );
-    }
-
-    throw error;
-  }
+  return NextResponse.json({
+    success: true,
+    requestId,
+    data: cart,
+    message: 'Cart line removed',
+    timestamp: new Date().toISOString(),
+  });
 }
-
-import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const PUT = withError(
   withOptionalAuth(
@@ -215,6 +67,7 @@ export const PUT = withError(
     )
   )
 );
+
 export const DELETE = withError(
   withOptionalAuth(withRateLimit(removeCartLineHandler, RateLimits.CART_WRITE))
 );

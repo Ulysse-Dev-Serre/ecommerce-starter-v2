@@ -48,6 +48,8 @@ export function formatPrice(
 
   if (!showCurrencyCode) {
     options.currencyDisplay = 'symbol';
+  } else {
+    options.currencyDisplay = 'code';
   }
 
   const formatted = new Intl.NumberFormat(locale, options).format(

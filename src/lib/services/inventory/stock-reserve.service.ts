@@ -2,6 +2,7 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { StockItem } from '@/lib/types/domain/inventory';
 import { checkStockAvailability } from './stock-check.service';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
  * Réserve du stock pour un ensemble d'items
@@ -18,8 +19,10 @@ export async function reserveStock(items: StockItem[]): Promise<void> {
     );
 
     if (!available) {
-      throw new Error(
-        `Insufficient stock for variant ${item.variantId}. Requested: ${item.quantity}`
+      throw new AppError(
+        ErrorCode.INSUFFICIENT_STOCK,
+        `Insufficient stock for variant ${item.variantId}. Requested: ${item.quantity}`,
+        400
       );
     }
 

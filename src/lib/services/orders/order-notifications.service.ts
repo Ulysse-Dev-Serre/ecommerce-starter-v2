@@ -353,3 +353,53 @@ export async function sendStatusChangeEmail(
       break;
   }
 }
+
+/**
+ * Envoie une alerte admin pour une demande de remboursement
+ */
+export async function sendRefundRequestAlert(params: {
+  orderNumber: string;
+  customerName: string;
+  customerEmail: string;
+  reason: string;
+  hasAttachment: boolean;
+  attachments?: any[];
+}) {
+  const adminEmail = env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  try {
+    const { default: RefundRequestAdminEmail } = await import(
+      '@/components/emails/refund-request-admin'
+    );
+
+    const emailHtml = await render(
+      RefundRequestAdminEmail({
+        orderNumber: params.orderNumber,
+        customerName: params.customerName,
+        customerEmail: params.customerEmail,
+        reason: params.reason,
+        imageUrl: params.hasAttachment ? 'Attached' : undefined,
+        locale: env.ADMIN_LOCALE || 'fr',
+      })
+    );
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: adminEmail,
+      subject: `⚠️ Refund Request - Order ${params.orderNumber}`,
+      html: emailHtml,
+      attachments: params.attachments,
+    });
+
+    logger.info(
+      { orderNumber: params.orderNumber },
+      'Refund request email sent to admin'
+    );
+  } catch (error) {
+    logger.error(
+      { error, orderNumber: params.orderNumber },
+      'Failed to send refund request email'
+    );
+  }
+}

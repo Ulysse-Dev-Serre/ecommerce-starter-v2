@@ -6,15 +6,15 @@ Ce document sert de guide technique pour comprendre comment le tracking a été 
 
 Pour comprendre ou modifier le tracking, voici les fichiers clés :
 
-- **Le Cerveau (`src/lib/analytics/tracker.ts`)** : Contient les fonctions `trackEvent` (pour envoyer une donnée) et `captureAndSaveUTM` (pour lire l'URL).
-- **Le Capteur Global (`src/components/analytics/AnalyticsTracker.tsx`)** : Un composant invisible dans le layout qui s'exécute à chaque changement de page.
-- **Le Réceptionniste (`src/app/api/analytics/events/route.ts`)** : L'API qui reçoit les données du navigateur et les enregistre.
+- **Le Cerveau (`src/lib/client/analytics.ts`)** : Contient les fonctions `trackEvent` (pour envoyer une donnée) et `captureAndSaveUTM` (pour lire l'URL).
+- **Le Capteur Global (`src/components/analytics/analytics-tracker.tsx`)** : Un composant invisible dans le layout qui s'exécute à chaque changement de page.
+- **Le Réceptionniste (`src/app/api/tracking/events/route.ts`)** : L'API qui reçoit les données du navigateur et les enregistre.
 - **Le Stockage (`prisma/schema.prisma`)** : Modèle `AnalyticsEvent` qui définit ce qu'on enregistre (path, source, etc.).
-- **L'Interface de Consentement (`src/components/analytics/CookieConsent.tsx`)** : La bannière que voit l'utilisateur.
+- **L'Interface de Consentement (`src/components/analytics/cookie-consent.tsx`)** : La bannière que voit l'utilisateur.
 
 ## 2. État Actuel : "Mode Lancement" (Direct)
 
-Actuellement, le fichier `AnalyticsTracker.tsx` appelle les fonctions de tracking **dès le chargement**, sans vérifier la bannière de cookies.
+Actuellement, le fichier `analytics-tracker.tsx` appelle les fonctions de tracking **dès le chargement**, sans vérifier la bannière de cookies.
 
 ### Pourquoi ce choix ?
 - **Données de démarrage** : Ne pas perdre une seule miette d'information sur tes 100 premiers visiteurs.
@@ -24,11 +24,11 @@ Actuellement, le fichier `AnalyticsTracker.tsx` appelle les fonctions de trackin
 
 Quand tu seras prêt à filtrer le tracking par consentement, voici les étapes exactes :
 
-### Étape A : Modifier `AnalyticsTracker.tsx`
+### Étape A : Modifier `analytics-tracker.tsx`
 Il faut entourer les appels par une vérification du plugin `vanilla-cookieconsent`.
 
 ```typescript
-// Localisation : src/components/analytics/AnalyticsTracker.tsx
+// Localisation : src/components/analytics/analytics-tracker.tsx
 
 import * as CookieConsent from 'vanilla-cookieconsent';
 
@@ -49,11 +49,11 @@ export function AnalyticsTracker() {
 ```
 
 ### Étape B : Lier l'ID Anonyme
-Le fichier `tracker.ts` crée un cookie `analytics_anon_id`. En mode conformité, ce cookie ne doit être créé que **après** le clic sur "Accepter".
+Le fichier `analytics.ts` crée un cookie `analytics_anon_id`. En mode conformité, ce cookie ne doit être créé que **après** le clic sur "Accepter".
 
 ## 4. Lexique des Données
 - **Anonymous ID** : Un code unique stocké dans le navigateur pour savoir si la personne qui revient aujourd'hui est la même que celle d'hier.
 - **UTM** : Les étiquettes (source, medium, campaign) que tu ajoutes à tes liens (ex: `?utm_source=tiktok`).
 
 ---
-**Note mémorielle** : Si tu lis ceci après 6 mois, n'aie pas peur de casser le tracker. Tout est centralisé dans `src/lib/analytics/tracker.ts`.
+**Note mémorielle** : Si tu lis ceci après 6 mois, n'aie pas peur de casser le tracker. Tout est centralisé dans `src/lib/client/analytics.ts`.

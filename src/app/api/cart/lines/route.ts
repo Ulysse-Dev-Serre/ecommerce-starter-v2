@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
@@ -20,112 +19,37 @@ async function addToCartHandler(
   authContext: OptionalAuthContext,
   data: AddToCartInput
 ): Promise<NextResponse> {
-  const requestId = crypto.randomUUID();
-  const { variantId, quantity } = data;
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
 
-  // Résoudre l'identité (User ou Guest)
+  // Resolve identity
   const { userId, anonymousId, newAnonymousId } = await resolveCartIdentity(
     authContext,
-    true // Créer un ID si nécessaire pour le panier
+    true
   );
 
-  logger.info(
+  const cart = await addToCart(data, userId, anonymousId);
+
+  const response = NextResponse.json(
     {
+      success: true,
       requestId,
-      action: 'add_to_cart',
-      variantId,
-      quantity,
-      userId: userId ?? null,
-      anonymousId: anonymousId ?? null,
+      data: cart,
+      message: 'Item added to cart',
+      timestamp: new Date().toISOString(),
     },
-    'Adding item to cart'
+    { status: 201 }
   );
 
-  try {
-    const cart = await addToCart({ variantId, quantity }, userId, anonymousId);
-
-    logger.info(
-      {
-        requestId,
-        action: 'item_added_successfully',
-        cartId: cart.id,
-        itemsCount: cart.items.length,
-      },
-      'Item added to cart successfully'
-    );
-
-    const response = NextResponse.json(
-      {
-        success: true,
-        requestId,
-        data: cart,
-        message: 'Item added to cart',
-        timestamp: new Date().toISOString(),
-      },
-      {
-        status: 201,
-        headers: {
-          'X-Request-ID': requestId,
-        },
-      }
-    );
-
-    if (newAnonymousId) {
-      response.cookies.set(CART_COOKIE_NAME, newAnonymousId, {
-        httpOnly: true,
-        secure: env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-      });
-    }
-
-    return response;
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
-
-    logger.error(
-      {
-        requestId,
-        action: 'add_to_cart_failed',
-        error: errorMessage,
-        variantId,
-        quantity,
-      },
-      'Failed to add item to cart'
-    );
-
-    if (
-      errorMessage.includes('not found') ||
-      errorMessage.includes('not available')
-    ) {
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: 'Product not found',
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 404 }
-      );
-    }
-
-    if (errorMessage.includes('stock')) {
-      return NextResponse.json(
-        {
-          success: false,
-          requestId,
-          error: 'Insufficient stock',
-          message: errorMessage,
-          timestamp: new Date().toISOString(),
-        },
-        { status: 400 }
-      );
-    }
-
-    throw error;
+  if (newAnonymousId) {
+    response.cookies.set(CART_COOKIE_NAME, newAnonymousId, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 60 * 60,
+    });
   }
+
+  return response;
 }
 
 export const POST = withError(

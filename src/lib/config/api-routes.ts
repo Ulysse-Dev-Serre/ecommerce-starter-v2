@@ -18,8 +18,8 @@ export const API_ROUTES = {
   PRODUCTS: {
     LIST: '/api/products',
   },
-  ANALYTICS: {
-    EVENTS: '/api/analytics/events',
+  TRACKING: {
+    EVENTS: '/api/tracking/events',
   },
   CONTACT: '/api/contact', // À créer
   ADMIN: {
