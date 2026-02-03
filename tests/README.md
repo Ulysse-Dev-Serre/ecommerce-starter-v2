@@ -34,46 +34,42 @@ TEST_API_KEY=votre-clé-générée-ici
 
 ---
 
-## Structure
+## Structure (Migration JS → TS)
 
 ```
 tests/
  ├── setup/                    # Configuration et utilitaires globaux
- │   ├── jest.setup.js        # Configuration Jest globale
- │   ├── db.setup.js          # Seed et reset de la DB de test
- │   ├── auth.factory.js      # Génération d'utilisateurs (admin/user)
- │   ├── test.setup.js        # Setup/teardown des tests
- │   └── test-client.js       # Client HTTP pour tests API
+ │   ├── vitest.setup.ts      # Setup Vitest (ENV, Mocks globaux)
+ │   ├── test-client.ts       # Client HTTP TypeScript pour tests API
+ │   ├── test.setup.ts        # Utilities TS (setup/teardown)
+ │   ├── auth.factory.ts      # [À MIGRER] Génération d'utilisateurs
+ │   └── db.setup.js          # [HÉRITAGE] Seed et reset de la DB
  │
  ├── unit/                     # Tests unitaires (isolés, mockés)
- │   └── services/            # Tests des services métier
+ │   └── services/            # Tests des services métier (.test.ts)
  │
  ├── integration/              # Tests d'intégration (vraie DB)
  │   └── api/                 # Tests des endpoints API
- │       ├── attributes.test.js
- │       ├── cart.test.js
- │       └── health.test.js
+ │       ├── health.test.ts   # Migré vers TS
+ │       └── ...              # Autres fichiers .test.js (à migrer)
  │
- ├── e2e/                      # Tests end-to-end
+ ├── e2e/                      # Tests end-to-end (Playwright)
  │
  ├── fixtures/                 # Données de test réutilisables
  │   └── products.fixture.js
  │
- └── scripts/                  # Scripts utilitaires
+ └── scripts/                  # Scripts utilitaires Node.js
 ```
 
-## Commandes
+## Commandes (Vitest)
 
 ```bash
-# Tous les tests
-npm test
+# Lancer tous les tests unitaires et intégration (TS)
+npm run test:unit
 
-# Tests unitaires uniquement (rapides)
-npm test -- --testPathPattern=unit
+# Lancer en mode watch (développement)
+npm run test:unit:watch
 
-# Tests d'intégration uniquement
-npm test -- --testPathPattern=integration
-
-# Tests e2e uniquement
-npm test -- --testPathPattern=e2e
+# Lancer les tests E2E (Playwright)
+npm run test:e2e
 ```

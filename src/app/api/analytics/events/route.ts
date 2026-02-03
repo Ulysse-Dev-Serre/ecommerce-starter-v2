@@ -1,52 +1,33 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/core/db';
 import { auth } from '@clerk/nextjs/server';
 
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
+import { analyticsEventSchema } from '@/lib/validators/analytics';
+import { logger } from '@/lib/core/logger';
 
 async function handler(req: Request) {
   try {
-    const body = await req.json();
-    const {
-      eventType,
-      eventName,
-      path,
-      anonymousId,
-      metadata,
-      utmSource,
-      utmMedium,
-      utmCampaign,
-    } = body;
+    const json = await req.json();
 
-    const { userId: clerkId } = await auth();
-    let dbUserId = null;
-
-    if (clerkId) {
-      const user = await prisma.user.findUnique({
-        where: { clerkId },
-        select: { id: true },
-      });
-      dbUserId = user?.id;
+    // Validate request body
+    const result = analyticsEventSchema.safeParse(json);
+    if (!result.success) {
+      return NextResponse.json(
+        { error: 'Invalid request body', details: result.error.format() },
+        { status: 400 }
+      );
     }
 
-    const event = await prisma.analyticsEvent.create({
-      data: {
-        eventType,
-        eventName,
-        path,
-        anonymousId,
-        metadata,
-        userId: dbUserId,
-        utmSource,
-        utmMedium,
-        utmCampaign,
-      },
-    });
+    const { userId: clerkId } = await auth();
+
+    // Delegate to service
+    const event = await AnalyticsService.trackEvent(result.data, clerkId);
 
     return NextResponse.json({ success: true, id: event.id });
   } catch (error) {
-    console.error('[ANALYTICS_EVENT_POST]', error);
+    logger.error({ error }, '[ANALYTICS_EVENT_POST] Error');
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

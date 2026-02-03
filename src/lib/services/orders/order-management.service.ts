@@ -6,6 +6,38 @@ import {
   PaginationParams,
 } from '@/lib/repositories/order.repository';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { updateOrderStatus as updateOrderLogic } from '@/lib/services/payments/payment-refund.service';
+
+/**
+ * Workflow de transition d'état valide
+ */
+export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+  [OrderStatus.PAID]: [
+    OrderStatus.SHIPPED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.SHIPPED]: [
+    OrderStatus.IN_TRANSIT,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.IN_TRANSIT]: [
+    OrderStatus.DELIVERED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED, OrderStatus.REFUND_REQUESTED],
+  [OrderStatus.REFUND_REQUESTED]: [
+    OrderStatus.REFUNDED,
+    OrderStatus.PAID,
+    OrderStatus.SHIPPED,
+    OrderStatus.DELIVERED,
+  ],
+  [OrderStatus.CANCELLED]: [],
+  [OrderStatus.REFUNDED]: [],
+};
 import { cache } from '@/lib/core/cache';
 
 /**
@@ -253,4 +285,42 @@ export async function getOrderByIdAdmin(orderId: string) {
   }
 
   return order;
+}
+
+/**
+ * Met à jour le statut d'une commande (Admin)
+ * Inclut la validation du workflow de transition
+ */
+export async function updateOrderStatus(params: {
+  orderId: string;
+  status: OrderStatus;
+  comment?: string;
+  userId?: string;
+}) {
+  const { orderId, status: newStatus, comment, userId } = params;
+
+  // 1. Récupérer l'état actuel
+  const order = await orderRepository.findById(orderId);
+  if (!order) {
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
+  }
+
+  // 2. Valider la transition
+  const validTransitions =
+    VALID_STATUS_TRANSITIONS[order.status as OrderStatus] || [];
+  if (!validTransitions.includes(newStatus)) {
+    throw new AppError(
+      ErrorCode.VALIDATION_ERROR,
+      `Invalid status transition from ${order.status} to ${newStatus}`,
+      400
+    );
+  }
+
+  // 3. Déléguer la logique complexe (Stripe/Stock) au service dédié
+  return updateOrderLogic({
+    orderId,
+    status: newStatus,
+    comment,
+    userId,
+  });
 }

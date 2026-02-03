@@ -1,10 +1,9 @@
-/**
- * Health API tests
- */
-const { setupTest, teardownTest } = require('../../setup/test.setup');
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { setupTest, teardownTest } from '../../setup/test.setup';
+import { TestClient } from '../../setup/test-client';
 
 describe('Health API', () => {
-  let client;
+  let client: TestClient;
 
   beforeAll(async () => {
     const setup = await setupTest();
@@ -16,7 +15,7 @@ describe('Health API', () => {
   });
 
   describe('GET /api/internal/health', () => {
-    test('should return health status successfully', async () => {
+    it('should return health status successfully', async () => {
       const response = await client.get('/api/internal/health');
 
       expect(response.success).toBe(true);
@@ -25,9 +24,9 @@ describe('Health API', () => {
       expect(response.data).toHaveProperty('data');
     });
 
-    test('should have correct health data structure', async () => {
+    it('should have correct health data structure', async () => {
       const response = await client.get('/api/internal/health');
-      const { data } = response.data;
+      const data = (response.data as any).data;
 
       expect(data).toMatchObject({
         status: expect.any(String),
@@ -41,9 +40,9 @@ describe('Health API', () => {
       });
     });
 
-    test('should report healthy database connection', async () => {
+    it('should report healthy database connection', async () => {
       const response = await client.get('/api/internal/health');
-      const { data } = response.data;
+      const data = (response.data as any).data;
 
       expect(data.status).toBe('healthy');
       expect(data.database.connected).toBe(true);
