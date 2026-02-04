@@ -22,12 +22,12 @@ export function VariantButton({
       onClick={onClick}
       disabled={!isAvailable}
       className={cn(
-        'vibe-variant-button',
+        'px-4 py-2 rounded-md border-2 transition cursor-pointer disabled:cursor-not-allowed',
         isSelected
-          ? 'vibe-variant-button-selected'
+          ? 'border-primary bg-primary text-primary-foreground'
           : isAvailable
-            ? 'vibe-variant-button-available'
-            : 'vibe-variant-button-unavailable',
+            ? 'border-border hover:border-border-focus'
+            : 'border-muted text-muted-foreground opacity-50',
         className
       )}
     >

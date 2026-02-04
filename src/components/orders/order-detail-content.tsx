@@ -15,11 +15,10 @@ import { OrderSummary } from '@/components/orders/order-summary';
 import { RefundRequestForm } from '@/components/orders/refund-request-form';
 import { Order, OrderItem, Payment, Shipment } from '@/generated/prisma';
 
-type OrderDetail = Order & {
-  items: OrderItem[];
-  payments: Payment[];
-  shipments: Shipment[];
-};
+// Ideally we should import OrderWithIncludes from the service or types definition
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+
+type OrderDetail = OrderWithIncludes;
 
 interface OrderDetailContentProps {
   order: OrderDetail;
@@ -85,45 +84,45 @@ export async function OrderDetailContent({
 
   return (
     <div
-      className={`vibe-min-h-screen vibe-bg-muted-extra-soft vibe-pb-12 vibe-section-py ${VIBE_ANIMATION_FADE_IN}`}
+      className={`min-h-screen bg-muted/20 vibe-pb-12 py-8 lg:py-12 ${VIBE_ANIMATION_FADE_IN}`}
     >
-      <div className="vibe-layout-container vibe-container-max-6xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 vibe-container-max-6xl">
         <NextLink
           href={`/${locale}/orders`}
-          className={`${VIBE_HOVER_GROUP} vibe-nav-link-prev vibe-mb-8`}
+          className={`${VIBE_HOVER_GROUP} inline-flex items-center text-sm font-bold text-muted-foreground hover:text-foreground transition-colors mb-8 vibe-mb-8`}
         >
-          <ArrowLeft className="vibe-mr-2 vibe-icon-sm group-hover:vibe-translate-x-n1 vibe-transition" />
+          <ArrowLeft className="mr-2 h-5 w-5 group-hover:-translate-x-1 transition-all duration-300" />
           {t('backToOrders')}
         </NextLink>
 
-        <div className="vibe-flex-wrap-justify-between-items-end vibe-gap-6 vibe-mb-12">
+        <div className="vibe-flex-wrap-justify-between-items-end gap-6 vibe-mb-12">
           <div className="vibe-stack-y-2">
-            <h1 className="vibe-page-header vibe-mb-0">
+            <h1 className="text-3xl font-bold mb-8 vibe-mb-0">
               {t('orderNumber')} #{order.orderNumber}
             </h1>
-            <p className="vibe-text-p-lg vibe-text-muted">
+            <p className="text-lg text-muted-foreground leading-relaxed text-muted-foreground">
               {t('date')} : {formatDate(order.createdAt, locale)}
             </p>
           </div>
           <StatusBadge
             status={order.status}
             label={statusLabels[order.status]}
-            className="vibe-px-6 vibe-py-2 vibe-text-black-caps"
+            className="vibe-px-6 vibe-py-2 font-black uppercase tracking-wider"
           />
         </div>
 
-        <div className="vibe-grid-layout">
-          <div className="vibe-grid-main vibe-stack-y-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <div className="lg:col-span-8 space-y-6 space-y-10">
             <OrderStepper status={order.status} labels={statusLabels} />
 
             {(order.status === 'CANCELLED' || order.status === 'REFUNDED') && (
-              <div className="vibe-info-box vibe-info-box-styled">
-                <h3 className="vibe-text-xl-bold vibe-mb-4 vibe-flex-items-center-gap-2">
+              <div className="vibe-info-box bg-info/5 border-info/20 text-info">
+                <h3 className="text-xl font-bold text-foreground mb-4 vibe-flex-items-center-gap-2">
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingTitle')
                     : tRefund('refundDoneTitle')}
                 </h3>
-                <p className="whitespace-pre-wrap leading-relaxed vibe-text-medium">
+                <p className="whitespace-pre-wrap leading-relaxed font-medium">
                   {order.status === 'CANCELLED'
                     ? tRefund('refundPendingMessage', {
                         name:
@@ -171,7 +170,7 @@ export async function OrderDetailContent({
             />
           </div>
 
-          <div className="vibe-grid-side">
+          <div className="lg:col-span-4 h-full">
             <OrderSummary
               order={order}
               locale={locale}

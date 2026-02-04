@@ -102,8 +102,22 @@ export async function getReturnShippingRates(
 }
 
 /**
- * Purchase a label for a specific rate
+ * Retrieve a specific rate detail
  */
+export async function getRate(rateId: string): Promise<ShippingRate> {
+  if (!shippo) {
+    throw new Error('SHIPPO_API_KEY is not defined');
+  }
+
+  try {
+    const rate = await shippo.rates.get(rateId);
+    return rate as any;
+  } catch (error) {
+    console.error('Error retrieving rate:', error);
+    throw error;
+  }
+}
+
 /**
  * Purchase a label for a specific rate
  */

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/core/db';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/core/logger';
 import { z } from 'zod';
@@ -9,16 +8,19 @@ const schema = z.object({
   type: z.enum(['LOCAL_STOCK', 'DROPSHIPPER', 'OTHER']),
   incoterm: z.enum(['DDP', 'DDU']).default('DDU'),
   address: z.object({
+    name: z.string().min(1),
     street1: z.string().min(1),
     street2: z.string().optional(),
     city: z.string().min(1),
     state: z.string().min(1),
     zip: z.string().min(1),
     country: z.string().length(2),
-    email: z.string().email().optional().or(z.literal('')),
-    phone: z.string().optional(),
+    email: z.string().email(),
+    phone: z.string().min(1),
   }),
 });
+
+import { logisticsLocationService } from '@/lib/services/logistics/logistics-location.service';
 
 export async function PUT(
   req: NextRequest,
@@ -41,17 +43,10 @@ export async function PUT(
       );
     }
 
-    const { name, type, address, incoterm } = result.data;
-
-    const supplier = await prisma.supplier.update({
-      where: { id },
-      data: {
-        name,
-        type: type as any,
-        incoterm,
-        address: address as any, // Stored as JSON
-      },
-    });
+    const supplier = await logisticsLocationService.updateLocation(
+      id,
+      result.data as any
+    );
 
     logger.info(
       { supplierId: supplier.id, userId },
@@ -80,14 +75,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Soft delete (set isActive = false) or hard delete?
-    // Schema has deletedAt? No, only isActive.
-    // We set isActive = false.
-
-    await prisma.supplier.update({
-      where: { id },
-      data: { isActive: false },
-    });
+    await logisticsLocationService.deleteLocation(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

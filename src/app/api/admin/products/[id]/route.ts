@@ -11,7 +11,7 @@ import {
   getProductByIdSimple,
   updateProduct,
   deleteProduct,
-} from '@/lib/services/products';
+} from '@/lib/services/products/product-admin.service';
 import { UpdateProductData } from '@/lib/types/domain/product';
 
 /**
@@ -236,6 +236,72 @@ async function updateProductHandler(
         metaDescription: t.metaDescription || null,
       }));
     }
+
+    // --- STRICT SHIPPING VALIDATION FOR PUBLICATION ---
+    // If we are publishing (ACTIVE) or if it is already ACTIVE and we are not deactivating it:
+    const newStatus = updateData.status;
+    const currentStatus = product.status;
+    const isBecomingActive = newStatus === 'ACTIVE';
+    const isStayingActive =
+      currentStatus === 'ACTIVE' && newStatus === undefined;
+
+    if (isBecomingActive || isStayingActive) {
+      // Prepare the final state of the product to validate
+      const finalWeight =
+        updateData.weight !== undefined ? updateData.weight : product.weight;
+      const finalDimensions =
+        updateData.dimensions !== undefined
+          ? updateData.dimensions
+          : product.dimensions;
+      const finalOriginId =
+        updateData.shippingOriginId !== undefined
+          ? updateData.shippingOriginId
+          : product.shippingOriginId;
+
+      const errors: string[] = [];
+
+      if (!finalOriginId) {
+        errors.push(
+          'Shipping Origin (Supplier) is required to publish a product.'
+        );
+      }
+
+      if (!finalWeight || Number(finalWeight) <= 0) {
+        errors.push('Weight (> 0) is required to publish a product.');
+      }
+
+      if (!finalDimensions) {
+        errors.push('Dimensions (L, W, H) are required to publish a product.');
+      }
+
+      if (errors.length > 0) {
+        logger.warn(
+          {
+            requestId,
+            action: 'publish_product_validation_failed',
+            productId: id,
+            errors,
+          },
+          'Product cannot be published due to missing shipping data'
+        );
+
+        return NextResponse.json(
+          {
+            success: false,
+            requestId,
+            error: 'Publication Failed: Missing Shipping Data',
+            details: {
+              message:
+                'To invoke status ACTIVE, you must provide valid shipping data.',
+              errors,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          { status: 400, headers: { 'X-Request-ID': requestId } }
+        );
+      }
+    }
+    // --------------------------------------------------
 
     const updatedProduct = await updateProduct(id, updateData);
 

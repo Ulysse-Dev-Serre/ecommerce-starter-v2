@@ -61,7 +61,7 @@ export async function trackEvent(
 
   try {
     // On envoie à notre propre API interne
-    await fetch(API_ROUTES.ANALYTICS.EVENTS, {
+    await fetch(API_ROUTES.TRACKING.EVENTS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

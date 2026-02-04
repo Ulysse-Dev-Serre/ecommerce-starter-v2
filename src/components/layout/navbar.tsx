@@ -60,25 +60,27 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
   };
 
   return (
-    <header className="vibe-nav-header">
-      <div className="vibe-layout-container">
-        <div className="vibe-flex-between-items-center vibe-h-20">
-          <div className="vibe-flex-items-center">
+    <header className="bg-background border-b border-border sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between vibe-h-20">
+          <div className="flex items-center">
             <Link
               href={`/${locale}`}
               onClick={() => handleNavigationClick(`/${locale}`)}
               className={VIBE_HOVER_GROUP}
             >
-              <h1 className="vibe-logo-text">{siteConfig.name}</h1>
+              <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tighter transition-colors group-hover:text-primary">
+                {siteConfig.name}
+              </h1>
             </Link>
           </div>
 
-          <nav className="vibe-nav-main">
+          <nav className="hidden md:flex items-center space-x-1">
             <Link
               href={`/${locale}`}
               className={cn(
-                'vibe-nav-link',
-                pathname === `/${locale}` && 'vibe-nav-link-active'
+                'px-4 py-2 text-sm font-bold transition-all rounded-md text-muted-foreground hover:text-foreground',
+                pathname === `/${locale}` && 'text-primary'
               )}
               onClick={() => handleNavigationClick(`/${locale}`)}
             >
@@ -88,8 +90,8 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             <Link
               href={`/${locale}/shop`}
               className={cn(
-                'vibe-nav-link',
-                pathname.includes('/shop') && 'vibe-nav-link-active'
+                'px-4 py-2 text-sm font-bold transition-all rounded-md text-muted-foreground hover:text-foreground',
+                pathname.includes('/shop') && 'text-primary'
               )}
               onClick={() => handleNavigationClick(`/${locale}/shop`)}
             >
@@ -99,8 +101,8 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             <Link
               href={`/${locale}/contact`}
               className={cn(
-                'vibe-nav-link',
-                pathname.includes('/contact') && 'vibe-nav-link-active'
+                'px-4 py-2 text-sm font-bold transition-all rounded-md text-muted-foreground hover:text-foreground',
+                pathname.includes('/contact') && 'text-primary'
               )}
               onClick={() => handleNavigationClick(`/${locale}/contact`)}
             >
@@ -111,8 +113,8 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               <Link
                 href={`/${locale}/orders`}
                 className={cn(
-                  'vibe-nav-link',
-                  pathname.includes('/orders') && 'vibe-nav-link-active'
+                  'px-4 py-2 text-sm font-bold transition-all rounded-md text-muted-foreground hover:text-foreground',
+                  pathname.includes('/orders') && 'text-primary'
                 )}
                 onClick={() => handleNavigationClick(`/${locale}/orders`)}
               >
@@ -123,23 +125,23 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             {isSignedIn && userRole === 'ADMIN' && (
               <Link
                 href={`/${locale}/admin`}
-                className="vibe-nav-admin-link"
+                className="bg-secondary/10 text-secondary px-4 py-2 rounded-md text-sm font-bold hover:bg-secondary/20 transition-all ml-4"
                 onClick={() => handleNavigationClick(`/${locale}/admin`)}
               >
                 {tNavbar('dashboard')}
               </Link>
             )}
 
-            <div className="vibe-nav-lang-divider">
+            <div className="flex items-center gap-1 border-l border-border ml-6 pl-6 h-6">
               {i18n.locales.map(loc => (
                 <button
                   key={loc}
                   onClick={e => handleLanguageChange(loc, e)}
                   className={cn(
-                    'vibe-nav-lang-btn',
+                    'w-8 h-8 text-[10px] font-black rounded-md transition-all uppercase',
                     locale === loc
-                      ? 'vibe-nav-lang-btn-active'
-                      : 'vibe-nav-lang-btn-inactive'
+                      ? 'bg-foreground text-background shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
                 >
                   {loc}
@@ -148,20 +150,20 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
             </div>
           </nav>
 
-          <div className="vibe-nav-spacing">
+          <div className="flex items-center space-x-2 md:space-x-4">
             <Link
               href={`/${locale}/cart`}
-              className="vibe-nav-icon-btn"
+              className="text-foreground hover:bg-muted p-2 rounded-md transition-all"
               title={tNavbar('cart')}
               onClick={() => handleNavigationClick(`/${locale}/cart`)}
             >
-              <ShoppingCart className="vibe-icon-md" />
+              <ShoppingCart className="h-16 w-16" />
             </Link>
 
             <SignedOut>
               <SignInButton mode="modal">
                 <button
-                  className="vibe-button-auth"
+                  className="vibe-button-primary h-10 px-6 text-sm"
                   onClick={() => {
                     logger.info(
                       {

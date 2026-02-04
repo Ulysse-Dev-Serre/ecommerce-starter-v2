@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createReturnLabel } from '@/lib/services/orders';
+import { createReturnLabel } from '@/lib/services/orders/order-fulfillment.service';
 import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import type { AuthContext } from '@/lib/middleware/withAuth';
 
 async function handler(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ id: string }> },
   authContext: AuthContext
 ) {
-  const { id } = await params;
+  const { id } = await context.params;
 
   try {
     const { searchParams } = new URL(req.url);
@@ -35,14 +36,19 @@ async function handler(
       },
       'Failed to create return label'
     );
+
+    const status = error.message === 'Order not found' ? 404 : 500;
+
     return NextResponse.json(
       {
         success: false,
         message: error.message || 'Failed to create return label',
       },
-      { status: 500 }
+      { status }
     );
   }
 }
 
-export const POST = withError(withAdmin(handler));
+export const POST = withError(
+  withAdmin(withRateLimit(handler, RateLimits.ADMIN))
+);

@@ -101,7 +101,7 @@ npx prisma studio
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Index Tests](./14-test/index-test.md)** | Stratégie globale de test | QA |
-| **[Jest](./14-test/jest.md)** | Tests unitaires | Fiabilité |
+| **[Vitest](./14-test/vitest.md)** | Tests unitaires | Fiabilité |
 | **[Playwright](./14-test/playwright.md)** | Tests E2E automatisés | Parcours client |
 
 ---

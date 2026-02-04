@@ -23,6 +23,7 @@ interface ProductShippingInfoProps {
   };
   setFormData: (fn: (prev: any) => any) => void;
   suppliers: Supplier[];
+  fieldErrors?: Record<string, string>;
   t: (key: string) => string;
 }
 
@@ -30,6 +31,7 @@ export function ProductShippingInfo({
   formData,
   setFormData,
   suppliers,
+  fieldErrors = {},
   t,
 }: ProductShippingInfoProps) {
   const handleChange = (field: string, value: string) => {
@@ -54,8 +56,13 @@ export function ProductShippingInfo({
               value={formData.originCountry}
               onChange={e => handleChange('originCountry', e.target.value)}
               placeholder="e.g. CA, US, FR"
-              className="admin-input uppercase"
+              className={`admin-input uppercase ${fieldErrors.originCountry ? 'border-red-500 bg-red-50' : ''}`}
             />
+            {fieldErrors.originCountry && (
+              <p className="mt-1 text-xs font-medium text-red-600">
+                {fieldErrors.originCountry}
+              </p>
+            )}
           </div>
 
           <div>
@@ -65,7 +72,7 @@ export function ProductShippingInfo({
             <select
               value={formData.shippingOriginId}
               onChange={e => handleChange('shippingOriginId', e.target.value)}
-              className="admin-input"
+              className={`admin-input ${fieldErrors.shippingOriginId ? 'border-red-500 bg-red-50' : ''}`}
             >
               <option value="">{t('selectOrigin')}</option>
               {suppliers.map(s => (
@@ -74,6 +81,11 @@ export function ProductShippingInfo({
                 </option>
               ))}
             </select>
+            {fieldErrors.shippingOriginId && (
+              <p className="mt-1 text-xs font-medium text-red-600">
+                {fieldErrors.shippingOriginId}
+              </p>
+            )}
           </div>
 
           <div>
@@ -85,8 +97,13 @@ export function ProductShippingInfo({
               value={formData.hsCode}
               onChange={e => handleChange('hsCode', e.target.value)}
               placeholder="e.g. 1234.56.78"
-              className="admin-input"
+              className={`admin-input ${fieldErrors.hsCode ? 'border-red-500 bg-red-50' : ''}`}
             />
+            {fieldErrors.hsCode && (
+              <p className="mt-1 text-xs font-medium text-red-600">
+                {fieldErrors.hsCode}
+              </p>
+            )}
           </div>
         </div>
 
@@ -102,8 +119,13 @@ export function ProductShippingInfo({
                 min="0"
                 value={formData.weight}
                 onChange={e => handleChange('weight', e.target.value)}
-                className="admin-input"
+                className={`admin-input ${fieldErrors.weight ? 'border-red-500 bg-red-50' : ''}`}
               />
+              {fieldErrors.weight && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  {fieldErrors.weight}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -114,8 +136,13 @@ export function ProductShippingInfo({
                 value={formData.incoterm}
                 onChange={e => handleChange('incoterm', e.target.value)}
                 placeholder="e.g. EXW, FOB"
-                className="admin-input uppercase"
+                className={`admin-input uppercase ${fieldErrors.incoterm ? 'border-red-500 bg-red-50' : ''}`}
               />
+              {fieldErrors.incoterm && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  {fieldErrors.incoterm}
+                </p>
+              )}
             </div>
           </div>
 
@@ -124,30 +151,51 @@ export function ProductShippingInfo({
               {t('dimensions')} (cm)
             </label>
             <div className="grid grid-cols-3 gap-2">
-              <input
-                type="number"
-                step="0.1"
-                value={formData.length}
-                onChange={e => handleChange('length', e.target.value)}
-                placeholder="L"
-                className="admin-input"
-              />
-              <input
-                type="number"
-                step="0.1"
-                value={formData.width}
-                onChange={e => handleChange('width', e.target.value)}
-                placeholder="W"
-                className="admin-input"
-              />
-              <input
-                type="number"
-                step="0.1"
-                value={formData.height}
-                onChange={e => handleChange('height', e.target.value)}
-                placeholder="H"
-                className="admin-input"
-              />
+              <div>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.length}
+                  onChange={e => handleChange('length', e.target.value)}
+                  placeholder="L"
+                  className={`admin-input ${fieldErrors['dimensions.length'] ? 'border-red-500 bg-red-50' : ''}`}
+                />
+                {fieldErrors['dimensions.length'] && (
+                  <p className="mt-1 text-xs font-medium text-red-600">
+                    {fieldErrors['dimensions.length']}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.width}
+                  onChange={e => handleChange('width', e.target.value)}
+                  placeholder="W"
+                  className={`admin-input ${fieldErrors['dimensions.width'] ? 'border-red-500 bg-red-50' : ''}`}
+                />
+                {fieldErrors['dimensions.width'] && (
+                  <p className="mt-1 text-xs font-medium text-red-600">
+                    {fieldErrors['dimensions.width']}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.height}
+                  onChange={e => handleChange('height', e.target.value)}
+                  placeholder="H"
+                  className={`admin-input ${fieldErrors['dimensions.height'] ? 'border-red-500 bg-red-50' : ''}`}
+                />
+                {fieldErrors['dimensions.height'] && (
+                  <p className="mt-1 text-xs font-medium text-red-600">
+                    {fieldErrors['dimensions.height']}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -159,8 +207,13 @@ export function ProductShippingInfo({
               value={formData.exportExplanation}
               onChange={e => handleChange('exportExplanation', e.target.value)}
               rows={2}
-              className="admin-input"
+              className={`admin-input ${fieldErrors.exportExplanation ? 'border-red-500 bg-red-50' : ''}`}
             />
+            {fieldErrors.exportExplanation && (
+              <p className="mt-1 text-xs font-medium text-red-600">
+                {fieldErrors.exportExplanation}
+              </p>
+            )}
           </div>
         </div>
       </div>

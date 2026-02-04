@@ -264,6 +264,7 @@
         "productCreated": "Produit créé avec succès !",
         "productUpdated": "Produit mis à jour avec succès !",
         "productDeleted": "Produit supprimé avec succès !",
+        "validationError": "Certains champs du formulaire sont invalides. Veuillez les corriger.",
         "variantsAdded": "Nouvelles variantes ajoutées avec succès !",
         "variantUpdated": "Variante mise à jour avec succès !",
         "variantDeleted": "Variante supprimée avec succès !",
@@ -321,6 +322,8 @@
       "locationName": "Nom du lieu (ex: Entrepôt Principal)",
       "locationType": "Type de lieu",
       "originAddress": "Adresse de départ (pour le calcul des tarifs)",
+      "senderName": "Nom de l'expéditeur (Signataire Douanes)",
+      "senderNamePlaceholder": "Nom complet de la personne responsable",
       "street": "Adresse (Rue)",
       "streetPlaceholder": "123 rue Exemple",
       "city": "Ville",
@@ -331,9 +334,9 @@
       "zipPlaceholder": "H1A 1A1",
       "country": "Pays (Code ISO 2 lettres)",
       "countryPlaceholder": "CA",
-      "email": "Email contact (Optionnel)",
+      "email": "Email contact",
       "emailPlaceholder": "logistics@example.com",
-      "phone": "Téléphone (Optionnel)",
+      "phone": "Téléphone",
       "localStock": "Stock Local (Entrepôt)",
       "dropshipper": "Dropshipper",
       "other": "Autre",
@@ -375,7 +378,10 @@
     },
     "noShippingRates": "Aucune option de livraison trouvée pour cette adresse.",
     "edit": "Modifier",
-    "continueToPayment": "Continuer vers le paiement"
+    "continueToPayment": "Continuer vers le paiement",
+    "email": "Adresse Email",
+    "emailPlaceholder": "votre@email.com",
+    "errorFetchingRates": "Impossible de calculer les frais de port. Veuillez vérifier votre adresse."
   },
   "footer": {
     "about": "À propos",
@@ -564,10 +570,12 @@
     "processing": "Traitement de votre paiement en cours...",
     "title": "Paiement réussi !",
     "message": "Votre commande a été confirmée et est en cours de traitement.",
+    "guestMessage": "Votre commande a été confirmée avec succès. Un email de confirmation a été envoyé à votre adresse.",
     "orderNumber": "Numéro de commande",
     "sessionId": "ID de transaction",
     "waitMessage": "Veuillez patienter pendant que nous confirmons votre commande...",
     "backToShop": "Retour à la boutique",
+    "checkEmail": "Consulter mes emails",
     "error": "Une erreur est survenue lors de la vérification de la commande.",
     "timeout": "Délai d'attente dépassé pour la vérification de la commande. Veuillez vérifier vos emails pour la confirmation.",
     "noId": "Aucun identifiant de session ou de paiement fourni.",
@@ -602,6 +610,12 @@
     "orders": {
       "title": "Commandes",
       "subtitle": "Gérez et suivez les commandes clients",
+      "pagination": {
+        "showing": "Affichage de",
+        "to": "à",
+        "of": "sur",
+        "orders": "commandes"
+      },
       "table": {
         "order": "Commande",
         "customer": "Client",
@@ -678,7 +692,19 @@
         "printLabel": "Imprimer l'étiquette",
         "purchaseLabel": "Acheter & Générer l'étiquette",
         "successPurchase": "Étiquette achetée avec succès",
-        "errorPurchase": "Échec de l'achat de l'étiquette"
+        "errorPurchase": "Échec de l'achat de l'étiquette",
+        "purchaseConfirmPrice": "Le coût réel de cette étiquette est de {price}.",
+        "purchaseConfirmPaid": "Le client a payé : {amount}.",
+        "purchaseConfirmQuestion": "Voulez-vous procéder à l'achat de cette étiquette ?",
+        "errorPrefix": "Erreur : {message}",
+        "na": "N/D",
+        "packingInstructions": "Instructions de colisage",
+        "noPackingInstructions": "Aucune instruction de colisage disponible pour cette commande.",
+        "packingListOptimized": "Liste de colisage (Optimisée 3D)",
+        "parcel": "Colis",
+        "dimensions": "Dimensions",
+        "weight": "Poids",
+        "contents": "Contenu"
       }
     },
     "customers": {

@@ -34,21 +34,23 @@ export function OrderSummary({
 }: OrderSummaryProps) {
   const t = useTranslations('checkout');
   return (
-    <Card className={`vibe-card-raised-p6 ${VIBE_ANIMATION_FADE_IN}`}>
-      <h2 className="vibe-h2-underlined">{t('orderSummary')}</h2>
+    <Card className={`p-6 duration-500 shadow-lg ${VIBE_ANIMATION_FADE_IN}`}>
+      <h2 className="text-xl font-bold mb-6 text-foreground border-b border-border pb-4">
+        {t('orderSummary')}
+      </h2>
 
-      <div className="vibe-stack-y-4 vibe-text-xs-muted">
+      <div className="space-y-4 text-xs text-muted-foreground">
         {/* Items List */}
         {summaryItems && summaryItems.length > 0 && (
-          <div className="vibe-mb-6 vibe-list-stack vibe-scrollable-area custom-scrollbar max-h-[40vh]">
+          <div className="mb-6 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar max-h-[40vh]">
             {summaryItems.map((item, idx) => (
               <div
                 key={idx}
-                className={`vibe-flex-items-center-gap-4 vibe-animate-slide-in-right ${VIBE_ANIMATION_SLIDE_IN_RIGHT}`}
+                className={`flex items-center gap-4 duration-300 ${VIBE_ANIMATION_SLIDE_IN_RIGHT}`}
                 style={{ animationDelay: `${idx * 50}ms` }}
               >
                 {/* Image Container */}
-                <div className="vibe-product-thumb-sm">
+                <div className="relative h-16 w-16 flex-shrink-0 bg-muted border border-border rounded-lg overflow-hidden">
                   {item.image ? (
                     <Image
                       src={item.image}
@@ -58,25 +60,27 @@ export function OrderSummary({
                       sizes="64px"
                     />
                   ) : (
-                    <div className="vibe-badge-img-placeholder">
-                      <span className="vibe-text-img-placeholder">IMG</span>
+                    <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground">
+                      <span className="text-[10px]">IMG</span>
                     </div>
                   )}
-                  <div className="vibe-badge-quantity">{item.quantity}</div>
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                    {item.quantity}
+                  </div>
                 </div>
 
                 {/* Details */}
-                <div className="vibe-flex-grow">
-                  <h4 className="vibe-text-medium-foreground truncate">
+                <div className="flex-grow">
+                  <h4 className="font-medium text-foreground truncate">
                     {item.name}
                   </h4>
-                  <p className="vibe-text-xs-muted">
+                  <p className="text-xs text-muted-foreground">
                     {formatPrice(item.price, item.currency as any, locale)}
                   </p>
                 </div>
 
-                <div className="vibe-text-right">
-                  <p className="vibe-text-bold-foreground">
+                <div className="text-right">
+                  <p className="font-bold text-foreground">
                     {formatPrice(
                       item.price * item.quantity,
                       item.currency as any,
@@ -86,20 +90,20 @@ export function OrderSummary({
                 </div>
               </div>
             ))}
-            <div className="vibe-section-divider-bottom vibe-pt-2" />
+            <div className="border-b border-border pb-4 pt-2" />
           </div>
         )}
 
         <div className="vibe-stack-y-2">
-          <div className="vibe-flex-between-center vibe-text-muted">
+          <div className="flex justify-between items-center text-muted-foreground">
             <span>{t('subtotal')}</span>
-            <span className="vibe-text-medium-foreground">
+            <span className="font-medium text-foreground">
               {formatPrice(initialTotal, currency as any, locale)}
             </span>
           </div>
-          <div className="vibe-flex-between-center vibe-text-muted">
+          <div className="flex justify-between items-center text-muted-foreground">
             <span>{t('shipping')}</span>
-            <span className="vibe-text-medium-foreground">
+            <span className="font-medium text-foreground">
               {formatPrice(
                 selectedRate?.amount || 0,
                 selectedRate?.currency || currency,
@@ -109,10 +113,12 @@ export function OrderSummary({
           </div>
         </div>
 
-        <div className="vibe-section-divider-top">
-          <div className="vibe-flex-between-center">
-            <span className="vibe-text-total-label">{t('totalToPay')}</span>
-            <span className="vibe-text-total-value">
+        <div className="border-t border-border pt-4 mt-4">
+          <div className="flex justify-between items-center">
+            <span className="font-bold text-lg text-foreground">
+              {t('totalToPay')}
+            </span>
+            <span className="font-extrabold text-2xl text-primary">
               {formatPrice(total, currency as any, locale)}
             </span>
           </div>

@@ -11,3 +11,6 @@ export * from './user-clerk.service';
 
 // User Authentication - Authentification et session
 export * from './user-auth.service';
+
+// User Admin - Gestion des utilisateurs pour l'admin
+export * from './user-admin.service';

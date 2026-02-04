@@ -51,30 +51,28 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="vibe-pos-toast">
+      <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map(toast => (
           <div
             key={toast.id}
             role="alert"
             aria-live="assertive"
             className={cn(
-              `vibe-toast-item ${VIBE_ANIMATION_SLIDE_IN_RIGHT}`,
+              `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${VIBE_ANIMATION_SLIDE_IN_RIGHT}`,
               toast.type === 'success'
-                ? 'vibe-bg-success-dark'
+                ? 'bg-success text-white'
                 : toast.type === 'error'
-                  ? 'vibe-bg-error-dark'
-                  : 'vibe-bg-info-dark'
+                  ? 'bg-error text-white'
+                  : 'bg-info text-white'
             )}
           >
-            {toast.type === 'success' && (
-              <CheckCircle className="vibe-icon-md" />
-            )}
-            <span className="vibe-text-medium">{toast.message}</span>
+            {toast.type === 'success' && <CheckCircle className="h-16 w-16" />}
+            <span className="font-medium">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="vibe-ml-2 vibe-hover-opacity-80 vibe-transition-opacity"
+              className="vibe-ml-2 hover:opacity-80 transition-opacity"
             >
-              <X className="vibe-icon-sm" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         ))}

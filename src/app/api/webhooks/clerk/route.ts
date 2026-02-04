@@ -1,11 +1,17 @@
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
+import { WebhookEvent } from '@clerk/nextjs/server';
 
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { processClerkWebhook } from '@/lib/services/webhooks';
+import {
+  userCreatedSchema,
+  userUpdatedSchema,
+  userDeletedSchema,
+} from '@/lib/validators/clerk-webhook';
+import { UserClerkService } from '@/lib/services/users/user-clerk.service';
 import { env } from '@/lib/core/env';
 
 const webhookSecret = env.CLERK_WEBHOOK_SECRET;
@@ -75,66 +81,75 @@ async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
 
   // 4. Verify signature BEFORE parsing
   const webhook = new Webhook(webhookSecret);
-  let evt: unknown;
+  let evt: WebhookEvent;
 
   try {
     evt = webhook.verify(body, {
       'svix-id': svixId,
       'svix-timestamp': svixTimestamp,
       'svix-signature': svixSignature,
-    });
+    }) as WebhookEvent;
+
     logger.info(
       {
         action: 'webhook_signature_verified',
-        eventType: (evt as any)?.type,
-        userId: (evt as any)?.data?.id,
+        eventType: evt.type,
       },
-      'Webhook signature verified and parsed'
+      'Webhook signature verified'
     );
   } catch (error) {
     logger.error(
-      {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: error instanceof Error ? error.message : 'Unknown error' },
       'Webhook signature verification failed'
     );
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
-  // 5. Process the webhook event
+  // 5. Process the webhook event using Strict Validators
   try {
-    await processClerkWebhook((evt as any).type, (evt as any).data);
+    const eventType = evt.type;
+    const eventData = evt.data;
 
-    logger.info(
-      {
-        action: 'webhook_processed_successfully',
-        eventType: (evt as any).type,
-        userId: (evt as any).data?.id,
-      },
-      'Webhook processed successfully'
-    );
+    switch (eventType) {
+      case 'user.created':
+        await UserClerkService.handleUserCreated(
+          userCreatedSchema.parse(eventData)
+        );
+        break;
+      case 'user.updated':
+        await UserClerkService.handleUserUpdated(
+          userUpdatedSchema.parse(eventData)
+        );
+        break;
+      case 'user.deleted':
+        await UserClerkService.handleUserDeleted(
+          userDeletedSchema.parse(eventData)
+        );
+        break;
+      default:
+        logger.info({ eventType }, 'Unhandled webhook event type');
+    }
 
     return NextResponse.json({
       success: true,
-      eventType: (evt as any).type,
+      eventType: evt.type,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
     logger.error(
       {
         action: 'webhook_processing_failed',
-        eventType: (evt as any).type,
+        eventType: evt.type,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
       'Failed to process webhook event'
     );
 
-    // Don't throw - return 200 to prevent Clerk retries for business logic errors
+    // Business logic errors (validation) should not trigger constant retries
     return NextResponse.json({
       success: false,
       error: 'Processing failed',
-      eventType: (evt as any).type,
-      timestamp: new Date().toISOString(),
+      eventType: evt.type,
     });
   }
 }

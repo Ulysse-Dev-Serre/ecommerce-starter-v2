@@ -49,13 +49,13 @@ export function OrderItemsList({
   };
 
   return (
-    <div className="vibe-container vibe-bg-background vibe-p-0 vibe-overflow-hidden">
-      <div className="vibe-px-8 vibe-py-6 vibe-section-divider-bottom vibe-bg-muted-extra-soft">
-        <h2 className="vibe-text-xl-bold vibe-text-foreground">
+    <div className="vibe-container bg-background vibe-p-0 vibe-overflow-hidden">
+      <div className="px-8 vibe-py-6 border-b border-border pb-4 bg-muted/20">
+        <h2 className="text-xl font-bold text-foreground text-foreground">
           {labels.itemsTitle} ({items.length})
         </h2>
       </div>
-      <ul className="vibe-divide-y">
+      <ul className="divide-y divide-border">
         {items.map((item: any) => {
           const info = item.variantId ? itemData[item.variantId] : null;
           const snapshot = item.productSnapshot as any;
@@ -67,9 +67,9 @@ export function OrderItemsList({
           return (
             <li
               key={item.id}
-              className="vibe-p-8 vibe-flex-col sm:vibe-flex-row vibe-items-center vibe-gap-8 vibe-hover-bg-muted-extra-soft vibe-transition-colors"
+              className="p-8 flex flex-col sm:flex vibe-items-center vibe-gap-8 vibe-hover-bg-muted-extra-soft transition-colors"
             >
-              <div className="vibe-w-24 vibe-h-24 vibe-bg-muted vibe-rounded-2xl vibe-overflow-hidden vibe-flex-shrink-0 vibe-border-border vibe-shadow-sm">
+              <div className="vibe-w-24 vibe-h-24 vibe-bg-muted vibe-rounded-2xl vibe-overflow-hidden flex-shrink-0 vibe-border-border vibe-shadow-sm">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
@@ -77,45 +77,45 @@ export function OrderItemsList({
                     className="vibe-w-full vibe-h-full vibe-object-cover"
                   />
                 ) : (
-                  <div className="vibe-w-full vibe-h-full vibe-flex-center vibe-text-muted-soft vibe-text-3xl">
+                  <div className="vibe-w-full vibe-h-full vibe-flex-center text-muted-foreground/30 vibe-text-3xl">
                     📦
                   </div>
                 )}
               </div>
-              <div className="vibe-flex-grow vibe-min-w-0 vibe-text-center sm:vibe-text-left">
+              <div className="flex-grow vibe-min-w-0 text-center sm:text-left">
                 {slug ? (
                   <Link
                     href={`/${locale}/product/${slug}`}
-                    className="vibe-text-xl-bold vibe-text-foreground vibe-hover-primary vibe-underline-primary vibe-transition-colors"
+                    className="text-xl font-bold text-foreground text-foreground hover:text-primary underline decoration-primary decoration-2 underline-offset-4 transition-colors"
                   >
                     {itemName}
                   </Link>
                 ) : (
-                  <p className="vibe-text-xl-bold vibe-text-foreground">
+                  <p className="text-xl font-bold text-foreground text-foreground">
                     {itemName}
                   </p>
                 )}
 
                 {/* Affichage des attributs de variante (Sans badges, style sobre conforme au projet) */}
                 {info?.attributes && info.attributes.length > 0 && (
-                  <p className="vibe-text-base vibe-text-muted vibe-mt-1 vibe-text-medium">
+                  <p className="vibe-text-base text-muted-foreground mt-1 font-medium">
                     {labels.variant} :{' '}
-                    <span className="vibe-text-bold vibe-text-foreground">
+                    <span className="font-bold text-foreground">
                       {info.attributes.map(a => a.value).join(', ')}
                     </span>
                   </p>
                 )}
 
-                <p className="vibe-text-base vibe-text-muted vibe-mt-1 vibe-text-medium">
+                <p className="vibe-text-base text-muted-foreground mt-1 font-medium">
                   {labels.quantity} :{' '}
-                  <span className="vibe-text-bold vibe-text-foreground">
+                  <span className="font-bold text-foreground">
                     {item.quantity}
                   </span>{' '}
                   × {formatPrice(item.unitPrice, currency as any, locale)}
                 </p>
               </div>
-              <div className="vibe-text-right vibe-whitespace-nowrap">
-                <p className="vibe-text-2xl-bold vibe-text-foreground">
+              <div className="text-right vibe-whitespace-nowrap">
+                <p className="vibe-text-2xl-bold text-foreground">
                   {formatPrice(item.totalPrice, currency as any, locale)}
                 </p>
               </div>

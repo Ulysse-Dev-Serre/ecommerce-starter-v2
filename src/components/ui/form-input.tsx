@@ -12,9 +12,9 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="vibe-form-label">
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
             {label}{' '}
-            {required && <span className="vibe-form-required ml-1">*</span>}
+            {required && <span className="text-error ml-1 ml-1">*</span>}
           </label>
         )}
         <input
@@ -26,7 +26,7 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
           )}
           {...props}
         />
-        {error && <p className="vibe-form-error">{error}</p>}
+        {error && <p className="text-xs text-error mt-1">{error}</p>}
       </div>
     );
   }

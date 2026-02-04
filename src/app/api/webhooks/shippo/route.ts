@@ -113,9 +113,12 @@ async function handleShippoWebhook(request: NextRequest) {
     }
 
     return NextResponse.json({ received: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error(
-      { requestId, error: error.message },
+      {
+        requestId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
       'Shippo Webhook: Error processing request'
     );
     return NextResponse.json(

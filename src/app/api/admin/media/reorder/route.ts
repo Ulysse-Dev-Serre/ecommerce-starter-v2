@@ -4,7 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { prisma } from '@/lib/core/db';
+import { productMediaService } from '@/lib/services/products/product-media.service';
 
 /**
  * PUT /api/admin/media/reorder
@@ -77,42 +77,8 @@ async function reorderMediaHandler(
       }
     }
 
-    // Mettre à jour tous les médias en transaction
-    await prisma.$transaction(
-      body.media.map((mediaItem: { id: string; sortOrder: number }) =>
-        prisma.productMedia.update({
-          where: { id: mediaItem.id },
-          data: { sortOrder: mediaItem.sortOrder },
-        })
-      )
-    );
-
-    // Récupérer le productId depuis le premier média
-    const firstMedia = await prisma.productMedia.findUnique({
-      where: { id: body.media[0].id },
-      select: { productId: true },
-    });
-
-    if (firstMedia?.productId) {
-      // Mettre à jour automatiquement l'image principale
-      // La première image (sortOrder = 0) devient principale
-      await prisma.productMedia.updateMany({
-        where: {
-          productId: firstMedia.productId,
-          sortOrder: 0,
-        },
-        data: { isPrimary: true },
-      });
-
-      // Toutes les autres images ne sont plus principales
-      await prisma.productMedia.updateMany({
-        where: {
-          productId: firstMedia.productId,
-          sortOrder: { not: 0 },
-        },
-        data: { isPrimary: false },
-      });
-    }
+    // Mettre à jour via le service
+    await productMediaService.reorderMedia(body.media);
 
     logger.info(
       {

@@ -125,6 +125,77 @@ async function deleteMediaHandler(
   }
 }
 
+/**
+ * PATCH /api/admin/media/[id]
+ * Met à jour les métadonnées d'un média (alt, title)
+ */
+async function patchMediaHandler(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+  authContext: AuthContext
+): Promise<NextResponse> {
+  const requestId = crypto.randomUUID();
+  const { id } = await context.params;
+
+  try {
+    const body = await request.json();
+    const { alt, title } = body;
+
+    logger.info(
+      {
+        requestId,
+        action: 'update_media_metadata',
+        userId: authContext.userId,
+        mediaId: id,
+        updates: { alt, title },
+      },
+      `Admin updating media metadata: ${id}`
+    );
+
+    // Vérifier si le média existe
+    const media = await prisma.productMedia.findUnique({
+      where: { id },
+    });
+
+    if (!media) {
+      return NextResponse.json(
+        {
+          success: false,
+          requestId,
+          error: 'Media not found',
+        },
+        { status: 404 }
+      );
+    }
+
+    // Mettre à jour
+    const updatedMedia = await prisma.productMedia.update({
+      where: { id },
+      data: {
+        alt: alt !== undefined ? alt : undefined,
+        title: title !== undefined ? title : undefined,
+      },
+    });
+
+    return NextResponse.json(updatedMedia, { status: 200 });
+  } catch (error) {
+    logger.error(
+      {
+        requestId,
+        action: 'update_media_metadata_error',
+        mediaId: id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      'Failed to update media metadata'
+    );
+    throw error;
+  }
+}
+
 export const DELETE = withError(
   withAdmin(withRateLimit(deleteMediaHandler, RateLimits.ADMIN))
+);
+
+export const PATCH = withError(
+  withAdmin(withRateLimit(patchMediaHandler, RateLimits.ADMIN))
 );

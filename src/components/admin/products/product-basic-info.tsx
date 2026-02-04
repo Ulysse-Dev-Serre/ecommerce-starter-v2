@@ -20,6 +20,7 @@ interface ProductBasicInfoProps {
   >;
   setTranslations: (fn: (prev: any) => any) => void;
   isSlugValid: boolean;
+  fieldErrors?: Record<string, string>;
   t: (key: string) => string;
   tc: (key: string) => string;
 }
@@ -30,6 +31,7 @@ export function ProductBasicInfo({
   translations,
   setTranslations,
   isSlugValid,
+  fieldErrors = {},
   t,
   isEditMode = true,
 }: ProductBasicInfoProps & { isEditMode?: boolean }) {
@@ -64,9 +66,14 @@ export function ProductBasicInfo({
                 setFormData(prev => ({ ...prev, slug: e.target.value }))
               }
               placeholder="product-url-slug"
-              className="admin-input"
+              className={`admin-input ${fieldErrors.slug ? 'border-red-500 bg-red-50' : ''}`}
               required
             />
+            {fieldErrors.slug && (
+              <p className="mt-1 text-xs font-medium text-red-600">
+                {fieldErrors.slug}
+              </p>
+            )}
             {formData.slug && (
               <p
                 className={`mt-1 text-xs ${isSlugValid ? 'text-green-600' : 'text-red-600'}`}
@@ -157,9 +164,16 @@ export function ProductBasicInfo({
                     handleTranslationChange(lang, 'name', e.target.value)
                   }
                   placeholder={t('productName')}
-                  className="admin-input"
+                  className={`admin-input ${fieldErrors[`translations.0.name`] || fieldErrors[`translations.1.name`] ? 'border-red-500 bg-red-50' : ''}`}
                   required={lang === 'en'}
                 />
+                {(fieldErrors[`translations.0.name`] ||
+                  fieldErrors[`translations.1.name`]) && (
+                  <p className="mt-1 text-xs font-medium text-red-600">
+                    {fieldErrors[`translations.0.name`] ||
+                      fieldErrors[`translations.1.name`]}
+                  </p>
+                )}
               </div>
 
               <div>

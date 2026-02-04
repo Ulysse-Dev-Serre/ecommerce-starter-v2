@@ -21,7 +21,7 @@ export async function addToCart(variantId: string, quantity: number = 1) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to add to cart');
+    throw new Error(error.message || error.error || 'Failed to add to cart');
   }
 
   return await response.json();
@@ -43,7 +43,9 @@ export async function updateCartItem(itemId: string, quantity: number) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to update quantity');
+    throw new Error(
+      error.message || error.error || 'Failed to update quantity'
+    );
   }
 
   return await response.json();
@@ -59,7 +61,7 @@ export async function removeFromCart(itemId: string) {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to remove item');
+    throw new Error(error.message || error.error || 'Failed to remove item');
   }
 
   return await response.json();
@@ -77,7 +79,7 @@ export async function mergeCart() {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to merge cart');
+    throw new Error(error.message || error.error || 'Failed to merge cart');
   }
 
   return await response.json();

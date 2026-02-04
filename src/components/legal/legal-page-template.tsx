@@ -13,17 +13,19 @@ export function LegalPageTemplate({
   content,
 }: LegalPageTemplateProps) {
   return (
-    <div className="vibe-stack-y-8 vibe-section-py">
-      <div className="vibe-section-divider-bottom vibe-pb-8">
-        <h1 className="vibe-h1-mega">{title}</h1>
-        <p className="vibe-text-muted vibe-mt-4 vibe-flex-items-center-gap-2 vibe-text-xs-bold-muted-caps">
-          <span className="vibe-badge-dot-primary" />
+    <div className="space-y-8 py-8 lg:py-12">
+      <div className="border-b border-border pb-4 pb-8">
+        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground">
+          {title}
+        </h1>
+        <p className="text-muted-foreground mt-4 vibe-flex-items-center-gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="w-2 h-2 rounded-full bg-primary" />
           {lastUpdated}
         </p>
       </div>
 
       <div className={VIBE_TYPOGRAPHY_PROSE}>
-        <p className="vibe-whitespace-pre-line vibe-text-p-lg vibe-text-foreground vibe-text-medium">
+        <p className="whitespace-pre-line text-lg text-muted-foreground leading-relaxed text-foreground font-medium">
           {content}
         </p>
       </div>

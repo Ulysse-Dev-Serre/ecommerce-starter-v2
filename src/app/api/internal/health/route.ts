@@ -1,38 +1,22 @@
-import { NextResponse } from 'next/server';
-import { env } from '@/lib/core/env';
+import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../../lib/core/logger';
-import { withError } from '../../../../lib/middleware/withError';
-import { getUserCount } from '../../../../lib/services/users';
+import { withError } from '@/lib/middleware/withError';
+import { getSystemHealth } from '@/lib/services/health';
 
-async function healthCheck(): Promise<NextResponse> {
-  logger.info({ action: 'health_check' }, 'Performing health check');
+/**
+ * GET /api/internal/health
+ * Performs a basic health check of the application and its dependencies.
+ */
+async function healthCheckHandler(request: NextRequest): Promise<NextResponse> {
+  const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
 
-  const userCount = await getUserCount();
-
-  const healthInfo = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    database: {
-      connected: true,
-      userCount,
-    },
-    environment: env.NODE_ENV,
-    version: process.env.npm_package_version ?? '0.1.0',
-  };
-
-  logger.info(
-    {
-      action: 'health_check_success',
-      userCount,
-    },
-    'Health check completed successfully'
-  );
+  const healthInfo = await getSystemHealth();
 
   return NextResponse.json({
-    success: true,
+    success: healthInfo.status === 'healthy',
     data: healthInfo,
+    requestId,
   });
 }
 
-export const GET = withError(healthCheck);
+export const GET = withError(healthCheckHandler);

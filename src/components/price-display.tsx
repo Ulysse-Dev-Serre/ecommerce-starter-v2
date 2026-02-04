@@ -1,13 +1,9 @@
 'use client';
 
-import {
-  useCurrency,
-  getPriceFromPricingArray,
-  type Currency,
-} from '@/hooks/use-currency';
+import { getPriceFromPricingArray } from '@/lib/utils/currency';
 import { formatPrice } from '@/lib/utils/currency';
 import { useLocale } from 'next-intl';
-import { SupportedCurrency } from '@/lib/config/site';
+import { SupportedCurrency, SITE_CURRENCY } from '@/lib/config/site';
 
 interface PriceDisplayProps {
   pricing: Array<{ price: string; currency: string }>;
@@ -24,11 +20,7 @@ export function PriceDisplay({
 }: PriceDisplayProps) {
   const defaultLocale = useLocale();
   const currentLocale = locale || defaultLocale;
-  const { currency, isLoaded } = useCurrency();
-
-  if (!isLoaded) {
-    return <span className={className}>--</span>;
-  }
+  const currency = SITE_CURRENCY;
 
   const {
     price,
@@ -46,7 +38,7 @@ export function PriceDisplay({
     <span className={className}>
       {formattedPrice}
       {showFallbackIndicator && isFallback && (
-        <span className="vibe-text-xs vibe-text-muted vibe-ml-1">
+        <span className="vibe-text-xs text-muted-foreground ml-1">
           ({displayCurrency})
         </span>
       )}
@@ -66,11 +58,7 @@ interface PriceTotalProps {
 export function PriceTotal({ items, className = '', locale }: PriceTotalProps) {
   const defaultLocale = useLocale();
   const currentLocale = locale || defaultLocale;
-  const { currency, isLoaded } = useCurrency();
-
-  if (!isLoaded) {
-    return <span className={className}>--</span>;
-  }
+  const currency = SITE_CURRENCY;
 
   const total = items.reduce((sum, item) => {
     const { price } = getPriceFromPricingArray(item.pricing, currency);

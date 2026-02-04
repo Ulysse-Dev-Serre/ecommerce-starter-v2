@@ -9,4 +9,4 @@ npm run test:e2e
 Exécute les tests end-to-end avec Playwright.
 
 ## Note
-Le dossier `tests/e2e/` est actuellement vide.
+Les tests E2E seront orchestrés dans le futur dossier `src/test/e2e`. L'infrastructure est disponible mais les parcours critiques sont actuellement testés manuellement via les scripts de validation.

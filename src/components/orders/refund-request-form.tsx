@@ -82,14 +82,14 @@ export function RefundRequestForm({
 
   if (isSubmitted) {
     return (
-      <div className="vibe-status-banner-success-soft vibe-p-6 vibe-text-center">
-        <div className="vibe-flex-center vibe-mb-4">
-          <CheckCircle2 className="vibe-w-12 vibe-h-12 vibe-text-success" />
+      <div className="bg-success/10 rounded-xl border border-success/20 vibe-p-6 text-center">
+        <div className="vibe-flex-center mb-4">
+          <CheckCircle2 className="vibe-w-12 vibe-h-12 text-success" />
         </div>
-        <h3 className="vibe-text-lg-bold vibe-text-success vibe-mb-2">
+        <h3 className="vibe-text-lg-bold text-success vibe-mb-2">
           {t('successTitle')}
         </h3>
-        <p className="vibe-text-medium vibe-text-muted vibe-text-sm">
+        <p className="font-medium text-muted-foreground vibe-text-sm">
           {t('successMessage')}
         </p>
       </div>
@@ -103,9 +103,9 @@ export function RefundRequestForm({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="vibe-w-full vibe-flex-center-gap-2 vibe-px-6 vibe-py-4 vibe-bg-transparent vibe-border-dashed vibe-card-rounded vibe-text-muted hover:vibe-border-primary-soft hover:vibe-text-primary vibe-transition-all group"
+        className="vibe-w-full flex items-center justify-center gap-2 vibe-px-6 vibe-py-4 vibe-bg-transparent vibe-border-dashed vibe-card-rounded text-muted-foreground hover:border-primary/20 hover:text-primary transition-all duration-300 group"
       >
-        <AlertCircle className="vibe-w-5 vibe-h-5 group-hover:vibe-scale-110 vibe-transition-transform" />
+        <AlertCircle className="vibe-w-5 vibe-h-5 group-hover:scale-110 vibe-transition-transform" />
         <span className="vibe-text-xs-bold-caps">
           {canCancelNow ? t('cancelDelivery') : t('openButton')}
         </span>
@@ -115,23 +115,23 @@ export function RefundRequestForm({
 
   if (isShipmentInProgress) {
     return (
-      <div className="vibe-status-banner-error-soft vibe-p-6 vibe-flex-col-gap-4">
-        <div className="vibe-flex-gap-4 vibe-items-start">
-          <div className="vibe-p-2 vibe-bg-error-soft vibe-rounded-full">
-            <AlertCircle className="vibe-w-6 vibe-h-6 vibe-text-error" />
+      <div className="bg-error/5 rounded-xl border border-error/20 flex flex-col vibe-p-6 flex flex-col gap-4">
+        <div className="flex gap-4 vibe-items-start">
+          <div className="vibe-p-2 bg-error/10 vibe-rounded-full">
+            <AlertCircle className="vibe-w-6 vibe-h-6 text-error" />
           </div>
           <div>
-            <h3 className="vibe-text-bold vibe-text-error vibe-mb-1">
+            <h3 className="font-bold text-error vibe-mb-1">
               {t('waitDeliveryTitle')}
             </h3>
-            <p className="vibe-text-muted vibe-text-sm vibe-text-medium vibe-leading-relaxed">
+            <p className="text-muted-foreground vibe-text-sm font-medium leading-relaxed">
               {t('waitDeliveryMessage')}
             </p>
           </div>
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="vibe-text-xs-bold-muted-caps vibe-self-end vibe-hover-foreground vibe-transition"
+          className="text-xs font-bold uppercase tracking-widest text-muted-foreground vibe-self-end vibe-hover-foreground transition-all duration-300"
         >
           {t('cancelButton')}
         </button>
@@ -142,23 +142,23 @@ export function RefundRequestForm({
   if (canCancelNow) {
     return (
       <div className="vibe-card">
-        <h3 className="vibe-text-xl-bold vibe-text-foreground vibe-mb-2">
+        <h3 className="text-xl font-bold text-foreground text-foreground vibe-mb-2">
           {t('cancelOrder')}
         </h3>
-        <p className="vibe-text-sm vibe-text-muted vibe-text-medium vibe-mb-6">
+        <p className="vibe-text-sm text-muted-foreground font-medium mb-6">
           {t('cancelOrderDesc')}
         </p>
-        <div className="vibe-flex-gap-4">
+        <div className="flex gap-4">
           <button
             onClick={() => setIsOpen(false)}
-            className="vibe-flex-1 vibe-button-secondary vibe-h-12"
+            className="flex-1 vibe-button-secondary vibe-h-12"
           >
             {t('cancelButton')}
           </button>
           <button
             onClick={handleCancelOrder}
             disabled={isSubmitting}
-            className="vibe-flex-2 vibe-button-primary vibe-bg-error vibe-hover-error-dark vibe-h-12"
+            className="flex-[2] vibe-button-primary vibe-bg-error hover:bg-error/90 vibe-h-12"
           >
             <XCircle className="vibe-w-5 vibe-h-5" />
             <span>{isSubmitting ? t('cancelling') : t('cancelOrder')}</span>
@@ -171,16 +171,16 @@ export function RefundRequestForm({
   if (isDelivered) {
     return (
       <div className="vibe-card vibe-overflow-hidden">
-        <h3 className="vibe-text-xl-bold vibe-text-foreground vibe-mb-2">
+        <h3 className="text-xl font-bold text-foreground text-foreground vibe-mb-2">
           {t('requestTitle')}
         </h3>
-        <p className="vibe-text-sm vibe-text-muted vibe-text-medium vibe-mb-8">
+        <p className="vibe-text-sm text-muted-foreground font-medium vibe-mb-8">
           {t('requestDescription')}
         </p>
 
-        <form onSubmit={handleSubmitRefund} className="vibe-stack-y-6">
+        <form onSubmit={handleSubmitRefund} className="space-y-6">
           <div className="vibe-stack-y-2">
-            <label className="vibe-text-xs-bold-muted-caps">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {t('reasonLabel')}
             </label>
             <textarea
@@ -189,44 +189,44 @@ export function RefundRequestForm({
               value={reason}
               onChange={e => setReason(e.target.value)}
               placeholder={t('reasonPlaceholder')}
-              className="vibe-input vibe-h-auto vibe-py-3 vibe-resize-none"
+              className="vibe-input h-auto vibe-py-3 resize-none"
             />
           </div>
 
           <div className="vibe-stack-y-2">
-            <label className="vibe-text-xs-bold-muted-caps">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {t('imageLabel')}
             </label>
-            <div className="vibe-relative vibe-group">
+            <div className="relative vibe-group">
               <input
                 type="file"
                 accept="image/*"
                 onChange={e => setImage(e.target.files?.[0] || null)}
-                className="vibe-abs-inset-0 vibe-w-full vibe-h-full vibe-opacity-0 vibe-cursor-pointer vibe-z-10"
+                className="absolute inset-0 vibe-w-full vibe-h-full vibe-opacity-0 vibe-cursor-pointer z-10"
               />
-              <div className="vibe-flex-items-center-gap-3 vibe-px-4 vibe-py-3 vibe-border-dashed vibe-card-rounded group-hover:vibe-border-primary-soft vibe-transition-all vibe-bg-muted-soft">
-                <div className="vibe-p-2 vibe-bg-background vibe-rounded-full group-hover:vibe-bg-primary-soft vibe-transition-all vibe-shadow-xs">
-                  <Camera className="vibe-w-5 vibe-h-5 vibe-text-muted group-hover:vibe-text-primary" />
+              <div className="flex items-center gap-3 px-4 vibe-py-3 vibe-border-dashed vibe-card-rounded group-hover:border-primary/20 transition-all duration-300 bg-muted/30">
+                <div className="vibe-p-2 bg-background vibe-rounded-full group-hover:bg-primary/5 transition-all duration-300 shadow-sm">
+                  <Camera className="vibe-w-5 vibe-h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
-                <span className="vibe-text-sm vibe-text-bold vibe-text-muted group-hover:vibe-text-foreground vibe-overflow-hidden vibe-text-ellipsis vibe-whitespace-nowrap">
+                <span className="vibe-text-sm font-bold text-muted-foreground group-hover:text-foreground vibe-overflow-hidden text-ellipsis vibe-whitespace-nowrap">
                   {image ? image.name : t('imageLabel')}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="vibe-flex-gap-4 vibe-pt-4 vibe-section-divider-top">
+          <div className="flex gap-4 vibe-pt-4 border-t border-border pt-4 mt-4">
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="vibe-flex-1 vibe-button-secondary vibe-h-12"
+              className="flex-1 vibe-button-secondary vibe-h-12"
             >
               {t('cancelButton')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !reason.trim()}
-              className="vibe-flex-2 vibe-button-primary vibe-h-12"
+              className="flex-[2] vibe-button-primary vibe-h-12"
             >
               <Send
                 className={`vibe-w-4 vibe-h-4 ${isSubmitting ? 'vibe-animate-pulse' : ''}`}

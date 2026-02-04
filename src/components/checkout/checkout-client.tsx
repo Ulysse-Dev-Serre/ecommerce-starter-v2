@@ -12,7 +12,7 @@ import { formatPrice } from '@/lib/utils/currency';
 import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { useToast } from '@/components/ui/toast-provider';
-import { siteTokens } from '@/styles/themes/tokens';
+import { siteTokens } from '@/styles/tokens';
 import { CheckoutAddress } from '@/lib/types/ui/checkout';
 import { ShippingRate } from '@/lib/integrations/shippo';
 import {
@@ -65,17 +65,18 @@ export function CheckoutClient({
   const directQuantity = searchParams.get(CHECKOUT_URL_PARAMS.DIRECT_QUANTITY);
   const initialized = useRef(false);
 
+  const directItem =
+    directVariantId && directQuantity
+      ? {
+          variantId: directVariantId,
+          quantity: parseInt(directQuantity),
+        }
+      : undefined;
+
   // 1. Au chargement, on crée une PaymentIntent (ou Session) vide pour avoir le clientSecret
   // C'est nécessaire pour initialiser <Elements> de Stripe
   useEffect(() => {
-    // Si mode direct, on prépare l'objet directItem
-    const directItem =
-      directVariantId && directQuantity
-        ? {
-            variantId: directVariantId,
-            quantity: parseInt(directQuantity),
-          }
-        : undefined;
+    // Si mode direct, on prépare l'objet directItem (déjà calculé au dessus)
 
     if (initialized.current) return;
     initialized.current = true;
@@ -96,11 +97,11 @@ export function CheckoutClient({
 
   if (error)
     return (
-      <div className="vibe-p-4 vibe-text-error">
+      <div className="p-4 text-error">
         {t('error')}: {error}
       </div>
     );
-  if (!clientSecret) return <div className="vibe-p-4">{t('loading')}</div>;
+  if (!clientSecret) return <div className="p-4">{t('loading')}</div>;
 
   return (
     <Elements
@@ -139,6 +140,7 @@ export function CheckoutClient({
         userEmail={userEmail}
         cartId={cartId}
         summaryItems={summaryItems}
+        directItem={directItem}
       />
     </Elements>
   );
@@ -158,6 +160,10 @@ interface CheckoutFormProps {
     currency: string;
     image?: string;
   }>;
+  directItem?: {
+    variantId: string;
+    quantity: number;
+  };
 }
 
 export function CheckoutForm({
@@ -168,6 +174,7 @@ export function CheckoutForm({
   userEmail,
   cartId,
   summaryItems,
+  directItem,
 }: CheckoutFormProps) {
   const t = useTranslations('checkout');
   const tCommon = useTranslations('common');
@@ -198,10 +205,11 @@ export function CheckoutForm({
     city: '',
     state: '',
     postal_code: '',
-    country: 'CA',
+    country: '',
   });
   const [tempName, setTempName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
+  const [email, setEmail] = useState<string>(userEmail || '');
   const [isAddressReady, setIsAddressReady] = useState(false);
 
   // Form validation
@@ -209,13 +217,14 @@ export function CheckoutForm({
     const isReady =
       tempName?.trim() !== '' &&
       phone?.trim().length >= 10 &&
+      email?.trim() !== '' && // Validate Email
       tempAddress?.line1?.trim() !== '' &&
       tempAddress?.city?.trim() !== '' &&
       tempAddress?.state?.trim() !== '' &&
       tempAddress?.postal_code?.trim() !== '' &&
       tempAddress?.country?.trim() !== '';
     setIsAddressReady(isReady);
-  }, [tempName, phone, tempAddress]);
+  }, [tempName, phone, tempAddress, email]);
 
   const [total, setTotal] = useState(initialTotal);
 
@@ -250,7 +259,7 @@ export function CheckoutForm({
 
       const finalShippingDetails = {
         ...detailsToSend,
-        email: userEmail,
+        email: email, // Use local email state
       };
 
       await updatePaymentIntentAction({
@@ -282,17 +291,21 @@ export function CheckoutForm({
         ? cleanPhone
         : `1${cleanPhone}`;
 
-      const data = await getShippingRates(cartId, {
-        name: tempName || t('anonymousCustomer'),
-        street1: tempAddress.line1,
-        street2: tempAddress.line2 || '',
-        city: tempAddress.city,
-        state: tempAddress.state,
-        zip: tempAddress.postal_code,
-        country: tempAddress.country,
-        email: userEmail || '',
-        phone: formattedPhone,
-      });
+      const data = await getShippingRates(
+        cartId,
+        {
+          name: tempName || t('anonymousCustomer'),
+          street1: tempAddress.line1,
+          street2: tempAddress.line2 || '',
+          city: tempAddress.city,
+          state: tempAddress.state,
+          zip: tempAddress.postal_code,
+          country: tempAddress.country,
+          email: email || '', // Use local email state
+          phone: formattedPhone,
+        },
+        directItem ? [directItem] : undefined
+      );
 
       if (data.rates && data.rates.length > 0) {
         setShippingRates(data.rates);
@@ -376,9 +389,9 @@ export function CheckoutForm({
   };
 
   return (
-    <div className="vibe-grid-layout">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
       {/* Left Column: Address & Shipping */}
-      <div className="vibe-grid-main-xl">
+      <div className="lg:col-span-12 xl:col-span-8 space-y-8">
         <AddressSection
           tempAddress={tempAddress}
           setTempAddress={setTempAddress}
@@ -386,6 +399,8 @@ export function CheckoutForm({
           setTempName={setTempName}
           phone={phone}
           setPhone={setPhone}
+          email={email} // Pass email
+          setEmail={setEmail} // Pass setEmail
           isAddressReady={isAddressReady}
           isLoading={isLoading}
           onCalculateShipping={handleCalculateShipping}
@@ -395,7 +410,7 @@ export function CheckoutForm({
 
         {step !== 'address' && (
           <div
-            className={`vibe-mt-6 ${step === 'shipping' ? 'vibe-animate-fade-in' : ''}`}
+            className={`vibe-mt-6 ${step === 'shipping' ? 'duration-500' : ''}`}
           >
             <ShippingSection
               shippingRates={shippingRates}
@@ -412,8 +427,8 @@ export function CheckoutForm({
       </div>
 
       {/* Right Column: Summary & Payment */}
-      <div className="vibe-grid-side-xl">
-        <div className="vibe-checkout-sidebar">
+      <div className="lg:col-span-12 xl:col-span-4 h-full">
+        <div className="sticky top-8 space-y-6">
           <OrderSummary
             summaryItems={summaryItems}
             initialTotal={initialTotal}
@@ -424,13 +439,13 @@ export function CheckoutForm({
           />
 
           {step === 'payment' && (
-            <div className="vibe-container-sm vibe-shadow-lg vibe-animate-fade-in">
+            <div className="max-w-sm mx-auto shadow-lg duration-500">
               <PaymentSection
                 stripe={stripe}
                 elements={elements}
                 selectedRate={selectedRate}
                 onPay={handlePay}
-                userEmail={userEmail}
+                userEmail={email} // Pass current email state
               />
             </div>
           )}

@@ -10,16 +10,35 @@ import {
 /**
  * Récupère tous les produits avec traductions (version simple pour admin)
  */
-export async function getAllProducts(): Promise<ProductWithTranslations[]> {
+export async function getAllProducts(filters?: {
+  status?: string;
+  language?: string;
+}): Promise<ProductWithTranslations[]> {
+  const where: Prisma.ProductWhereInput = {
+    deletedAt: null,
+  };
+
+  if (filters?.status && filters.status !== 'all') {
+    where.status = filters.status as ProductStatus;
+  }
+
   return prisma.product.findMany({
-    where: {
-      deletedAt: null,
-    },
+    where,
     include: {
       translations: true,
+      variants: {
+        where: { deletedAt: null },
+        include: {
+          pricing: true,
+          inventory: true,
+        },
+      },
+      media: {
+        orderBy: { sortOrder: 'asc' },
+      },
     },
     orderBy: {
-      createdAt: 'desc',
+      sortOrder: 'asc',
     },
   });
 }
@@ -63,7 +82,7 @@ export async function createProduct(
           ? new Prisma.Decimal(productData.weight)
           : undefined,
       dimensions: productData.dimensions
-        ? (productData.dimensions as any)
+        ? (productData.dimensions as Prisma.InputJsonValue)
         : undefined,
       translations: productData.translations
         ? {
@@ -97,7 +116,7 @@ export async function updateProduct(
 ): Promise<ProductWithTranslations> {
   const { translations, weight, dimensions, ...productFields } = productData;
 
-  const dataToUpdate: any = {
+  const dataToUpdate: Prisma.ProductUpdateInput = {
     ...productFields,
     updatedAt: new Date(),
   };
@@ -107,7 +126,10 @@ export async function updateProduct(
   }
 
   if (dimensions !== undefined) {
-    dataToUpdate.dimensions = dimensions != null ? (dimensions as any) : null;
+    dataToUpdate.dimensions =
+      dimensions != null
+        ? (dimensions as Prisma.InputJsonValue)
+        : Prisma.DbNull;
   }
 
   const updatedProduct = await prisma.product.update({
@@ -179,7 +201,7 @@ export async function deleteProduct(id: string): Promise<Product> {
 }
 
 /**
- * Suppression définitive d'un produit (pour tests)
+ * Suppression définitive d'un produit (Utilisé pour les tests uniquement)
  */
 export async function hardDeleteProduct(id: string): Promise<Product> {
   const deletedProduct = await prisma.product.delete({
@@ -195,4 +217,35 @@ export async function hardDeleteProduct(id: string): Promise<Product> {
   );
 
   return deletedProduct;
+}
+
+/**
+ * Récupère un produit complet pour l'admin (avec toutes les relations pour l'édition)
+ */
+export async function getProductForAdmin(id: string) {
+  return prisma.product.findUnique({
+    where: { id },
+    include: {
+      translations: true,
+      variants: {
+        where: { deletedAt: null },
+        include: {
+          pricing: true,
+          inventory: true,
+          attributeValues: {
+            include: {
+              attributeValue: {
+                include: {
+                  translations: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      media: {
+        orderBy: { sortOrder: 'asc' },
+      },
+    },
+  });
 }

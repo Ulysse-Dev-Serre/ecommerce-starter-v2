@@ -1,6 +1,7 @@
 import { ProductStatus, Language } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   ProductListFilters,
   ProductListOptions,
@@ -127,6 +128,34 @@ export async function getProducts(
             ...(includeAttributes && {
               attributeValues: {
                 select: {
+                  attributeValue: {
+                    select: {
+                      value: true,
+                      attribute: {
+                        select: {
+                          key: true,
+                          translations: {
+                            where: filters.language
+                              ? { language: filters.language }
+                              : undefined,
+                            select: {
+                              language: true,
+                              name: true,
+                            },
+                          },
+                        },
+                      },
+                      translations: {
+                        where: filters.language
+                          ? { language: filters.language }
+                          : undefined,
+                        select: {
+                          language: true,
+                          displayName: true,
+                        },
+                      },
+                    },
+                  },
                   variantId: true,
                   attributeValueId: true,
                 },
@@ -199,8 +228,9 @@ export async function getProducts(
         ...variant,
         pricing: variant.pricing.map(p => ({
           ...p,
-          price: (p.price as any).toString(),
+          price: p.price.toString(),
         })),
+        attributeValues: (variant as any).attributeValues || [],
       })),
     })) as unknown as ProductProjection[],
     pagination: {
@@ -219,7 +249,7 @@ export async function getProducts(
 export async function getProductBySlug(
   slug: string,
   language?: Language
-): Promise<ProductProjection | null> {
+): Promise<ProductProjection> {
   const product = await prisma.product.findUnique({
     where: { slug, deletedAt: null },
     select: {
@@ -333,7 +363,7 @@ export async function getProductBySlug(
   });
 
   if (!product) {
-    return null;
+    throw new AppError(ErrorCode.NOT_FOUND, `Product not found: ${slug}`, 404);
   }
 
   return {
@@ -342,7 +372,7 @@ export async function getProductBySlug(
       ...variant,
       pricing: variant.pricing.map(p => ({
         ...p,
-        price: (p.price as any).toString(),
+        price: p.price.toString(),
       })),
     })),
   } as unknown as ProductProjection;

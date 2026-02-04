@@ -87,44 +87,46 @@ export function ProductActions({
   };
 
   return (
-    <div className={compact ? 'vibe-stack-y-3' : 'vibe-stack-y-6'}>
+    <div className={compact ? 'space-y-3' : 'space-y-6'}>
       {showQuantitySelector && (
-        <div className="vibe-flex-items-center-gap-4">
+        <div className="flex items-center gap-4">
           {!compact && (
-            <span className="vibe-text-xs-bold-muted-caps">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {tCommon('quantity')}
             </span>
           )}
-          <div className="vibe-quantity-selector">
+          <div className="flex items-center bg-muted/50 rounded-lg p-1 border border-border/50 h-10">
             <button
               onClick={decrementQuantity}
               disabled={disabled || quantity <= 1}
-              className="vibe-quantity-btn"
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
             >
-              <Minus className="vibe-icon-xxs" />
+              <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="vibe-text-center-mono">{quantity}</span>
+            <span className="w-10 text-center font-bold text-foreground">
+              {quantity}
+            </span>
             <button
               onClick={incrementQuantity}
               disabled={disabled || quantity >= maxQuantity}
-              className="vibe-quantity-btn"
+              className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
             >
-              <Plus className="vibe-icon-xxs" />
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>
       )}
 
-      <div className={compact ? 'vibe-flex-col-gap-3' : 'vibe-flex-row-gap-3'}>
+      <div className={compact ? 'flex flex-col gap-3' : 'flex flex-row gap-3'}>
         <button
           onClick={handleAddToCart}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className="vibe-button-primary vibe-flex-grow vibe-btn-sm-h10"
+          className="vibe-button-primary flex-grow h-10 px-6"
         >
           {isAddingToCart ? (
-            <Loader2 className="vibe-icon-sm vibe-icon-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            <ShoppingCart className="vibe-icon-sm" />
+            <ShoppingCart className="h-5 w-5" />
           )}
           <span>{isAddingToCart ? t('adding') : t('addToCart')}</span>
         </button>
@@ -132,12 +134,12 @@ export function ProductActions({
         <button
           onClick={handleBuyNow}
           disabled={disabled || isAddingToCart || isBuyingNow}
-          className="vibe-button-buy-now vibe-flex-grow vibe-btn-sm-h10"
+          className="vibe-button-secondary bg-foreground text-background hover:opacity-90 flex-grow h-10 px-6"
         >
           {isBuyingNow ? (
-            <Loader2 className="vibe-icon-sm vibe-icon-spin" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
-            <Zap className="vibe-icon-sm fill-current" />
+            <Zap className="h-5 w-5 fill-current" />
           )}
           <span>{isBuyingNow ? t('buying') : t('buyNow')}</span>
         </button>

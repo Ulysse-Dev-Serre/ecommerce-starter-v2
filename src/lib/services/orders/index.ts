@@ -9,7 +9,7 @@ export * from './order-fulfillment.service';
 
 // Order Refunds - Désormais géré dans le module payments
 // Réexport pour compatibilité avec le code existant
-export { updateOrderStatus, processRefund } from '@/lib/services/payments';
+export { processRefund } from '@/lib/services/payments';
 
 // Order Notifications - Envoi d'emails
 export * from './order-notifications.service';

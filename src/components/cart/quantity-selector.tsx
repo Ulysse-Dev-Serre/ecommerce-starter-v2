@@ -88,19 +88,19 @@ export function QuantitySelector({
   const t = useTranslations('cart');
 
   return (
-    <div className="vibe-flex-center-gap-2">
-      <div className="vibe-quantity-selector">
+    <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center bg-muted/50 rounded-lg p-1 border border-border/50 h-10">
         <button
           type="button"
           onClick={decrement}
           disabled={quantity <= 1 || isLoading}
-          className="vibe-quantity-btn"
+          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
           aria-label={t('decreaseQuantity')}
         >
           {isLoading ? (
-            <Loader2 className="vibe-icon-xxs vibe-icon-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Minus className="vibe-icon-xxs" />
+            <Minus className="h-3.5 w-3.5" />
           )}
         </button>
 
@@ -109,7 +109,7 @@ export function QuantitySelector({
           value={quantity}
           onChange={handleInputChange}
           disabled={isLoading}
-          className="vibe-quantity-input"
+          className="w-10 text-center border-none focus:ring-0 font-bold text-sm bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           min="1"
           max={maxQuantity}
         />
@@ -118,13 +118,13 @@ export function QuantitySelector({
           type="button"
           onClick={increment}
           disabled={quantity >= maxQuantity || isLoading}
-          className="vibe-quantity-btn"
+          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
           aria-label={t('increaseQuantity')}
         >
           {isLoading ? (
-            <Loader2 className="vibe-icon-xxs vibe-icon-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Plus className="vibe-icon-xxs" />
+            <Plus className="h-3.5 w-3.5" />
           )}
         </button>
       </div>

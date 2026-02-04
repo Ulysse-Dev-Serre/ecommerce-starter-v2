@@ -27,7 +27,7 @@ export function AddLocationModal({
     name: initialData?.name || '',
     type: initialData?.type || 'LOCAL_STOCK', // Default
     address: {
-      name: initialData?.address?.name || 'Default',
+      name: initialData?.address?.name || '',
       street1: initialData?.address?.street1 || '',
       street2: initialData?.address?.street2 || '',
       city: initialData?.address?.city || '',
@@ -138,6 +138,20 @@ export function AddLocationModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-xs font-medium admin-text-subtle mb-1">
+                  {t('senderName')}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.address.name}
+                  onChange={e => updateAddress('name', e.target.value)}
+                  className="admin-input text-sm"
+                  placeholder={t('senderNamePlaceholder')}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-medium admin-text-subtle mb-1">
                   {t('street')}
                 </label>
                 <input
@@ -215,6 +229,7 @@ export function AddLocationModal({
                 </label>
                 <input
                   type="email"
+                  required
                   value={formData.address.email || ''}
                   onChange={e => updateAddress('email', e.target.value)}
                   className="admin-input text-sm"
@@ -227,6 +242,7 @@ export function AddLocationModal({
                 </label>
                 <input
                   type="text"
+                  required
                   value={formData.address.phone || ''}
                   onChange={e => updateAddress('phone', e.target.value)}
                   className="admin-input text-sm"

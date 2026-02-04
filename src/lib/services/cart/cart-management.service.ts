@@ -1,9 +1,9 @@
-import { CartStatus } from '@/generated/prisma';
-import { prisma } from '@/lib/core/db';
+import { Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
-import { SITE_CURRENCY } from '@/lib/config/site';
 import { CartProjection } from '@/lib/types/domain/cart';
 import { Cart } from '@/lib/types/ui/cart';
+import { cartRepository } from '@/lib/repositories/cart.repository';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
  * Get detailed cart data for the cart page (including translations and primary media)
@@ -13,61 +13,8 @@ export async function getCartPageData(
   anonymousId?: string,
   locale?: string
 ): Promise<Cart | null> {
-  const language = (locale?.toUpperCase() || 'FR') as any;
-
-  const cart = await prisma.cart.findFirst({
-    where: userId
-      ? { userId, status: 'ACTIVE' }
-      : { anonymousId, status: 'ACTIVE' },
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: {
-              pricing: {
-                where: { isActive: true, priceType: 'base' },
-              },
-              product: {
-                include: {
-                  translations: {
-                    where: { language },
-                  },
-                  media: {
-                    where: { isPrimary: true },
-                    take: 1,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!cart) return null;
-
-  // Manual serialization of Decimal and nested objects for Server -> Client pass
-  return {
-    ...cart,
-    items: cart.items.map(item => ({
-      ...item,
-      variant: {
-        ...item.variant,
-        weight: item.variant.weight ? Number(item.variant.weight) : null,
-        pricing: item.variant.pricing.map(p => ({
-          ...p,
-          price: p.price.toString(),
-        })),
-        product: {
-          ...item.variant.product,
-          weight: item.variant.product.weight
-            ? Number(item.variant.product.weight)
-            : null,
-        },
-      },
-    })),
-  } as unknown as Cart;
+  const language = (locale?.toUpperCase() || 'FR') as Language;
+  return cartRepository.getRichCart({ userId, anonymousId, language });
 }
 
 /**
@@ -78,125 +25,17 @@ export async function getOrCreateCart(
   anonymousId?: string
 ): Promise<CartProjection> {
   if (!userId && !anonymousId) {
-    throw new Error('Either userId or anonymousId is required');
+    throw new AppError(
+      ErrorCode.INVALID_INPUT,
+      'Either userId or anonymousId is required',
+      400
+    );
   }
 
-  const where: any = {
-    status: CartStatus.ACTIVE,
-  };
-
-  if (userId) {
-    where.userId = userId;
-  } else {
-    where.anonymousId = anonymousId;
-  }
-
-  let cart = await prisma.cart.findFirst({
-    where,
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: {
-              product: {
-                select: {
-                  id: true,
-                  slug: true,
-                  translations: {
-                    select: {
-                      language: true,
-                      name: true,
-                    },
-                  },
-                },
-              },
-              pricing: {
-                where: { isActive: true },
-                select: {
-                  price: true,
-                  currency: true,
-                },
-              },
-              inventory: {
-                select: {
-                  stock: true,
-                  trackInventory: true,
-                  allowBackorder: true,
-                },
-              },
-              media: {
-                where: { isPrimary: true },
-                select: {
-                  url: true,
-                  alt: true,
-                  isPrimary: true,
-                },
-                take: 1,
-              },
-            },
-          },
-        },
-      },
-    },
-  });
+  let cart = await cartRepository.findActiveCart({ userId, anonymousId });
 
   if (!cart) {
-    cart = await prisma.cart.create({
-      data: {
-        userId: userId ?? null,
-        anonymousId: anonymousId ?? null,
-        status: CartStatus.ACTIVE,
-        currency: SITE_CURRENCY,
-        expiresAt: userId
-          ? null
-          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 jours pour invités
-      },
-      include: {
-        items: {
-          include: {
-            variant: {
-              include: {
-                product: {
-                  select: {
-                    id: true,
-                    slug: true,
-                    translations: {
-                      select: {
-                        language: true,
-                        name: true,
-                      },
-                    },
-                  },
-                },
-                pricing: {
-                  where: { isActive: true },
-                  select: {
-                    price: true,
-                    currency: true,
-                  },
-                },
-                inventory: {
-                  select: {
-                    stock: true,
-                    trackInventory: true,
-                    allowBackorder: true,
-                  },
-                },
-                media: {
-                  where: { isPrimary: true },
-                  select: {
-                    url: true,
-                    alt: true,
-                    isPrimary: true,
-                  },
-                  take: 1,
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    cart = await cartRepository.createCart({ userId, anonymousId });
 
     logger.info(
       {
@@ -209,77 +48,19 @@ export async function getOrCreateCart(
     );
   }
 
-  const serializedCart = {
-    ...cart,
-    items: cart.items.map(item => ({
-      ...item,
-      variant: {
-        ...item.variant,
-        pricing: item.variant.pricing.map(p => ({
-          ...p,
-          price: (p.price as any).toString(),
-        })),
-      },
-    })),
-  };
-
-  return serializedCart as unknown as CartProjection;
+  return cart;
 }
 
 /**
  * Clean invalid cart items (deleted products, out of stock without backorder)
  */
 export async function cleanInvalidCartItems(cartId: string): Promise<number> {
-  const cart = await prisma.cart.findUnique({
-    where: { id: cartId },
-    include: {
-      items: {
-        include: {
-          variant: {
-            include: {
-              inventory: true,
-              product: {
-                select: {
-                  status: true,
-                  deletedAt: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!cart) {
-    return 0;
-  }
-
-  const invalidItems = cart.items.filter(item => {
-    const variant = item.variant;
-    const product = variant.product;
-
-    if (product.deletedAt !== null) return true;
-    if (product.status !== 'ACTIVE') return true;
-
-    if (
-      variant.inventory?.trackInventory &&
-      !variant.inventory.allowBackorder
-    ) {
-      if (variant.inventory.stock < item.quantity) return true;
-    }
-
-    return false;
-  });
+  const invalidItems = await cartRepository.getInvalidItems(cartId);
 
   if (invalidItems.length > 0) {
-    await prisma.cartItem.deleteMany({
-      where: {
-        id: {
-          in: invalidItems.map(item => item.id),
-        },
-      },
-    });
+    for (const item of invalidItems) {
+      await cartRepository.removeItem(item.id);
+    }
 
     logger.info(
       {
@@ -298,9 +79,7 @@ export async function cleanInvalidCartItems(cartId: string): Promise<number> {
  * Clear all items from a cart after successful purchase
  */
 export async function clearCart(cartId: string): Promise<void> {
-  await prisma.cartItem.deleteMany({
-    where: { cartId },
-  });
+  await cartRepository.clearCartItems(cartId);
 
   logger.info(
     {

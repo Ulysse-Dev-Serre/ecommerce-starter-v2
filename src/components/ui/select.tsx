@@ -12,18 +12,16 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="vibe-full">
         {label && (
-          <label className="vibe-text-xs-bold-muted-caps vibe-mb-1-5">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground vibe-mb-1-5">
             {label}
-            {props.required && (
-              <span className="vibe-form-required vibe-ml-1">*</span>
-            )}
+            {props.required && <span className="text-error ml-1 ml-1">*</span>}
           </label>
         )}
         <select
           ref={ref}
           className={cn(
             'vibe-input vibe-appearance-none vibe-bg-select vibe-pr-10',
-            error && 'vibe-border-error vibe-focus-error',
+            error && 'vibe-border-error focus:ring-error/20 focus:border-error',
             className
           )}
           {...props}
@@ -38,9 +36,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && (
-          <p className="vibe-mt-1-5 vibe-text-xs vibe-text-error vibe-text-bold">
-            {error}
-          </p>
+          <p className="mt-1.5 vibe-text-xs text-error font-bold">{error}</p>
         )}
       </div>
     );

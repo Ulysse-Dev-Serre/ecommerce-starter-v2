@@ -264,6 +264,7 @@
         "productCreated": "Product created successfully!",
         "productUpdated": "Product updated successfully!",
         "productDeleted": "Product deleted successfully!",
+        "validationError": "Some form fields are invalid. Please correct them.",
         "variantsAdded": "New variants added successfully!",
         "variantUpdated": "Variant updated successfully!",
         "variantDeleted": "Variant deleted successfully!",
@@ -321,6 +322,8 @@
       "locationName": "Location Name (e.g. Main Warehouse)",
       "locationType": "Location Type",
       "originAddress": "Origin Address (for rate calculation)",
+      "senderName": "Sender Name (Customs Signer)",
+      "senderNamePlaceholder": "Responsible person's full name",
       "street": "Street Address",
       "streetPlaceholder": "123 Example St",
       "city": "City",
@@ -331,9 +334,9 @@
       "zipPlaceholder": "10001",
       "country": "Country (2-letter ISO code)",
       "countryPlaceholder": "US",
-      "email": "Contact Email (Optional)",
+      "email": "Contact Email",
       "emailPlaceholder": "logistics@example.com",
-      "phone": "Phone (Optional)",
+      "phone": "Phone",
       "localStock": "Local Stock (Warehouse)",
       "dropshipper": "Dropshipper",
       "other": "Other"
@@ -372,7 +375,10 @@
     },
     "noShippingRates": "No shipping rates found for this address.",
     "edit": "Edit",
-    "continueToPayment": "Continue to Payment"
+    "continueToPayment": "Continue to Payment",
+    "email": "Email Address",
+    "emailPlaceholder": "your@email.com",
+    "errorFetchingRates": "Unable to calculate shipping rates. Please check your address."
   },
   "footer": {
     "about": "About",
@@ -561,10 +567,12 @@
     "processing": "Processing your payment...",
     "title": "Payment Successful!",
     "message": "Your order has been confirmed and is being processed.",
+    "guestMessage": "Your order has been confirmed successfully. A confirmation email has been sent to your address.",
     "orderNumber": "Order Number",
     "sessionId": "Transaction ID",
     "waitMessage": "Please wait while we confirm your order...",
     "backToShop": "Back to shop",
+    "checkEmail": "Check my emails",
     "error": "An error occurred while verifying the order.",
     "timeout": "Order verification timeout. Please check your email for confirmation.",
     "noId": "No session or payment ID provided.",
@@ -599,6 +607,12 @@
     "orders": {
       "title": "Orders",
       "subtitle": "Manage and track customer orders",
+      "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "orders": "orders"
+      },
       "table": {
         "order": "Order",
         "customer": "Customer",
@@ -675,7 +689,19 @@
         "printLabel": "Print Label",
         "purchaseLabel": "Purchase & Generate Label",
         "successPurchase": "Label purchased successfully",
-        "errorPurchase": "Failed to purchase label"
+        "errorPurchase": "Failed to purchase label",
+        "purchaseConfirmPrice": "The real cost of this label is {price}.",
+        "purchaseConfirmPaid": "Customer paid: {amount}.",
+        "purchaseConfirmQuestion": "Do you want to proceed and purchase this label?",
+        "errorPrefix": "Error: {message}",
+        "na": "N/A",
+        "packingInstructions": "Packing Instructions",
+        "noPackingInstructions": "No packing instructions available for this order.",
+        "packingListOptimized": "Packing List (3D Optimized)",
+        "parcel": "Parcel",
+        "dimensions": "Dimensions",
+        "weight": "Weight",
+        "contents": "Contents"
       }
     },
     "customers": {

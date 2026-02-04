@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { FormInput } from '@/components/ui/form-input';
 import { FormSelect } from '@/components/ui/form-select';
+import { Card } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
 
 import AddressAutocomplete from './AddressAutocomplete';
@@ -19,6 +20,8 @@ interface AddressSectionProps {
   setTempAddress: (address: CheckoutAddress) => void;
   tempName: string;
   setTempName: (name: string) => void;
+  email: string;
+  setEmail: (email: string) => void;
   phone: string;
   setPhone: (phone: string) => void;
   isAddressReady: boolean;
@@ -33,6 +36,8 @@ export function AddressSection({
   setTempAddress,
   tempName,
   setTempName,
+  email,
+  setEmail,
   phone,
   setPhone,
   isAddressReady,
@@ -75,37 +80,45 @@ export function AddressSection({
 
   if (readOnly) {
     return (
-      <section className="vibe-section-card vibe-border-primary/20 vibe-bg-primary/5">
-        <div className="vibe-flex-between-items-center vibe-mb-4">
-          <h2 className="vibe-text-lg-bold vibe-text-primary">
+      <Card className="border-primary/20 bg-primary/5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="vibe-text-lg-bold text-primary">
             {t('shippingAddress')}
           </h2>
-          <button onClick={onEdit} className="vibe-link-action vibe-text-sm">
+          <button
+            onClick={onEdit}
+            className="text-primary font-bold hover:underline underline-offset-4 inline-flex items-center vibe-text-sm"
+          >
             {t('edit')}
           </button>
         </div>
-        <div className="vibe-text-medium-foreground vibe-leading-relaxed">
+        <div className="font-medium text-foreground leading-relaxed">
           <p className="vibe-mb-1 vibe-font-bold">{tempName}</p>
+          <p className="vibe-text-sm vibe-text-muted-foreground vibe-mb-2">
+            {email}
+          </p>
           <p>{tempAddress.line1}</p>
           {tempAddress.line2 && <p>{tempAddress.line2}</p>}
           <p>
             {tempAddress.city}, {tempAddress.state} {tempAddress.postal_code}
           </p>
           <p>{tempAddress.country}</p>
-          <p className="vibe-mt-2 vibe-text-sm vibe-text-muted-foreground">
+          <p className="mt-2 vibe-text-sm vibe-text-muted-foreground">
             {phone}
           </p>
         </div>
-      </section>
+      </Card>
     );
   }
 
   return (
-    <section className="vibe-container-sm">
-      <h2 className="vibe-section-title">{t('shippingAddress')}</h2>
-      <div className="vibe-stack-y-4">
-        {/* Name & Phone */}
-        <div className="vibe-grid-form">
+    <Card className="p-6">
+      <h2 className="text-xl font-bold mb-6 text-foreground border-b border-border pb-4">
+        {t('shippingAddress')}
+      </h2>
+      <div className="space-y-4">
+        {/* Name & Email & Phone */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormInput
             label={t('fullName')}
             required
@@ -113,17 +126,28 @@ export function AddressSection({
             onChange={e => setTempName(e.target.value)}
           />
 
+          <FormInput
+            label={t('email')} // Assurez-vous d'avoir la clé de traduction 'email'
+            type="email"
+            required
+            placeholder={t('emailPlaceholder')}
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+          />
+
           <div>
-            <label className="vibe-form-label">
-              {t('phone')} <span className="vibe-form-required">*</span>
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
+              {t('phone')} <span className="text-error ml-1">*</span>
             </label>
-            <div className="vibe-flex-row">
-              <span className="vibe-input-prefix">{PHONE_PREFIX}</span>
+            <div className="flex">
+              <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm">
+                {PHONE_PREFIX}
+              </span>
               <FormInput
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                className="vibe-rounded-l-none"
+                className="rounded-l-none"
               />
             </div>
           </div>
@@ -131,8 +155,8 @@ export function AddressSection({
 
         {/* Address Line 1 (Autocomplete restricted to instance Country) */}
         <div>
-          <label className="vibe-form-label">
-            {t('addressLine1')} <span className="vibe-form-required">*</span>
+          <label className="block text-sm font-medium text-muted-foreground mb-1">
+            {t('addressLine1')} <span className="text-error ml-1">*</span>
           </label>
           <AddressAutocomplete
             onAddressSelect={selected => {
@@ -153,7 +177,7 @@ export function AddressSection({
             }}
             value={tempAddress?.line1 || ''}
             placeholder={t('addressPlaceholder')}
-            className="vibe-input-raw"
+            className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
             countryRestriction={instanceCountryCode.toLowerCase()}
           />
         </div>
@@ -168,14 +192,14 @@ export function AddressSection({
         />
 
         {/* Country (Read-Only) & City */}
-        <div className="vibe-grid-form">
-          <div className="vibe-md-col-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-1">
             <FormInput
               label={t('country')}
               value={instanceCountryCode}
               disabled
               readOnly
-              className="vibe-input-readonly"
+              className="bg-muted text-muted-foreground opacity-100 cursor-not-allowed"
             />
           </div>
 
@@ -190,7 +214,7 @@ export function AddressSection({
         </div>
 
         {/* State & Zip Row */}
-        <div className="vibe-grid-form">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {provinceOptions.length > 0 ? (
             <FormSelect
               label={t('state')}
@@ -233,20 +257,20 @@ export function AddressSection({
         </div>
       </div>
 
-      <div className="vibe-mt-8">
+      <div className="mt-8">
         <button
           onClick={onCalculateShipping}
-          disabled={!isAddressReady || isLoading || !phone}
-          className={`vibe-button-primary vibe-btn-full-lg vibe-h-12
+          disabled={!isAddressReady || isLoading || !phone || !email}
+          className={`vibe-button-primary w-full h-12 vibe-h-12
             ${
-              isAddressReady && !isLoading && phone
+              isAddressReady && !isLoading && phone && email
                 ? ''
-                : 'vibe-opacity-50 vibe-cursor-not-allowed vibe-shadow-none'
+                : 'opacity-50 vibe-cursor-not-allowed vibe-shadow-none'
             }`}
         >
           {isLoading ? (
-            <div className="vibe-loader-container">
-              <Loader2 className="vibe-loader-icon" />
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" />
               {t('calculating')}
             </div>
           ) : (
@@ -254,6 +278,6 @@ export function AddressSection({
           )}
         </button>
       </div>
-    </section>
+    </Card>
   );
 }

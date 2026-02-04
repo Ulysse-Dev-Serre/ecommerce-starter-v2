@@ -1,8 +1,8 @@
-import { prisma } from '@/lib/core/db';
 import { ConversionFunnel } from '@/components/admin/analytics/conversion-funnel';
 import { SourceTable } from '@/components/admin/analytics/source-table';
 import { AnalyticsStatsGrid } from '@/components/admin/analytics/analytics-stats-grid';
 import { getTranslations } from 'next-intl/server';
+import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,34 +17,10 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     namespace: 'adminDashboard.analytics',
   });
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  // 1. Fetch Funnel Data
-  const [sessions, productViews, cartAdds, checkouts, purchases] =
-    await Promise.all([
-      prisma.analyticsEvent.count({
-        where: { eventType: 'page_view', createdAt: { gte: thirtyDaysAgo } },
-      }),
-      prisma.analyticsEvent.count({
-        where: { eventType: 'view_item', createdAt: { gte: thirtyDaysAgo } },
-      }),
-      prisma.analyticsEvent.count({
-        where: { eventType: 'add_to_cart', createdAt: { gte: thirtyDaysAgo } },
-      }),
-      prisma.analyticsEvent.count({
-        where: {
-          eventType: 'begin_checkout',
-          createdAt: { gte: thirtyDaysAgo },
-        },
-      }),
-      prisma.order.count({
-        where: {
-          createdAt: { gte: thirtyDaysAgo },
-          status: { not: 'CANCELLED' },
-        },
-      }),
-    ]);
+  // 1. Fetch data from Service
+  const { funnel, sourceVisitors, sourceStats } =
+    await AnalyticsService.getAnalyticsSummary(30);
+  const { sessions, productViews, cartAdds, checkouts, purchases } = funnel;
 
   const funnelData = [
     { stage: t('stages.sessions'), count: sessions, percentage: 100 },
@@ -71,26 +47,13 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     },
   ];
 
-  // 2. Fetch Source Data
-  const sourceStats = await prisma.order.groupBy({
-    by: ['utmSource'],
-    _count: { _all: true },
-    _sum: { totalAmount: true },
-    where: { createdAt: { gte: thirtyDaysAgo } },
-  });
-
-  const sourceVisitors = await prisma.analyticsEvent.groupBy({
-    by: ['utmSource'],
-    _count: { _all: true },
-    where: { eventType: 'page_view', createdAt: { gte: thirtyDaysAgo } },
-  });
-
+  // 2. Process Source Data
   const tableData = sourceVisitors
     .map(v => {
       const stats = sourceStats.find(s => s.utmSource === v.utmSource);
       const visitors = v._count._all;
-      const orders = stats?._count._all || 0;
-      const revenue = Number(stats?._sum.totalAmount || 0);
+      const orders = stats?._count?._all || 0;
+      const revenue = Number(stats?._sum?.totalAmount || 0);
       return {
         source: v.utmSource || t('sourceTable.directOrganic'),
         visitors,

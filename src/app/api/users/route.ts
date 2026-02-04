@@ -1,43 +1,44 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '../../../lib/core/logger';
-import { withAdmin } from '../../../lib/middleware/withAuth';
-import { withError } from '../../../lib/middleware/withError';
-import { getAllUsers } from '../../../lib/services/users';
+import { logger } from '@/lib/core/logger';
+import { withAdmin } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { getAllUsers } from '@/lib/services/users';
 
-// PROTECTED: Admin only
-async function getUsers(): Promise<NextResponse> {
-  logger.info({ action: 'get_all_users' }, 'Fetching all users');
+import { userSearchSchema } from '@/lib/validators/user';
 
-  const users = await getAllUsers();
+async function getUsers(req: NextRequest): Promise<NextResponse> {
+  const requestId = req.headers.get('X-Request-ID') || crypto.randomUUID();
+  const { searchParams } = new URL(req.url);
+
+  // Step 1: Validation
+  // Zod coerce automatically converts strings to numbers/booleans where required
+  const filters = userSearchSchema.parse({
+    page: searchParams.get('page'),
+    limit: searchParams.get('limit'),
+    search: searchParams.get('search'),
+    role: searchParams.get('role'),
+  });
 
   logger.info(
-    {
-      action: 'users_fetched_successfully',
-      count: users.length,
-    },
-    `Retrieved ${users.length} users`
+    { requestId, action: 'get_all_users', filters },
+    'Fetching users'
   );
 
+  // Step 2: Service Call
+  const result = await getAllUsers(filters);
+
+  // Distinct return logic for paginated list vs old flat list
   return NextResponse.json({
     success: true,
-    count: users.length,
-    users,
+    requestId,
+    data: result.users,
+    pagination: result.pagination,
     timestamp: new Date().toISOString(),
   });
 }
 
-// NOTE: Actual Profile Updates are usually done via Clerk Webhooks or specific user endpoints.
-// If this route is intended for Admin updates of users, we'd implement a POST/PUT here.
-// Currently the user request specified 'api/users/route.ts' (POST/PUT - Profile updates) in the plan.
-// But the current file ONLY has GET.
-// I will assume for now we just want to SECURE the GET if it was mutable, but it is GET.
-// Wait, the plan said "POST/PUT - Profile updates". I should probably add the capability or skip if not present.
-// Looking at the code, it seems `api/users` is currently read-only for admins.
-// There is no POST/PUT to secure yet.
-// I will respect the plan but if code doesn't exist, I cannot "secure" it. I can only create it if that was the intent.
-// Given the context is "Securing", I should not add *new features* unless implicitly required.
-// I will skip adding POST/PUT if it doesn't exist, to avoid scope creep.
-// I will just leave GET as is (secured by withAdmin).
-
-export const GET = withError(withAdmin(getUsers));
+export const GET = withError(
+  withRateLimit(withAdmin(getUsers), RateLimits.STRICT)
+);

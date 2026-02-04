@@ -1,36 +1,106 @@
-import { Language } from '@/generated/prisma';
+import { Language, OrderStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
+import {
+  orderRepository,
+  OrderFilters,
+  PaginationParams,
+} from '@/lib/repositories/order.repository';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { updateOrderStatus as updateOrderLogic } from '@/lib/services/payments/payment-refund.service';
+import { cache } from '@/lib/core/cache';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+import { sendStatusChangeEmail } from './order-notifications.service';
+
+/**
+ * Workflow de transition d'état valide
+ */
+export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+  [OrderStatus.PAID]: [
+    OrderStatus.SHIPPED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.SHIPPED]: [
+    OrderStatus.IN_TRANSIT,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.IN_TRANSIT]: [
+    OrderStatus.DELIVERED,
+    OrderStatus.REFUNDED,
+    OrderStatus.REFUND_REQUESTED,
+  ],
+  [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED, OrderStatus.REFUND_REQUESTED],
+  [OrderStatus.REFUND_REQUESTED]: [
+    OrderStatus.REFUNDED,
+    OrderStatus.PAID,
+    OrderStatus.SHIPPED,
+    OrderStatus.DELIVERED,
+  ],
+  [OrderStatus.CANCELLED]: [],
+  [OrderStatus.REFUNDED]: [],
+};
 
 /**
  * Récupère une commande par son ID
  * Vérifie que la commande appartient bien à l'utilisateur
  */
-export async function getOrderById(orderId: string, userId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      items: true,
-      payments: true,
-      shipments: true,
-    },
-  });
+// Helper to map Prisma Decimal to number
+function mapToOrderWithIncludes(order: any): OrderWithIncludes {
+  return {
+    ...order,
+    subtotalAmount: Number(order.subtotalAmount),
+    taxAmount: Number(order.taxAmount),
+    shippingAmount: Number(order.shippingAmount),
+    discountAmount: Number(order.discountAmount),
+    totalAmount: Number(order.totalAmount),
+    items: order.items.map((item: any) => ({
+      ...item,
+      unitPrice: Number(item.unitPrice),
+      totalPrice: Number(item.totalPrice),
+    })),
+    payments:
+      order.payments?.map((payment: any) => ({
+        ...payment,
+        amount: Number(payment.amount),
+      })) || [],
+  };
+}
+
+export async function getOrderById(
+  orderId: string,
+  userId: string
+): Promise<OrderWithIncludes> {
+  const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   if (order.userId !== userId) {
-    throw new Error('Unauthorized: This order does not belong to you');
+    throw new AppError(
+      ErrorCode.FORBIDDEN,
+      'Unauthorized: This order does not belong to you',
+      403
+    );
   }
 
-  return order;
+  return mapToOrderWithIncludes(order);
 }
 
 /**
  * Récupère les données minimales d'une commande pour SEO/Metadata
  */
 export async function getOrderMetadata(idOrNumber: string) {
-  return prisma.order.findFirst({
+  const cacheKey = `order:metadata:${idOrNumber}`;
+  const cached = await cache.get<{ orderNumber: string } | null>(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
+  const order = await prisma.order.findFirst({
     where: {
       OR: [{ id: idOrNumber }, { orderNumber: idOrNumber }],
     },
@@ -38,6 +108,13 @@ export async function getOrderMetadata(idOrNumber: string) {
       orderNumber: true,
     },
   });
+
+  if (order) {
+    // Cache for 24 hours as order number never changes
+    await cache.set(cacheKey, order, 24 * 60 * 60);
+  }
+
+  return order;
 }
 
 /**
@@ -45,6 +122,7 @@ export async function getOrderMetadata(idOrNumber: string) {
  * Vérifie que la commande appartient bien à l'utilisateur
  */
 export async function getOrderByNumber(orderNumber: string, userId: string) {
+  // Optionnel: On pourrait ajouter findByNumber dans le repository if needed
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: {
@@ -55,14 +133,18 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
   });
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   if (order.userId !== userId) {
-    throw new Error('Unauthorized: This order does not belong to you');
+    throw new AppError(
+      ErrorCode.FORBIDDEN,
+      'Unauthorized: This order does not belong to you',
+      403
+    );
   }
 
-  return order;
+  return mapToOrderWithIncludes(order);
 }
 
 /**
@@ -196,53 +278,84 @@ export async function getUserOrders(userId: string) {
 }
 
 /**
+ * Liste des commandes pour l'admin avec filtres et pagination
+ */
+export async function listOrdersAdmin(
+  filters: OrderFilters,
+  pagination: PaginationParams
+) {
+  const [orders, total] = await Promise.all([
+    orderRepository.findMany(filters, pagination),
+    orderRepository.count(filters),
+  ]);
+
+  const totalPages = Math.ceil(total / pagination.limit);
+
+  return {
+    orders,
+    pagination: {
+      ...pagination,
+      total,
+      totalPages,
+    },
+  };
+}
+
+/**
  * Récupère une commande par ID pour l'admin (sans restriction utilisateur)
  */
 export async function getOrderByIdAdmin(orderId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          clerkId: true,
-        },
-      },
-      items: {
-        include: {
-          product: {
-            select: {
-              id: true,
-              slug: true,
-              translations: true,
-              media: {
-                where: { isPrimary: true },
-                take: 1,
-              },
-            },
-          },
-          variant: {
-            select: {
-              id: true,
-              sku: true,
-            },
-          },
-        },
-      },
-      payments: true,
-      shipments: true,
-      statusHistory: {
-        orderBy: { createdAt: 'desc' },
-      },
-    },
-  });
+  const order = await orderRepository.findById(orderId);
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
   }
 
   return order;
+}
+
+/**
+ * Met à jour le statut d'une commande (Admin)
+ * Inclut la validation du workflow de transition
+ */
+export async function updateOrderStatus(params: {
+  orderId: string;
+  status: OrderStatus;
+  comment?: string;
+  userId?: string;
+}) {
+  const { orderId, status: newStatus, comment, userId } = params;
+
+  // 1. Récupérer l'état actuel
+  const order = await orderRepository.findById(orderId);
+  if (!order) {
+    throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
+  }
+
+  // 2. Valider la transition
+  const validTransitions =
+    VALID_STATUS_TRANSITIONS[order.status as OrderStatus] || [];
+  if (!validTransitions.includes(newStatus)) {
+    throw new AppError(
+      ErrorCode.VALIDATION_ERROR,
+      `Invalid status transition from ${order.status} to ${newStatus}`,
+      400
+    );
+  }
+
+  // 3. Déléguer la logique complexe (Stripe/Stock) au service dédié
+  const updatedOrder = await updateOrderLogic({
+    orderId,
+    status: newStatus,
+    comment,
+    userId,
+  });
+
+  // 4. Envoyer l'email de notification (Fire & Forget)
+  sendStatusChangeEmail(updatedOrder, newStatus).catch((error: unknown) => {
+    // On loggue l'erreur mais on ne bloque pas la réponse car la mise à jour DB est faite
+    console.error('Failed to send status change email:', error);
+  });
+
+  return updatedOrder;
 }
