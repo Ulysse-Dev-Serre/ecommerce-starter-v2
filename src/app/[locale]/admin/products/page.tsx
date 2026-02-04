@@ -4,50 +4,24 @@ import { ProductsList } from '@/components/admin/products/products-list';
 
 export const dynamic = 'force-dynamic';
 
+import { getAllProducts } from '@/lib/services/products';
+
 export default async function ProductsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const { locale } = await params;
+  const { status } = await searchParams;
 
-  // Utiliser Fetch API du backend interne pour garantir la cohérence des data si logique complexe,
-  // OU appeler Prisma directement. Ici, la logique "getAll" est simple.
-  // Cependant, le controlleur d'API fait quelques includes.
-  // Pour être iso-fonctionnel :
-
-  const products = await prisma.product.findMany({
-    where: {
-      deletedAt: null,
-    },
-    include: {
-      translations: true,
-      variants: {
-        where: { deletedAt: null },
-        include: {
-          pricing: true,
-          inventory: true,
-          attributeValues: {
-            include: {
-              attributeValue: {
-                include: {
-                  translations: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      media: {
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-    orderBy: {
-      sortOrder: 'asc',
-    },
+  const products = await getAllProducts({
+    status,
+    language: locale.toUpperCase(),
   });
 
-  // Serialization to avoid "Decimal objects are not supported" error and match LocalProduct interface
+  // Serialization to match LocalProduct interface
   const serializedProducts = products.map(product => ({
     id: product.id,
     slug: product.slug,
@@ -61,24 +35,27 @@ export default async function ProductsPage({
       name: t.name,
       shortDescription: t.shortDescription,
     })),
-    variants: product.variants.map(variant => ({
-      id: variant.id,
-      sku: variant.sku,
-      pricing: variant.pricing.map(p => ({
-        price: Number(p.price),
-        currency: p.currency,
-        priceType: p.priceType,
-      })),
-      inventory: variant.inventory
-        ? {
-            stock: variant.inventory.stock,
-          }
-        : null,
-    })),
-    media: product.media.map(m => ({
-      url: m.url,
-      isPrimary: m.isPrimary,
-    })),
+    variants:
+      (product as any).variants?.map((variant: any) => ({
+        id: variant.id,
+        sku: variant.sku,
+        pricing:
+          variant.pricing?.map((p: any) => ({
+            price: Number(p.price),
+            currency: p.currency,
+            priceType: p.priceType,
+          })) || [],
+        inventory: variant.inventory
+          ? {
+              stock: variant.inventory.stock,
+            }
+          : null,
+      })) || [],
+    media:
+      (product as any).media?.map((m: any) => ({
+        url: m.url,
+        isPrimary: m.isPrimary,
+      })) || [],
   }));
 
   return <ProductsList initialProducts={serializedProducts} locale={locale} />;

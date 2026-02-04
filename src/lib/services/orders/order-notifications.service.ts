@@ -137,9 +137,9 @@ export async function sendAdminNewOrderAlert(
  */
 export async function sendShippedEmail(order: any) {
   try {
-    let recipientEmail = order.user?.email;
+    let recipientEmail = order.orderEmail || order.user?.email;
 
-    if (!recipientEmail && order.payments.length > 0) {
+    if (!recipientEmail && order.payments?.length > 0) {
       const paymentMetadata = order.payments[0].transactionData as any;
       recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
     }
@@ -214,9 +214,9 @@ export async function sendShippedEmail(order: any) {
  */
 export async function sendDeliveredEmail(order: any) {
   try {
-    let recipientEmail = order.user?.email;
+    let recipientEmail = order.orderEmail || order.user?.email;
 
-    if (!recipientEmail && order.payments.length > 0) {
+    if (!recipientEmail && order.payments?.length > 0) {
       const paymentMetadata = order.payments[0].transactionData as any;
       recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
     }
@@ -277,9 +277,9 @@ export async function sendDeliveredEmail(order: any) {
  */
 export async function sendRefundedEmail(order: any) {
   try {
-    let recipientEmail = order.user?.email;
+    let recipientEmail = order.orderEmail || order.user?.email;
 
-    if (!recipientEmail && order.payments.length > 0) {
+    if (!recipientEmail && order.payments?.length > 0) {
       const paymentMetadata = order.payments[0].transactionData as any;
       recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
     }

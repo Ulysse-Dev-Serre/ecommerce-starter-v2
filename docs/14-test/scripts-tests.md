@@ -1,39 +1,24 @@
-# Scripts de test manuels
+# Scripts de gestion et maintenance
 
-Ces scripts sont des alternatives à Jest pour tester manuellement certaines fonctionnalités.
+Ces scripts permettent de gérer l'infrastructure et la maintenance du projet. Les anciens scripts de validation JavaScript ont été supprimés au profit de **Vitest** (unitaire) et prochainement **Playwright** (E2E).
 
-## database-test.js
+## Reset de la base de données
 ```bash
-npm run test:db
+npm run db:reset
 ```
-Teste les opérations CRUD de base de données avec Prisma.
+**Fichier:** `scripts/reset-database.ts`  
+Réinitialise complètement la base de données et applique les migrations/seeds. Utile pour repartir sur une base saine avant des tests.
 
-## webhook-debug.js
+## Synchronisation Clerk
 ```bash
-npm run test:webhook
+npm run sync-clerk sync
 ```
-Lance un serveur de debug pour les webhooks Clerk.
+**Fichier:** `scripts/sync-clerk-users.ts`  
+Synchronise les utilisateurs depuis Clerk vers la base de données locale.
 
-## test-product-crud.js
-```bash
-node tests/scripts/test-product-crud.js
-```
-Teste le workflow complet CRUD des produits.
+---
 
-## test-simple-variant-workflow.js
-```bash
-node tests/scripts/test-simple-variant-workflow.js
-```
-Teste le workflow simplifié de gestion des variantes produit.
-
-## test-variant-workflow.js
-```bash
-node tests/scripts/test-variant-workflow.js
-```
-Teste le workflow complet de gestion des variantes produit.
-
-## validate-features.js
-```bash
-node tests/scripts/validate-features.js
-```
-Valide tous les endpoints critiques de l'application.
+## Note sur la validation
+Pour valider les tunnels critiques (Produits, Panier, Checkout), utilisez :
+1. **Tests Unitaires** : `npm run test:unit`
+2. **Tests E2E** : `npm run test:e2e` (Installations en cours...)

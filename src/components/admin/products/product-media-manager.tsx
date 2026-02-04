@@ -1,7 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { Upload, GripVertical, Trash2, ImageIcon } from 'lucide-react';
+import {
+  Upload,
+  GripVertical,
+  Trash2,
+  ImageIcon,
+  Edit2,
+  X,
+} from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -18,25 +25,35 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useState } from 'react';
+import { updateMediaMetadataAction } from '@/lib/actions/products';
 
 interface MediaItem {
   id: string;
   url: string;
   isPrimary: boolean;
   alt?: string;
+  title?: string;
   sortOrder: number;
 }
 
 interface SortableMediaItemProps {
   item: MediaItem;
   onDelete: (id: string) => void;
+  onEdit: (item: MediaItem) => void;
   labels: {
     primary: string;
     delete: string;
+    edit: string;
   };
 }
 
-function SortableMediaItem({ item, onDelete, labels }: SortableMediaItemProps) {
+function SortableMediaItem({
+  item,
+  onDelete,
+  onEdit,
+  labels,
+}: SortableMediaItemProps) {
   const {
     attributes,
     listeners,
@@ -77,14 +94,24 @@ function SortableMediaItem({ item, onDelete, labels }: SortableMediaItemProps) {
       >
         <GripVertical className="h-4 w-4" />
       </div>
-      <button
-        type="button"
-        onClick={() => onDelete(item.id)}
-        className="absolute right-2 top-2 z-10 rounded-lg bg-red-600/90 p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-700 shadow-sm"
-        title={labels.delete}
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+      <div className="absolute right-2 top-2 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+        <button
+          type="button"
+          onClick={() => onEdit(item)}
+          className="rounded-lg bg-white/90 p-1.5 text-gray-700 hover:text-primary hover:bg-white shadow-sm"
+          title={labels.edit}
+        >
+          <Edit2 className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(item.id)}
+          className="rounded-lg bg-red-600/90 p-1.5 text-white hover:bg-red-700 shadow-sm"
+          title={labels.delete}
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -110,12 +137,42 @@ export function ProductMediaManager({
   t,
   tc,
 }: ProductMediaManagerProps) {
+  const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const [editForm, setEditForm] = useState({ alt: '', title: '' });
+  const [isSaving, setIsSaving] = useState(false);
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const handleEditClick = (item: MediaItem) => {
+    setEditingItem(item);
+    setEditForm({ alt: item.alt || '', title: item.title || '' });
+  };
+
+  const handleSaveMetadata = async () => {
+    if (!editingItem) return;
+
+    try {
+      setIsSaving(true);
+      const result = await updateMediaMetadataAction(editingItem.id, editForm);
+
+      if (result.success) {
+        setEditingItem(null);
+        // Refresh handled by Revalidate in action
+      } else {
+        alert('Failed to update media: ' + result.error);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!productId) {
     return (
@@ -132,54 +189,134 @@ export function ProductMediaManager({
   }
 
   return (
-    <div className="admin-card">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="admin-section-title">{t('productMedia')}</h2>
-        <label className="admin-btn-secondary cursor-pointer gap-2">
-          <Upload className="h-4 w-4" />
-          {uploading ? tc('uploading') : tc('upload')}
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={onUpload}
-            className="hidden"
-            disabled={uploading}
-          />
-        </label>
+    <>
+      <div className="admin-card">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="admin-section-title">{t('productMedia')}</h2>
+          <label className="admin-btn-secondary cursor-pointer gap-2">
+            <Upload className="h-4 w-4" />
+            {uploading ? tc('uploading') : tc('upload')}
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={onUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+          </label>
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
+        >
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <SortableContext
+              items={media.map(m => m.id)}
+              strategy={rectSortingStrategy}
+            >
+              {media.map(item => (
+                <SortableMediaItem
+                  key={item.id}
+                  item={item}
+                  onDelete={onDelete}
+                  onEdit={handleEditClick}
+                  labels={{
+                    primary: t('primary'),
+                    delete: tc('delete'),
+                    edit: tc('edit'),
+                  }}
+                />
+              ))}
+            </SortableContext>
+          </div>
+        </DndContext>
+
+        {media.length === 0 && !uploading && (
+          <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center bg-gray-50/50">
+            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="mt-2 text-sm text-gray-600">{t('noMediaYet')}</p>
+          </div>
+        )}
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={onDragEnd}
-      >
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          <SortableContext
-            items={media.map(m => m.id)}
-            strategy={rectSortingStrategy}
-          >
-            {media.map(item => (
-              <SortableMediaItem
-                key={item.id}
-                item={item}
-                onDelete={onDelete}
-                labels={{
-                  primary: t('primary'),
-                  delete: tc('delete'),
-                }}
-              />
-            ))}
-          </SortableContext>
-        </div>
-      </DndContext>
+      {/* Edit Modal */}
+      {editingItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold">{tc('edit')} Media SEO</h3>
+              <button
+                onClick={() => setEditingItem(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-      {media.length === 0 && !uploading && (
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center bg-gray-50/50">
-          <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">{t('noMediaYet')}</p>
+            <div className="mb-4 flex justify-center">
+              <div className="relative h-40 w-40 overflow-hidden rounded-md border border-gray-200">
+                <Image
+                  src={editingItem.url}
+                  alt="Preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Alt Text (SEO description)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.alt}
+                  onChange={e =>
+                    setEditForm(prev => ({ ...prev, alt: e.target.value }))
+                  }
+                  className="admin-input"
+                  placeholder="Describe image for SEO..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title (Hover text)
+                </label>
+                <input
+                  type="text"
+                  value={editForm.title}
+                  onChange={e =>
+                    setEditForm(prev => ({ ...prev, title: e.target.value }))
+                  }
+                  className="admin-input"
+                  placeholder="Image title..."
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setEditingItem(null)}
+                className="admin-btn-secondary"
+                disabled={isSaving}
+              >
+                {tc('cancel')}
+              </button>
+              <button
+                onClick={handleSaveMetadata}
+                className="admin-btn-primary"
+                disabled={isSaving}
+              >
+                {isSaving ? tc('saving') : tc('save')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

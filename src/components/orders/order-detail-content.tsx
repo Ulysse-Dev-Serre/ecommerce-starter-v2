@@ -15,11 +15,10 @@ import { OrderSummary } from '@/components/orders/order-summary';
 import { RefundRequestForm } from '@/components/orders/refund-request-form';
 import { Order, OrderItem, Payment, Shipment } from '@/generated/prisma';
 
-type OrderDetail = Order & {
-  items: OrderItem[];
-  payments: Payment[];
-  shipments: Shipment[];
-};
+// Ideally we should import OrderWithIncludes from the service or types definition
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+
+type OrderDetail = OrderWithIncludes;
 
 interface OrderDetailContentProps {
   order: OrderDetail;

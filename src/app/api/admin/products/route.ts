@@ -10,7 +10,7 @@ import {
   CreateProductInput,
 } from '@/lib/validators/product';
 import { Language } from '@/generated/prisma';
-import { createProduct } from '@/lib/services/products';
+import { createProduct } from '@/lib/services/products/product-admin.service';
 import { CreateProductData } from '@/lib/types/domain/product';
 
 async function createProductHandler(

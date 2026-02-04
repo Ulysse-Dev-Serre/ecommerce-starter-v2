@@ -61,7 +61,7 @@ it('devrait bloquer une action si la condition X n\'est pas remplie', async () =
 ## 4. Configuration Globale
 
 - **`vitest.config.ts`** : Gère les alias `@/` et l'environnement `jsdom`.
-- **`vitest.setup.ts`** : Charge les variables d'environnement (`.env`) et définit les mocks globaux (Prisma).
+- **`src/test/setup.ts`** : Charge les variables d'environnement (`.env`) et définit les mocks globaux (Prisma).
 
 ## 5. Commandes Utiles
 
@@ -74,4 +74,4 @@ it('devrait bloquer une action si la condition X n\'est pas remplie', async () =
 ---
 
 > [!IMPORTANT]
-> **Filet de sécurité** : Avant de supprimer un ancien test `.js` (Jest), assurez-vous que sa logique est couverte par un nouveau test `.ts` (Vitest).
+> **Productivité** : La co-location des tests accélère le développement car la logique et sa validation sont toujours côte à côte.

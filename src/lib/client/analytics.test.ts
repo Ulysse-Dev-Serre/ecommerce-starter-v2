@@ -50,7 +50,9 @@ describe('Client Analytics Utils', () => {
     });
 
     it('should generate and save new ID if cookie is missing', () => {
-      vi.mocked(getCookie).mockReturnValue(undefined);
+      vi.mocked(getCookie).mockReturnValue(
+        undefined as unknown as string | null
+      );
 
       const result = getOrSetAnonymousId();
       expect(result).toBeDefined();

@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/core/db';
+import { getAllUsersAdmin } from '@/lib/services/users/user-admin.service';
 import { CustomerListHeader } from '@/components/admin/customers/customer-list-header';
 import { CustomerStatsGrid } from '@/components/admin/customers/customer-stats-grid';
 import { CustomerListTable } from '@/components/admin/customers/customer-list-table';
@@ -30,6 +31,9 @@ export default async function CustomersPage({
   thisMonth.setMonth(now.getMonth() - 1);
 
   // 1. Fetch Stats
+
+  // TODO: Add getUserStats to service to avoid this direct call too,
+  // but for now let's focus on the list.
   const [totalCount, newToday, newWeek, newMonth] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: today } } }),
@@ -37,19 +41,10 @@ export default async function CustomersPage({
     prisma.user.count({ where: { createdAt: { gte: thisMonth } } }),
   ]);
 
-  // 2. Fetch Customers List
-  const customers = await prisma.user.findMany({
-    where: query
-      ? {
-          OR: [
-            { email: { contains: query, mode: 'insensitive' } },
-            { firstName: { contains: query, mode: 'insensitive' } },
-            { lastName: { contains: query, mode: 'insensitive' } },
-          ],
-        }
-      : {},
-    orderBy: { createdAt: 'desc' },
-    take: 50, // Limit to 50 for now
+  // 2. Fetch Customers List via Service
+  const { users: customers } = await getAllUsersAdmin({
+    search: query,
+    limit: 50,
   });
 
   const stats = [

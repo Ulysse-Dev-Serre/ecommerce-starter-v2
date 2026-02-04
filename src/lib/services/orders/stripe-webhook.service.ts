@@ -262,15 +262,13 @@ export class StripeWebhookService {
     // 3. Extract Address
     const shippingAddress = this.extractShippingAddress(addressSource);
 
-    // For guests, we might need email from source directly if not in address
-    const guestEmail =
-      !userId && addressSource?.email ? addressSource.email : undefined;
+    const orderEmail = addressSource?.email || fullPaymentIntent?.receipt_email;
 
     // 4. Create Order
     const order = await createOrderFromCart({
       cart: virtualCart as any,
       userId: userId || undefined,
-      guestEmail: guestEmail,
+      orderEmail: orderEmail,
       paymentIntent:
         fullPaymentIntent ||
         ({
@@ -278,7 +276,7 @@ export class StripeWebhookService {
           amount: amountTotal,
           currency: currencyCode,
           metadata: metadata as any,
-          receipt_email: guestEmail,
+          receipt_email: orderEmail,
         } as Stripe.PaymentIntent),
       shippingAddress,
     });
@@ -292,7 +290,7 @@ export class StripeWebhookService {
     await this.sendConfirmationEmails(
       order,
       shippingAddress,
-      addressSource?.email || guestEmail
+      addressSource?.email || orderEmail
     );
 
     // 6. Clear Original Cart

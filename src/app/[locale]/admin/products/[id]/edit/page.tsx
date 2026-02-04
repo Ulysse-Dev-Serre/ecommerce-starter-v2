@@ -9,6 +9,8 @@ interface EditProductPageProps {
   params: Promise<{ id: string; locale: string }>;
 }
 
+import { getProductForAdmin } from '@/lib/services/products';
+
 export default async function EditProductPage({
   params,
 }: EditProductPageProps) {
@@ -19,31 +21,7 @@ export default async function EditProductPage({
 
   // Parallel fetch: Product (with nested relations) & Suppliers
   const [product, suppliers] = await Promise.all([
-    prisma.product.findUnique({
-      where: { id },
-      include: {
-        translations: true,
-        variants: {
-          where: { deletedAt: null },
-          include: {
-            pricing: true,
-            inventory: true,
-            attributeValues: {
-              include: {
-                attributeValue: {
-                  include: {
-                    translations: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        media: {
-          orderBy: { sortOrder: 'asc' },
-        },
-      },
-    }),
+    getProductForAdmin(id),
     prisma.supplier.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },

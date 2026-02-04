@@ -264,6 +264,7 @@
         "productCreated": "Produit créé avec succès !",
         "productUpdated": "Produit mis à jour avec succès !",
         "productDeleted": "Produit supprimé avec succès !",
+        "validationError": "Certains champs du formulaire sont invalides. Veuillez les corriger.",
         "variantsAdded": "Nouvelles variantes ajoutées avec succès !",
         "variantUpdated": "Variante mise à jour avec succès !",
         "variantDeleted": "Variante supprimée avec succès !",

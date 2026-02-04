@@ -44,7 +44,7 @@ export const API_ROUTES = {
       ITEM: (id: string) => `/api/admin/logistics/locations/${id}`,
     },
     ORDERS: {
-      STATUS: (id: string) => `/api/admin/orders/${id}/status`,
+      STATUS: (id: string) => `/api/admin/orders/${id}`,
       PURCHASE_LABEL: (id: string) => `/api/admin/orders/${id}/purchase-label`,
       RETURN_LABEL: (id: string) => `/api/admin/orders/${id}/return-label`,
     },

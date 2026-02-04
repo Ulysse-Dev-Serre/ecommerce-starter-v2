@@ -276,3 +276,160 @@ export async function createReturnLabel(
     throw err;
   }
 }
+
+import { SHIPPING_VARIANT_INCLUDE } from '@/lib/services/shipping/shipping.repository';
+import { ShippingService } from '@/lib/services/shipping/shipping.service';
+
+/**
+ * Prévisualise les tarifs d'expédition pour une commande
+ * (Utilisé par l'admin pour voir les coûts avant d'acheter l'étiquette)
+ */
+export async function previewShippingRates(orderId: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      items: {
+        include: {
+          variant: {
+            include: SHIPPING_VARIANT_INCLUDE,
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new Error('Order not found');
+  }
+
+  // Dynamic Rate Calculation
+  const mappingItems = order.items
+    .filter(item => item.variant)
+    .map(item => ({
+      variantId: item.variant!.id,
+      quantity: item.quantity,
+    }));
+
+  const addressTo = order.shippingAddress as any;
+
+  // Use ShippingService.getShippingRates to match user flow logic
+  const rates = await ShippingService.getShippingRates(undefined, {
+    addressTo,
+    items: mappingItems,
+  });
+
+  if (!rates || rates.length === 0) {
+    throw new Error('No shipping rates found');
+  }
+
+  return rates;
+}
+
+/**
+ * Achète une étiquette d'expédition pour une commande
+ * - Recalcule les tarifs si rateId nest pas fourni
+ * - Achète l'étiquette via Shippo
+ * - Crée l'objet Shipment en base de données
+ * - Envoie l'email d'expédition au client (via le changement de statut qui suivra, ou ici ?)
+ *   -> NOTE: Ici on crée juste le Shipment. Le changement de statut "SHIPPED" est souvent une action séparée de l'admin.
+ */
+export async function purchaseShippingLabel(orderId: string, rateId?: string) {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: {
+      user: true,
+      shipments: true,
+      items: {
+        include: {
+          variant: {
+            include: SHIPPING_VARIANT_INCLUDE,
+          },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new Error('Order not found');
+  }
+
+  // Check if shipment already exists with tracking
+  const existingShipment = order.shipments.find(s => s.trackingCode);
+  if (existingShipment) {
+    throw new Error('Label already exists');
+  }
+
+  // RECALCULATION LOGIC: Use ShippingService if rate is missing or expired
+  if (!rateId) {
+    logger.info({ orderId }, 'No shipping rate provided, recalculating...');
+
+    const mappingItems = order.items
+      .filter(item => item.variant)
+      .map(item => ({
+        variantId: item.variant!.id,
+        quantity: item.quantity,
+      }));
+
+    const addressTo = order.shippingAddress as any;
+
+    const rates = await ShippingService.getShippingRates(undefined, {
+      addressTo,
+      items: mappingItems,
+    });
+
+    if (rates && rates.length > 0) {
+      // Automatically pick the cheapest rate for the recalculation
+      const cheapestRate = rates[0];
+      rateId =
+        (cheapestRate as any).object_id ||
+        (cheapestRate as any).objectId ||
+        (cheapestRate as any).id;
+    } else {
+      throw new Error('Could not calculate new shipping rates');
+    }
+  }
+
+  if (!rateId) {
+    throw new Error('Rate ID missing and recalculation failed');
+  }
+
+  // Purchase the label
+  const transaction = await createTransaction(rateId);
+
+  if (transaction.status !== 'SUCCESS') {
+    logger.error({ transaction, rateId }, 'Shippo transaction failed');
+    throw new Error(
+      'Failed to purchase label: ' +
+        ((transaction as any).messages?.[0]?.text || 'Unknown error')
+    );
+  }
+
+  const trackingNumber =
+    (transaction as any).tracking_number || (transaction as any).trackingNumber;
+  const labelUrl =
+    (transaction as any).label_url || (transaction as any).labelUrl;
+  const carrier = (transaction as any).rate?.provider || 'Shippo';
+
+  // Create Shipment record
+  const shipment = await prisma.shipment.create({
+    data: {
+      orderId: orderId,
+      status: 'PENDING',
+      trackingCode: trackingNumber,
+      labelUrl: labelUrl,
+      carrier: carrier,
+    },
+  });
+
+  logger.info(
+    { orderId, trackingNumber },
+    'Shipping label purchased successfully'
+  );
+
+  return {
+    success: true,
+    trackingNumber,
+    labelUrl,
+    shipment,
+  };
+}

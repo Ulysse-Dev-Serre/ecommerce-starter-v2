@@ -264,6 +264,7 @@
         "productCreated": "Product created successfully!",
         "productUpdated": "Product updated successfully!",
         "productDeleted": "Product deleted successfully!",
+        "validationError": "Some form fields are invalid. Please correct them.",
         "variantsAdded": "New variants added successfully!",
         "variantUpdated": "Variant updated successfully!",
         "variantDeleted": "Variant deleted successfully!",

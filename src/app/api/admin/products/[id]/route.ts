@@ -11,7 +11,7 @@ import {
   getProductByIdSimple,
   updateProduct,
   deleteProduct,
-} from '@/lib/services/products';
+} from '@/lib/services/products/product-admin.service';
 import { UpdateProductData } from '@/lib/types/domain/product';
 
 /**

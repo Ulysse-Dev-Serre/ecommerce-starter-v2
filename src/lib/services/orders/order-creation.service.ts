@@ -32,7 +32,7 @@ export async function generateOrderNumber(): Promise<string> {
 export async function createOrderFromCart({
   cart,
   userId,
-  guestEmail,
+  orderEmail,
   paymentIntent,
   shippingAddress,
   billingAddress,
@@ -118,7 +118,7 @@ export async function createOrderFromCart({
       data: {
         orderNumber,
         userId: userId || null, // Ensure explicit null if undefined/empty
-        guestEmail: guestEmail || null,
+        orderEmail: orderEmail || null,
         status: OrderStatus.PAID,
         currency: cart.currency,
         subtotalAmount,

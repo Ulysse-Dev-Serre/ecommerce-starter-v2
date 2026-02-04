@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/core/db';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/core/logger';
 import { z } from 'zod';
@@ -20,6 +19,8 @@ const schema = z.object({
     phone: z.string().min(1),
   }),
 });
+
+import { logisticsLocationService } from '@/lib/services/logistics/logistics-location.service';
 
 export async function PUT(
   req: NextRequest,
@@ -42,17 +43,10 @@ export async function PUT(
       );
     }
 
-    const { name, type, address, incoterm } = result.data;
-
-    const supplier = await prisma.supplier.update({
-      where: { id },
-      data: {
-        name,
-        type: type as any,
-        incoterm,
-        address: address as any, // Stored as JSON
-      },
-    });
+    const supplier = await logisticsLocationService.updateLocation(
+      id,
+      result.data as any
+    );
 
     logger.info(
       { supplierId: supplier.id, userId },
@@ -81,45 +75,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Safety: Handle connected products before deactivating supplier
-    // 0 Fallback Policy: If the origin disappears, the products must not remain ACTIVE
-    await prisma.$transaction(async tx => {
-      // 1. Find all ACTIVE products using this origin
-      const affectedProducts = await tx.product.findMany({
-        where: {
-          shippingOriginId: id,
-          status: 'ACTIVE',
-        },
-        select: { id: true, slug: true },
-      });
-
-      if (affectedProducts.length > 0) {
-        // 2. Force DRAFT status
-        await tx.product.updateMany({
-          where: {
-            id: { in: affectedProducts.map(p => p.id) },
-          },
-          data: {
-            status: 'DRAFT',
-          },
-        });
-
-        logger.warn(
-          {
-            supplierId: id,
-            count: affectedProducts.length,
-            products: affectedProducts.map(p => p.slug),
-          },
-          'Cascade Deactivation: Products forced to DRAFT due to Supplier deactivation'
-        );
-      }
-
-      // 3. Deactivate Supplier
-      await tx.supplier.update({
-        where: { id },
-        data: { isActive: false },
-      });
-    });
+    await logisticsLocationService.deleteLocation(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

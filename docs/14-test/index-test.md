@@ -7,8 +7,8 @@ Cette section regroupe tous les scripts, tests et utilitaires du projet.
 ### 0. [Workflow de Refactorisation](./refactor-workflow.md)
 Guide étape par étape pour migrer une route vers le pattern **Service/Validator/Vitest**.
 
-> [!WARNING]
-> Les tests d'intégration sont actuellement en cours de migration de JavaScript vers **TypeScript**. Les anciens tests `.js` dans `tests/integration` ne sont plus exécutés par le nouveau runner Vitest.
+> [!NOTE]
+> Le projet a été entièrement migré vers **Vitest** pour les tests unitaires et **Playwright** pour les tests E2E. Les anciens tests JavaScript ont été supprimés.
 
 ## Scripts de gestion
 
@@ -31,4 +31,4 @@ Scripts Node.js pour tester manuellement des fonctionnalités spécifiques.
 
 ## Configuration requise
 
-Voir [tests/README.md](../../tests/README.md) pour la configuration de `TEST_API_KEY`.
+Les tests utilisent les variables d'environnement configurées dans `.env.local`.

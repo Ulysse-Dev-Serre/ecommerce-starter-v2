@@ -13,16 +13,18 @@ import {
   SUPPORTED_CURRENCIES,
 } from '@/lib/config/site';
 import {
+  uploadMediaAction,
+  deleteMediaAction,
+  reorderMediaAction,
+  updateProductAction,
+  createProductAction,
+  updateVariantAction,
+  deleteVariantAction,
+  addVariantsAction,
+} from '@/lib/actions/products';
+import {
   getProductVariants,
   getProductMedia,
-  uploadProductMedia,
-  deleteProductMedia,
-  reorderProductMedia,
-  updateProduct,
-  createProduct,
-  updateProductVariant,
-  deleteProductVariant,
-  addSimpleVariants,
 } from '@/lib/client/admin/products';
 
 import { ProductBasicInfo } from './product-basic-info';
@@ -116,6 +118,7 @@ export function ProductForm({
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [variants, setVariants] = useState<Variant[]>(
@@ -210,7 +213,8 @@ export function ProductForm({
         if (media.length === 0 && i === 0)
           formDataUpload.append('isPrimary', 'true');
 
-        await uploadProductMedia(formDataUpload);
+        const result = await uploadMediaAction(formDataUpload);
+        if (!result.success) throw new Error(result.error);
       }
       await loadMedia(productId);
       setSuccessMessage(t('messages.mediaUploaded'));
@@ -230,7 +234,8 @@ export function ProductForm({
     if (!confirm(t('deleteMediaConfirm'))) return;
 
     try {
-      await deleteProductMedia(mediaId);
+      const result = await deleteMediaAction(mediaId);
+      if (!result.success) throw new Error(result.error);
       setSuccessMessage(t('messages.mediaDeleted'));
       setMedia(media.filter(m => m.id !== mediaId));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -265,7 +270,7 @@ export function ProductForm({
           id: m.id,
           sortOrder: m.sortOrder,
         }));
-        await reorderProductMedia(mediaOrders);
+        await reorderMediaAction(mediaOrders, productId);
       } catch (err) {
         console.error(err);
         await loadMedia(productId);
@@ -280,31 +285,51 @@ export function ProductForm({
   const handleUpdateProduct = async () => {
     setSaving(true);
     setError(null);
+    setFieldErrors({});
     setSuccessMessage(null);
 
     try {
       const payload = {
         ...formData,
-        translations: Object.entries(translations).map(([lang, data]) => ({
-          language: lang,
-          name: data.name,
-          description: data.description || null,
-          shortDescription: data.shortDescription || null,
-        })),
-        weight: formData.weight ? parseFloat(formData.weight) : null,
+        translations: Object.entries(translations)
+          .filter(([_, data]) => data.name && data.name.trim() !== '')
+          .map(([lang, data]) => ({
+            language: lang,
+            name: data.name.trim(),
+            description: data.description || null,
+            shortDescription: data.shortDescription || null,
+          })),
         dimensions: {
-          length: formData.length ? parseFloat(formData.length) : null,
-          width: formData.width ? parseFloat(formData.width) : null,
-          height: formData.height ? parseFloat(formData.height) : null,
+          length: formData.length,
+          width: formData.width,
+          height: formData.height,
         },
       };
 
-      let data;
+      console.log('📦 Sending Product Payload:', payload);
+
+      let result;
       if (productId) {
-        data = await updateProduct(productId, payload);
+        result = await updateProductAction(productId, payload);
       } else {
-        data = await createProduct(payload);
+        result = await createProductAction(payload);
       }
+
+      if (!result.success) {
+        if (result.errors) {
+          const errorsObj: Record<string, string> = {};
+          result.errors.forEach((err: any) => {
+            errorsObj[err.field] = err.message;
+          });
+          setFieldErrors(errorsObj);
+          throw new Error(t('messages.validationError'));
+        }
+        throw new Error(result.error || 'Error');
+      }
+
+      /* Server Actions revalidate path, so we don't strictly need returned data unless we update local state immediately.
+         However, the router.push/refresh below will handle the UI update.
+       */
 
       setSuccessMessage(
         productId ? t('messages.productUpdated') : t('messages.productCreated')
@@ -332,7 +357,9 @@ export function ProductForm({
       if (updates.stock !== undefined)
         payload.inventory = { stock: updates.stock };
 
-      await updateProductVariant(productId, variantId, payload);
+      const result = await updateVariantAction(productId, variantId, payload);
+      if (!result.success) throw new Error(result.error);
+
       await loadVariants(productId);
       setSuccessMessage(t('messages.variantUpdated'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -350,7 +377,9 @@ export function ProductForm({
     if (!productId || !confirm(t('deleteVariantConfirm', { sku: variantName })))
       return;
     try {
-      await deleteProductVariant(productId, variantId);
+      const result = await deleteVariantAction(productId, variantId);
+      if (!result.success) throw new Error(result.error);
+
       await loadVariants(productId);
       setSuccessMessage(t('messages.variantDeleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -375,7 +404,9 @@ export function ProductForm({
         ),
         stock: parseInt(v.stock) || 0,
       }));
-      await addSimpleVariants(productId, variantPayload);
+      const result = await addVariantsAction(productId, variantPayload);
+      if (!result.success) throw new Error(result.error);
+
       await loadVariants(productId);
       setNewVariants([]);
       setSuccessMessage(t('messages.variantsAdded'));
@@ -455,6 +486,7 @@ export function ProductForm({
             translations={translations}
             setTranslations={setTranslations}
             isSlugValid={isSlugValid}
+            fieldErrors={fieldErrors}
             t={t}
             tc={tc}
             isEditMode={isEditMode}
@@ -477,6 +509,7 @@ export function ProductForm({
             formData={formData}
             setFormData={setFormData}
             suppliers={suppliers}
+            fieldErrors={fieldErrors}
             t={t}
           />
 

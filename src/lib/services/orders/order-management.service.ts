@@ -9,6 +9,7 @@ import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { updateOrderStatus as updateOrderLogic } from '@/lib/services/payments/payment-refund.service';
 import { cache } from '@/lib/core/cache';
 import { OrderWithIncludes } from '@/lib/types/domain/order';
+import { sendStatusChangeEmail } from './order-notifications.service';
 
 /**
  * Workflow de transition d'état valide
@@ -45,6 +46,28 @@ export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
  * Récupère une commande par son ID
  * Vérifie que la commande appartient bien à l'utilisateur
  */
+// Helper to map Prisma Decimal to number
+function mapToOrderWithIncludes(order: any): OrderWithIncludes {
+  return {
+    ...order,
+    subtotalAmount: Number(order.subtotalAmount),
+    taxAmount: Number(order.taxAmount),
+    shippingAmount: Number(order.shippingAmount),
+    discountAmount: Number(order.discountAmount),
+    totalAmount: Number(order.totalAmount),
+    items: order.items.map((item: any) => ({
+      ...item,
+      unitPrice: Number(item.unitPrice),
+      totalPrice: Number(item.totalPrice),
+    })),
+    payments:
+      order.payments?.map((payment: any) => ({
+        ...payment,
+        amount: Number(payment.amount),
+      })) || [],
+  };
+}
+
 export async function getOrderById(
   orderId: string,
   userId: string
@@ -63,7 +86,7 @@ export async function getOrderById(
     );
   }
 
-  return order as any as OrderWithIncludes;
+  return mapToOrderWithIncludes(order);
 }
 
 /**
@@ -121,7 +144,7 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
     );
   }
 
-  return order;
+  return mapToOrderWithIncludes(order);
 }
 
 /**
@@ -321,10 +344,18 @@ export async function updateOrderStatus(params: {
   }
 
   // 3. Déléguer la logique complexe (Stripe/Stock) au service dédié
-  return updateOrderLogic({
+  const updatedOrder = await updateOrderLogic({
     orderId,
     status: newStatus,
     comment,
     userId,
   });
+
+  // 4. Envoyer l'email de notification (Fire & Forget)
+  sendStatusChangeEmail(updatedOrder, newStatus).catch((error: unknown) => {
+    // On loggue l'erreur mais on ne bloque pas la réponse car la mise à jour DB est faite
+    console.error('Failed to send status change email:', error);
+  });
+
+  return updatedOrder;
 }

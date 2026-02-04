@@ -13,53 +13,51 @@ export const ProductTranslationSchema = z.object({
   language: z.enum(SUPPORTED_LOCALES, {
     message: 'Language must be a supported locale',
   }),
-  name: z
-    .string()
-    .min(1, 'Product name is required')
-    .max(200, 'Product name must be less than 200 characters'),
-  description: z
-    .string()
-    .max(5000, 'Description must be less than 5000 characters')
-    .optional()
-    .nullable(),
-  shortDescription: z
-    .string()
-    .max(500, 'Short description must be less than 500 characters')
-    .optional()
-    .nullable(),
-  metaTitle: z
-    .string()
-    .max(70, 'Meta title must be less than 70 characters for SEO')
-    .optional()
-    .nullable(),
-  metaDescription: z
-    .string()
-    .max(160, 'Meta description must be less than 160 characters for SEO')
-    .optional()
-    .nullable(),
+  name: z.string().min(1, 'Product name is required'),
+  description: z.string().optional().nullable(),
+  shortDescription: z.string().optional().nullable(),
+  metaTitle: z.string().optional().nullable(),
+  metaDescription: z.string().optional().nullable(),
 });
 
 export const DimensionsSchema = z.object({
-  length: z
-    .union([z.number(), z.string().transform(val => parseFloat(val))])
-    .optional()
-    .nullable(),
-  width: z
-    .union([z.number(), z.string().transform(val => parseFloat(val))])
-    .optional()
-    .nullable(),
-  height: z
-    .union([z.number(), z.string().transform(val => parseFloat(val))])
-    .optional()
-    .nullable(),
-  unit: z.string().optional(),
+  length: z.union([
+    z.number().positive('Must be a positive number'),
+    z
+      .string()
+      .min(1, 'Required')
+      .transform(val => parseFloat(val))
+      .refine(val => !isNaN(val) && val > 0, {
+        message: 'Must be a positive number',
+      }),
+  ]),
+  width: z.union([
+    z.number().positive('Must be a positive number'),
+    z
+      .string()
+      .min(1, 'Required')
+      .transform(val => parseFloat(val))
+      .refine(val => !isNaN(val) && val > 0, {
+        message: 'Must be a positive number',
+      }),
+  ]),
+  height: z.union([
+    z.number().positive('Must be a positive number'),
+    z
+      .string()
+      .min(1, 'Required')
+      .transform(val => parseFloat(val))
+      .refine(val => !isNaN(val) && val > 0, {
+        message: 'Must be a positive number',
+      }),
+  ]),
+  unit: z.string().optional().default('cm'),
 });
 
 export const CreateProductSchema = z.object({
   slug: z
     .string()
     .min(1, 'Slug is required')
-    .max(100, 'Slug must be less than 100 characters')
     .regex(
       slugRegex,
       'Slug must be lowercase with hyphens only (e.g., my-product)'
@@ -75,29 +73,41 @@ export const CreateProductSchema = z.object({
   originCountry: z
     .string()
     .length(2, 'Origin country must be a 2-letter ISO code')
-    .toUpperCase()
-    .optional()
-    .nullable(),
-  hsCode: z.string().optional().nullable(),
-  exportExplanation: z.string().optional().nullable(),
-  incoterm: z.string().optional().nullable(),
-  shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
-  weight: z
-    .union([z.number(), z.string().transform(val => parseFloat(val))])
-    .optional()
-    .nullable(),
-  dimensions: DimensionsSchema.optional().nullable(),
+    .toUpperCase(),
+  hsCode: z
+    .string()
+    .regex(
+      /^\d{6,12}(\.\d{2,6})*$/,
+      'HS Code must be at least 6 digits (e.g., 123456 or 123456.78)'
+    ),
+  exportExplanation: z
+    .string()
+    .min(1, 'Export explanation is required for customs'),
+  incoterm: z
+    .string()
+    .length(3, 'Incoterm must be 3 letters (e.g. DDP, EXW)')
+    .toUpperCase(),
+  shippingOriginId: z.string().cuid('Shipping origin is required (Location)'),
+  weight: z.union([
+    z.number().positive('Weight must be positive'),
+    z
+      .string()
+      .min(1, 'Weight is required')
+      .transform(val => parseFloat(val))
+      .refine(val => !isNaN(val) && val > 0, {
+        message: 'Must be a positive number',
+      }),
+  ]),
+  dimensions: DimensionsSchema,
   translations: z
     .array(ProductTranslationSchema)
-    .min(1, 'At least one translation is required')
-    .optional(),
+    .min(1, 'At least one translation is required'),
 });
 
 export const UpdateProductSchema = z.object({
   slug: z
     .string()
     .min(1, 'Slug cannot be empty')
-    .max(100, 'Slug must be less than 100 characters')
     .regex(slugRegex, 'Slug must be lowercase with hyphens only')
     .optional(),
   status: z.enum(PRODUCT_STATUSES).optional(),
@@ -107,17 +117,34 @@ export const UpdateProductSchema = z.object({
     .string()
     .length(2, 'Origin country must be a 2-letter ISO code')
     .toUpperCase()
-    .optional()
-    .nullable(),
-  hsCode: z.string().optional().nullable(),
-  shippingOriginId: z.string().cuid().or(z.literal('')).optional().nullable(),
-  exportExplanation: z.string().optional().nullable(),
-  incoterm: z.string().optional().nullable(),
+    .optional(),
+  hsCode: z
+    .string()
+    .regex(
+      /^\d{6,12}(\.\d{2,6})*$/,
+      'Invalid HS Code format (minimum 6 digits)'
+    )
+    .optional(),
+  shippingOriginId: z.string().cuid('Invalid shipping origin').optional(),
+  exportExplanation: z.string().optional(),
+  incoterm: z
+    .string()
+    .length(3, 'Incoterm must be 3 letters')
+    .toUpperCase()
+    .optional(),
   weight: z
-    .union([z.number(), z.string().transform(val => parseFloat(val))])
-    .optional()
-    .nullable(),
-  dimensions: DimensionsSchema.optional().nullable(),
+    .union([
+      z.number().positive('Must be a positive number'),
+      z
+        .string()
+        .min(1)
+        .transform(val => parseFloat(val))
+        .refine(val => !isNaN(val) && val > 0, {
+          message: 'Must be a positive number',
+        }),
+    ])
+    .optional(),
+  dimensions: DimensionsSchema.partial().optional(),
   translations: z.array(ProductTranslationSchema).optional(),
 });
 
@@ -129,8 +156,7 @@ export const VariantPricingSchema = z.object({
   currency: z
     .string()
     .length(3, 'Currency must be a 3-letter code (e.g., CAD, USD, EUR)')
-    .toUpperCase()
-    .default('CAD'),
+    .toUpperCase(),
   compareAtPrice: z
     .number()
     .positive('Compare at price must be greater than 0')
