@@ -56,6 +56,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={toast.id}
             role="alert"
+            data-testid="toast-notification"
             aria-live="assertive"
             className={cn(
               `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${VIBE_ANIMATION_SLIDE_IN_RIGHT}`,

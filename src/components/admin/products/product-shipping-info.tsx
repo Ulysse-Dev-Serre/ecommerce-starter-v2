@@ -53,6 +53,8 @@ export function ProductShippingInfo({
             </label>
             <input
               type="text"
+              id="originCountry"
+              name="originCountry"
               value={formData.originCountry}
               onChange={e => handleChange('originCountry', e.target.value)}
               placeholder="e.g. CA, US, FR"
@@ -70,6 +72,8 @@ export function ProductShippingInfo({
               {t('shippingOrigin')}
             </label>
             <select
+              name="shippingOriginId"
+              id="shippingOriginId"
               value={formData.shippingOriginId}
               onChange={e => handleChange('shippingOriginId', e.target.value)}
               className={`admin-input ${fieldErrors.shippingOriginId ? 'border-red-500 bg-red-50' : ''}`}
@@ -94,6 +98,8 @@ export function ProductShippingInfo({
             </label>
             <input
               type="text"
+              id="hsCode"
+              name="hsCode"
               value={formData.hsCode}
               onChange={e => handleChange('hsCode', e.target.value)}
               placeholder="e.g. 1234.56.78"
@@ -115,6 +121,8 @@ export function ProductShippingInfo({
               </label>
               <input
                 type="number"
+                id="weight"
+                name="weight"
                 step="0.001"
                 min="0"
                 value={formData.weight}
@@ -133,6 +141,8 @@ export function ProductShippingInfo({
               </label>
               <input
                 type="text"
+                id="incoterm"
+                name="incoterm"
                 value={formData.incoterm}
                 onChange={e => handleChange('incoterm', e.target.value)}
                 placeholder="e.g. EXW, FOB"
@@ -154,6 +164,8 @@ export function ProductShippingInfo({
               <div>
                 <input
                   type="number"
+                  id="length"
+                  name="length"
                   step="0.1"
                   value={formData.length}
                   onChange={e => handleChange('length', e.target.value)}
@@ -169,6 +181,8 @@ export function ProductShippingInfo({
               <div>
                 <input
                   type="number"
+                  id="width"
+                  name="width"
                   step="0.1"
                   value={formData.width}
                   onChange={e => handleChange('width', e.target.value)}
@@ -184,6 +198,8 @@ export function ProductShippingInfo({
               <div>
                 <input
                   type="number"
+                  id="height"
+                  name="height"
                   step="0.1"
                   value={formData.height}
                   onChange={e => handleChange('height', e.target.value)}
@@ -204,6 +220,8 @@ export function ProductShippingInfo({
               {t('exportExplanation')}
             </label>
             <textarea
+              id="exportExplanation"
+              name="exportExplanation"
               value={formData.exportExplanation}
               onChange={e => handleChange('exportExplanation', e.target.value)}
               rows={2}

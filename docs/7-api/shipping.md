@@ -21,7 +21,7 @@
     3. Sauvegarde `trackingCode`, `carrier`, `labelUrl` dans table `Shipment`
     4. Met à jour statut commande → SHIPPED (ou partiellement)
   - **Retourne**: Shipment details + Label URL
-  - **Fichier**: (À venir) `src/app/api/admin/orders/[id]/purchase-label/route.ts`
+  - **Fichier**: `src/app/api/admin/orders/[id]/purchase-label/route.ts`
 
 ## Workflow Livraison
 

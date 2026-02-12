@@ -123,6 +123,7 @@ export function AddressSection({
             label={t('fullName')}
             required
             value={tempName}
+            data-testid="checkout-name"
             onChange={e => setTempName(e.target.value)}
           />
 
@@ -132,6 +133,7 @@ export function AddressSection({
             required
             placeholder={t('emailPlaceholder')}
             value={email}
+            data-testid="checkout-email"
             onChange={e => setEmail(e.target.value)}
           />
 
@@ -146,6 +148,7 @@ export function AddressSection({
               <FormInput
                 type="tel"
                 value={phone}
+                data-testid="checkout-phone"
                 onChange={e => setPhone(e.target.value)}
                 className="rounded-l-none"
               />
@@ -207,6 +210,7 @@ export function AddressSection({
             label={t('city')}
             required
             value={tempAddress?.city || ''}
+            data-testid="checkout-city"
             onChange={e =>
               setTempAddress({ ...tempAddress, city: e.target.value })
             }
@@ -220,6 +224,7 @@ export function AddressSection({
               label={t('state')}
               required
               value={tempAddress?.state || ''}
+              data-testid="checkout-state"
               onChange={e =>
                 setTempAddress({
                   ...tempAddress,
@@ -234,6 +239,7 @@ export function AddressSection({
               label={t('state')}
               required
               value={tempAddress?.state || ''}
+              data-testid="checkout-state"
               onChange={e =>
                 setTempAddress({
                   ...tempAddress,
@@ -247,6 +253,7 @@ export function AddressSection({
             label={t('zipCode')}
             required
             value={tempAddress?.postal_code || ''}
+            data-testid="checkout-zip"
             onChange={e =>
               setTempAddress({
                 ...tempAddress,
@@ -261,6 +268,7 @@ export function AddressSection({
         <button
           onClick={onCalculateShipping}
           disabled={!isAddressReady || isLoading || !phone || !email}
+          data-testid="confirm-address-button"
           className={`vibe-button-primary w-full h-12 vibe-h-12
             ${
               isAddressReady && !isLoading && phone && email

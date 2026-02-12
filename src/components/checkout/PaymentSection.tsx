@@ -44,6 +44,7 @@ export function PaymentSection({
         className={`vibe-button-primary w-full h-12 mt-8 uppercase tracking-wide
           ${!stripe || !elements || !selectedRate ? 'opacity-50 vibe-cursor-not-allowed vibe-shadow-none' : ''}`}
         disabled={!stripe || !elements || !selectedRate}
+        data-testid="pay-now-button"
         onClick={onPay}
       >
         <div className="flex items-center justify-center gap-3">

@@ -42,6 +42,10 @@ export class ShippingService {
     cartId: string | undefined,
     data: ShippingRequestInput
   ): Promise<ShippingRate[]> {
+    logger.info(
+      { cartId, addressTo: data.addressTo },
+      'Service received shipping rates request'
+    );
     const { addressTo, items: bodyItems } = data;
 
     // Standardize zip code
@@ -181,6 +185,10 @@ export class ShippingService {
     );
 
     // 6. Fetch rates from Shippo
+    logger.info(
+      { origin: originAddress, destination: addressTo, parcels },
+      'Fetching rates from Shippo'
+    );
     const shipment = await getShippingRates(
       originAddress,
       addressTo,
@@ -206,7 +214,17 @@ export class ShippingService {
     let bestStandard: ShippingRate | null = null;
     let bestExpress: ShippingRate | null = null;
 
+    logger.info({ count: rawRates.length }, 'Processing raw shipping rates');
     for (const rate of rawRates) {
+      logger.info(
+        {
+          provider: rate.provider,
+          service: rate.servicelevel?.name,
+          amount: rate.amount,
+          currency: rate.currency,
+        },
+        'Raw rate found'
+      );
       const name = (rate.servicelevel?.name || '').toLowerCase();
       const provider = (rate.provider || '').toLowerCase();
 

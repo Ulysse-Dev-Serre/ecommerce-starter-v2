@@ -66,7 +66,7 @@
 
 - `POST /api/admin/products/[id]/variants/simple` - Crée variantes (UI simple EN/FR)
   - **Auth**: Admin
-  - **Body**: variants[{ nameEN, nameFR, priceCAD, priceUSD, stock }]
+  - **Body**: variants[{ nameEN, nameFR, prices: { CAD, USD }, stock }]
   - **Fichier**: `src/app/api/admin/products/[id]/variants/simple/route.ts`
 
 - `GET /api/admin/products/[id]/variants/[variantId]` - Détail variante

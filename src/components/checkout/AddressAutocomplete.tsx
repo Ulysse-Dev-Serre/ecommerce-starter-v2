@@ -151,6 +151,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       <input
         type="text"
         value={value}
+        data-testid="address-autocomplete-input"
         onChange={e => {
           onInputChange(e.target.value);
           setShowSuggestions(true);

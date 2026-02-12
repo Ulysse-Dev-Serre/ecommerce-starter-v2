@@ -5,21 +5,25 @@
 ### Client
 - `POST /api/checkout/create-intent` - Initialise paiement (Stripe Elements)
   - **Auth**: Aucune (Session panier ou User connecté)
-  - **Body**: cartId (optionnel), currency (CAD|USD)
+  - **Body**: cartId (optionnel), directItem (optionnel), currency (optionnel, défaut: SITE_CURRENCY)
   - **Actions**:
-    1. Récupère panier
+    1. Récupère panier (ou item direct)
     2. Réserve stock
     3. Crée Stripe PaymentIntent (Montant = Sous-total produits)
-  - **Retourne**: clientSecret, amount, currency
+  - **Retourne**: clientSecret, amount, currency, requestId
   - **Fichier**: `src/app/api/checkout/create-intent/route.ts`
 
 - `POST /api/checkout/update-intent` - Met à jour montant total (Livraison)
   - **Auth**: Aucune
-  - **Body**: paymentIntentId, shippingRate { amount, object_id }, currency
+  - **Body**: 
+    - `paymentIntentId`: ID Stripe
+    - `shippingRate`: `{ amount, object_id }`
+    - `shippingDetails`: `{ name, email, phone, street1, street2, city, state, zip, country }`
+    - `currency`: (Optionnel)
   - **Actions**:
-    1. Récupère PaymentIntent existant
-    2. Calcule Nouveau Total = (Sous-total initial + Frais livraison)
-    3. Met à jour metadata Stripe (shipping_rate_id, shipping_cost)
+    1. Récupère PaymentIntent
+    2. Calcule Nouveau Total = (Sous-total + Frais livraison)
+    3. Met à jour les metadata Stripe et les détails de livraison
   - **Retourne**: success: true, amount (nouveau total)
   - **Fichier**: `src/app/api/checkout/update-intent/route.ts`
 

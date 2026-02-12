@@ -179,6 +179,7 @@ export function ProductVariantsManager({
           </h2>
           <button
             type="button"
+            id="addVariantBtn"
             onClick={handleAddNewVariant}
             className="admin-btn-primary"
           >
@@ -212,6 +213,7 @@ export function ProductVariantsManager({
                     </label>
                     <input
                       type="text"
+                      name="variantNameEN"
                       value={variant.nameEN}
                       onChange={e =>
                         handleNewVariantChange(
@@ -229,6 +231,7 @@ export function ProductVariantsManager({
                     </label>
                     <input
                       type="text"
+                      name="variantNameFR"
                       value={variant.nameFR}
                       onChange={e =>
                         handleNewVariantChange(
@@ -248,6 +251,7 @@ export function ProductVariantsManager({
                       <input
                         type="number"
                         step="0.01"
+                        name={`variantPrice_${curr}`}
                         value={variant.prices[curr] || ''}
                         onChange={e =>
                           handleNewVariantChange(
@@ -267,6 +271,7 @@ export function ProductVariantsManager({
                     </label>
                     <input
                       type="number"
+                      name="variantStock"
                       value={variant.stock}
                       onChange={e =>
                         handleNewVariantChange(
@@ -284,6 +289,7 @@ export function ProductVariantsManager({
             <div className="mt-4">
               <button
                 type="button"
+                id="saveNewVariantsBtn"
                 onClick={onSaveNewVariants}
                 className="admin-btn-primary"
               >

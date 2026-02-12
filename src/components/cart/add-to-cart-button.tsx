@@ -50,6 +50,7 @@ export function AddToCartButton({
     <button
       onClick={handleAddToCart}
       disabled={disabled || isLoading}
+      data-testid="add-to-cart-button"
       className={cn(
         'vibe-button-primary',
         fullWidth ? 'w-full h-12' : 'h-10 px-6'

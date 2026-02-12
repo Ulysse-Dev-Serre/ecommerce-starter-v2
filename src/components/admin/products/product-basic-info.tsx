@@ -98,6 +98,8 @@ export function ProductBasicInfo({
                 {t('status')}
               </label>
               <select
+                id="statusSelect"
+                name="status"
                 value={formData.status}
                 onChange={e =>
                   setFormData(prev => ({

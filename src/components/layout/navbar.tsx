@@ -155,6 +155,7 @@ export function Navbar({ locale, userRole }: NavbarProps): React.JSX.Element {
               href={`/${locale}/cart`}
               className="text-foreground hover:bg-muted p-2 rounded-md transition-all"
               title={tNavbar('cart')}
+              data-testid="navbar-cart-link"
               onClick={() => handleNavigationClick(`/${locale}/cart`)}
             >
               <ShoppingCart className="h-16 w-16" />

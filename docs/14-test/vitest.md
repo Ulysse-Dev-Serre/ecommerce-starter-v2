@@ -61,7 +61,7 @@ it('devrait bloquer une action si la condition X n\'est pas remplie', async () =
 ## 4. Configuration Globale
 
 - **`vitest.config.ts`** : Gère les alias `@/` et l'environnement `jsdom`.
-- **`src/test/setup.ts`** : Charge les variables d'environnement (`.env`) et définit les mocks globaux (Prisma).
+- **`src/tests/setup.ts`** : Charge les variables d'environnement (`.env`) et définit les mocks globaux (Prisma).
 
 ## 5. Commandes Utiles
 

@@ -112,6 +112,7 @@ export function ShippingSection({
               return (
                 <div
                   key={rateId || index}
+                  data-testid="shipping-rate-item"
                   className={`${VIBE_HOVER_GROUP} relative p-5 border-2 rounded-xl cursor-pointer transition-all duration-300 ${isSelected ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary/20' : 'border-border bg-background hover:border-primary/50 hover:bg-accent/50'}`}
                   onClick={() => onRateSelect(rate)}
                 >
@@ -152,6 +153,7 @@ export function ShippingSection({
           <button
             onClick={onConfirm}
             disabled={!selectedRate}
+            data-testid="confirm-shipping-button"
             className={`vibe-button-primary w-full h-12 vibe-h-12 ${!selectedRate ? 'opacity-50' : ''}`}
           >
             {t('continueToPayment')}

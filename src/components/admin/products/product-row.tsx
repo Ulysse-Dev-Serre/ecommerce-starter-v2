@@ -59,6 +59,8 @@ export function SortableProductRow({
     <tr
       ref={setNodeRef}
       style={style}
+      data-testid="product-row"
+      data-product-slug={product.slug}
       className={`admin-table-tr ${isDragging ? 'bg-blue-50/50 shadow-inner' : ''}`}
     >
       <td className="admin-table-td w-10">

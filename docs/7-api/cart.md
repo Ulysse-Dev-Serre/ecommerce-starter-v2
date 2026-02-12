@@ -26,7 +26,7 @@
 
 - `GET /api/cart/calculate` - Calcule totaux panier (taxes, frais, etc)
   - **Auth**: Optionnel
-  - **Query**: currency (CAD ou USD)
+  - **Query**: currency (optionnel, défaut: SITE_CURRENCY)
   - **Fichier**: `src/app/api/cart/calculate/route.ts`
 
 - `POST /api/cart/merge` - Fusionne panier guest → user à connexion

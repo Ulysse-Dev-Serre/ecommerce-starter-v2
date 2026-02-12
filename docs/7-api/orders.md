@@ -28,12 +28,12 @@
   - **Params**: id
   - **Fichier**: `src/app/api/admin/orders/[id]/route.ts`
 
-- `PATCH /api/admin/orders/[id]/status` - Change statut commande
+- `PATCH /api/admin/orders/[id]` - Change statut commande
   - **Auth**: Admin
   - **Body**: status, comment (optionnel)
   - **Transitions**: PENDING→PAID/CANCELLED, PAID→SHIPPED/REFUNDED, SHIPPED→DELIVERED, DELIVERED→REFUNDED
   - **Audit**: Enregistre createdBy + timestamp
-  - **Fichier**: `src/app/api/admin/orders/[id]/status/route.ts`
+  - **Fichier**: `src/app/api/admin/orders/[id]/route.ts`
 
 ## Notes
 - Statuts: PENDING, PAID, SHIPPED, DELIVERED, CANCELLED, REFUNDED

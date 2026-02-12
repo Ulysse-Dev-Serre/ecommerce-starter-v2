@@ -99,16 +99,21 @@ export function ProductActions({
             <button
               onClick={decrementQuantity}
               disabled={disabled || quantity <= 1}
+              data-testid="quantity-decrement"
               className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="w-10 text-center font-bold text-foreground">
+            <span
+              className="w-10 text-center font-bold text-foreground"
+              data-testid="quantity-display"
+            >
               {quantity}
             </span>
             <button
               onClick={incrementQuantity}
               disabled={disabled || quantity >= maxQuantity}
+              data-testid="quantity-increment"
               className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -121,6 +126,7 @@ export function ProductActions({
         <button
           onClick={handleAddToCart}
           disabled={disabled || isAddingToCart || isBuyingNow}
+          data-testid="add-to-cart-button"
           className="vibe-button-primary flex-grow h-10 px-6"
         >
           {isAddingToCart ? (
@@ -134,6 +140,7 @@ export function ProductActions({
         <button
           onClick={handleBuyNow}
           disabled={disabled || isAddingToCart || isBuyingNow}
+          data-testid="buy-now-button"
           className="vibe-button-secondary bg-foreground text-background hover:opacity-90 flex-grow h-10 px-6"
         >
           {isBuyingNow ? (

@@ -91,9 +91,17 @@ Cherche un endpoint spécifique? Utilise:
 
 - Créer un produit? → [products.md](products.md) `POST /api/admin/products`
 - Ajouter au panier? → [cart.md](cart.md) `POST /api/cart/lines`
-- Payer? → [checkout.md](checkout.md) `POST /api/checkout/create-session`
+- Payer? → [checkout.md](checkout.md) `POST /api/checkout/create-intent`
 - Voir mes commandes? → [orders.md](orders.md) `GET /api/orders`
 - Upload image? → [media.md](media.md) `POST /api/admin/media/upload`
+
+---
+
+## 🏗️ Architecture des devises (Mono-devise)
+
+Le projet utilise `SITE_CURRENCY` (défini dans `src/lib/config/site.ts`) comme devise de référence. 
+- Bien que la base de données supporte plusieurs devises, le flux de paiement et les calculs privilégient la devise par défaut du site.
+- La plupart des APIs acceptent une `currency` optionnelle mais utilisent `SITE_CURRENCY` par défaut.
 
 ---
 

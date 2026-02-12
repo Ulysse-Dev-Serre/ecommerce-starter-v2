@@ -26,6 +26,8 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
   return (
     <Card
       className={`${VIBE_HOVER_GROUP} flex flex-col h-full hover:shadow-md`}
+      data-testid="product-card"
+      data-product-slug={product.slug}
     >
       <Link
         href={`/${locale}/product/${product.slug}`}
@@ -56,7 +58,10 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
           href={`/${locale}/product/${product.slug}`}
           className="block vibe-mb-1"
         >
-          <h3 className="font-bold vibe-text-lg text-foreground group-hover:text-primary transition-all duration-300 line-clamp-1">
+          <h3
+            className="font-bold vibe-text-lg text-foreground group-hover:text-primary transition-all duration-300 line-clamp-1"
+            data-testid="product-name"
+          >
             {translation?.name ?? product.slug}
           </h3>
         </Link>
@@ -70,6 +75,7 @@ export async function ProductCard({ product, locale }: ProductCardProps) {
               pricing={pricing}
               className="vibe-text-xl font-bold text-foreground"
               locale={locale}
+              dataTestId="product-price"
             />
           </div>
           {product.variants.length > 1 ? (

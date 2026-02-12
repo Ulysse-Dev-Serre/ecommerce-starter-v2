@@ -47,6 +47,7 @@ async function createIntentHandler(
     cartIdForIntent = 'direct_purchase';
   } else {
     // Mode 2: Panier (Standard)
+
     const cart = await getOrCreateCart(userId, anonymousId);
 
     if (bodyCartId && cart.id !== bodyCartId) {

@@ -103,6 +103,9 @@
     "addedToCart": "{count, plural, =1 {# item added to cart} other {# items added to cart}}",
     "relatedProducts": "You might also like"
   },
+  "products": {
+    "relatedProducts": "You might also like"
+  },
   "shop": {
     "title": "Shop",
     "description": "Browse our full catalog of high-quality products.",

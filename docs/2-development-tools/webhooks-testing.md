@@ -13,6 +13,8 @@ Pour recevoir des webhooks sur votre machine locale, vous devez exposer votre se
    ```bash
    ngrok http 3000
    ```
+   http://127.0.0.1:4040
+   
 3. **Récupérer l'URL** : Copiez l'URL de transfert (ex: `https://abcd-123.ngrok-free.app`).
 
 > ⚠️ **Note (Version Gratuite)** : L'URL change à chaque redémarrage de Ngrok. Pensez à mettre à jour vos endpoints dans les dashboards tiers à chaque session de développement.

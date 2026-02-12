@@ -118,7 +118,10 @@ export function OrderSummary({
             <span className="font-bold text-lg text-foreground">
               {t('totalToPay')}
             </span>
-            <span className="font-extrabold text-2xl text-primary">
+            <span
+              className="font-extrabold text-2xl text-primary"
+              data-testid="order-total"
+            >
               {formatPrice(total, currency as any, locale)}
             </span>
           </div>

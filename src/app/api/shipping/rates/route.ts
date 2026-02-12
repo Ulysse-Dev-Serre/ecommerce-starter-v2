@@ -17,16 +17,12 @@ async function handler(
   _context: unknown,
   data: ShippingRequestInput
 ) {
-  try {
-    const cartId = req.cookies.get('cartId')?.value || data.cartId;
+  const cartId = req.cookies.get('cartId')?.value || data.cartId;
 
-    // Delegate to Service (Mailbox Pattern)
-    const rates = await ShippingService.getShippingRates(cartId, data);
+  // Delegate to Service (Mailbox Pattern)
+  const rates = await ShippingService.getShippingRates(cartId, data);
 
-    return NextResponse.json({ rates });
-  } catch (error) {
-    throw error;
-  }
+  return NextResponse.json({ rates });
 }
 
 export const POST = withError(

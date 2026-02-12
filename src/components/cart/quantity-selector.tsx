@@ -96,6 +96,7 @@ export function QuantitySelector({
           disabled={quantity <= 1 || isLoading}
           className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
           aria-label={t('decreaseQuantity')}
+          data-testid="quantity-decrease"
         >
           {isLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -112,6 +113,7 @@ export function QuantitySelector({
           className="w-10 text-center border-none focus:ring-0 font-bold text-sm bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           min="1"
           max={maxQuantity}
+          data-testid="quantity-input"
         />
 
         <button
@@ -120,6 +122,7 @@ export function QuantitySelector({
           disabled={quantity >= maxQuantity || isLoading}
           className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-background hover:shadow-sm disabled:opacity-30 disabled:cursor-not-allowed transition-all text-foreground"
           aria-label={t('increaseQuantity')}
+          data-testid="quantity-increase"
         >
           {isLoading ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

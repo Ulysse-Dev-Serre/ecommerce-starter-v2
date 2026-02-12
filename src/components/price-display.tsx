@@ -10,6 +10,7 @@ interface PriceDisplayProps {
   className?: string;
   locale?: string;
   showFallbackIndicator?: boolean;
+  dataTestId?: string;
 }
 
 export function PriceDisplay({
@@ -17,6 +18,7 @@ export function PriceDisplay({
   className = '',
   locale,
   showFallbackIndicator = false,
+  dataTestId,
 }: PriceDisplayProps) {
   const defaultLocale = useLocale();
   const currentLocale = locale || defaultLocale;
@@ -35,7 +37,7 @@ export function PriceDisplay({
   );
 
   return (
-    <span className={className}>
+    <span className={className} data-testid={dataTestId}>
       {formattedPrice}
       {showFallbackIndicator && isFallback && (
         <span className="vibe-text-xs text-muted-foreground ml-1">
