@@ -95,13 +95,14 @@ test.describe('Cart Operations', () => {
 
     // 4. Add to Cart
     console.log('🛒 Adding to cart...');
+    const cartResponsePromise = page.waitForResponse(
+      res => res.url().includes('/api/cart') && res.status() === 200
+    );
     await page.click('[data-testid="add-to-cart-button"]');
 
-    // 5. Verify Toast Notification
-    // 5. Verify Toast Notification (Skipped - Flaky on slow env)
-    console.log('✨ Toast check skipped, checking cart directly...');
-    // Wait briefly for action to complete
-    await page.waitForTimeout(1000);
+    // 5. Verify API response
+    await cartResponsePromise;
+    console.log('📡 Cart API response received');
 
     // 6. Verify Cart Count or Navigation
     console.log('🏁 Checking cart...');
