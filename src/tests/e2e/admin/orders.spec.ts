@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createTestOrder, disconnectPrisma } from '../fixtures/seed-test-data';
 
 /**
  * Admin Orders E2E Test
@@ -12,6 +13,21 @@ import { test, expect } from '@playwright/test';
  * 6. Verify label was generated (tracking code, label URL)
  */
 test.describe('Admin Orders Management', () => {
+  const TEST_LABEL_EMAIL = process.env.ADMIN_EMAIL || 'agtechnest@gmail.com';
+  let testOrderNumber: string;
+
+  test.beforeAll(async () => {
+    // Seed a specific order for this test suite to avoid dependency on other tests
+    const order = await createTestOrder(TEST_LABEL_EMAIL);
+    testOrderNumber = order.orderNumber;
+    console.log(
+      `✨ Created dedicated test order for Label generation: ${testOrderNumber}`
+    );
+  });
+
+  test.afterAll(async () => {
+    await disconnectPrisma();
+  });
   test('View orders list and navigate to order detail', async ({ page }) => {
     // ── 1. Navigate to Admin Orders ──
     console.log('📋 Navigating to Admin Orders...');
@@ -30,9 +46,19 @@ test.describe('Admin Orders Management', () => {
 
     // ── 3. Verify order content (number, status, etc.) ──
     // Find the first PAID order in the list (robust against other test data)
+    // Find the order we just created
+    console.log(`🔎 Searching for specific test order: ${testOrderNumber}`);
+
+    // Search input (assuming there's a search bar)
+    const searchInput = page.locator('input[placeholder*="Search"]');
+    if (await searchInput.isVisible()) {
+      await searchInput.fill(testOrderNumber);
+      await page.waitForTimeout(2000);
+    }
+
     const paidOrderRow = page
       .locator('table tbody tr')
-      .filter({ hasText: /Paid|Payée|PAID/i })
+      .filter({ hasText: testOrderNumber })
       .first();
 
     // Ensure at least one PAID order exists
@@ -51,8 +77,10 @@ test.describe('Admin Orders Management', () => {
     await expect(page).toHaveURL(/admin\/orders\/.+/);
     console.log(`📍 Order detail URL: ${page.url()}`);
 
-    // Verify order header is visible (contains ORD-XXXX-XXXXXX)
-    await expect(page.locator('text=/ORD-\\d{4}-\\d{6}/')).toBeVisible({
+    // Verify order header is visible (contains ORD-)
+    await expect(
+      page.locator('h1, h2, h3').filter({ hasText: /ORD-/ })
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -78,12 +106,24 @@ test.describe('Admin Orders Management', () => {
     const orderRows = page.locator('table tbody tr');
     await expect(orderRows.first()).toBeVisible({ timeout: 10000 });
 
+    console.log(`🔎 Searching for specific test order: ${testOrderNumber}`);
+
+    // Search input
+    const searchInput = page.locator('input[placeholder*="Search"]');
+    if (await searchInput.isVisible()) {
+      await searchInput.fill(testOrderNumber);
+      await page.waitForTimeout(2000);
+    }
+
     // Find a PAID order to generate label for
     // We prefer one that doesn't have "Label Generated" if possible, but for simplicity let's pick a PAID one
+    // Filtering by email ensures we pick the one created by checkout.spec.ts (John Doe)
+    // Use the specific row
     const paidOrderRow = page
       .locator('table tbody tr')
-      .filter({ hasText: /Paid|Payée|PAID/i })
+      .filter({ hasText: testOrderNumber })
       .first();
+
     await expect(paidOrderRow).toBeVisible({ timeout: 10000 });
 
     const orderNumberText = await paidOrderRow

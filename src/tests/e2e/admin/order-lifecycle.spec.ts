@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import {
+  createTestOrder,
+  getAdminUserId,
+  disconnectPrisma,
+} from '../fixtures/seed-test-data';
 
 /**
  * Order Lifecycle E2E Test
@@ -22,6 +27,37 @@ test.describe.serial('Order Lifecycle — Ship, Deliver, Refund', () => {
   let orderId: string; // Internal DB ID (UUID)
   let orderNumber: string; // Public order number (ORD-2026-XXXXXX)
 
+  test.beforeAll(async () => {
+    // 1. Get Admin User ID (to link the order so Admin can view it on storefront)
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+    // Fallback if env is not perfect in test run, assume seed data matches.
+    // Actually, let's use a known test email or just relying on `ADMIN_EMAIL` being set in .env.local
+
+    // Better: We must ensure we attach it to the user that Playwright logs in as.
+    // Playwright uses `auth.setup.ts` which uses `ADMIN_EMAIL`.
+    const userId = await getAdminUserId(adminEmail);
+
+    if (!userId) {
+      console.warn(
+        '⚠️ Admin User ID not found. Storefront access might fail if order is not owned by logged in user.'
+      );
+    }
+
+    // 2. Create a clean PAID order for this lifecycle test
+    // Use the admin email so Resend allows sending transactional emails to it during test
+    // withShipment=true allows the "Shipped" email to find a tracking code
+    const order = await createTestOrder(adminEmail, userId, true);
+    orderId = order.id;
+    orderNumber = order.orderNumber;
+    console.log(
+      `✨ Created dedicated Lifecycle Order: ${orderNumber} (ID: ${orderId}) linked to User: ${userId}`
+    );
+  });
+
+  test.afterAll(async () => {
+    await disconnectPrisma();
+  });
+
   // ────────────────────────────────────────────────────────────────
   // Phase 1a: Client sees "Cancel delivery" when status is PAID
   // ────────────────────────────────────────────────────────────────
@@ -30,66 +66,12 @@ test.describe.serial('Order Lifecycle — Ship, Deliver, Refund', () => {
   }) => {
     test.setTimeout(60_000);
 
-    // Step 1: Use admin page to find a PAID order and get both IDs
-    console.log('📋 Finding a PAID order via Admin...');
+    // Step 1: We already have the orderId from beforeAll.
+    console.log(`📋 Using seeded PAID order: ${orderNumber} (id: ${orderId})`);
+
+    // Optional: Verify it appears in Admin list just for sanity
     await page.goto('/en/admin/orders');
-    const orderRows = page.locator('table tbody tr');
-    await expect(orderRows.first()).toBeVisible();
-
-    const viewLinks = page
-      .locator('table tbody tr a')
-      .filter({ hasText: /View|Voir/ });
-    const count = await viewLinks.count();
-
-    // Find a PAID order
-    let found = false;
-    for (let i = 0; i < count; i++) {
-      const row = page.locator('table tbody tr').nth(i);
-      const rowText = await row.innerText();
-
-      // Match "Paid" but ignore orders that already have labels or other statuses
-      if (
-        rowText.includes('Paid') &&
-        !rowText.includes('Shipped') &&
-        !rowText.includes('Delivered')
-      ) {
-        // Extract orderNumber from the row text
-        const match = rowText.match(/(ORD-\d{4}-\d{6})/);
-        if (match) orderNumber = match[1];
-
-        // Click View to get the orderId
-        await viewLinks.nth(i).click();
-        await expect(page).toHaveURL(/admin\/orders\/.+/);
-        orderId = page.url().split('/admin/orders/')[1];
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      console.warn(
-        '⚠️ No PAID order found. Attempting to use the first order and forcing it to PAID for test continuity...'
-      );
-      const firstViewLink = viewLinks.first();
-      await firstViewLink.click();
-      await expect(page).toHaveURL(/admin\/orders\/.+/);
-      orderId = page.url().split('/admin/orders/')[1];
-
-      // Force PAID status via API for the test
-      await page.evaluate(async id => {
-        await fetch(`/api/admin/orders/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            status: 'PAID',
-            comment: 'E2E Reset for test',
-          }),
-        });
-      }, orderId);
-      await page.reload();
-      found = true;
-    }
-    console.log(`📦 Found PAID order: ${orderNumber} (id: ${orderId})`);
+    await expect(page.locator('body')).toContainText(orderNumber);
 
     // Step 2: Navigate to the client order page
     console.log('📋 Navigating to client order page...');

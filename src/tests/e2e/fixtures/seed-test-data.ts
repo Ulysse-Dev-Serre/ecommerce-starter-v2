@@ -153,3 +153,148 @@ export async function getTestSupplierId(): Promise<string> {
 export async function disconnectPrisma() {
   await prisma.$disconnect();
 }
+
+/**
+ * Reset test orders to ensure a clean state before E2E run
+ * - Deletes orders associated with the test email
+ */
+export async function resetTestOrders(testEmail: string) {
+  if (!testEmail) return;
+  console.log(`🧹 Cleaning up orders for test email: ${testEmail}...`);
+
+  // Find users or orders with this email
+  // First delete order items, shipments, payments due to foreign keys if cascade is not set
+  // Assuming cascade delete is set on Order -> Items, but let's be safe:
+
+  // Simplest: Find order IDs
+  const orders = await prisma.order.findMany({
+    where: {
+      OR: [
+        { orderEmail: testEmail },
+        // Also check shipping address email if stored in JSON or relayed
+      ],
+    },
+    select: { id: true, orderNumber: true },
+  });
+
+  if (orders.length === 0) {
+    console.log('✅ No stale orders found.');
+    return;
+  }
+
+  console.log(`🗑️ Deleting ${orders.length} stale orders...`);
+
+  // Delete one by one or batch
+  const orderIds = orders.map(o => o.id);
+
+  // Note: Prisma cascade delete logic depends on schema.
+  // If cascading is configured in schema.prisma, deleting order is enough.
+  // If not, we might fail. Let's try deleting orders directly.
+  try {
+    await prisma.order.deleteMany({
+      where: { id: { in: orderIds } },
+    });
+    console.log('✅ Stale orders deleted.');
+    // ...existing code...
+  } catch (err: any) {
+    console.warn(
+      '⚠️ Failed to delete stale orders (likely foreign key constraints):',
+      err.message
+    );
+  }
+}
+
+/**
+ * Get Admin User ID by email
+ */
+export async function getAdminUserId(email: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  return user?.id;
+}
+
+/**
+ * Create a simple PAID order for testing Admin Label features directly
+ */
+export async function createTestOrder(
+  testEmail: string,
+  userId?: string,
+  withShipment: boolean = false
+) {
+  const supplierId = await getTestSupplierId();
+  const product = await getOrCreateTestProduct(supplierId);
+  const variant = product.variants[0];
+
+  console.log('🆕 Seeding a direct PAID order for Admin tests...');
+
+  const order = await prisma.order.create({
+    data: {
+      status: 'PAID',
+      userId: userId, // Link to user if provided
+      orderNumber: `ORD-TEST-${Date.now()}`,
+      orderEmail: testEmail,
+      currency: 'CAD',
+      totalAmount: 39.99,
+      subtotalAmount: 29.99,
+      shippingAmount: 10.0,
+      taxAmount: 0,
+
+      // Crucial: Full Shipping Address
+      shippingAddress: {
+        name: 'John Test Seeder',
+        firstName: 'John',
+        lastName: 'Test Seeder',
+        email: testEmail,
+        phone: '5145550000',
+        street1: '1100 Rue de la Gauchetière O',
+        city: 'Montréal',
+        state: 'QC',
+        zip: 'H3B 2S2' as any,
+        country: 'CA' as any,
+      },
+
+      billingAddress: {
+        name: 'John Test Seeder',
+        street1: '1100 Rue de la Gauchetière O',
+        city: 'Montréal',
+        state: 'QC',
+        zip: 'H3B 2S2' as any,
+        country: 'CA' as any,
+      },
+
+      items: {
+        create: [
+          {
+            variantId: variant.id,
+            quantity: 1,
+            unitPrice: 29.99,
+            totalPrice: 29.99,
+            productId: product.id,
+            productSnapshot: {
+              name: product.slug, // Translations not loaded, using slug
+              sku: variant.sku,
+            },
+            currency: 'CAD',
+          },
+        ],
+      },
+
+      shipments: withShipment
+        ? {
+            create: [
+              {
+                trackingCode: `TRK-TEST-${Date.now()}`,
+                carrier: 'CNE_EXPRESS',
+                status: 'PENDING',
+                labelUrl: 'https://example.com/label.pdf',
+              },
+            ],
+          }
+        : undefined,
+    },
+  });
+
+  console.log(`✅ Seeded order: ${order.orderNumber} (${order.id})`);
+  return order;
+}

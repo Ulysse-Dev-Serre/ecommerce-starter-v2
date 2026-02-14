@@ -3,6 +3,7 @@ import {
   getTestSupplierId,
   getOrCreateTestProduct,
   disconnectPrisma,
+  resetTestOrders,
 } from '../fixtures/seed-test-data';
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -19,7 +20,7 @@ async function fillAddressAndGetRates(
 ) {
   // Only fill the form on the first attempt; on retries the form is already filled
   if (attempt === 1) {
-    await page.fill('[data-testid="checkout-name"]', 'John Test');
+    await page.fill('[data-testid="checkout-name"]', 'John Doe Test');
     await page.fill('[data-testid="checkout-email"]', testEmail);
     await page.fill('[data-testid="checkout-phone"]', '5145550000');
 
@@ -84,6 +85,10 @@ test.describe('Checkout and Payment Flow', () => {
   let testSupplierId: string;
 
   test.beforeAll(async () => {
+    // Clean up any stale orders from previous runs to avoid test pollution
+    const testEmail = process.env.TEST_ADMIN_EMAIL || 'test@yopmail.com';
+    await resetTestOrders(testEmail);
+
     testSupplierId = await getTestSupplierId();
   });
 
@@ -146,7 +151,13 @@ test.describe('Checkout and Payment Flow', () => {
       await shippingRateList.first().click();
     }
 
+    // Wait for the update-intent call initiated by verifyShipping/confirmShipping
+    const responsePromise = page.waitForResponse(
+      res => res.url().includes('update-intent') && res.status() === 200
+    );
     await page.click('[data-testid="confirm-shipping-button"]');
+    await responsePromise;
+    console.log('✅ Shipping details updated on PaymentIntent');
 
     // ── 5. Payment (Stripe PaymentElement) ──
     console.log('💰 Waiting for Stripe PaymentElement...');
