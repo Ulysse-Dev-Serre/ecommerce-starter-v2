@@ -3,6 +3,8 @@ import { LogisticsPage } from '../pom/admin/LogisticsPage';
 import { ProductPage } from '../pom/admin/ProductPage';
 import { prisma } from '@/lib/core/db';
 import { verifyProductCreated } from '../fixtures/seed-test-data';
+import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
+import { cleanupAllE2EData, disconnectPrisma } from '../fixtures/cleanup-e2e';
 
 test.describe('Admin Logistics & Product Workflow', () => {
   // Tests in this file are dependent on each other
@@ -56,6 +58,10 @@ test.describe('Admin Logistics & Product Workflow', () => {
       await prisma.product.deleteMany({
         where: { slug: { contains: 'e2e-product' } },
       });
+
+      // Nettoyage automatique des attributs orphelins
+      await cleanupOrphanedAttributes();
+
       console.log('🧹 Teardown complete');
     } catch (e) {
       console.error('⚠️ Teardown warning:', e);

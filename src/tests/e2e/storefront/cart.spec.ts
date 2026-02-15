@@ -3,6 +3,7 @@ import {
   getTestSupplierId,
   getOrCreateTestProduct,
   cleanupTestProduct,
+  cleanupTestSupplier,
   disconnectPrisma,
 } from '../fixtures/seed-test-data';
 
@@ -17,6 +18,7 @@ test.describe('Test 3: Flux Panier & Authenticité (Boutique -> Panier -> Checko
 
   test.afterAll(async () => {
     await cleanupTestProduct(fixedSlug);
+    await cleanupTestSupplier();
     await disconnectPrisma();
   });
 

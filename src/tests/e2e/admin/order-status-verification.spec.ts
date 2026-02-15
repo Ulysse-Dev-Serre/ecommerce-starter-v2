@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 import {
   createTestOrder,
-  disconnectPrisma,
   resetTestOrders,
   cleanupTestProduct,
+  cleanupTestSupplier,
+  disconnectPrisma,
 } from '../fixtures/seed-test-data';
 import { verifyEmailSent } from '../fixtures/resend-helper';
 
@@ -33,6 +34,7 @@ test.describe('Order Status Flow - UI Badges & Emails', () => {
     console.log('🧹 Final cleanup after Status Verification test...');
     await resetTestOrders(adminEmail);
     await cleanupTestProduct('e2e-checkout-product-fixed');
+    await cleanupTestSupplier();
     await disconnectPrisma();
   });
 

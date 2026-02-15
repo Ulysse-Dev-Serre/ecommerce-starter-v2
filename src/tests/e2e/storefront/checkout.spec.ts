@@ -2,9 +2,10 @@ import { test, expect, Page } from '@playwright/test';
 import {
   getTestSupplierId,
   getOrCreateTestProduct,
-  disconnectPrisma,
   resetTestOrders,
   cleanupTestProduct,
+  cleanupTestSupplier,
+  disconnectPrisma,
 } from '../fixtures/seed-test-data';
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -98,6 +99,7 @@ test.describe('Checkout and Payment Flow', () => {
     console.log('🧹 Final cleanup after Checkout test...');
     await resetTestOrders(testEmail);
     await cleanupTestProduct('e2e-checkout-product-fixed');
+    await cleanupTestSupplier();
     await disconnectPrisma();
   });
 

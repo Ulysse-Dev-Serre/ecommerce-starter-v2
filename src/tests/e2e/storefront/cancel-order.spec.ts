@@ -4,6 +4,7 @@ import {
   resetTestOrders,
   cleanupTestProduct,
   getAdminUserId,
+  cleanupTestSupplier,
   disconnectPrisma,
 } from '../fixtures/seed-test-data';
 import { verifyEmailSent } from '../fixtures/resend-helper';
@@ -30,6 +31,7 @@ test.describe('Order Cancellation Workflow (Optimized)', () => {
     try {
       await resetTestOrders(testEmail);
       await cleanupTestProduct('e2e-checkout-product-fixed');
+      await cleanupTestSupplier();
     } catch (err) {
       console.warn('⚠️ Teardown cleanup failed:', err);
     }

@@ -2,6 +2,7 @@ import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { SITE_CURRENCY } from '@/lib/config/site';
+import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
 import {
   SimpleVariantData,
   CreateVariantData,
@@ -404,6 +405,9 @@ export async function deleteVariant(variantId: string) {
   const deleted = await prisma.productVariant.delete({
     where: { id: variantId },
   });
+
+  // Nettoyage automatique des attributs orphelins
+  await cleanupOrphanedAttributes();
 
   logger.info(
     {

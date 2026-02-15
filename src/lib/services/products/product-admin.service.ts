@@ -1,6 +1,7 @@
 import { Prisma, ProductStatus, Product } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
 import {
   CreateProductData,
   UpdateProductData,
@@ -189,6 +190,9 @@ export async function deleteProduct(id: string): Promise<Product> {
     where: { id },
   });
 
+  // Nettoyage des attributs orphelins
+  await cleanupOrphanedAttributes();
+
   logger.info(
     {
       action: 'product_deleted',
@@ -207,6 +211,9 @@ export async function hardDeleteProduct(id: string): Promise<Product> {
   const deletedProduct = await prisma.product.delete({
     where: { id },
   });
+
+  // Nettoyage des attributs orphelins
+  await cleanupOrphanedAttributes();
 
   logger.info(
     {

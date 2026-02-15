@@ -3,10 +3,9 @@
  * Creates realistic test fixtures for shipping and product tests
  */
 
-import { PrismaClient } from '@/generated/prisma';
+import { prisma } from '@/lib/core/db';
 import { CreateProductSchema } from '@/lib/validators/product';
-
-const prisma = new PrismaClient();
+import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
 
 /**
  * Seed a test supplier with real Repentigny, QC address
@@ -146,7 +145,11 @@ export async function cleanupTestProduct(slug: string) {
   await prisma.product.deleteMany({
     where: { slug: slug },
   });
-  console.log(`🗑️  Cleaned up test product: ${slug}`);
+
+  // Clean up orphaned attributes after deleting test product
+  await cleanupOrphanedAttributes();
+
+  console.log(`🗑️  Cleaned up test product and orphaned attributes: ${slug}`);
 }
 
 /**
@@ -154,9 +157,11 @@ export async function cleanupTestProduct(slug: string) {
  */
 export async function cleanupTestSupplier() {
   await prisma.supplier.deleteMany({
-    where: { name: 'E2E Test Warehouse - Repentigny V2' },
+    where: {
+      OR: [{ name: { contains: 'E2E' } }, { name: { contains: 'e2e' } }],
+    },
   });
-  console.log('🗑️  Cleaned up test supplier');
+  console.log('🗑️  Cleaned up all E2E test suppliers');
 }
 
 /**
