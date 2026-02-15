@@ -4,6 +4,7 @@ import {
   getOrCreateTestProduct,
   disconnectPrisma,
   resetTestOrders,
+  cleanupTestProduct,
 } from '../fixtures/seed-test-data';
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -93,6 +94,10 @@ test.describe('Checkout and Payment Flow', () => {
   });
 
   test.afterAll(async () => {
+    const testEmail = process.env.TEST_ADMIN_EMAIL || 'test@yopmail.com';
+    console.log('🧹 Final cleanup after Checkout test...');
+    await resetTestOrders(testEmail);
+    await cleanupTestProduct('e2e-checkout-product-fixed');
     await disconnectPrisma();
   });
 
@@ -274,6 +279,24 @@ test.describe('Checkout and Payment Flow', () => {
     }
 
     console.log(`📍 End URL: ${page.url()}`);
-    console.log('✅ Checkout flow complete and successful!');
+
+    // CRITICAL: Wait for the order to be actually created in DB (Webhook latency)
+    // We use a shared helper that polls the DB
+    const { verifyOrderCreated } = require('../fixtures/seed-test-data');
+
+    console.log(
+      '⏳ Waiting for Order Creation confirmation (Webhook latency)...'
+    );
+    const order = await verifyOrderCreated(testEmail);
+
+    if (!order) {
+      throw new Error(
+        '❌ Order was NOT created in DB after success page (Webhook timeout or failure)'
+      );
+    }
+
+    console.log(
+      `✅ Checkout flow complete, Order Created & Paid: ${order.orderNumber}`
+    );
   });
 });

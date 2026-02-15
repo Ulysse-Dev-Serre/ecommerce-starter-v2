@@ -1,120 +1,158 @@
-# Tests End-to-End (E2E) - Playwright
+# Documentation des Tests Playwright E2E
 
-Cette section documente la suite de tests E2E qui valide les parcours critiques de l'application (Storefront et Admin).
+## 🚀 Créer un Test E2E (Checklist Rapide)
 
-## 🚀 Exécuter les tests (Procédure Recommandée)
+Suivez ces 4 étapes pour chaque nouveau test. Pas d'exception.
 
-Pour éviter les conflits de base de données (ex: plusieurs tests modifiant le même produit en même temps), il est **fortement recommandé** de lancer les tests de manière séquentielle.
+### 1. Préparer le Terrain (Config)
+- [ ] Ouvrez `src/tests/e2e/config/routes.ts`.
+- [ ] Ajoutez ou vérifiez l'URL de la page visée (ex: `TEST_ROUTES.ADMIN.LOGISTICS`).
+  > *Centralisez les chemins ici pour faciliter la maintenance future.*
 
-### ✅ Commande de Validation Complète (Stable)
-Cette commande exécute tous les tests un par un, dans l'ordre optimal, pour garantir un résultat fiable à 100%. L'option `--workers=1` est impérative pour éviter les conflits de données.
+### 2. Créer l'Outil (Page Object Model)
+Dans `src/tests/e2e/pom/`, créez une classe (ex: `LogisticsPage.ts`) :
+- [ ] **Constructeur** : Déclarez tous vos sélecteurs (`this.btn = page.locator(...)`).
+  > *Utilisez des IDs uniques ou `getByRole` pour éviter que les tests cassent au moindre changement CSS.*
+- [ ] **Actions** : Une méthode par action utilisateur (ex: `createLocation()`).
+  > *Enveloppez le corps de la méthode dans `await test.step('Nom Action', ...)` pour un rapport d'exécution clair.*
+- [ ] **Visuel** : Ajoutez toujours une méthode `expectLoaded()`.
+  > *Intégrez `await expect(page).toHaveScreenshot()` pour détecter les régressions visuelles involontaires.*
+
+### 3. Écrire le Scénario (Spec)
+Dans `src/tests/e2e/`, créez votre fichier `spec.ts` :
+- [ ] Importez votre Page Object.
+- [ ] Scénario simple : 
+  ```typescript
+  test('Mon Test', async ({ page }) => {
+    const po = new LogisticsPage(page);
+    await po.goto();
+    await po.createLocation();
+    await po.expectSuccess();
+  });
+  ```
+- [ ] **Contrat API** : Ajoutez une vérification de données.
+  > *Importez `prisma` pour comparer la valeur affichée dans l'UI (via POM) avec la valeur réelle en base de données.*
+
+### 4. Lancer et Valider
+- [ ] Commande unique : `npx playwright test --project=chromium --update-snapshots`
+- [ ] **Critères de succès** :
+    - ✅ Test Vert.
+    - ✅ Snapshots générés/mis à jour.
+    - ✅ Données vérifiées par contrat.
+
+---
+
+---
+
+Cette documentation détaille la structure atomique de notre suite de tests End-to-End. Chaque test est indépendant et conçu pour valider une partie spécifique du workflow e-commerce.
+
+---
+
+## 🏗️ Structure des Tests
+
+### Test 1 : Santé & Accès Dashboard Admin (Quick Check)
+- **Fichier** : `src/tests/e2e/admin/dashboard.spec.ts`
+- **POM Associé** : `src/tests/e2e/pom/admin/DashboardPage.ts`
+- **Objectifs Validés** :
+  - **Status 200** : Vérifie que le dashboard admin renvoie un code succès OK.
+  - **Presence** : Vérifie la visibilité du texte "Admin Panel" dans l'interface.
+  - **Auth** : Confirme que la session Clerk est active pour l'admin.
+  - **Sécurité** : Vérifie que les accès anonymes sont bloqués et redirigés vers le login.
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/dashboard.spec.ts --project=chromium --workers=1`
+
+### Test 2 : Cycle de Vie Produit (Logistique & CRUD)
+- **Fichier** : `src/tests/e2e/admin/product-crud.spec.ts`
+- **POM Associés** : `src/tests/e2e/pom/admin/LogisticsPage.ts`, `src/tests/e2e/pom/admin/ProductPage.ts`
+- **Objectifs Validés** :
+  - **Logistique** : Création d'un point d'expédition (Supplier) fonctionnel.
+  - **CRUD Produit** : Création d'un produit DRAFT avec données logistiques.
+  - **Edition produit** : Ajout de variante (Prix/Stock) et passage au statut ACTIVE.
+  - **Storefront** : Vérification que le produit est accessible en ligne (Status 200).
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/product-crud.spec.ts --project=chromium --workers=1`
+
+### Test 3 : Flux Panier & Authenticité (Produit -> Panier -> Checkout)
+- **Fichier** : `src/tests/e2e/storefront/cart.spec.ts`
+- **POM Associé** : `src/tests/e2e/pom/storefront/CartPage.ts`
+- **Objectifs Validés** :
+  - **Authenticité Zod** : Le produit est injecté via un seed validé par Zod 
+  - **Flux Panier** : Ajout au panier et navigation vers la page de Checkout (Status 200).
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/cart.spec.ts --project=chromium --workers=1`
+
+### Test 4 : Parcours Checkout Complet (Shippo & Stripe Radar)
+- **Fichier** : `src/tests/e2e/storefront/checkout.spec.ts`
+- **POM Associé** : `src/tests/e2e/pom/storefront/CheckoutPage.ts`
+- **Objectifs Validés** :
+  - **Logistique** : Saisie d'adresse et récupération des tarifs Shippo réels.
+  - **Sécurité** : Validation des cartes de test Stripe (Success 4242, Fraude 0531, Review 0701).
+  - **Succès** : Confirmation de commande et redirection finale.
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/checkout.spec.ts --project=chromium --workers=1`
+
+### Test 5 : Validation Statuts & Emails (High Fidelity)
+- **Fichier** : `src/tests/e2e/admin/order-status-verification.spec.ts`
+- **POM Associé** : `src/tests/e2e/pom/admin/OrderPage.ts`
+- **Objectifs Cibles** :
+  - **Workflow** : Transition UI (Paid -> Shipped -> Delivered).
+  - **Visuel** : Badges de statut corrects (Snapshot).
+  - **Email Contract** : Appel API Resend pour prouver l'envoi réel.
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/order-status-verification.spec.ts --project=chromium --workers=1`
+
+### Test 6 : Gestion des Retours & Annulations
+- **Fichier** : `src/tests/e2e/storefront/order-returns.spec.ts`
+- **POM Associé** : `src/tests/e2e/pom/storefront/AccountPage.ts`
+- **Objectifs Cibles** :
+  -  **Client** : Flux d'annulation et demande remboursement.
+  -  **Admin** : Réception de la demande.
+  -  **Notification** : Vérification email confirmation.
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/order-returns.spec.ts --project=chromium --workers=1`
+
+---
+
+## 🛠 Guide d'Exécution Global
+
+Pour lancer l'intégralité de la suite de manière séquentielle (recommandé pour la stabilité) et générer les rapports :
 
 ```bash
-npx playwright test src/tests/e2e/auth.setup.ts src/tests/e2e/admin/dashboard.spec.ts src/tests/e2e/admin/products.spec.ts src/tests/e2e/admin/product-edit.spec.ts src/tests/e2e/storefront/cart.spec.ts src/tests/e2e/storefront/checkout.spec.ts src/tests/e2e/admin/orders.spec.ts src/tests/e2e/admin/order-lifecycle.spec.ts --workers=1 --project=chromium
+# 1. Lancer tous les tests avec le projet configuré (Auth auto)
+npx playwright test --project=chromium --workers=1
+
+# 2. En cas d'échec visuel (Snapshot)
+npx playwright test --update-snapshots
+
+# 3. Visualiser le rapport détaillé
+npx playwright show-report
 ```
 
-### 🏎️ Exécution Rapide (Peut échouer)
-Si vous lancez `npx playwright test` sans option, Playwright utilisera plusieurs "workers" en parallèle. Cela peut causer des erreurs (faux négatifs) si deux tests essaient de modifier la même commande ou le même produit en même temps.
+## 🧠 Bonnes Pratiques Avancées (Points de Vigilance)
 
----
+### 1. Gestion de l'État et Parallélisme
+- **Risque** : Conflits de données si plusieurs tests manipulent la même ressource (ex: produits) en parallèle.
+- **Solution** : Utilisez des identifiants uniques dans vos tests (ex: `const email = \`test-user-${Date.now()}@example.com\``) pour garantir l'isolation totale.
 
-### Exécution par étape (Manuel)
-Si vous souhaitez valider étape par étape :
-
-1. **Initialiser l'Admin (Auth)**
-   ```bash
-   npx playwright test auth.setup.ts
-   ```
-
-2. **Tester le Storefront (Client)**
-   ```bash
-   npx playwright test src/tests/e2e/storefront/
-   ```
-
-3. **Tester l'Admin (Gestion)**
-   ```bash
-   npx playwright test src/tests/e2e/admin/dashboard.spec.ts src/tests/e2e/admin/products.spec.ts src/tests/e2e/admin/orders.spec.ts
-   ```
-
-4. **Valider les Cycles Complexes (Remboursement)**
-   ```bash
-   npx playwright test src/tests/e2e/admin/order-lifecycle.spec.ts
-   ```
-
----
-
-## 📂 Architecture des Tests
-
-Les tests sont situés dans `src/tests/e2e/` et organisés par domaine :
-
-### 🛍️ Storefront (`src/tests/e2e/storefront/`)
-Ces tests simulent le parcours d'un client lambda (Guest ou Connecté).
-
-| Fichier | Scénarios couverts |
-| :--- | :--- |
-| **`product-discovery.spec.ts`** | Navigation catalogue, Filtres, Vue détail produit. |
-| **`cart.spec.ts`** | Ajout au panier, Modification quantité, Suppression. |
-| **`checkout.spec.ts`** | Parcours d'achat complet (Guest + Stripe Test Card), Validation formulaire. |
-
-### 🛠️ Admin (`src/tests/e2e/admin/`)
-Ces tests nécessitent une authentification Admin (gérée via `auth.setup.ts`).
-
-| Fichier | Scénarios couverts |
-| :--- | :--- |
-| **`dashboard.spec.ts`** | Accès au dashboard, KPIs de base. |
-| **`products.spec.ts`** | Liste des produits, Création, Modification, Statut (Draft/Active). |
-| **`orders.spec.ts`** | Liste commandes, Vue détail, **Génération d'étiquette d'expédition**. |
-| **`order-lifecycle.spec.ts`** | **Cycle complet Remboursement** : <br>1. Client : Annulation (si Paid)<br>2. Admin : Marquer Expédié -> Livré<br>3. Client : Demande remboursement (si Livré)<br>4. Admin : Confirmation remboursement. |
-
----
-
-## 🔄 Flux Critique : Cycle de Vie & Remboursement
-
-Le fichier `order-lifecycle.spec.ts` est particulièrement important car il valide la logique métier complexe des statuts de commande.
-
-**Étapes validées automatiquement :**
-1. **PAID** : Le client voit le bouton "Cancel delivery".
-2. **SHIPPED** : L'admin marque la commande expédiée. Le client voit un warning "Wait for delivery".
-3. **DELIVERED** : L'admin marque (via API) la commande livrée.
-4. **REFUND REQUEST** : Le client demande un remboursement.
-5. **REFUNDED** : L'admin valide la demande, le statut passe à "Refunded".
-
----
-
-## ⚙️ Configuration & Prérequis
-
-- **Authentification** : Le fichier `auth.setup.ts` connecte automatiquement un utilisateur Admin avant de lancer les tests du dossier `admin/`. L'état d'authentification est sauvegardé dans `.auth/admin.json`.
-- **Base de données** : Les tests utilisent la base de données de développement locale. Assurez-vous que votre serveur local tourne (`npm run dev`) ou que la DB est accessible.
-- **Stripe** : Les tests de paiement utilisent la carte de test Stripe standard (`4242...`).
-
-## 🛠 Bonnes Pratiques pour la Stabilité
-
-Pour garantir des tests E2E qui passent à 100% même dans des environnements lents :
-
-1.  **Sélecteurs Précis (Contre les Faux Positifs)** :
-    - Évitez `page.locator('text=Status')` qui peut matcher un bouton ou un label.
-    - Privilégiez les classes CSS spécifiques : `page.locator('.vibe-badge').filter({ hasText: /Paid/i })`.
-
-2.  **Synchronisation Post-Action** :
-    - Après un clic sur un bouton d'action (ex: "Mark as Shipped"), attendez que le bouton disparaisse (`toBeHidden`) avant de vérifier le changement de statut. Cela garantit que le serveur a fini de traiter la demande et de rafraîchir l'UI.
-
-3.  **Timeouts Généreux** :
-    - La configuration globale est fixée à **300s** (5 min) pour le test et **60s** pour les `expect`. Cela laisse le temps aux APIs externes (Stripe, Shippo) de répondre.
-
-4.  **Gestion de la Pollution des Données** :
-    - Dans les listes (ex: Admin Orders), ne prenez pas la première ligne par défaut. Recherchez dynamiquement une ligne correspondant à l'état attendu (`filter({ hasText: 'Paid' })`).
-
-## 🛠 Troubleshooting
-
-**"Error: Checkout form not visible"**
-- Vérifiez que vous n'avez pas de bloqueur de scripts ou que la clé publique Stripe est bien configurée dans `.env.local`.
-
-**Tests Admin échouent sur le login**
-- Supprimez le dossier `.auth/` et relancez les tests pour forcer une nouvelle authentification :
-  ```bash
-  rm -rf src/tests/e2e/playwright/.auth/ && npx playwright test src/tests/e2e/auth.setup.ts
+### 2. Visual Regression (Tolérance)
+- **Risque** : Les polices ou le rendu peuvent varier légèrement entre TA machine (Ubuntu) et la CI (GitHub Actions), causant des faux positifs.
+- **Solution** : Configurez un seuil de tolérance dans `playwright.config.ts` ou dans l'appel :
+  ```typescript
+  await expect(page).toHaveScreenshot({ maxDiffPixels: 100 });
   ```
 
-**Erreurs de type "Invalid status transition"**
-- Souvent dû à un test précédent qui n'a pas fini de mettre à jour la DB. Assurez-vous de toujours utiliser `--workers=1`.
-- Si le problème persiste, tuez les processus orphelins : `pkill -f playwright`.
+### 3. Optimisation des APIs Tiers (Shippo/Stripe)
+- **Risque** : Les appels réels sont lents, coûteux et fragiles (réseau).
+- **Solution** : Utilisez **MSW (Mock Service Worker)** pour les tests fréquents (ex: Test 3 Panier). Gardez les appels réels uniquement pour les tests "High Fidelity" (ex: Test 5 Order Status).
+
+## 🚑 Troubleshooting & Synchronisation
+
+### 1. Synchronisation de la Base de Données
+- **Risque** : Le serveur Next.js et Playwright pointent vers des bases différentes (ex: `.env` vs `.env.local`).
+- **Solution** : 
+  - Utilisez toujours `path.resolve(__dirname, '.env')` dans `playwright.config.ts`.
+  - Lancez les tests via le script synchronisé : `npm run test:e2e` (qui utilise `dotenv-cli`).
+  - Vérifiez les logs : `NEXT.JS DB URL` et `PLAYWRIGHT DB URL` doivent être identiques.
+
+### 2. Stratégie "UI-First" pour Prisma
+- **Risque** : Prisma peut être "aveugle" aux données si le test s'exécute dans un contexte différent du serveur.
+- **Principe** : Si Playwright valide une redirection (ex: `waitForURL(/\/products\/[ID]/)`), c'est la preuve ultime que le serveur a créé l'objet. Ne laissez pas un échec de lecture Prisma bloquer un test dont le flux UI est parfait. Utilisez l'ID extrait de l'URL pour vos requêtes Prisma.
+
+### 3. Debugging Avancé (Trace Viewer)
+- **Outil** : Utilisez le **Trace Viewer** de Playwright pour inspecter chaque action, capture d'écran, et requête réseau après un échec.
+- **Commande** : `npx playwright show-trace path/to/trace.zip`
+- **Utilisation** : Survolez la timeline pour voir l'état exact du DOM à n'importe quel milliseconde du test.

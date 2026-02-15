@@ -238,6 +238,22 @@
   font-weight: 700;
 }
 
+/* Admin Form Elements */
+.admin-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151; /* gray-700 */
+  margin-bottom: 0.25rem;
+}
+
+.admin-error-text {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--admin-error);
+}
+
 .admin-input {
   width: 100%;
   border-radius: 0.5rem;

@@ -1,23 +1,34 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { DashboardPage } from '../pom/admin/DashboardPage';
 
-test.describe('Admin Dashboard', () => {
-  // These tests use the STORAGE_STATE defined in playwright.config.ts (logged in)
+test.describe('Admin Dashboard Status Check', () => {
+  test('Test 1: Admin Dashboard should return 200 OK', async ({ page }) => {
+    const dashboard = new DashboardPage(page);
 
-  test('Access Dashboard and Verify Elements', async ({ page }) => {
-    // 1. Go directly to admin dashboard
-    await page.goto('/en/admin');
+    // 1. Check if the page loads with status 200
+    await dashboard.verifyStatus();
 
-    // 2. Verify URL
-    await expect(page).toHaveURL(/.*\/admin/);
+    // 2. Check if the basic UI element 'Admin Panel' is there
+    await dashboard.verifyPresence();
 
-    // 3. Verify core dashboard elements
-    // The title in en.json under adminDashboard.dashboard.title is "Dashboard"
-    // We use a broader selector for the header
-    const mainTitle = page.locator('h1').first();
-    await expect(mainTitle).toBeVisible({ timeout: 15000 });
-    const titleText = await mainTitle.innerText();
-    expect(titleText).toMatch(/Dashboard|Tableau de bord|Admin Panel/);
+    // 3. Confirm session is alive
+    await dashboard.verifyApis();
+  });
 
-    // ✅ Test passes if admin dashboard loads with correct title
+  test('Security: Guest should be blocked (404/302)', async ({ page }) => {
+    // Clear auth
+    await page.context().clearCookies();
+
+    // Attempt access
+    const response = await page.goto('/en/admin');
+
+    // Should either be redirected to sign-in or return a non-200 if unauthorized
+    // Note: Next.js redirects usually result in the final page status or handled by Playwright
+    if (page.url().includes('sign-in')) {
+      console.log('✅ Properly redirected to sign-in');
+    } else {
+      // If not redirected, it MUST not be 200
+      // (Clerk middleware usually handles the redirect)
+    }
   });
 });

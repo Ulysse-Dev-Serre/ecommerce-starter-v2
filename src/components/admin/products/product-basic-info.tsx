@@ -1,24 +1,28 @@
 'use client';
 
+import { Dispatch, SetStateAction } from 'react';
 import { CheckCircle, X } from 'lucide-react';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
+export interface ProductBasicFormData {
+  slug: string;
+  status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
+  isFeatured: boolean;
+  // Index signature to allow other fields from parent state safely
+  [key: string]: unknown;
+}
+
+export interface TranslationData {
+  name: string;
+  description: string;
+  shortDescription: string;
+}
+
 interface ProductBasicInfoProps {
-  formData: {
-    slug: string;
-    status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
-    isFeatured: boolean;
-  };
-  setFormData: (fn: (prev: any) => any) => void;
-  translations: Record<
-    string,
-    {
-      name: string;
-      description: string;
-      shortDescription: string;
-    }
-  >;
-  setTranslations: (fn: (prev: any) => any) => void;
+  formData: ProductBasicFormData;
+  setFormData: Dispatch<SetStateAction<ProductBasicFormData>>;
+  translations: Record<string, TranslationData>;
+  setTranslations: Dispatch<SetStateAction<Record<string, TranslationData>>>;
   isSlugValid: boolean;
   fieldErrors?: Record<string, string>;
   t: (key: string) => string;
@@ -37,13 +41,13 @@ export function ProductBasicInfo({
 }: ProductBasicInfoProps & { isEditMode?: boolean }) {
   const handleTranslationChange = (
     lang: string,
-    field: string,
+    field: keyof TranslationData,
     value: string
   ) => {
     setTranslations(prev => ({
       ...prev,
       [lang]: {
-        ...prev[lang],
+        ...(prev[lang] || { name: '', description: '', shortDescription: '' }),
         [field]: value,
       },
     }));
@@ -56,7 +60,7 @@ export function ProductBasicInfo({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="admin-label">
               {t('slug')} <span className="text-red-500">*</span>
             </label>
             <input
@@ -70,9 +74,7 @@ export function ProductBasicInfo({
               required
             />
             {fieldErrors.slug && (
-              <p className="mt-1 text-xs font-medium text-red-600">
-                {fieldErrors.slug}
-              </p>
+              <p className="admin-error-text">{fieldErrors.slug}</p>
             )}
             {formData.slug && (
               <p
@@ -144,7 +146,7 @@ export function ProductBasicInfo({
       </div>
 
       <div className="space-y-4">
-        {SUPPORTED_LOCALES.map((lang: string) => (
+        {SUPPORTED_LOCALES.map((lang: string, index: number) => (
           <div key={lang} className="admin-card">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">
               {lang.toUpperCase()}
@@ -155,33 +157,30 @@ export function ProductBasicInfo({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="admin-label" htmlFor={`product-name-${lang}`}>
                   {t('productName')}
                   {lang === 'en' && <span className="text-red-500"> *</span>}
                 </label>
                 <input
+                  id={`product-name-${lang}`}
                   type="text"
                   value={translations[lang]?.name || ''}
                   onChange={e =>
                     handleTranslationChange(lang, 'name', e.target.value)
                   }
                   placeholder={t('productName')}
-                  className={`admin-input ${fieldErrors[`translations.0.name`] || fieldErrors[`translations.1.name`] ? 'border-red-500 bg-red-50' : ''}`}
+                  className={`admin-input ${fieldErrors[`translations.${index}.name`] ? 'border-red-500 bg-red-50' : ''}`}
                   required={lang === 'en'}
                 />
-                {(fieldErrors[`translations.0.name`] ||
-                  fieldErrors[`translations.1.name`]) && (
-                  <p className="mt-1 text-xs font-medium text-red-600">
-                    {fieldErrors[`translations.0.name`] ||
-                      fieldErrors[`translations.1.name`]}
+                {fieldErrors[`translations.${index}.name`] && (
+                  <p className="admin-error-text">
+                    {fieldErrors[`translations.${index}.name`]}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  {t('shortDescription')}
-                </label>
+                <label className="admin-label">{t('shortDescription')}</label>
                 <input
                   type="text"
                   value={translations[lang]?.shortDescription || ''}
@@ -198,10 +197,14 @@ export function ProductBasicInfo({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label
+                  className="block text-sm font-medium text-gray-700"
+                  htmlFor={`product-description-${lang}`}
+                >
                   {t('fullDescription')}
                 </label>
                 <textarea
+                  id={`product-description-${lang}`}
                   value={translations[lang]?.description || ''}
                   onChange={e =>
                     handleTranslationChange(lang, 'description', e.target.value)

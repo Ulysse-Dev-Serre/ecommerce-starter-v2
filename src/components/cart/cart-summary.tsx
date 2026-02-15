@@ -46,6 +46,7 @@ export function CartSummary({ items, locale, isSignedIn }: CartSummaryProps) {
         <Link
           href={`/${locale}${NAV_ROUTES.CHECKOUT}`}
           className="vibe-button-primary w-full h-12"
+          data-testid="checkout-button"
         >
           {t('checkout')}
         </Link>

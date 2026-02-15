@@ -342,7 +342,8 @@
       "phone": "Phone",
       "localStock": "Local Stock (Warehouse)",
       "dropshipper": "Dropshipper",
-      "other": "Other"
+      "other": "Other",
+      "saveError": "Failed to save logistics location"
     }
   },
   "checkout": {
@@ -636,6 +637,8 @@
         "title": "Admin Actions",
         "help": "* Automatic Stripe/Shippo status. Fallback buttons only.",
         "markShipped": "MARK AS SHIPPED",
+        "markInTransit": "MARK AS IN TRANSIT",
+        "markDelivered": "MARK AS DELIVERED",
         "generateReturnLabel": "GENERATE RETURN LABEL",
         "confirmRefund": "CONFIRM REFUND",
         "refund": "REFUND",

@@ -55,6 +55,11 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
+// Mock requireAdmin
+vi.mock('@/lib/auth/server', () => ({
+  requireAdmin: vi.fn().mockResolvedValue('admin_user_id'),
+}));
+
 describe('Product Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks();

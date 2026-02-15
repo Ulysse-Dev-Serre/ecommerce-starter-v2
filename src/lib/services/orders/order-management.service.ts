@@ -20,6 +20,7 @@ export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     OrderStatus.SHIPPED,
     OrderStatus.REFUNDED,
     OrderStatus.REFUND_REQUESTED,
+    OrderStatus.CANCELLED,
   ],
   [OrderStatus.SHIPPED]: [
     OrderStatus.IN_TRANSIT,

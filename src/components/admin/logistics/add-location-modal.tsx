@@ -96,7 +96,10 @@ export function AddLocationModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="logistics-name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 {t('locationName')}
               </label>
               <input
@@ -106,12 +109,16 @@ export function AddLocationModal({
                 onChange={e =>
                   setFormData({ ...formData, name: e.target.value })
                 }
+                id="logistics-name"
                 className="admin-input"
                 placeholder={t('locationName')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="logistics-type"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 {t('locationType')}
               </label>
               <select
@@ -120,6 +127,7 @@ export function AddLocationModal({
                 onChange={e =>
                   setFormData({ ...formData, type: e.target.value })
                 }
+                id="logistics-type"
                 className="admin-input"
               >
                 <option value="LOCAL_STOCK">{t('localStock')}</option>
@@ -137,7 +145,10 @@ export function AddLocationModal({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-sender-name"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('senderName')}
                 </label>
                 <input
@@ -145,13 +156,17 @@ export function AddLocationModal({
                   required
                   value={formData.address.name}
                   onChange={e => updateAddress('name', e.target.value)}
+                  id="logistics-sender-name"
                   className="admin-input text-sm"
                   placeholder={t('senderNamePlaceholder')}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-street"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('street')}
                 </label>
                 <input
@@ -159,13 +174,17 @@ export function AddLocationModal({
                   required
                   value={formData.address.street1}
                   onChange={e => updateAddress('street1', e.target.value)}
+                  id="logistics-street"
                   className="admin-input text-sm"
                   placeholder={t('streetPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-city"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('city')}
                 </label>
                 <input
@@ -173,13 +192,17 @@ export function AddLocationModal({
                   required
                   value={formData.address.city}
                   onChange={e => updateAddress('city', e.target.value)}
+                  id="logistics-city"
                   className="admin-input text-sm"
                   placeholder={t('cityPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-state"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('state')}
                 </label>
                 <input
@@ -187,13 +210,17 @@ export function AddLocationModal({
                   required
                   value={formData.address.state}
                   onChange={e => updateAddress('state', e.target.value)}
+                  id="logistics-state"
                   className="admin-input text-sm"
                   placeholder={t('statePlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-zip"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('zip')}
                 </label>
                 <input
@@ -201,13 +228,17 @@ export function AddLocationModal({
                   required
                   value={formData.address.zip}
                   onChange={e => updateAddress('zip', e.target.value)}
+                  id="logistics-zip"
                   className="admin-input text-sm"
                   placeholder={t('zipPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-country"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('country')}
                 </label>
                 <input
@@ -218,13 +249,17 @@ export function AddLocationModal({
                   onChange={e =>
                     updateAddress('country', e.target.value.toUpperCase())
                   }
+                  id="logistics-country"
                   className="admin-input text-sm"
                   placeholder={t('countryPlaceholder')}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-email"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('email')}
                 </label>
                 <input
@@ -232,12 +267,16 @@ export function AddLocationModal({
                   required
                   value={formData.address.email || ''}
                   onChange={e => updateAddress('email', e.target.value)}
+                  id="logistics-email"
                   className="admin-input text-sm"
                   placeholder={t('emailPlaceholder')}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium admin-text-subtle mb-1">
+                <label
+                  htmlFor="logistics-phone"
+                  className="block text-xs font-medium admin-text-subtle mb-1"
+                >
                   {t('phone')}
                 </label>
                 <input
@@ -245,6 +284,7 @@ export function AddLocationModal({
                   required
                   value={formData.address.phone || ''}
                   onChange={e => updateAddress('phone', e.target.value)}
+                  id="logistics-phone"
                   className="admin-input text-sm"
                   placeholder={t('phone')}
                 />

@@ -4,6 +4,7 @@
  */
 
 import { PrismaClient } from '@/generated/prisma';
+import { CreateProductSchema } from '@/lib/validators/product';
 
 const prisma = new PrismaClient();
 
@@ -51,48 +52,67 @@ export async function seedTestSupplier() {
 /**
  * Get or Create a stable test product for Checkout E2E tests
  * This avoids polluting DB with infinite test products
+ * REINFORCED: Now uses Zod to validate data before DB insertion.
  */
 export async function getOrCreateTestProduct(supplierId: string) {
   const fixedSlug = 'e2e-checkout-product-fixed';
 
-  // 1. Try to find existing product
-  const existing = await prisma.product.findUnique({
-    where: { slug: fixedSlug },
-    include: { variants: true },
-  });
+  // 1. FORCE CLEANUP: Never reuse old data. Always start fresh.
+  await cleanupTestProduct(fixedSlug);
 
-  if (existing) {
-    console.log('✅ Found existing test product:', existing.slug);
-    return existing;
-  }
+  // 2. Define data
+  const rawData = {
+    slug: fixedSlug,
+    status: 'ACTIVE' as const,
+    shippingOriginId: supplierId,
+    weight: 1.5,
+    dimensions: { length: 20, width: 15, height: 10, unit: 'cm' },
+    originCountry: 'CA',
+    hsCode: '123456',
+    incoterm: 'DDP',
+    exportExplanation: 'Stable automated test product for customs validation',
+    translations: [
+      {
+        language: 'en' as const,
+        name: `E2E Checkout Product (Fixed)`,
+        description: 'Stable automated test product',
+      },
+      {
+        language: 'fr' as const,
+        name: `Produit E2E Checkout (Fixe)`,
+        description: 'Produit test stable',
+      },
+    ],
+  };
 
-  // 2. Create if not exists
+  // 3. Validate with Zod before creating (ensures 100% legal product)
+  console.log('🧐 Validating product seed data with Zod...');
+  const validatedData = CreateProductSchema.parse(rawData);
+
+  // 4. Create in DB (Mapping Zod structure to Prisma structure if needed)
   console.log('🆕 Creating new test product:', fixedSlug);
   const product = await prisma.product.create({
     data: {
-      slug: fixedSlug,
-      status: 'ACTIVE',
-      shippingOriginId: supplierId,
-      weight: 1.5,
-      dimensions: { length: 20, width: 15, height: 10 },
+      slug: validatedData.slug,
+      status: validatedData.status,
+      shippingOriginId: validatedData.shippingOriginId,
+      weight: validatedData.weight as number,
+      dimensions: validatedData.dimensions,
+      originCountry: validatedData.originCountry,
+      hsCode: validatedData.hsCode,
+      incoterm: validatedData.incoterm,
+      exportExplanation: validatedData.exportExplanation,
       translations: {
-        create: [
-          {
-            language: 'EN',
-            name: `E2E Checkout Product (Fixed)`,
-            description: 'Stable automated test product',
-          },
-          {
-            language: 'FR',
-            name: `Produit E2E Checkout (Fixe)`,
-            description: 'Produit test stable',
-          },
-        ],
+        create: validatedData.translations.map(t => ({
+          language: t.language.toUpperCase() as any, // DB uses 'EN', Zod uses 'en'
+          name: t.name,
+          description: t.description,
+        })),
       },
       variants: {
         create: {
           sku: `SKU-E2E-FIXED`,
-          weight: 1.5,
+          weight: validatedData.weight as number,
           pricing: {
             create: {
               price: 29.99,
@@ -102,7 +122,7 @@ export async function getOrCreateTestProduct(supplierId: string) {
           },
           inventory: {
             create: {
-              stock: 9999, // High stock to avoid depletion
+              stock: 9999,
               trackInventory: true,
             },
           },
@@ -297,4 +317,55 @@ export async function createTestOrder(
 
   console.log(`✅ Seeded order: ${order.orderNumber} (${order.id})`);
   return order;
+}
+
+/**
+ * Verify order exists and is PAID (Polling for Webhook latency)
+ */
+export async function verifyOrderCreated(
+  email: string,
+  maxAttempts = 20
+): Promise<any> {
+  console.log(`🔍 Polling DB for order created by ${email}...`);
+  for (let i = 0; i < maxAttempts; i++) {
+    const order = await prisma.order.findFirst({
+      where: { orderEmail: email },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (order && order.status === 'PAID') {
+      console.log(
+        `✅ Order found in DB: ${order.orderNumber} (Status: ${order.status})`
+      );
+      return order;
+    }
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+  return null;
+}
+
+/**
+ * Verify product exists and has correct status (Polling for async processing)
+ */
+export async function verifyProductCreated(
+  slug: string,
+  status = 'ACTIVE',
+  maxAttempts = 20
+): Promise<any> {
+  console.log(`🔍 Polling DB for product slug: ${slug}...`);
+  for (let i = 0; i < maxAttempts; i++) {
+    const product = await prisma.product.findUnique({
+      where: { slug: slug },
+      include: { variants: true },
+    });
+
+    if (product && product.status === status) {
+      console.log(
+        `✅ Product found in DB: ${product.slug} (Status: ${product.status})`
+      );
+      return product;
+    }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  return null;
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { OrderStatus } from '@/generated/prisma';
-import { Package, RefreshCcw, AlertTriangle } from 'lucide-react';
+import { Package, RefreshCcw, AlertTriangle, Truck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils/cn';
@@ -140,6 +140,8 @@ export function StatusActions({
 
   // On n'affiche les boutons que si le statut actuel permet ces transitions
   const canShip = currentStatus === OrderStatus.PAID;
+  const canTransit = currentStatus === OrderStatus.SHIPPED;
+  const canDeliver = [OrderStatus.IN_TRANSIT].includes(currentStatus as any);
   const canRefund = [
     OrderStatus.PAID,
     OrderStatus.SHIPPED,
@@ -159,7 +161,7 @@ export function StatusActions({
     OrderStatus.CANCELLED,
   ].includes(currentStatus as any);
 
-  if (!canShip && !canRefund && !canReturn) {
+  if (!canShip && !canRefund && !canReturn && !canTransit && !canDeliver) {
     return null;
   }
 
@@ -183,6 +185,28 @@ export function StatusActions({
           >
             <Package className="h-4 w-4" />
             {t('markShipped')}
+          </button>
+        )}
+
+        {canTransit && (
+          <button
+            onClick={() => handleStatusChange(OrderStatus.IN_TRANSIT)}
+            disabled={isLoading}
+            className="admin-btn-secondary w-full"
+          >
+            <Truck className="h-4 w-4" />
+            {t('markInTransit')}
+          </button>
+        )}
+
+        {canDeliver && (
+          <button
+            onClick={() => handleStatusChange(OrderStatus.DELIVERED)}
+            disabled={isLoading}
+            className="admin-btn-success w-full"
+          >
+            <Package className="h-4 w-4" />
+            {t('markDelivered')}
           </button>
         )}
 
