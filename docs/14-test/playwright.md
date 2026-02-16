@@ -1,158 +1,85 @@
-# Documentation des Tests Playwright E2E
+# Documentation Playwright E2E
 
-## 🚀 Créer un Test E2E (Checklist Rapide)
+Cette documentation décrit la stratégie de test et les scénarios automatisés pour garantir la stabilité de la plateforme e-commerce.
 
-Suivez ces 4 étapes pour chaque nouveau test. Pas d'exception.
+## 🚀 Méthodologies de Test
 
-### 1. Préparer le Terrain (Config)
-- [ ] Ouvrez `src/tests/e2e/config/routes.ts`.
-- [ ] Ajoutez ou vérifiez l'URL de la page visée (ex: `TEST_ROUTES.ADMIN.LOGISTICS`).
-  > *Centralisez les chemins ici pour faciliter la maintenance future.*
+L'architecture de test est divisée en deux approches complémentaires pour maximiser la couverture tout en minimisant la fragilité.
 
-### 2. Créer l'Outil (Page Object Model)
-Dans `src/tests/e2e/pom/`, créez une classe (ex: `LogisticsPage.ts`) :
-- [ ] **Constructeur** : Déclarez tous vos sélecteurs (`this.btn = page.locator(...)`).
-  > *Utilisez des IDs uniques ou `getByRole` pour éviter que les tests cassent au moindre changement CSS.*
-- [ ] **Actions** : Une méthode par action utilisateur (ex: `createLocation()`).
-  > *Enveloppez le corps de la méthode dans `await test.step('Nom Action', ...)` pour un rapport d'exécution clair.*
-- [ ] **Visuel** : Ajoutez toujours une méthode `expectLoaded()`.
-  > *Intégrez `await expect(page).toHaveScreenshot()` pour détecter les régressions visuelles involontaires.*
+### 1. Méthode UI-First (Tests 1 à 3)
+Cible le parcours utilisateur direct via le navigateur.
+- **Approche** : Utilisation intensive du **Page Object Model (POM)**.
+- **Validation** : Vérifie que les éléments visuels sont présents, cliquables et que les flux de navigation de base fonctionnent.
 
-### 3. Écrire le Scénario (Spec)
-Dans `src/tests/e2e/`, créez votre fichier `spec.ts` :
-- [ ] Importez votre Page Object.
-- [ ] Scénario simple : 
-  ```typescript
-  test('Mon Test', async ({ page }) => {
-    const po = new LogisticsPage(page);
-    await po.goto();
-    await po.createLocation();
-    await po.expectSuccess();
-  });
-  ```
-- [ ] **Contrat API** : Ajoutez une vérification de données.
-  > *Importez `prisma` pour comparer la valeur affichée dans l'UI (via POM) avec la valeur réelle en base de données.*
-
-### 4. Lancer et Valider
-- [ ] Commande unique : `npx playwright test --project=chromium --update-snapshots`
-- [ ] **Critères de succès** :
-    - ✅ Test Vert.
-    - ✅ Snapshots générés/mis à jour.
-    - ✅ Données vérifiées par contrat.
-
----
-
----
-
-Cette documentation détaille la structure atomique de notre suite de tests End-to-End. Chaque test est indépendant et conçu pour valider une partie spécifique du workflow e-commerce.
+### 2. Méthode Hybride API-Smoke & Integration (Tests 4 à 6)
+Cible les processus métier critiques et les intégrations tierces (Stripe, Shippo, Resend).
+- **API Smoke (Source de Vérité)** : Appels directs aux endpoints backend avec **vérification profonde en base de données (Prisma)**.
+- **Isolation des Données** : Chaque test utilise ses propres produits (Slugs uniques) pour éviter les erreurs de nettoyage concurrent ou les conflits de webhooks.
+- **Standard de Réponse** : Les erreurs métier (ex: annuler une commande livrée) doivent retourner un code **400 Bad Request** propre et non un crash 500.
 
 ---
 
 ## 🏗️ Structure des Tests
 
-### Test 1 : Santé & Accès Dashboard Admin (Quick Check)
+### Test 1 : Santé & Accès Dashboard Admin
 - **Fichier** : `src/tests/e2e/admin/dashboard.spec.ts`
-- **POM Associé** : `src/tests/e2e/pom/admin/DashboardPage.ts`
-- **Objectifs Validés** :
-  - **Status 200** : Vérifie que le dashboard admin renvoie un code succès OK.
-  - **Presence** : Vérifie la visibilité du texte "Admin Panel" dans l'interface.
-  - **Auth** : Confirme que la session Clerk est active pour l'admin.
-  - **Sécurité** : Vérifie que les accès anonymes sont bloqués et redirigés vers le login.
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/dashboard.spec.ts --project=chromium --workers=1`
+- **Objectifs** : Vérifie le Status 200, la présence du texte "Admin Panel" et la redirection de sécurité si non authentifié.
 
 ### Test 2 : Cycle de Vie Produit (Logistique & CRUD)
 - **Fichier** : `src/tests/e2e/admin/product-crud.spec.ts`
-- **POM Associés** : `src/tests/e2e/pom/admin/LogisticsPage.ts`, `src/tests/e2e/pom/admin/ProductPage.ts`
-- **Objectifs Validés** :
-  - **Logistique** : Création d'un point d'expédition (Supplier) fonctionnel.
-  - **CRUD Produit** : Création d'un produit DRAFT avec données logistiques.
-  - **Edition produit** : Ajout de variante (Prix/Stock) et passage au statut ACTIVE.
-  - **Storefront** : Vérification que le produit est accessible en ligne (Status 200).
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/product-crud.spec.ts --project=chromium --workers=1`
+- **Objectifs** : Création d'un Supplier, création d'un produit DRAFT, passage en ACTIVE avec prix/stock et visibilité storefront.
 
-### Test 3 : Flux Panier & Authenticité (Produit -> Panier -> Checkout)
+### Test 3 : Flux Panier & Authenticité
 - **Fichier** : `src/tests/e2e/storefront/cart.spec.ts`
-- **POM Associé** : `src/tests/e2e/pom/storefront/CartPage.ts`
+- **Objectifs** : Injection de produit via seed validé par Zod, ajout au panier et accès à la page Checkout.
+
+### Test 4 : Parcours Checkout Complet (100% Intégration)
+- **Fichier** : `src/tests/e2e/smoke/api-checkout-full.spec.ts`
 - **Objectifs Validés** :
-  - **Authenticité Zod** : Le produit est injecté via un seed validé par Zod 
-  - **Flux Panier** : Ajout au panier et navigation vers la page de Checkout (Status 200).
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/cart.spec.ts --project=chromium --workers=1`
+  - **Stripe Réel** : Utilise une vraie carte de test Visa pour créer un paiement.
+  - **Webhook ngrok** : Vérifie que le signal de Stripe revient bien sur le serveur local via ngrok.
+  - **Confirmation** : Création de la commande en DB (Status PAID) et envoi des emails Resend.
+- **Isolation** : Utilise le slug `e2e-checkout-full-smoke`.
 
-### Test 4 : Parcours Checkout Complet (Multi-scénarios Stripe)
-- **Fichier** : `src/tests/e2e/storefront/checkout.spec.ts`
-- **POM Associé** : `src/tests/e2e/pom/storefront/CheckoutPage.ts`
+### Test 5 : État de Commande & Historique Prisma
+- **Fichier** : `src/tests/e2e/smoke/api-order-status.spec.ts`
 - **Objectifs Validés** :
-  - **Logistique** : Saisie d'adresse et récupération des tarifs Shippo réels.
-  - **Sécurité** : Validation des cartes de test Stripe (Success 4242, Decline 9995, Radar Block 0019).
-  - **Succès** : Confirmation de commande, redirection et vérification DB (Prisma).
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/checkout.spec.ts --project=chromium --workers=1`
+  - **Transitions** : PAID -> SHIPPED -> IN_TRANSIT -> DELIVERED.
+  - **Deep DB Check** : Vérifie avec Prisma que chaque étape crée une entrée dans l'historique (`statusHistory`).
+  - **Emails** : Vérifie le déclenchement des notifications d'expédition et de livraison.
+- **Isolation** : Utilise le slug `e2e-order-status-smoke`.
 
-### Test 5 : Validation Statuts & Emails (High Fidelity)
-- **Fichier** : `src/tests/e2e/admin/order-status-verification.spec.ts`
-- **POM Associé** : `src/tests/e2e/pom/admin/OrderPage.ts`
-- **Objectifs Cibles** :
-  - **Workflow** : Transition UI (Paid -> Shipped -> Delivered).
-  - **Visuel** : Badges de statut corrects (Snapshot).
-  - **Email Contract** : Appel API Resend pour prouver l'envoi réel.
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/order-status-verification.spec.ts --project=chromium --workers=1`
-
-### Test 6 : Gestion des Retours & Annulations
-- **Fichier** : `src/tests/e2e/storefront/cancel-order.spec.ts`
-- **POM Associé** : `src/tests/e2e/pom/storefront/AccountPage.ts`
-- **Objectifs Cibles** :
-  -  **Client** : Flux d'annulation et demande remboursement.
-  -  **Admin** : Réception de la demande.
-  -  **Notification** : Vérification email confirmation.
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/cancel-order.spec.ts --project=chromium --workers=1`
+### Test 6 : Retours, Annulations & Sécurité Métier
+- **Fichier** : `src/tests/e2e/smoke/api-refund.spec.ts`
+- **Objectifs Validés** :
+  - **Cycle de Retour** : Demande client (avec image mockée) -> Alerte Admin -> Approbation -> Remboursement.
+  - **Sécurité (Negative Tests)** : Vérifie qu'il est **impossible** d'annuler une commande déjà SHIPPED ou DELIVERED (Code 400 exigé).
+- **Isolation** : Utilise le slug `e2e-refund-smoke`.
 
 ---
 
-## 🛠 Guide d'Exécution Global
+## 🛠️ Guide d'Exécution Rapide
 
-Pour lancer l'intégralité de la suite de manière séquentielle (recommandé pour la stabilité) et générer les rapports :
-
+### Exécution du Backend (Suite Smoke)
+C'est la commande la plus importante pour valider la robustesse technique :
 ```bash
-# 1. Lancer tous les tests avec le projet configuré (Auth auto)
-npx playwright test --project=chromium --workers=1
-
-# 2. En cas d'échec visuel (Snapshot)
-npx playwright test --update-snapshots
-
-# 3. Visualiser le rapport détaillé
-npx playwright show-report
+# Nécessite ngrok actif pour le Test 4
+npx playwright test src/tests/e2e/smoke/ --project=chromium --workers=1
 ```
 
-## 🧠 Bonnes Pratiques Avancées (Points de Vigilance)
+### Exécution Individuelle (Exemple)
+```bash
+npx playwright test src/tests/e2e/smoke/api-order-status.spec.ts --project=chromium
+```
 
-### 1. Gestion de l'État et Parallélisme
-- **Risque** : Conflits de données si plusieurs tests manipulent la même ressource (ex: produits) en parallèle.
-- **Solution** : Utilisez des identifiants uniques dans vos tests (ex: `const email = \`test-user-${Date.now()}@example.com\``) pour garantir l'isolation totale.
+### Règles d'Or pour les Nouveaux Tests
+1. **Source de Vérité** : Toujours vérifier l'état final en base de données avec `prisma.order.findUnique`.
+2. **Nettoyage Automatisé** : Utiliser `afterAll` avec un délai (`setTimeout`) de 3-5s pour laisser le temps aux webhooks Stripe de finir avant d'effacer les données.
+3. **Codes ERE** : Attendre des codes `400` pour les erreurs de logique métier et `401/403` pour la sécurité. Ne jamais tolérer de `500`.
 
-### 2. Visual Regression (Tolérance)
-- **Risque** : Les polices ou le rendu peuvent varier légèrement entre TA machine (Ubuntu) et la CI (GitHub Actions), causant des faux positifs.
-- **Solution** : Configurez un seuil de tolérance dans `playwright.config.ts` ou dans l'appel :
-  ```typescript
-  await expect(page).toHaveScreenshot({ maxDiffPixels: 100 });
-  ```
+---
 
-### 3. Optimisation des APIs Tiers (Shippo/Stripe)
-- **Risque** : Les appels réels sont lents, coûteux et fragiles (réseau).
-- **Solution** : Utilisez **MSW (Mock Service Worker)** pour les tests fréquents (ex: Test 3 Panier). Gardez les appels réels uniquement pour les tests "High Fidelity" (ex: Test 5 Order Status).
-
-## 🚑 Troubleshooting & Synchronisation
-
-### 1. Synchronisation de la Base de Données
-- **Risque** : Le serveur Next.js et Playwright pointent vers des bases différentes (ex: `.env` vs `.env.local`).
-- **Solution** : 
-  - Utilisez toujours `path.resolve(__dirname, '.env')` dans `playwright.config.ts`.
-  - Lancez les tests via le script synchronisé : `npm run test:e2e` (qui utilise `dotenv-cli`).
-  - Vérifiez les logs : `NEXT.JS DB URL` et `PLAYWRIGHT DB URL` doivent être identiques.
-
-### 2. Stratégie "UI-First" pour Prisma
-- **Risque** : Prisma peut être "aveugle" aux données si le test s'exécute dans un contexte différent du serveur.
-- **Principe** : Si Playwright valide une redirection (ex: `waitForURL(/\/products\/[ID]/)`), c'est la preuve ultime que le serveur a créé l'objet. Ne laissez pas un échec de lecture Prisma bloquer un test dont le flux UI est parfait. Utilisez l'ID extrait de l'URL pour vos requêtes Prisma.
-
-### 3. Debugging Avancé (Trace Viewer)
-- **Outil** : Utilisez le **Trace Viewer** de Playwright pour inspecter chaque action, capture d'écran, et requête réseau après un échec.
-- **Commande** : `npx playwright show-trace path/to/trace.zip`
-- **Utilisation** : Survolez la timeline pour voir l'état exact du DOM à n'importe quel milliseconde du test.
+## 📊 Rapports & Logs
+- **Rapports** : `npx playwright show-report`
+- **Logs Resend** : Surveillez la console du serveur pour les messages `Email sent successfully`.
+- **Logs Stripe** : Regardez le terminal ngrok pour voir les requêtes POST vers `/api/webhooks/stripe`.

@@ -361,6 +361,7 @@ export async function updateOrderStatus(params: {
   // 2. Valider la transition
   const validTransitions =
     VALID_STATUS_TRANSITIONS[order.status as OrderStatus] || [];
+
   if (!validTransitions.includes(newStatus)) {
     throw new AppError(
       ErrorCode.VALIDATION_ERROR,

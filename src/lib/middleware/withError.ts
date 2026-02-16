@@ -11,12 +11,16 @@ export function withError(handler: AnyHandler): AnyHandler {
     try {
       return await handler(...args);
     } catch (error) {
-      if (error instanceof AppError) {
+      if (
+        error instanceof AppError ||
+        (error && typeof error === 'object' && (error as any).isAppError)
+      ) {
+        const appError = error as AppError;
         logger.warn(
           {
-            code: error.code,
-            message: error.message,
-            statusCode: error.statusCode,
+            code: appError.code,
+            message: appError.message,
+            statusCode: appError.statusCode,
           },
           'AppError handled'
         );
@@ -24,12 +28,12 @@ export function withError(handler: AnyHandler): AnyHandler {
         return NextResponse.json(
           {
             success: false,
-            error: error.code,
-            message: error.message,
-            details: error.details,
+            error: appError.code,
+            message: appError.message,
+            details: appError.details,
             timestamp: new Date().toISOString(),
           },
-          { status: error.statusCode }
+          { status: appError.statusCode }
         );
       }
 

@@ -47,6 +47,8 @@ export interface ApiError {
  * Classe d'erreur personnalisée pour API
  */
 export class AppError extends Error {
+  readonly isAppError = true;
+
   constructor(
     public code: ErrorCode | string,
     message: string,
@@ -55,5 +57,7 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = 'AppError';
+    // Ensure the prototype is set correctly for custom errors
+    Object.setPrototypeOf(this, AppError.prototype);
   }
 }

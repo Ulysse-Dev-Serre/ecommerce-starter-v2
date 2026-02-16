@@ -103,30 +103,8 @@ export function withAuth(handler: ApiHandler) {
         ? await handler(request, routeContext, authContext)
         : await handler(request, authContext);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-
-      logger.error(
-        {
-          error: errorMessage,
-          stack: error instanceof Error ? error.stack : undefined,
-          timestamp: new Date().toISOString(),
-        },
-        'Authentication middleware error'
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Internal server error',
-          message:
-            env.NODE_ENV === 'development'
-              ? errorMessage
-              : 'Something went wrong',
-          timestamp: new Date().toISOString(),
-        },
-        { status: 500 }
-      );
+      // Re-throw to let withError middleware handle it correctly (e.g., preservation of status codes)
+      throw error;
     }
   };
 }
@@ -254,30 +232,8 @@ export function withOptionalAuth(handler: ApiHandler) {
         ? await handler(request, routeContext, authContext)
         : await handler(request, authContext);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-
-      logger.error(
-        {
-          error: errorMessage,
-          stack: error instanceof Error ? error.stack : undefined,
-          timestamp: new Date().toISOString(),
-        },
-        'Optional auth middleware error'
-      );
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Internal server error',
-          message:
-            env.NODE_ENV === 'development'
-              ? errorMessage
-              : 'Something went wrong',
-          timestamp: new Date().toISOString(),
-        },
-        { status: 500 }
-      );
+      // Re-throw to let withError middleware handle it correctly
+      throw error;
     }
   };
 }

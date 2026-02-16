@@ -49,19 +49,22 @@ export async function seedTestSupplier() {
 }
 
 /**
- * Get or Create a stable test product for Checkout E2E tests
+ * Get or Create a stable test product for E2E tests
  * This avoids polluting DB with infinite test products
  * REINFORCED: Now uses Zod to validate data before DB insertion.
+ * @param supplierId - The supplier ID to link to
+ * @param customSlug - Optional custom slug, defaults to 'e2e-checkout-product-fixed'
  */
-export async function getOrCreateTestProduct(supplierId: string) {
-  const fixedSlug = 'e2e-checkout-product-fixed';
-
+export async function getOrCreateTestProduct(
+  supplierId: string,
+  customSlug: string = 'e2e-checkout-product-fixed'
+) {
   // 1. FORCE CLEANUP: Never reuse old data. Always start fresh.
-  await cleanupTestProduct(fixedSlug);
+  await cleanupTestProduct(customSlug);
 
   // 2. Define data
   const rawData = {
-    slug: fixedSlug,
+    slug: customSlug,
     status: 'ACTIVE' as const,
     shippingOriginId: supplierId,
     weight: 1.5,
@@ -73,12 +76,12 @@ export async function getOrCreateTestProduct(supplierId: string) {
     translations: [
       {
         language: 'en' as const,
-        name: `E2E Checkout Product (Fixed)`,
+        name: `E2E Product (${customSlug})`,
         description: 'Stable automated test product',
       },
       {
         language: 'fr' as const,
-        name: `Produit E2E Checkout (Fixe)`,
+        name: `Produit E2E (${customSlug})`,
         description: 'Produit test stable',
       },
     ],
@@ -89,7 +92,7 @@ export async function getOrCreateTestProduct(supplierId: string) {
   const validatedData = CreateProductSchema.parse(rawData);
 
   // 4. Create in DB (Mapping Zod structure to Prisma structure if needed)
-  console.log('🆕 Creating new test product:', fixedSlug);
+  console.log('🆕 Creating new test product:', customSlug);
   const product = await prisma.product.create({
     data: {
       slug: validatedData.slug,
@@ -110,7 +113,7 @@ export async function getOrCreateTestProduct(supplierId: string) {
       },
       variants: {
         create: {
-          sku: `SKU-E2E-FIXED`,
+          sku: `SKU-${customSlug.toUpperCase()}`,
           weight: validatedData.weight as number,
           pricing: {
             create: {
@@ -245,10 +248,11 @@ export async function getAdminUserId(email: string) {
 export async function createTestOrder(
   testEmail: string,
   userId?: string,
-  withShipment: boolean = false
+  withShipment: boolean = false,
+  productSlug: string = 'e2e-checkout-product-fixed'
 ) {
   const supplierId = await getTestSupplierId();
-  const product = await getOrCreateTestProduct(supplierId);
+  const product = await getOrCreateTestProduct(supplierId, productSlug);
   const variant = product.variants[0];
 
   console.log('🆕 Seeding a direct PAID order for Admin tests...');
