@@ -19,7 +19,7 @@ export interface CreateLocationData {
   };
 }
 
-export interface UpdateLocationData extends Partial<CreateLocationData> {}
+export type UpdateLocationData = Partial<CreateLocationData>;
 
 export const logisticsLocationService = {
   /**

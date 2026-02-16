@@ -8,8 +8,16 @@ export interface ProductBasicFormData {
   slug: string;
   status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   isFeatured: boolean;
-  // Index signature to allow other fields from parent state safely
-  [key: string]: unknown;
+  sortOrder: number;
+  originCountry: string;
+  hsCode: string;
+  shippingOriginId: string;
+  exportExplanation: string;
+  incoterm: string;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
 }
 
 export interface TranslationData {

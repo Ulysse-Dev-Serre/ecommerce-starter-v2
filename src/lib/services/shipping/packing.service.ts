@@ -11,6 +11,7 @@ if (typeof global !== 'undefined') {
 }
 
 // Use require to ensure the shim is set up before loading the library
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const packer = require('3d-bin-packing');
 import { SHIPPING_BOX_CATALOG } from '@/lib/config/site';
 

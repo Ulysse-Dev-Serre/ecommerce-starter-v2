@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest';
-import { vi, beforeAll, afterAll, expect } from 'vitest';
+import { vi, expect } from 'vitest';
 import { config } from 'dotenv';
 
 // Load environment variables

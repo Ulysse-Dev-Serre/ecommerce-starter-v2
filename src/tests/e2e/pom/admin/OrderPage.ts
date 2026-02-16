@@ -35,7 +35,9 @@ export class AdminOrderPage {
   async markAsShipped() {
     await test.step('Admin: Mark as Shipped', async () => {
       await expect(this.shipBtn).toBeVisible();
-      this.page.once('dialog', dialog => dialog.accept());
+      this.page.once('dialog', async dialog => {
+        await dialog.accept();
+      });
       await this.shipBtn.click();
       await expect(this.statusBadge).toContainText(/Shipped|Expédiée/i, {
         timeout: 15000,
@@ -47,7 +49,9 @@ export class AdminOrderPage {
   async markAsInTransit() {
     await test.step('Admin: Mark as In Transit', async () => {
       await expect(this.transitBtn).toBeVisible();
-      this.page.once('dialog', dialog => dialog.accept());
+      this.page.once('dialog', async dialog => {
+        await dialog.accept();
+      });
       await this.transitBtn.click();
       await expect(this.statusBadge).toContainText(/In Transit|En cours|way/i, {
         timeout: 15000,
@@ -59,7 +63,9 @@ export class AdminOrderPage {
   async markAsDelivered() {
     await test.step('Admin: Mark as Delivered', async () => {
       await expect(this.deliverBtn).toBeVisible();
-      this.page.once('dialog', dialog => dialog.accept());
+      this.page.once('dialog', async dialog => {
+        await dialog.accept();
+      });
       await this.deliverBtn.click();
       await expect(this.statusBadge).toContainText(/Delivered|Livrée/i, {
         timeout: 15000,
@@ -73,9 +79,9 @@ export class AdminOrderPage {
       await expect(this.refundBtn).toBeVisible({ timeout: 10000 });
 
       // Accept the confirmation dialog
-      this.page.once('dialog', dialog => {
+      this.page.once('dialog', async dialog => {
         console.log(`💬 Admin Refund Dialog: ${dialog.message()}`);
-        dialog.accept();
+        await dialog.accept();
       });
 
       await this.refundBtn.click();

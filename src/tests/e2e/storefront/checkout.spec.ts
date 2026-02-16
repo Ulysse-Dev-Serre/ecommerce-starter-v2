@@ -6,6 +6,7 @@ import {
   cleanupTestProduct,
   cleanupTestSupplier,
   disconnectPrisma,
+  verifyOrderCreated,
 } from '../fixtures/seed-test-data';
 
 // ─── Helpers ────────────────────────────────────────────────
@@ -302,7 +303,6 @@ test.describe('Checkout and Payment Flow', () => {
     console.log(`📍 End URL: ${page.url()}`);
 
     // CRITICAL: Wait for the order to be actually created in DB (Webhook latency)
-    const { verifyOrderCreated } = require('../fixtures/seed-test-data');
 
     console.log(
       '⏳ Waiting for Order Creation confirmation (Webhook latency)...'
