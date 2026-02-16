@@ -1,4 +1,12 @@
-import { ProductStatus, Language, Product } from '@/generated/prisma';
+import {
+  ProductStatus,
+  Language,
+  Product,
+  ProductVariant,
+  ProductVariantPricing,
+  ProductVariantInventory,
+  ProductMedia,
+} from '@/generated/prisma';
 
 /**
  * Filtres pour la liste de produits
@@ -170,6 +178,17 @@ export type ProductWithTranslations = Product & {
     metaTitle: string | null;
     metaDescription: string | null;
   }[];
+};
+
+/**
+ * Resultat pour le listing admin (avec variantes et media)
+ */
+export type AdminProductListResult = ProductWithTranslations & {
+  variants: (ProductVariant & {
+    pricing: ProductVariantPricing[];
+    inventory: ProductVariantInventory | null;
+  })[];
+  media: ProductMedia[];
 };
 
 /**

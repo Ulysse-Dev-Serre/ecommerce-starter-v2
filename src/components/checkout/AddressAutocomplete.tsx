@@ -4,8 +4,36 @@ import React, { useState, useEffect, useRef } from 'react';
 
 declare global {
   interface Window {
-    google: any;
+    google: {
+      maps: {
+        places: {
+          AutocompleteSessionToken: new () => any;
+          AutocompleteSuggestion: {
+            fetchAutocompleteSuggestions: (
+              config: any
+            ) => Promise<{ suggestions: GoogleMapsSuggestion[] }>;
+          };
+          Place: new (config: { id: string }) => {
+            fetchFields: (config: { fields: string[] }) => Promise<void>;
+            addressComponents: AddressComponent[];
+          };
+        };
+      };
+    };
   }
+}
+
+interface GoogleMapsSuggestion {
+  placePrediction: {
+    placeId: string;
+    text: { text: string };
+  };
+}
+
+interface AddressComponent {
+  longText: string;
+  shortText: string;
+  types: string[];
 }
 
 interface AddressAutocompleteProps {
@@ -31,7 +59,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   className = '',
   countryRestriction = ['ca', 'us'],
 }) => {
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<GoogleMapsSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const sessionTokenRef = useRef<any>(null);
 
@@ -80,7 +108,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     return () => clearTimeout(timeoutId);
   }, [value, countryRestriction, showSuggestions]);
 
-  const handleSelect = async (suggestion: any) => {
+  const handleSelect = async (suggestion: GoogleMapsSuggestion) => {
     const placePrediction = suggestion.placePrediction;
     if (!placePrediction) return;
 
@@ -107,7 +135,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         let zipCode = '';
         let country = '';
 
-        place.addressComponents.forEach((component: any) => {
+        place.addressComponents.forEach((component: AddressComponent) => {
           const types = component.types;
           if (types.includes('street_number'))
             streetNumber = component.longText;

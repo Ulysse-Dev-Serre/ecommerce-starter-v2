@@ -36,13 +36,15 @@ async function previewLabelHandler(
       amount: bestRate.amount,
       currency: bestRate.currency,
       provider: bestRate.provider,
-      rateId: (bestRate as any).object_id || (bestRate as any).objectId,
+      rateId: bestRate.object_id || bestRate.objectId,
     });
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     logger.error({ error, orderId }, 'Error previewing shipping rates');
     return NextResponse.json(
-      { error: error.message || 'Failed to preview rates' },
-      { status: error.message === 'Order not found' ? 404 : 500 }
+      { error: errorMessage },
+      { status: errorMessage === 'Order not found' ? 404 : 500 }
     );
   }
 }
@@ -69,20 +71,19 @@ async function purchaseLabelHandler(
     const result = await purchaseShippingLabel(orderId, rateId);
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     logger.error({ error, orderId }, 'Error purchasing shipping label');
     // Gestion d'erreur un peu plus fine basée sur le message
     const status =
-      error.message === 'Order not found'
+      errorMessage === 'Order not found'
         ? 404
-        : error.message === 'Label already exists'
+        : errorMessage === 'Label already exists'
           ? 400
           : 500;
 
-    return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
-      { status }
-    );
+    return NextResponse.json({ error: errorMessage }, { status });
   }
 }
 

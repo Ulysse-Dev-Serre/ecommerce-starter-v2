@@ -1,11 +1,11 @@
-import { DollarSign, ShoppingCart, Package, Users } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
-interface StatItem {
+export interface StatItem {
   title: string;
   value: string;
   change: string;
   trend: 'up' | 'down';
-  icon: any;
+  icon: LucideIcon;
 }
 
 interface DashboardStatsGridProps {

@@ -13,7 +13,10 @@ import { formatPrice } from '@/lib/utils/currency';
 import { SITE_CURRENCY, SupportedCurrency } from '@/lib/config/site';
 import { formatDate } from '@/lib/utils/date';
 import { env } from '@/lib/core/env';
-import { DashboardStatsGrid } from '@/components/admin/dashboard/dashboard-stats-grid';
+import {
+  DashboardStatsGrid,
+  StatItem,
+} from '@/components/admin/dashboard/dashboard-stats-grid';
 import { RecentOrdersList } from '@/components/admin/dashboard/recent-orders-list';
 
 export const dynamic = 'force-dynamic';
@@ -109,7 +112,7 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
     return `${diff > 0 ? '+' : ''}${diff.toFixed(1)}%`;
   };
 
-  const stats = [
+  const stats: StatItem[] = [
     {
       title: t('stats.revenue'),
       value: formatPrice(totalRevenue._sum.amount || 0, currency, locale),
@@ -120,28 +123,28 @@ export default async function AdminDashboard({ params }: AdminDashboardProps) {
       trend:
         (totalRevenue._sum.amount || 0) >= (prevRevenue._sum.amount || 0)
           ? 'up'
-          : ('down' as any),
+          : 'down',
       icon: DollarSign,
     },
     {
       title: t('stats.orders'),
       value: ordersCount.toString(),
       change: calcTrend(ordersCount, prevOrdersCount),
-      trend: ordersCount >= prevOrdersCount ? 'up' : ('down' as any),
+      trend: ordersCount >= prevOrdersCount ? 'up' : 'down',
       icon: ShoppingCart,
     },
     {
       title: t('stats.products'),
       value: productsCount.toString(),
       change: t('stats.active'),
-      trend: 'up' as any,
+      trend: 'up',
       icon: Package,
     },
     {
       title: t('stats.customers'),
       value: customersCount.toString(),
       change: calcTrend(customersCount, prevCustomersCount),
-      trend: customersCount >= prevCustomersCount ? 'up' : ('down' as any),
+      trend: customersCount >= prevCustomersCount ? 'up' : 'down',
       icon: Users,
     },
   ];

@@ -6,6 +6,8 @@ import {
 } from '@/lib/config/vibe-styles';
 import { formatPrice } from '@/lib/utils/currency';
 import { Card } from '@/components/ui/card';
+import { SupportedCurrency } from '@/lib/config/site';
+import { ShippingRate } from '@/lib/integrations/shippo';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
@@ -14,14 +16,14 @@ interface OrderSummaryProps {
     name: string;
     quantity: number;
     price: number;
-    currency: string;
+    currency: SupportedCurrency;
     image?: string;
   }>;
   initialTotal: number;
   total: number;
-  currency: string;
+  currency: SupportedCurrency;
   locale: string;
-  selectedRate: any;
+  selectedRate: ShippingRate | null;
 }
 
 export function OrderSummary({
@@ -75,7 +77,7 @@ export function OrderSummary({
                     {item.name}
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    {formatPrice(item.price, item.currency as any, locale)}
+                    {formatPrice(item.price, item.currency, locale)}
                   </p>
                 </div>
 
@@ -83,7 +85,7 @@ export function OrderSummary({
                   <p className="font-bold text-foreground">
                     {formatPrice(
                       item.price * item.quantity,
-                      item.currency as any,
+                      item.currency,
                       locale
                     )}
                   </p>
@@ -98,7 +100,7 @@ export function OrderSummary({
           <div className="flex justify-between items-center text-muted-foreground">
             <span>{t('subtotal')}</span>
             <span className="font-medium text-foreground">
-              {formatPrice(initialTotal, currency as any, locale)}
+              {formatPrice(initialTotal, currency, locale)}
             </span>
           </div>
           <div className="flex justify-between items-center text-muted-foreground">
@@ -106,7 +108,7 @@ export function OrderSummary({
             <span className="font-medium text-foreground">
               {formatPrice(
                 selectedRate?.amount || 0,
-                selectedRate?.currency || currency,
+                (selectedRate?.currency as SupportedCurrency) || currency,
                 locale
               )}
             </span>
@@ -122,7 +124,7 @@ export function OrderSummary({
               className="font-extrabold text-2xl text-primary"
               data-testid="order-total"
             >
-              {formatPrice(total, currency as any, locale)}
+              {formatPrice(total, currency, locale)}
             </span>
           </div>
         </div>

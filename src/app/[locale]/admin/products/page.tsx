@@ -36,11 +36,11 @@ export default async function ProductsPage({
       shortDescription: t.shortDescription,
     })),
     variants:
-      (product as any).variants?.map((variant: any) => ({
+      product.variants?.map(variant => ({
         id: variant.id,
         sku: variant.sku,
         pricing:
-          variant.pricing?.map((p: any) => ({
+          variant.pricing?.map(p => ({
             price: Number(p.price),
             currency: p.currency,
             priceType: p.priceType,
@@ -52,7 +52,7 @@ export default async function ProductsPage({
           : null,
       })) || [],
     media:
-      (product as any).media?.map((m: any) => ({
+      product.media?.map(m => ({
         url: m.url,
         isPrimary: m.isPrimary,
       })) || [],

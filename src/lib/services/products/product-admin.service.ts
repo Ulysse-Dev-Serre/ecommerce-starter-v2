@@ -6,6 +6,7 @@ import {
   CreateProductData,
   UpdateProductData,
   ProductWithTranslations,
+  AdminProductListResult,
 } from '@/lib/types/domain/product';
 
 /**
@@ -14,7 +15,7 @@ import {
 export async function getAllProducts(filters?: {
   status?: string;
   language?: string;
-}): Promise<ProductWithTranslations[]> {
+}): Promise<AdminProductListResult[]> {
   const where: Prisma.ProductWhereInput = {
     deletedAt: null,
   };
