@@ -268,7 +268,7 @@ export class StripeWebhookService {
 
     const orderEmail =
       (addressSource && 'email' in addressSource
-        ? (addressSource as any).email
+        ? (addressSource as { email?: string | null }).email
         : undefined) || fullPaymentIntent?.receipt_email;
 
     // 4. Create Order
@@ -294,13 +294,7 @@ export class StripeWebhookService {
     );
 
     // 5. Send Emails
-    await this.sendConfirmationEmails(
-      order,
-      shippingAddress!,
-      (addressSource && 'email' in addressSource
-        ? (addressSource as any).email
-        : undefined) || orderEmail
-    );
+    await this.sendConfirmationEmails(order, shippingAddress!, orderEmail);
 
     // 6. Clear Original Cart
     if (metadata.cartId) {

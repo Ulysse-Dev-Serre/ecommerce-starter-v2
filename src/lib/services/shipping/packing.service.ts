@@ -6,12 +6,12 @@ import * as samchon from 'samchon';
 import * as tstl from 'tstl';
 
 if (typeof global !== 'undefined') {
-  (global as any).samchon = samchon;
-  (global as any).std = tstl;
+  (global as Record<string, unknown>).samchon = samchon;
+  (global as Record<string, unknown>).std = tstl;
 }
 
 // Use require to ensure the shim is set up before loading the library
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+/* eslint-disable @typescript-eslint/no-require-imports */
 const packer = require('3d-bin-packing');
 import { SHIPPING_BOX_CATALOG } from '@/lib/config/site';
 
@@ -37,6 +37,24 @@ export interface PackedParcel {
   }[];
 }
 
+// Local interfaces to type the legacy 3d-bin-packing library
+interface PackerWrapper {
+  getName(): string;
+  getWidth(): number;
+  getLength(): number;
+  getHeight(): number;
+  size(): number;
+  at(index: number): {
+    getInstance(): { getName(): string };
+  };
+}
+
+interface LegacyList<T> {
+  push_back(item: T): void;
+  size(): number;
+  at(index: number): T;
+}
+
 /**
  * Service to handle 3D Bin Packing for shipping optimization.
  * Uses the 3d-bin-packing library to find the best box(es) for a set of items.
@@ -47,14 +65,14 @@ export class PackingService {
    * Returns a list of parcels required to ship the items.
    */
   static pack(items: PackableItem[]): PackedParcel[] {
-    const wrapperArray = new packer.WrapperArray();
-    const instanceArray = new packer.InstanceArray();
+    const wrapperArray = new packer.WrapperArray() as LegacyList<unknown>;
+    const instanceArray = new packer.InstanceArray() as LegacyList<unknown>;
 
     // 1. Load the Box Catalog into WrapperArray
     SHIPPING_BOX_CATALOG.forEach(box => {
       // Wrapper(name, price, width, height, length, thickness)
       // Note: price is used for optimization (lowest cost), thickness is usually 0
-      (wrapperArray as any).push_back(
+      wrapperArray.push_back(
         new packer.Wrapper(box.id, 0, box.width, box.height, box.length, 0)
       );
     });
@@ -62,7 +80,7 @@ export class PackingService {
     // 2. Load the items into InstanceArray
     items.forEach(item => {
       for (let i = 0; i < item.quantity; i++) {
-        (instanceArray as any).push_back(
+        instanceArray.push_back(
           new packer.Product(item.id, item.width, item.height, item.length)
         );
       }
@@ -72,14 +90,14 @@ export class PackingService {
     const myPacker = new packer.Packer(wrapperArray, instanceArray);
 
     // The optimize() method returns the best WrapperArray (list of packed boxes)
-    const result = myPacker.optimize();
+    const result = myPacker.optimize() as LegacyList<PackerWrapper>;
 
     const packedParcels: PackedParcel[] = [];
 
     // 4. Convert result to our domain interface
     // result is a WrapperArray
-    for (let i = 0; i < (result as any).size(); i++) {
-      const wrapper = (result as any).at(i);
+    for (let i = 0; i < result.size(); i++) {
+      const wrapper = result.at(i);
 
       // If the wrapper contains any items
       if (wrapper.size() > 0) {

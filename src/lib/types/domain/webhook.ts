@@ -21,7 +21,7 @@ export interface ClerkWebhookEventData {
   last_name?: string | null;
   image_url?: string | null;
   public_metadata?: {
-    role?: string;
+    role?: UserRole;
   };
 }
 

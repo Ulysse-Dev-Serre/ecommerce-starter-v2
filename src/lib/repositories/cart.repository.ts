@@ -307,14 +307,16 @@ export class CartRepository {
   /**
    * Helper to serialize Decimal values from Prisma to Strings for the domain types
    */
-  private serializeCart(cart: any): CartProjection {
+  private serializeCart(
+    cart: Prisma.CartGetPayload<{ include: typeof CART_PROJECTION_INCLUDE }>
+  ): CartProjection {
     return {
       ...cart,
-      items: cart.items.map((item: any) => ({
+      items: cart.items.map(item => ({
         ...item,
         variant: {
           ...item.variant,
-          pricing: item.variant.pricing.map((p: any) => ({
+          pricing: item.variant.pricing.map(p => ({
             ...p,
             price: p.price.toString(),
           })),

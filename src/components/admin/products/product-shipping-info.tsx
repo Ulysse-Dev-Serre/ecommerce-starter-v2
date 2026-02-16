@@ -2,12 +2,16 @@
 
 import { Truck } from 'lucide-react';
 
-interface Supplier {
-  id: string;
-  name: string;
-  city: string;
-  country: string;
-}
+import { AdminSupplier } from '@/lib/types/domain/logistics';
+import { Address } from '@/lib/types/domain/order';
+
+const getSupplierAddress = (supplier: AdminSupplier) => {
+  const address = supplier.address as unknown as Address;
+  return {
+    city: address?.city || '',
+    country: address?.country || '',
+  };
+};
 
 interface ProductShippingInfoProps {
   formData: {
@@ -22,7 +26,7 @@ interface ProductShippingInfoProps {
     height: string;
   };
   setFormData: (fn: (prev: any) => any) => void;
-  suppliers: Supplier[];
+  suppliers: AdminSupplier[];
   fieldErrors?: Record<string, string>;
   t: (key: string) => string;
 }
@@ -79,11 +83,14 @@ export function ProductShippingInfo({
               className={`admin-input ${fieldErrors.shippingOriginId ? 'border-red-500 bg-red-50' : ''}`}
             >
               <option value="">{t('selectOrigin')}</option>
-              {suppliers.map(s => (
-                <option key={s.id} value={s.id}>
-                  {s.name} - {s.city}, {s.country}
-                </option>
-              ))}
+              {suppliers.map(s => {
+                const { city, country } = getSupplierAddress(s);
+                return (
+                  <option key={s.id} value={s.id}>
+                    {s.name} - {city}, {country}
+                  </option>
+                );
+              })}
             </select>
             {fieldErrors.shippingOriginId && (
               <p className="mt-1 text-xs font-medium text-red-600">

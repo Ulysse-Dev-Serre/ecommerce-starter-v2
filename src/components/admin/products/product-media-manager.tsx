@@ -32,8 +32,8 @@ interface MediaItem {
   id: string;
   url: string;
   isPrimary: boolean;
-  alt?: string;
-  title?: string;
+  alt?: string | null;
+  title?: string | null;
   sortOrder: number;
 }
 

@@ -31,6 +31,8 @@ import { ProductBasicInfo } from './product-basic-info';
 import { ProductMediaManager } from './product-media-manager';
 import { ProductShippingInfo } from './product-shipping-info';
 import { ProductVariantsManager } from './product-variants-manager';
+import { AdminSupplier } from '@/lib/types/domain/logistics';
+import { ProductMedia } from '@/generated/prisma';
 
 // ---- Types ----
 export interface Translation {
@@ -99,7 +101,7 @@ export interface NewVariant {
 interface ProductFormProps {
   initialProduct?: Product | null;
   locale: string;
-  suppliers: any[];
+  suppliers: AdminSupplier[];
 }
 
 export function ProductForm({
@@ -124,7 +126,9 @@ export function ProductForm({
   const [variants, setVariants] = useState<Variant[]>(
     initialProduct?.variants || []
   );
-  const [media, setMedia] = useState<any[]>(initialProduct?.media || []);
+  const [media, setMedia] = useState<ProductMedia[]>(
+    (initialProduct?.media as unknown as ProductMedia[]) || []
+  );
   const [newVariants, setNewVariants] = useState<NewVariant[]>([]);
 
   const [formData, setFormData] = useState({
@@ -318,7 +322,7 @@ export function ProductForm({
       if (!result.success) {
         if (result.errors) {
           const errorsObj: Record<string, string> = {};
-          result.errors.forEach((err: any) => {
+          result.errors.forEach((err: { field: string; message: string }) => {
             errorsObj[err.field] = err.message;
           });
           setFieldErrors(errorsObj);
@@ -349,7 +353,13 @@ export function ProductForm({
     }
   };
 
-  const handleUpdateVariant = async (variantId: string, updates: any) => {
+  const handleUpdateVariant = async (
+    variantId: string,
+    updates: Partial<NewVariant> & {
+      prices?: Record<string, string>;
+      stock?: number;
+    }
+  ) => {
     if (!productId) return;
     try {
       const payload: any = {};

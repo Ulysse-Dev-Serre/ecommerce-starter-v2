@@ -6,9 +6,11 @@ import { Truck, MapPin, Plus, Trash2, Edit } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { deleteLogisticsLocation } from '@/lib/client/admin/logistics';
 import { AddLocationModal } from './add-location-modal';
+import { AdminSupplier } from '@/lib/types/domain/logistics';
+import { Address } from '@/lib/types/domain/order';
 
 interface LogisticsClientProps {
-  suppliers: any[];
+  suppliers: AdminSupplier[];
   locale: string;
 }
 
@@ -16,9 +18,11 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
   const router = useRouter();
   const t = useTranslations('admin.logistics');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingLocation, setEditingLocation] = useState<any>(null);
+  const [editingLocation, setEditingLocation] = useState<AdminSupplier | null>(
+    null
+  );
 
-  const handleEdit = (supplier: any) => {
+  const handleEdit = (supplier: AdminSupplier) => {
     setEditingLocation(supplier);
     setIsModalOpen(true);
   };
@@ -101,12 +105,12 @@ export function LogisticsClient({ suppliers, locale }: LogisticsClientProps) {
 
                 <div className="mt-4 space-y-2 text-sm admin-text-subtle">
                   <p className="truncate">
-                    {(supplier.address as any)?.street1 ||
+                    {(supplier.address as unknown as Address)?.street1 ||
                       t('addressUndefined')}
                   </p>
                   <p>
-                    {(supplier.address as any)?.city},{' '}
-                    {(supplier.address as any)?.country}
+                    {(supplier.address as unknown as Address)?.city},{' '}
+                    {(supplier.address as unknown as Address)?.country}
                   </p>
                 </div>
               </div>

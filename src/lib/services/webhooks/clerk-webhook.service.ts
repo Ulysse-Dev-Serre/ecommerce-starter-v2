@@ -14,18 +14,7 @@ import { ClerkWebhookEventData } from '@/lib/types/domain/webhook';
 export async function handleUserCreated(
   eventData: ClerkWebhookEventData
 ): Promise<User> {
-  // Adaptation du payload générique vers le schéma Zod spécifique
-  // Note: On pourrait aussi utiliser directement les validateurs ici
-  const payload: any = {
-    id: eventData.id,
-    email_addresses: eventData.email_addresses,
-    first_name: eventData.first_name,
-    last_name: eventData.last_name,
-    image_url: eventData.image_url,
-    public_metadata: eventData.public_metadata,
-  };
-
-  return UserClerkService.handleUserCreated(payload);
+  return UserClerkService.handleUserCreated(eventData as any);
 }
 
 /**
@@ -34,16 +23,7 @@ export async function handleUserCreated(
 export async function handleUserUpdated(
   eventData: ClerkWebhookEventData
 ): Promise<User> {
-  const payload: any = {
-    id: eventData.id,
-    first_name: eventData.first_name,
-    last_name: eventData.last_name,
-    image_url: eventData.image_url,
-    public_metadata: eventData.public_metadata,
-    email_addresses: eventData.email_addresses,
-  };
-
-  return UserClerkService.handleUserUpdated(payload);
+  return UserClerkService.handleUserUpdated(eventData as any);
 }
 
 /**
@@ -52,11 +32,10 @@ export async function handleUserUpdated(
 export async function handleUserDeleted(
   eventData: ClerkWebhookEventData
 ): Promise<{ count: number }> {
-  const payload: any = {
+  return UserClerkService.handleUserDeleted({
     id: eventData.id,
     deleted: true,
-  };
-  return UserClerkService.handleUserDeleted(payload);
+  });
 }
 
 /**
