@@ -5,19 +5,17 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useTranslations } from 'next-intl';
 
+import {
+  ProductProjection,
+  ProductVariantProjection,
+} from '@/lib/types/domain/product';
+
 interface ProductRowProps {
-  product: {
-    id: string;
-    slug: string;
-    status: string;
-    translations: any[];
-    variants: any[];
-    media?: Array<{ url: string; isPrimary: boolean }>;
-  };
+  product: ProductProjection;
   locale: string;
-  getProductName: (translations: any[]) => string;
-  getBasePrice: (variants: any[]) => string | null;
-  getTotalStock: (variants: any[]) => number;
+  getProductName: (translations: ProductProjection['translations']) => string;
+  getBasePrice: (variants: ProductVariantProjection[]) => string | null;
+  getTotalStock: (variants: ProductVariantProjection[]) => number;
   handleDelete: (productId: string) => void;
   deletingId: string | null;
   statusColors: Record<string, string>;

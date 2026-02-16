@@ -57,7 +57,7 @@ export interface UpdatePaymentStatusInput {
 export interface RefundInput {
   orderId: string;
   amount?: number; // Si non spécifié = remboursement complet
-  reason?: string;
+  reason?: Stripe.RefundCreateParams.Reason;
   requestedBy?: string; // userId de l'admin qui demande le refund
 }
 

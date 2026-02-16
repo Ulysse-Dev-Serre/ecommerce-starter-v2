@@ -3,6 +3,14 @@
  */
 
 import { API_ROUTES } from '@/lib/config/api-routes';
+import {
+  CreateProductData,
+  UpdateProductData,
+} from '@/lib/types/domain/product';
+import {
+  UpdateVariantData,
+  SimpleVariantData,
+} from '@/lib/types/domain/variant';
 
 /**
  * Fetch products list for admin (filtered by status and language)
@@ -28,7 +36,7 @@ export async function getAdminProducts(params: {
 /**
  * Create a new product
  */
-export async function createProduct(payload: any) {
+export async function createProduct(payload: CreateProductData) {
   const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.BASE, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -46,7 +54,10 @@ export async function createProduct(payload: any) {
 /**
  * Update an existing product
  */
-export async function updateProduct(productId: string, payload: any) {
+export async function updateProduct(
+  productId: string,
+  payload: UpdateProductData
+) {
   const response = await fetch(API_ROUTES.ADMIN.PRODUCTS.ITEM(productId), {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -114,7 +125,7 @@ export async function getProductVariants(productId: string) {
 export async function updateProductVariant(
   productId: string,
   variantId: string,
-  payload: any
+  payload: UpdateVariantData
 ) {
   const response = await fetch(
     API_ROUTES.ADMIN.PRODUCTS.VARIANT_ITEM(productId, variantId),
@@ -154,7 +165,10 @@ export async function deleteProductVariant(
 /**
  * Add simple new variants to a product
  */
-export async function addSimpleVariants(productId: string, variants: any[]) {
+export async function addSimpleVariants(
+  productId: string,
+  variants: SimpleVariantData[]
+) {
   const response = await fetch(
     API_ROUTES.ADMIN.PRODUCTS.VARIANTS_SIMPLE(productId),
     {

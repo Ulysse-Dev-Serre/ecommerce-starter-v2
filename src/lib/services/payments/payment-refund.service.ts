@@ -10,6 +10,7 @@ import {
   RefundResult,
   UpdateOrderStatusInput,
 } from '@/lib/types/domain/payment';
+import Stripe from 'stripe'; // Import Stripe for type definitions
 
 /**
  * Traite un remboursement complet ou partiel sur Stripe
@@ -43,7 +44,7 @@ export async function processRefund(input: RefundInput): Promise<RefundResult> {
     const refund = await stripe.refunds.create({
       payment_intent: stripePayment.externalId,
       amount: amount ? Math.round(amount * 100) : undefined, // Partial refund if amount specified
-      reason: reason as any,
+      reason,
     });
 
     logger.info(
@@ -56,10 +57,12 @@ export async function processRefund(input: RefundInput): Promise<RefundResult> {
       refundId: refund.id,
       amount: refund.amount / 100,
       currency: refund.currency.toUpperCase(),
-      status: refund.status as any,
+      status: refund.status as 'pending' | 'succeeded' | 'failed',
       processedAt: new Date(),
     };
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     logger.error({ error, orderId }, 'Refund processing failed');
 
     return {
@@ -67,7 +70,7 @@ export async function processRefund(input: RefundInput): Promise<RefundResult> {
       amount: amount || Number(order.totalAmount),
       currency: order.currency,
       status: 'failed',
-      failureReason: error.message,
+      failureReason: errorMessage,
       processedAt: new Date(),
     };
   }
@@ -108,9 +111,13 @@ export async function updateOrderStatus(input: UpdateOrderStatusInput) {
           { orderId, paymentIntent: stripePayment.externalId },
           'Stripe refund executed successfully'
         );
-      } catch (error: any) {
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        const errorCode = (error as { code?: string }).code;
+
         // If already refunded, allow the function to proceed to update local status
-        if (error.code === 'charge_already_refunded') {
+        if (errorCode === 'charge_already_refunded') {
           logger.warn(
             { orderId },
             'Charge already refunded in Stripe, proceeding with local status update'
@@ -120,7 +127,7 @@ export async function updateOrderStatus(input: UpdateOrderStatusInput) {
           // Block the local update if Stripe refund fails for other reasons
           throw new AppError(
             ErrorCode.PAYMENT_FAILED,
-            `Stripe refund failed: ${error.message}`,
+            `Stripe refund failed: ${errorMessage}`,
             500
           );
         }

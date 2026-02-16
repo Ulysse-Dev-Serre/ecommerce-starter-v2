@@ -7,6 +7,7 @@ import {
   ProductMedia,
   ProductAttribute,
   ProductAttributeValue,
+  ProductVariantAttributeValue,
 } from '@/generated/prisma';
 
 /**
@@ -92,8 +93,12 @@ export type VariantWithRelations = ProductVariant & {
     id: string;
     slug: string;
   };
-  attributeValues: any[];
-  pricing: any[];
-  inventory: any | null;
-  media?: any[];
+  attributeValues: (ProductVariantAttributeValue & {
+    attributeValue: ProductAttributeValue & {
+      attribute: ProductAttribute;
+    };
+  })[];
+  pricing: ProductVariantPricing[];
+  inventory: ProductVariantInventory | null;
+  media?: ProductMedia[];
 };
