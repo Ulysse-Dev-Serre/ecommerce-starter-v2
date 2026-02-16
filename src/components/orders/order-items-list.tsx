@@ -1,8 +1,11 @@
-import Link from 'next/link';
 import { formatPrice } from '@/lib/utils/currency';
+import { OrderItem } from '@/lib/types/domain/order';
+import { SupportedCurrency } from '@/lib/config/site';
+
+import Link from 'next/link';
 
 interface OrderItemsListProps {
-  items: any[];
+  items: OrderItem[];
   itemData: Record<
     string,
     {
@@ -29,19 +32,18 @@ export function OrderItemsList({
   locale,
   labels,
 }: OrderItemsListProps) {
-  const getItemName = (item: any) => {
+  const getItemName = (item: OrderItem) => {
     const info = item.variantId ? itemData[item.variantId] : null;
 
     if (info?.name) return info.name;
 
-    const snapshot = item.productSnapshot as any;
+    const snapshot = item.productSnapshot as {
+      name?: string | Record<string, string>;
+    };
     if (snapshot?.name) {
       if (typeof snapshot.name === 'object') {
-        return (
-          snapshot.name[locale] ||
-          snapshot.name.en ||
-          Object.values(snapshot.name)[0]
-        );
+        const names = snapshot.name as Record<string, string>;
+        return names[locale] || names.en || Object.values(names)[0];
       }
       return snapshot.name;
     }
@@ -56,9 +58,12 @@ export function OrderItemsList({
         </h2>
       </div>
       <ul className="divide-y divide-border">
-        {items.map((item: any) => {
+        {items.map((item: OrderItem) => {
           const info = item.variantId ? itemData[item.variantId] : null;
-          const snapshot = item.productSnapshot as any;
+          const snapshot = item.productSnapshot as {
+            image?: string;
+            slug?: string;
+          };
 
           const slug = info?.slug || snapshot?.slug;
           const imageUrl = info?.image || snapshot?.image;
@@ -111,12 +116,21 @@ export function OrderItemsList({
                   <span className="font-bold text-foreground">
                     {item.quantity}
                   </span>{' '}
-                  × {formatPrice(item.unitPrice, currency as any, locale)}
+                  ×{' '}
+                  {formatPrice(
+                    item.unitPrice,
+                    currency as SupportedCurrency,
+                    locale
+                  )}
                 </p>
               </div>
               <div className="text-right vibe-whitespace-nowrap">
                 <p className="vibe-text-2xl-bold text-foreground">
-                  {formatPrice(item.totalPrice, currency as any, locale)}
+                  {formatPrice(
+                    item.totalPrice,
+                    currency as SupportedCurrency,
+                    locale
+                  )}
                 </p>
               </div>
             </li>

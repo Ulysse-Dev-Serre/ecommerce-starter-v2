@@ -13,6 +13,7 @@ import {
   sendOrderConfirmationEmail,
   sendAdminNewOrderAlert,
 } from '@/lib/services/orders';
+import { Address, OrderWithIncludes } from '@/lib/types/domain/order';
 
 export class StripeWebhookService {
   /**
@@ -218,7 +219,11 @@ export class StripeWebhookService {
     items: Array<{ variantId: string; quantity: number }>,
     amountTotal: number,
     currencyCode: string,
-    addressSource: any,
+    addressSource:
+      | Stripe.Checkout.Session.CustomerDetails
+      | Stripe.PaymentIntent.Shipping
+      | null
+      | undefined,
     metadata: StripeMetadata,
     requestId: string,
     anonymousId?: string,
@@ -259,13 +264,15 @@ export class StripeWebhookService {
       }),
     };
 
-    // 3. Extract Address
     const shippingAddress = this.extractShippingAddress(addressSource);
 
-    const orderEmail = addressSource?.email || fullPaymentIntent?.receipt_email;
+    const orderEmail =
+      (addressSource && 'email' in addressSource
+        ? (addressSource as any).email
+        : undefined) || fullPaymentIntent?.receipt_email;
 
     // 4. Create Order
-    const order = await createOrderFromCart({
+    const order = (await createOrderFromCart({
       cart: virtualCart as any,
       userId: userId || undefined,
       orderEmail: orderEmail,
@@ -278,8 +285,8 @@ export class StripeWebhookService {
           metadata: metadata as any,
           receipt_email: orderEmail,
         } as Stripe.PaymentIntent),
-      shippingAddress,
-    });
+      shippingAddress: shippingAddress as Address,
+    })) as unknown as OrderWithIncludes;
 
     logger.info(
       { requestId, orderId: order.id },
@@ -289,8 +296,10 @@ export class StripeWebhookService {
     // 5. Send Emails
     await this.sendConfirmationEmails(
       order,
-      shippingAddress,
-      addressSource?.email || orderEmail
+      shippingAddress!,
+      (addressSource && 'email' in addressSource
+        ? (addressSource as any).email
+        : undefined) || orderEmail
     );
 
     // 6. Clear Original Cart
@@ -303,7 +312,13 @@ export class StripeWebhookService {
     }
   }
 
-  private static extractShippingAddress(source: any): any {
+  private static extractShippingAddress(
+    source:
+      | Stripe.Checkout.Session.CustomerDetails
+      | Stripe.PaymentIntent.Shipping
+      | null
+      | undefined
+  ): Address | undefined {
     if (!source) return undefined;
 
     // Stripe structures vary (shipping vs customer_details)
@@ -312,24 +327,24 @@ export class StripeWebhookService {
     if (!addr) return undefined;
 
     return {
-      name: source.name,
-      street1: addr.line1,
-      street2: addr.line2,
-      city: addr.city,
-      state: addr.state,
-      postalCode: addr.postal_code,
-      country: addr.country,
+      name: source.name || '',
+      street1: addr.line1 || '',
+      street2: addr.line2 || undefined,
+      city: addr.city || '',
+      state: addr.state || '',
+      postalCode: addr.postal_code || undefined,
+      country: addr.country || '',
       firstName: source.name?.split(' ')[0] || '',
       lastName: source.name?.split(' ').slice(1).join(' ') || '',
-      phone: source.phone,
-      email: source.email,
+      phone: source.phone || undefined,
+      email: source.email || undefined,
     };
   }
 
   private static async sendConfirmationEmails(
-    order: any,
-    shippingAddress: any,
-    recipientEmail: string
+    order: OrderWithIncludes,
+    shippingAddress: Address,
+    recipientEmail: string | null | undefined
   ) {
     if (!recipientEmail) return;
 

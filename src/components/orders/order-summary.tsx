@@ -1,7 +1,9 @@
 import { formatPrice } from '@/lib/utils/currency';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface OrderSummaryProps {
-  order: any;
+  order: OrderWithIncludes;
   locale: string;
   labels: {
     summary: string;
@@ -16,8 +18,8 @@ interface OrderSummaryProps {
 }
 
 export function OrderSummary({ order, locale, labels }: OrderSummaryProps) {
-  const shippingAddr = order.shippingAddress as Record<string, any> | null;
-  const billingAddr = order.billingAddress as Record<string, any> | null;
+  const shippingAddr = order.shippingAddress;
+  const billingAddr = order.billingAddress;
 
   return (
     <div className="space-y-10">
@@ -29,19 +31,31 @@ export function OrderSummary({ order, locale, labels }: OrderSummaryProps) {
           <div className="vibe-flex-between opacity-80">
             <span>{labels.subtotal}</span>
             <span>
-              {formatPrice(order.subtotalAmount, order.currency as any, locale)}
+              {formatPrice(
+                order.subtotalAmount,
+                order.currency as SupportedCurrency,
+                locale
+              )}
             </span>
           </div>
           <div className="vibe-flex-between opacity-80">
             <span>{labels.shipping}</span>
             <span>
-              {formatPrice(order.shippingAmount, order.currency as any, locale)}
+              {formatPrice(
+                order.shippingAmount,
+                order.currency as SupportedCurrency,
+                locale
+              )}
             </span>
           </div>
           <div className="vibe-flex-between opacity-80">
             <span>{labels.tax}</span>
             <span>
-              {formatPrice(order.taxAmount, order.currency as any, locale)}
+              {formatPrice(
+                order.taxAmount,
+                order.currency as SupportedCurrency,
+                locale
+              )}
             </span>
           </div>
           {order.discountAmount > 0 && (
@@ -51,7 +65,7 @@ export function OrderSummary({ order, locale, labels }: OrderSummaryProps) {
                 -
                 {formatPrice(
                   order.discountAmount,
-                  order.currency as any,
+                  order.currency as SupportedCurrency,
                   locale
                 )}
               </span>
@@ -60,7 +74,11 @@ export function OrderSummary({ order, locale, labels }: OrderSummaryProps) {
           <div className="pt-6 border-t border-background/20 flex justify-between items-end">
             <span className="vibe-text-lg-bold">{labels.total}</span>
             <span className="text-4xl font-black vibe-leading-none">
-              {formatPrice(order.totalAmount, order.currency as any, locale)}
+              {formatPrice(
+                order.totalAmount,
+                order.currency as SupportedCurrency,
+                locale
+              )}
             </span>
           </div>
         </div>

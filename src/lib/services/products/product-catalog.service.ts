@@ -1,4 +1,4 @@
-import { ProductStatus, Language } from '@/generated/prisma';
+import { ProductStatus, Language, Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
@@ -28,7 +28,7 @@ export async function getProducts(
   const limit = options.limit ?? 20;
   const skip = (page - 1) * limit;
 
-  const where: any = {
+  const where: Prisma.ProductWhereInput = {
     deletedAt: null,
   };
 
@@ -63,7 +63,7 @@ export async function getProducts(
   }
 
   // Tri: fallback sur createdAt pour name/price (tris relationnels coûteux)
-  const orderBy: any = {};
+  const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   const sortBy = options.sortBy ?? 'createdAt';
 
   if (sortBy === 'name' || sortBy === 'price') {
@@ -75,9 +75,9 @@ export async function getProducts(
       },
       `Tri par ${sortBy} non supporté, fallback sur createdAt`
     );
-    orderBy.createdAt = options.sortOrder ?? 'desc';
+    orderBy.createdAt = (options.sortOrder ?? 'desc') as Prisma.SortOrder;
   } else {
-    orderBy[sortBy] = options.sortOrder ?? 'desc';
+    (orderBy as any)[sortBy] = options.sortOrder ?? 'desc';
   }
 
   const includeAttributes = options.includeAttributes ?? false;
@@ -230,9 +230,9 @@ export async function getProducts(
           ...p,
           price: p.price.toString(),
         })),
-        attributeValues: (variant as any).attributeValues || [],
+        attributeValues: variant.attributeValues || [],
       })),
-    })) as unknown as ProductProjection[],
+    })) as ProductProjection[],
     pagination: {
       page,
       limit,
@@ -375,7 +375,7 @@ export async function getProductBySlug(
         price: p.price.toString(),
       })),
     })),
-  } as unknown as ProductProjection;
+  } as ProductProjection;
 }
 
 /**

@@ -1,6 +1,35 @@
-import { OrderStatus, Language } from '@/generated/prisma';
+import {
+  OrderStatus,
+  Language,
+  Product,
+  ProductVariant,
+  Payment,
+  Shipment,
+} from '@/generated/prisma';
 import { CartProjection } from './cart';
 import Stripe from 'stripe';
+import { JsonValue } from '@prisma/client/runtime/library';
+
+/**
+ * Interface pour les adresses (Shipping/Billing)
+ */
+export interface Address {
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  street1: string;
+  street2?: string;
+  line1?: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode?: string;
+  postal_code?: string;
+  zip?: string;
+  country: string;
+  phone?: string;
+  email?: string;
+}
 
 /**
  * Input pour la création d'une commande depuis un panier
@@ -10,8 +39,8 @@ export interface CreateOrderFromCartInput {
   userId?: string | null;
   orderEmail?: string | null;
   paymentIntent: Stripe.PaymentIntent;
-  shippingAddress?: any;
-  billingAddress?: any;
+  shippingAddress?: Address;
+  billingAddress?: Address;
 }
 
 /**
@@ -44,14 +73,14 @@ export interface OrderWithIncludes {
   shippingAmount: number;
   discountAmount: number;
   totalAmount: number;
-  shippingAddress: any;
-  billingAddress: any;
+  shippingAddress: Address;
+  billingAddress: Address;
   language: Language;
   createdAt: Date;
   updatedAt: Date;
   items: OrderItem[];
   payments: OrderPayment[];
-  shipments: OrderShipment[];
+  shipments: Shipment[];
 }
 
 /**
@@ -60,9 +89,15 @@ export interface OrderWithIncludes {
 export interface OrderItem {
   id: string;
   orderId: string;
-  variantId: string;
+  variantId: string | null;
   productId: string | null;
-  productSnapshot: any;
+  productSnapshot:
+    | {
+        name: string;
+        sku: string;
+        image?: string;
+      }
+    | JsonValue;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
@@ -80,7 +115,7 @@ export interface OrderPayment {
   method: string;
   externalId: string | null;
   status: string;
-  transactionData: any;
+  transactionData: Stripe.PaymentIntent | JsonValue;
   processedAt: Date | null;
 }
 

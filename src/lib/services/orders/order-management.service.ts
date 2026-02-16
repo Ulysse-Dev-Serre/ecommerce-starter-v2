@@ -1,4 +1,11 @@
-import { Language, OrderStatus } from '@/generated/prisma';
+import {
+  Language,
+  OrderStatus,
+  Order,
+  OrderItem as PrismaOrderItem,
+  Payment as PrismaPayment,
+  Shipment,
+} from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import {
   orderRepository,
@@ -8,7 +15,11 @@ import {
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { updateOrderStatus as updateOrderLogic } from '@/lib/services/payments/payment-refund.service';
 import { cache } from '@/lib/core/cache';
-import { OrderWithIncludes } from '@/lib/types/domain/order';
+import {
+  OrderWithIncludes,
+  OrderItem,
+  OrderPayment,
+} from '@/lib/types/domain/order';
 import { sendStatusChangeEmail } from './order-notifications.service';
 
 /**
@@ -43,37 +54,52 @@ export const VALID_STATUS_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.REFUNDED]: [],
 };
 
+type PrismaOrderWithIncludes = Order & {
+  items: PrismaOrderItem[];
+  payments: PrismaPayment[];
+  shipments: Shipment[];
+};
+
 /**
- * Récupère une commande par son ID
- * Vérifie que la commande appartient bien à l'utilisateur
+ * Mapping de Decimal Prisma vers number pour le domaine
  */
-// Helper to map Prisma Decimal to number
-function mapToOrderWithIncludes(order: any): OrderWithIncludes {
+function mapToOrderWithIncludes(
+  order: PrismaOrderWithIncludes
+): OrderWithIncludes {
   return {
     ...order,
+    shippingAddress: order.shippingAddress as any,
+    billingAddress: order.billingAddress as any,
     subtotalAmount: Number(order.subtotalAmount),
     taxAmount: Number(order.taxAmount),
     shippingAmount: Number(order.shippingAmount),
     discountAmount: Number(order.discountAmount),
     totalAmount: Number(order.totalAmount),
-    items: order.items.map((item: any) => ({
+    items: order.items.map(item => ({
       ...item,
+      variantId: item.variantId,
       unitPrice: Number(item.unitPrice),
       totalPrice: Number(item.totalPrice),
-    })),
-    payments:
-      order.payments?.map((payment: any) => ({
-        ...payment,
-        amount: Number(payment.amount),
-      })) || [],
+    })) as OrderItem[],
+    payments: (order.payments?.map(payment => ({
+      ...payment,
+      amount: Number(payment.amount),
+    })) || []) as OrderPayment[],
+    shipments: order.shipments,
   };
 }
 
+/**
+ * Récupère une commande par son ID
+ * Vérifie que la commande appartient bien à l'utilisateur
+ */
 export async function getOrderById(
   orderId: string,
   userId: string
 ): Promise<OrderWithIncludes> {
-  const order = await orderRepository.findById(orderId);
+  const order = (await orderRepository.findById(
+    orderId
+  )) as PrismaOrderWithIncludes | null;
 
   if (!order) {
     throw new AppError(ErrorCode.NOT_FOUND, 'Order not found', 404);
@@ -123,7 +149,6 @@ export async function getOrderMetadata(idOrNumber: string) {
  * Vérifie que la commande appartient bien à l'utilisateur
  */
 export async function getOrderByNumber(orderNumber: string, userId: string) {
-  // Optionnel: On pourrait ajouter findByNumber dans le repository if needed
   const order = await prisma.order.findUnique({
     where: { orderNumber },
     include: {
@@ -145,7 +170,7 @@ export async function getOrderByNumber(orderNumber: string, userId: string) {
     );
   }
 
-  return mapToOrderWithIncludes(order);
+  return mapToOrderWithIncludes(order as PrismaOrderWithIncludes);
 }
 
 /**
@@ -239,7 +264,7 @@ export async function getOrderDetailsWithData(
         image: product?.media[0]?.url,
         slug: product?.slug || '',
         name: product?.translations[0]?.name || '',
-        attributes, // Liste structurée pour éviter le hardcoding visuel
+        attributes,
       };
       return acc;
     },
@@ -353,10 +378,11 @@ export async function updateOrderStatus(params: {
   });
 
   // 4. Envoyer l'email de notification (Fire & Forget)
-  sendStatusChangeEmail(updatedOrder, newStatus).catch((error: unknown) => {
-    // On loggue l'erreur mais on ne bloque pas la réponse car la mise à jour DB est faite
-    console.error('Failed to send status change email:', error);
-  });
+  sendStatusChangeEmail(updatedOrder as any, newStatus).catch(
+    (error: unknown) => {
+      console.error('Failed to send status change email:', error);
+    }
+  );
 
   return updatedOrder;
 }

@@ -2,9 +2,27 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { Package } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/currency';
 import { SupportedCurrency } from '@/lib/config/site';
+import { OrderItem } from '@/lib/types/domain/order';
+
+interface AdminOrderItem extends OrderItem {
+  variant?: {
+    sku: string;
+    media?: Array<{ url: string; isPrimary: boolean }>;
+    product?: {
+      slug: string;
+      translations: Array<{ language: string; name: string }>;
+      media?: Array<{ url: string; isPrimary: boolean }>;
+    };
+  };
+  product?: {
+    slug: string;
+    translations: Array<{ language: string; name: string }>;
+    media?: Array<{ url: string; isPrimary: boolean }>;
+  };
+}
 
 interface OrderItemsTableProps {
-  items: any[];
+  items: AdminOrderItem[];
   currency: string;
 }
 
@@ -21,7 +39,11 @@ export async function OrderItemsTable({
   return (
     <div className="admin-items-list divide-y divide-gray-200">
       {items.map(item => {
-        const snapshot = item.productSnapshot as any;
+        const snapshot = item.productSnapshot as {
+          name?: string | Record<string, string>;
+          image?: string;
+          sku?: string;
+        };
 
         // Name resolution
         let productName = t('unnamedProduct');
@@ -36,11 +58,11 @@ export async function OrderItemsTable({
           // Fallback to live product/variant data
           const liveProduct = item.product || item.variant?.product;
           if (liveProduct) {
-            const translation = (liveProduct as any).translations?.find(
-              (tr: any) => tr.language === locale.toUpperCase()
+            const translation = liveProduct.translations?.find(
+              tr => tr.language === locale.toUpperCase()
             );
-            const enTranslation = (liveProduct as any).translations?.find(
-              (tr: any) => tr.language === 'EN'
+            const enTranslation = liveProduct.translations?.find(
+              tr => tr.language === 'EN'
             );
 
             productName =
@@ -56,7 +78,7 @@ export async function OrderItemsTable({
         if (!imageUrl) {
           // Try variant media first
           const variantMedia =
-            item.variant?.media?.find((m: any) => m.isPrimary) ||
+            item.variant?.media?.find(m => m.isPrimary) ||
             item.variant?.media?.[0];
           if (variantMedia) {
             imageUrl = variantMedia.url;
