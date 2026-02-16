@@ -259,6 +259,7 @@ export async function createTestOrder(
       userId: userId, // Link to user if provided
       orderNumber: `ORD-TEST-${Date.now()}`,
       orderEmail: testEmail,
+      language: 'EN', // Required for email templates
       currency: 'CAD',
       totalAmount: 39.99,
       subtotalAmount: 29.99,

@@ -6,6 +6,7 @@ export class AdminOrderPage {
   readonly shipBtn: Locator;
   readonly transitBtn: Locator;
   readonly deliverBtn: Locator;
+  readonly refundBtn: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -19,6 +20,9 @@ export class AdminOrderPage {
     });
     this.deliverBtn = page.locator('button').filter({
       hasText: /MARK AS DELIVERED|MARQUER LIVRÉE/i,
+    });
+    this.refundBtn = page.locator('button').filter({
+      hasText: /CONFIRM REFUND|CONFIRMER LE REMBOURSEMENT|REFUND|REMBOURSER/i,
     });
   }
 
@@ -58,6 +62,26 @@ export class AdminOrderPage {
       this.page.once('dialog', dialog => dialog.accept());
       await this.deliverBtn.click();
       await expect(this.statusBadge).toContainText(/Delivered|Livrée/i, {
+        timeout: 15000,
+      });
+      await this.page.waitForLoadState('networkidle');
+    });
+  }
+
+  async approveRefund() {
+    await test.step('Admin: Approve Refund Request', async () => {
+      await expect(this.refundBtn).toBeVisible({ timeout: 10000 });
+
+      // Accept the confirmation dialog
+      this.page.once('dialog', dialog => {
+        console.log(`💬 Admin Refund Dialog: ${dialog.message()}`);
+        dialog.accept();
+      });
+
+      await this.refundBtn.click();
+
+      // Wait for status to update to REFUNDED
+      await expect(this.statusBadge).toContainText(/Refunded|Remboursée/i, {
         timeout: 15000,
       });
       await this.page.waitForLoadState('networkidle');

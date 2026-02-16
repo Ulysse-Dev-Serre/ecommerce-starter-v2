@@ -78,13 +78,13 @@ Cette documentation détaille la structure atomique de notre suite de tests End-
   - **Flux Panier** : Ajout au panier et navigation vers la page de Checkout (Status 200).
 - **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/cart.spec.ts --project=chromium --workers=1`
 
-### Test 4 : Parcours Checkout Complet (Shippo & Stripe Radar)
+### Test 4 : Parcours Checkout Complet (Multi-scénarios Stripe)
 - **Fichier** : `src/tests/e2e/storefront/checkout.spec.ts`
 - **POM Associé** : `src/tests/e2e/pom/storefront/CheckoutPage.ts`
 - **Objectifs Validés** :
   - **Logistique** : Saisie d'adresse et récupération des tarifs Shippo réels.
-  - **Sécurité** : Validation des cartes de test Stripe (Success 4242, Fraude 0531, Review 0701).
-  - **Succès** : Confirmation de commande et redirection finale.
+  - **Sécurité** : Validation des cartes de test Stripe (Success 4242, Decline 9995, Radar Block 0019).
+  - **Succès** : Confirmation de commande, redirection et vérification DB (Prisma).
 - **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/checkout.spec.ts --project=chromium --workers=1`
 
 ### Test 5 : Validation Statuts & Emails (High Fidelity)
@@ -97,13 +97,13 @@ Cette documentation détaille la structure atomique de notre suite de tests End-
 - **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/admin/order-status-verification.spec.ts --project=chromium --workers=1`
 
 ### Test 6 : Gestion des Retours & Annulations
-- **Fichier** : `src/tests/e2e/storefront/order-returns.spec.ts`
+- **Fichier** : `src/tests/e2e/storefront/cancel-order.spec.ts`
 - **POM Associé** : `src/tests/e2e/pom/storefront/AccountPage.ts`
 - **Objectifs Cibles** :
   -  **Client** : Flux d'annulation et demande remboursement.
   -  **Admin** : Réception de la demande.
   -  **Notification** : Vérification email confirmation.
-- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/order-returns.spec.ts --project=chromium --workers=1`
+- **Exécution** : `fuser -k 3000/tcp || true && pkill -f playwright || true && npx playwright test src/tests/e2e/storefront/cancel-order.spec.ts --project=chromium --workers=1`
 
 ---
 

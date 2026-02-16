@@ -277,12 +277,31 @@ export async function sendDeliveredEmail(order: any) {
  */
 export async function sendRefundedEmail(order: any) {
   try {
+    logger.info(
+      { orderId: order.id, orderNumber: order.orderNumber },
+      'sendRefundedEmail called'
+    );
+
     let recipientEmail = order.orderEmail || order.user?.email;
 
     if (!recipientEmail && order.payments?.length > 0) {
       const paymentMetadata = order.payments[0].transactionData as any;
       recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
+      logger.info(
+        { recipientEmail, source: 'payment_metadata' },
+        'Email extracted from payment metadata'
+      );
     }
+
+    logger.info(
+      {
+        recipientEmail,
+        hasUser: !!order.user,
+        hasOrderEmail: !!order.orderEmail,
+        hasPayments: order.payments?.length > 0,
+      },
+      'Email resolution result'
+    );
 
     if (recipientEmail) {
       const { OrderRefundedEmail } = await import(
@@ -309,6 +328,11 @@ export async function sendRefundedEmail(order: any) {
         order.orderNumber
       );
 
+      logger.info(
+        { to: recipientEmail, from: FROM_EMAIL, subject },
+        'Sending refund email via Resend'
+      );
+
       const { data, error } = await resend.emails.send({
         from: FROM_EMAIL,
         to: recipientEmail,
@@ -318,15 +342,26 @@ export async function sendRefundedEmail(order: any) {
 
       if (error) {
         logger.error(
-          { error, orderId: order.id },
+          { error, orderId: order.id, recipientEmail },
           'Failed to send refund email'
         );
       } else {
-        logger.info({ emailId: data?.id }, 'Refund email sent successfully');
+        logger.info(
+          { emailId: data?.id, recipientEmail },
+          'Refund email sent successfully'
+        );
       }
+    } else {
+      logger.warn(
+        { orderId: order.id, orderNumber: order.orderNumber },
+        'No recipient email found - skipping refund email'
+      );
     }
   } catch (err: any) {
-    logger.error({ err }, 'Error in refund email flow');
+    logger.error(
+      { err, message: err.message, orderId: order?.id },
+      'Error in refund email flow'
+    );
   }
 }
 
@@ -366,7 +401,20 @@ export async function sendRefundRequestAlert(params: {
   attachments?: any[];
 }) {
   const adminEmail = env.ADMIN_EMAIL;
-  if (!adminEmail) return;
+
+  logger.info(
+    {
+      orderNumber: params.orderNumber,
+      adminEmail,
+      hasAdminEmail: !!adminEmail,
+    },
+    'sendRefundRequestAlert called'
+  );
+
+  if (!adminEmail) {
+    logger.warn({}, 'No ADMIN_EMAIL configured - skipping admin alert');
+    return;
+  }
 
   try {
     const { default: RefundRequestAdminEmail } = await import(
@@ -384,22 +432,41 @@ export async function sendRefundRequestAlert(params: {
       })
     );
 
-    await resend.emails.send({
+    const subject = `⚠️ Refund Request - Order ${params.orderNumber}`;
+
+    logger.info(
+      {
+        to: adminEmail,
+        from: FROM_EMAIL,
+        subject,
+        orderNumber: params.orderNumber,
+      },
+      'Sending refund request alert to admin via Resend'
+    );
+
+    const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: adminEmail,
-      subject: `⚠️ Refund Request - Order ${params.orderNumber}`,
+      subject,
       html: emailHtml,
       attachments: params.attachments,
     });
 
-    logger.info(
-      { orderNumber: params.orderNumber },
-      'Refund request email sent to admin'
-    );
+    if (error) {
+      logger.error(
+        { error, orderNumber: params.orderNumber, adminEmail },
+        'Failed to send refund request email to admin'
+      );
+    } else {
+      logger.info(
+        { emailId: data?.id, orderNumber: params.orderNumber, adminEmail },
+        'Refund request email sent to admin successfully'
+      );
+    }
   } catch (error) {
     logger.error(
       { error, orderNumber: params.orderNumber },
-      'Failed to send refund request email'
+      'Error sending refund request email'
     );
   }
 }
