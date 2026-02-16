@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:reset": "npx tsx scripts/reset-database.ts",
+    "db:cleanup-analytics": "npx tsx scripts/cleanup-analytics.ts",
     "sync-clerk": "npx tsx scripts/sync-clerk-users.ts",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",

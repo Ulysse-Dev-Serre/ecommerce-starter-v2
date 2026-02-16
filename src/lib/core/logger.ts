@@ -7,8 +7,10 @@ const LOG_LEVELS = {
   development: env.LOG_LEVEL
     ? [env.LOG_LEVEL, 'warn', 'error']
     : ['debug', 'info', 'warn', 'error'],
-  production: ['warn', 'error'],
-  test: ['error'],
+  production: env.LOG_LEVEL
+    ? [env.LOG_LEVEL, 'warn', 'error']
+    : ['warn', 'error'],
+  test: env.LOG_LEVEL ? [env.LOG_LEVEL, 'warn', 'error'] : ['error'],
 };
 
 const currentEnv = env.NODE_ENV ?? 'development';

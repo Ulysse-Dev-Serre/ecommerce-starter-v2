@@ -111,4 +111,32 @@ export class AnalyticsService {
       throw error;
     }
   }
+
+  /**
+   * Cleanup old analytics events
+   */
+  static async cleanupEvents(days: number = 14) {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - days);
+
+      const deleted = await prisma.analyticsEvent.deleteMany({
+        where: {
+          createdAt: {
+            lt: cutoffDate,
+          },
+        },
+      });
+
+      logger.info(
+        { deletedCount: deleted.count, cutoffDate },
+        'Analytics events cleaned up'
+      );
+
+      return deleted.count;
+    } catch (error) {
+      logger.error({ error, days }, 'Failed to cleanup analytics events');
+      throw error;
+    }
+  }
 }

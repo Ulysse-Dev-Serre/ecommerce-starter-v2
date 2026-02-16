@@ -10,7 +10,7 @@ export class AdminOrderPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.statusBadge = page.locator('.vibe-badge');
+    this.statusBadge = page.locator('.admin-page-title + .vibe-badge');
 
     this.shipBtn = page.locator('button').filter({
       hasText: /MARK AS SHIPPED|MARQUER EXPÉDIÉE/i,
