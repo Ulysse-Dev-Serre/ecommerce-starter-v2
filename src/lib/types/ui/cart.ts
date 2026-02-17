@@ -10,7 +10,7 @@ import { CartStatus } from '@/generated/prisma';
  * Format de prix pour l'affichage dans le panier
  */
 export interface CartPricing {
-  price: string;
+  price: number;
   currency: string;
 }
 

@@ -228,7 +228,7 @@ export async function getProducts(
         ...variant,
         pricing: variant.pricing.map(p => ({
           ...p,
-          price: p.price.toString(),
+          price: Number(p.price),
         })),
         attributeValues: variant.attributeValues || [],
       })),
@@ -372,7 +372,7 @@ export async function getProductBySlug(
       ...variant,
       pricing: variant.pricing.map(p => ({
         ...p,
-        price: p.price.toString(),
+        price: Number(p.price),
       })),
     })),
   } as ProductProjection;
@@ -421,7 +421,7 @@ export async function getProductCount(): Promise<number> {
 export function getProductViewModel(product: ProductProjection) {
   const images = product.media.map(m => ({
     url: m.url,
-    alt: m.alt,
+    alt: m.alt || null,
     isPrimary: m.isPrimary,
   }));
 
@@ -429,11 +429,11 @@ export function getProductViewModel(product: ProductProjection) {
     id: v.id,
     sku: v.sku,
     pricing: v.pricing.map(p => ({
-      price: p.price,
+      price: Number(p.price),
       currency: p.currency,
     })),
     stock: v.inventory?.stock || 0,
-    attributes: v.attributeValues.map(av => ({
+    attributes: (v.attributeValues || []).map(av => ({
       name:
         av.attributeValue?.attribute.translations[0]?.name ||
         av.attributeValue?.attribute.key ||

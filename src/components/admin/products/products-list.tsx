@@ -27,39 +27,14 @@ import {
 } from '@/lib/actions/products';
 import { ProductStatsGrid } from './product-stats-grid';
 import { SortableProductRow } from './product-row';
+import {
+  ProductProjection,
+  ProductVariantProjection,
+} from '@/lib/types/domain/product';
 
-export interface LocalProductTranslation {
-  language: string;
-  name: string;
-  shortDescription?: string | null;
-}
+import { ProductStatus } from '@/generated/prisma';
 
-export interface LocalProductVariant {
-  id: string;
-  sku: string;
-  pricing: Array<{
-    price: number;
-    currency: string;
-    priceType: string;
-  }>;
-  inventory?: {
-    stock: number;
-  } | null;
-}
-
-export interface LocalProduct {
-  id: string;
-  slug: string;
-  status: string; // Updated to string to be more flexible with Prisma Enums
-  isFeatured: boolean;
-  sortOrder: number;
-  translations: LocalProductTranslation[];
-  variants: LocalProductVariant[];
-  media?: { url: string; isPrimary: boolean }[];
-  createdAt: Date | string;
-  updatedAt: Date | string;
-}
-
+// Status colors mapping
 const statusColors: Record<string, string> = {
   DRAFT: 'admin-badge-neutral',
   ACTIVE: 'admin-badge-success',
@@ -68,7 +43,7 @@ const statusColors: Record<string, string> = {
 };
 
 interface ProductsListProps {
-  initialProducts: LocalProduct[];
+  initialProducts: ProductProjection[];
   locale: string;
 }
 
@@ -105,7 +80,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     router.refresh();
   };
 
-  const getProductName = (translations: LocalProductTranslation[]) => {
+  const getProductName = (translations: ProductProjection['translations']) => {
     const translation =
       translations.find(tr => tr.language === locale.toUpperCase()) ||
       translations.find(tr => tr.language === 'EN') ||
@@ -113,19 +88,19 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     return translation?.name || t('unnamedProduct');
   };
 
-  const getBasePrice = (variants: LocalProductVariant[]) => {
+  const getBasePrice = (variants: ProductVariantProjection[]) => {
     if (variants.length === 0) return null;
     const allPricing = variants
       .flatMap(v => v.pricing)
-      .filter(p => p.priceType === 'base');
+      .filter(p => (p as any).priceType === 'base');
     if (allPricing.length === 0) return null;
 
     const cadPrices = allPricing
       .filter(p => p.currency === 'CAD')
-      .map(p => p.price);
+      .map(p => Number(p.price));
     const usdPrices = allPricing
       .filter(p => p.currency === 'USD')
-      .map(p => p.price);
+      .map(p => Number(p.price));
 
     const parts: string[] = [];
     const localeCode = locale; // Renaming to avoid conflict if any, though explicit usage is better
@@ -153,7 +128,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     return parts.join(' / ');
   };
 
-  const getTotalStock = (variants: LocalProductVariant[]) => {
+  const getTotalStock = (variants: ProductVariantProjection[]) => {
     return variants.reduce((sum, v) => sum + (v.inventory?.stock || 0), 0);
   };
 

@@ -29,7 +29,7 @@ export interface CheckoutSummaryItem {
   name: string;
   quantity: number;
   price: number;
-  currency: string;
+  currency: CheckoutCurrency;
   image?: string;
 }
 
@@ -70,7 +70,7 @@ export interface StripeCheckoutInput {
  * Utilisé pour afficher le récapitulatif avant paiement
  */
 export interface CheckoutSummary {
-  currency: string;
+  currency: CheckoutCurrency;
   initialTotal: number;
   cartId: string;
   summaryItems: CheckoutSummaryItem[];
@@ -102,7 +102,7 @@ export interface CheckoutContext {
 
 export interface CreateIntentOptions {
   cartId: string;
-  currency: string;
+  currency: CheckoutCurrency;
   locale: string;
   directItem?: {
     variantId: string;
@@ -113,6 +113,6 @@ export interface CreateIntentOptions {
 export interface UpdateIntentOptions {
   paymentIntentId: string;
   shippingRate: any;
-  currency: string;
+  currency: CheckoutCurrency;
   shippingDetails: any;
 }

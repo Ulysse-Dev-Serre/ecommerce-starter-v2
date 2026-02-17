@@ -37,7 +37,7 @@ export interface ProductVariantProjection {
   id: string;
   sku: string;
   pricing: {
-    price: string;
+    price: number;
     currency: string;
     priceType: string;
   }[];
@@ -47,7 +47,7 @@ export interface ProductVariantProjection {
     trackInventory: boolean;
     allowBackorder: boolean;
   } | null;
-  attributeValues: Array<{
+  attributeValues?: Array<{
     attributeValue?: {
       value: string;
       attribute: {
@@ -65,7 +65,7 @@ export interface ProductVariantProjection {
     variantId?: string;
     attributeValueId?: string;
   }>;
-  media: {
+  media?: {
     url: string;
     alt: string | null;
     isPrimary: boolean;
@@ -81,8 +81,9 @@ export interface ProductProjection {
   slug: string;
   status: ProductStatus;
   isFeatured: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  sortOrder: number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
   translations: {
     language: string;
     name: string;
@@ -90,7 +91,7 @@ export interface ProductProjection {
     shortDescription: string | null;
   }[];
   variants: ProductVariantProjection[];
-  categories: {
+  categories?: {
     category: {
       slug: string;
       translations: {
@@ -101,9 +102,9 @@ export interface ProductProjection {
   }[];
   media: {
     url: string;
-    alt: string | null;
+    alt?: string | null;
     isPrimary: boolean;
-    sortOrder: number;
+    sortOrder?: number;
   }[];
 }
 

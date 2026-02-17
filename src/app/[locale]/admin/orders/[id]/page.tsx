@@ -68,7 +68,14 @@ export default async function OrderDetailPage({
         {/* Main content - 2 columns */}
         <div className="lg:col-span-2 space-y-6">
           <div className="admin-card p-0 overflow-hidden">
-            <OrderItemsTable items={order.items} currency={order.currency} />
+            <OrderItemsTable
+              items={order.items.map(item => ({
+                ...item,
+                unitPrice: Number(item.unitPrice),
+                totalPrice: Number(item.totalPrice),
+              }))}
+              currency={order.currency}
+            />
             <OrderSummary
               subtotal={Number(order.subtotalAmount)}
               tax={Number(order.taxAmount)}

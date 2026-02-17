@@ -12,13 +12,13 @@ interface AdminOrderItem extends OrderItem {
       slug: string;
       translations: Array<{ language: string; name: string }>;
       media?: Array<{ url: string; isPrimary: boolean }>;
-    };
-  };
+    } | null;
+  } | null;
   product?: {
     slug: string;
     translations: Array<{ language: string; name: string }>;
     media?: Array<{ url: string; isPrimary: boolean }>;
-  };
+  } | null;
 }
 
 interface OrderItemsTableProps {

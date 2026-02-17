@@ -10,7 +10,7 @@ import { trackEvent } from '@/lib/client/analytics';
 interface Variant {
   id: string;
   sku: string;
-  pricing: Array<{ price: string; currency: string }>;
+  pricing: Array<{ price: number; currency: string }>;
   stock: number;
   attributes: Array<{
     name: string;
@@ -23,7 +23,7 @@ interface ProductClientProps {
   locale: string;
   productId: string;
   productName: string;
-  initialPrice?: string;
+  initialPrice?: number;
   initialCurrency?: string;
 }
 

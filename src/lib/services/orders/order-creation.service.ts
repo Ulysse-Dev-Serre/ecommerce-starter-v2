@@ -7,6 +7,7 @@ import { calculateCart, type Currency } from '../calculations';
 import { decrementStock } from '../inventory';
 import { CreateOrderFromCartInput } from '@/lib/types/domain/order';
 import { PackingService, PackableItem } from '../shipping/packing.service';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 /**
  * Génère un numéro de commande unique
@@ -126,9 +127,9 @@ export async function createOrderFromCart({
         shippingAmount,
         discountAmount,
         totalAmount,
-        shippingAddress: shippingAddress || {},
-        billingAddress: billingAddress || {},
-        packingResult: packingResult as any,
+        shippingAddress: (shippingAddress || {}) as InputJsonValue,
+        billingAddress: (billingAddress || {}) as InputJsonValue,
+        packingResult: packingResult as unknown as InputJsonValue,
         language: (Object.values(Language) as string[]).includes(
           locale.split('-')[0].toUpperCase()
         )
@@ -168,7 +169,7 @@ export async function createOrderFromCart({
             method: 'STRIPE',
             externalId: paymentIntent.id,
             status: 'COMPLETED',
-            transactionData: paymentIntent as any,
+            transactionData: paymentIntent as unknown as InputJsonValue,
             processedAt: new Date(),
           },
         },

@@ -33,6 +33,7 @@ export default async function ProductsPage({
     translations: product.translations.map(t => ({
       language: t.language,
       name: t.name,
+      description: t.description,
       shortDescription: t.shortDescription,
     })),
     variants:
@@ -48,6 +49,9 @@ export default async function ProductsPage({
         inventory: variant.inventory
           ? {
               stock: variant.inventory.stock,
+              lowStockThreshold: variant.inventory.lowStockThreshold || 0,
+              trackInventory: variant.inventory.trackInventory ?? true,
+              allowBackorder: variant.inventory.allowBackorder ?? false,
             }
           : null,
       })) || [],

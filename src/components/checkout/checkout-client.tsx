@@ -30,17 +30,19 @@ import { PaymentSection } from './PaymentSection';
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+import { SupportedCurrency } from '@/lib/config/site';
+
 interface CheckoutClientProps {
   cartId: string;
   locale: string;
   initialTotal: number;
-  currency: string;
+  currency: SupportedCurrency;
   userEmail?: string | null | undefined;
   summaryItems?: Array<{
     name: string;
     quantity: number;
     price: number;
-    currency: string;
+    currency: SupportedCurrency;
     image?: string;
   }>;
 }
@@ -148,7 +150,7 @@ export function CheckoutClient({
 
 interface CheckoutFormProps {
   clientSecret: string;
-  currency: string;
+  currency: SupportedCurrency;
   locale: string;
   initialTotal: number;
   userEmail?: string | null | undefined;
@@ -157,7 +159,7 @@ interface CheckoutFormProps {
     name: string;
     quantity: number;
     price: number;
-    currency: string;
+    currency: SupportedCurrency;
     image?: string;
   }>;
   directItem?: {

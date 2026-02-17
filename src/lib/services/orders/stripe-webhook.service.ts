@@ -331,7 +331,7 @@ export class StripeWebhookService {
       firstName: source.name?.split(' ')[0] || '',
       lastName: source.name?.split(' ').slice(1).join(' ') || '',
       phone: source.phone || undefined,
-      email: source.email || undefined,
+      email: (source as any).email || undefined,
     };
   }
 

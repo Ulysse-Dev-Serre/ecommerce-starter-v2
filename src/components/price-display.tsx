@@ -6,7 +6,7 @@ import { useLocale } from 'next-intl';
 import { SupportedCurrency, SITE_CURRENCY } from '@/lib/config/site';
 
 interface PriceDisplayProps {
-  pricing: Array<{ price: string; currency: string }>;
+  pricing: Array<{ price: number; currency: string }>;
   className?: string;
   locale?: string;
   showFallbackIndicator?: boolean;
@@ -51,7 +51,7 @@ export function PriceDisplay({
 interface PriceTotalProps {
   items: Array<{
     quantity: number;
-    pricing: Array<{ price: string; currency: string }>;
+    pricing: Array<{ price: number; currency: string }>;
   }>;
   className?: string;
   locale?: string;
