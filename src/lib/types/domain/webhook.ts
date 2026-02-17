@@ -64,7 +64,7 @@ export interface InvalidSignatureAlert {
 /**
  * Résultat générique de traitement webhook
  */
-export interface WebhookProcessResult<T = any> {
+export interface WebhookProcessResult<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

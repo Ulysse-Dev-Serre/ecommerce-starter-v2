@@ -7,10 +7,10 @@ config({ path: '.env.local' });
 config({ path: '.env' });
 
 // Mock global environment variables if needed
-(process.env as any).NODE_ENV = 'test';
+(process.env as unknown as { NODE_ENV: string }).NODE_ENV = 'test';
 
 // Global test utilities
-(global as any).testUtils = {
+(global as unknown as { testUtils: unknown }).testUtils = {
   wait: (ms: number) => new Promise(resolve => setTimeout(resolve, ms)),
 
   expectValidDate: (dateString: string) => {

@@ -9,6 +9,15 @@ import {
 } from '@/generated/prisma';
 
 /**
+ * Dimensions d'un produit
+ */
+export interface Dimensions {
+  length: number | null | undefined;
+  width: number | null | undefined;
+  height: number | null | undefined;
+}
+
+/**
  * Filtres pour la liste de produits
  */
 export interface ProductListFilters {
@@ -122,11 +131,7 @@ export interface CreateProductData {
   incoterm?: string;
   shippingOriginId?: string;
   weight?: number;
-  dimensions?: {
-    length?: number | null;
-    width?: number | null;
-    height?: number | null;
-  };
+  dimensions?: Dimensions;
   translations?: {
     language: Language;
     name: string;
@@ -151,11 +156,7 @@ export interface UpdateProductData {
   exportExplanation?: string | null;
   incoterm?: string | null;
   weight?: number | null;
-  dimensions?: {
-    length?: number | null;
-    width?: number | null;
-    height?: number | null;
-  } | null;
+  dimensions?: Dimensions | null;
   translations?: {
     language: Language;
     name: string;

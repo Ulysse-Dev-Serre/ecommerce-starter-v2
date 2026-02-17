@@ -31,6 +31,18 @@ export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
 export const DEFAULT_CURRENCY = 'CAD' as SupportedCurrency;
 
 /**
+ * Decimal precision per currency.
+ */
+export const CURRENCY_DECIMALS: Record<string, number> = {
+  CAD: 2,
+  USD: 2,
+  EUR: 2,
+  GBP: 2,
+  JPY: 0,
+  CLP: 0,
+};
+
+/**
  * Mapping of Country Codes (ISO 3166-1 alpha-2) to Currencies.
  * Used for auto-detection in middleware.
  */
@@ -94,7 +106,14 @@ export const SITE_ADDRESS = `${STORE_ORIGIN_ADDRESS.street1}, ${STORE_ORIGIN_ADD
  * 2. Product-specific Origin (Fallback from database)
  * 3. Global Store Origin (Final placeholder if nothing else exists)
  */
-export function resolveShippingOrigin(productOrigin?: any) {
+export function resolveShippingOrigin(
+  productOrigin?: {
+    name: string | null;
+    address: any;
+    contactPhone: string | null;
+    contactEmail: string | null;
+  } | null
+) {
   const isGlobalConfigured =
     STORE_ORIGIN_ADDRESS.street1 &&
     !STORE_ORIGIN_ADDRESS.street1.includes('Technology');
@@ -107,7 +126,7 @@ export function resolveShippingOrigin(productOrigin?: any) {
   }
 
   if (productOrigin?.address) {
-    const addr = productOrigin.address as any;
+    const addr = productOrigin.address as Record<string, any>;
     return {
       name: productOrigin.name || STORE_ORIGIN_ADDRESS.name,
       street1: addr.street1 || addr.line1,
@@ -132,6 +151,19 @@ export function resolveShippingOrigin(productOrigin?: any) {
  * Used primarily for shipping calculations between Shippo (CAD) and site currency.
  */
 export const CAD_TO_USD_RATE = 0.72;
+
+/**
+ * Centralized exchange rates for internal conversion.
+ * Key: Source Currency -> { Target Currency: Rate }
+ */
+export const EXCHANGE_RATES: Record<string, Record<string, number>> = {
+  CAD: {
+    USD: CAD_TO_USD_RATE,
+  },
+  USD: {
+    CAD: Number((1 / CAD_TO_USD_RATE).toFixed(4)),
+  },
+};
 
 /**
  * Default phone prefix for the site region.

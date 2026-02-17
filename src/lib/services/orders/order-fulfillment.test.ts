@@ -71,6 +71,7 @@ describe('OrderFulfillmentService', () => {
         shippingAddress: { city: 'Paris' },
         items: [{ variant: { id: 'var_1' }, quantity: 1 }],
         shipments: [],
+        orderEmail: 'test@example.com',
       } as any);
 
       vi.mocked(shippo.createTransaction).mockResolvedValue({
@@ -108,6 +109,7 @@ describe('OrderFulfillmentService', () => {
         shippingAddress: { city: 'Paris' },
         items: [{ variant: { id: 'var_1' }, quantity: 1 }],
         shipments: [],
+        orderEmail: 'test@example.com',
       } as any);
 
       vi.mocked(ShippingService.getShippingRates).mockResolvedValue([
@@ -117,6 +119,7 @@ describe('OrderFulfillmentService', () => {
       vi.mocked(shippo.createTransaction).mockResolvedValue({
         status: 'SUCCESS',
         tracking_number: 'TRACK123',
+        label_url: 'http://label.pdf',
       } as any);
 
       await purchaseShippingLabel('ord_1'); // No rateId
@@ -131,10 +134,19 @@ describe('OrderFulfillmentService', () => {
       // Mock complex order structure needed for return label
       vi.mocked(prisma.order.findUnique).mockResolvedValue({
         id: 'ord_1',
+        orderEmail: 'test@example.com',
         shippingAddress: { city: 'Paris', country: 'FR' },
         items: [
           {
             product: {
+              slug: 'test-product',
+              weight: 1,
+              dimensions: {
+                length: 10,
+                width: 10,
+                height: 10,
+              },
+              translations: [{ language: 'FR', name: 'Produit Test' }],
               shippingOrigin: {
                 address: {
                   city: 'Warehouse',
@@ -146,8 +158,10 @@ describe('OrderFulfillmentService', () => {
               },
             },
             quantity: 1,
+            unitPrice: { toString: () => '10.00' },
           },
         ],
+        currency: 'CAD',
         user: { email: 'client@example.com' },
       } as any);
 
@@ -166,7 +180,7 @@ describe('OrderFulfillmentService', () => {
         label_url: 'http://return.pdf',
       } as any);
 
-      const result = await createReturnLabel('ord_1');
+      const result = (await createReturnLabel('ord_1')) as any;
 
       expect(result.status).toBe('SUCCESS');
       expect(prisma.shipment.create).toHaveBeenCalledWith(

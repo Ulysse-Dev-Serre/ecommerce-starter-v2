@@ -10,7 +10,7 @@ import {
 } from '@/lib/types/domain/product';
 
 /**
- * Récupère tous les produits avec traductions (version simple pour admin)
+ * Retrieves all products with translations (simplified version for admin).
  */
 export async function getAllProducts(filters?: {
   status?: string;
@@ -46,7 +46,7 @@ export async function getAllProducts(filters?: {
 }
 
 /**
- * Récupère un produit par ID (version simple pour admin/delete)
+ * Retrieves a product by ID (simplified version for admin/delete).
  */
 export async function getProductByIdSimple(
   id: string
@@ -63,7 +63,7 @@ export async function getProductByIdSimple(
 }
 
 /**
- * Crée un nouveau produit
+ * Creates a new product.
  */
 export async function createProduct(
   productData: CreateProductData
@@ -84,7 +84,7 @@ export async function createProduct(
           ? new Prisma.Decimal(productData.weight)
           : undefined,
       dimensions: productData.dimensions
-        ? (productData.dimensions as Prisma.InputJsonValue)
+        ? (productData.dimensions as unknown as Prisma.InputJsonValue)
         : undefined,
       translations: productData.translations
         ? {
@@ -110,7 +110,7 @@ export async function createProduct(
 }
 
 /**
- * Met à jour un produit
+ * Updates an existing product.
  */
 export async function updateProduct(
   id: string,
@@ -130,7 +130,7 @@ export async function updateProduct(
   if (dimensions !== undefined) {
     dataToUpdate.dimensions =
       dimensions != null
-        ? (dimensions as Prisma.InputJsonValue)
+        ? (dimensions as unknown as Prisma.InputJsonValue)
         : Prisma.DbNull;
   }
 
@@ -184,14 +184,14 @@ export async function updateProduct(
 }
 
 /**
- * Supprime un produit (HARD DELETE - permanent)
+ * Deletes a product (HARD DELETE - permanent).
  */
 export async function deleteProduct(id: string): Promise<Product> {
   const deletedProduct = await prisma.product.delete({
     where: { id },
   });
 
-  // Nettoyage des attributs orphelins
+  // Cleanup orphaned attributes
   await cleanupOrphanedAttributes();
 
   logger.info(
@@ -206,14 +206,14 @@ export async function deleteProduct(id: string): Promise<Product> {
 }
 
 /**
- * Suppression définitive d'un produit (Utilisé pour les tests uniquement)
+ * Permanently deletes a product (Used for testing only).
  */
 export async function hardDeleteProduct(id: string): Promise<Product> {
   const deletedProduct = await prisma.product.delete({
     where: { id },
   });
 
-  // Nettoyage des attributs orphelins
+  // Cleanup orphaned attributes
   await cleanupOrphanedAttributes();
 
   logger.info(
@@ -228,7 +228,7 @@ export async function hardDeleteProduct(id: string): Promise<Product> {
 }
 
 /**
- * Récupère un produit complet pour l'admin (avec toutes les relations pour l'édition)
+ * Retrieves a complete product for the admin (with all relations for editing).
  */
 export async function getProductForAdmin(id: string) {
   return prisma.product.findUnique({

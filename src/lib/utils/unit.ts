@@ -1,4 +1,5 @@
 import type { Decimal } from '@prisma/client/runtime/library';
+import { toNum } from '@/lib/utils/number';
 
 /**
  * Formate un poids pour l'affichage.
@@ -9,14 +10,9 @@ export function formatWeight(
 ): string {
   if (weight === null || weight === undefined) return '';
 
-  const numericWeight =
-    typeof weight === 'object' && weight !== null && 'toNumber' in weight
-      ? (weight as any).toNumber()
-      : typeof weight === 'string'
-        ? parseFloat(weight)
-        : weight;
+  const numericWeight = toNum(weight);
 
-  if (isNaN(numericWeight) || numericWeight === 0) return '';
+  if (numericWeight === 0) return '';
 
   return `${numericWeight} kg`;
 }

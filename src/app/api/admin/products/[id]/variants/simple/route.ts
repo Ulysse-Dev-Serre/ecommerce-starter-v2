@@ -6,16 +6,17 @@ import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { createSimpleVariants } from '@/lib/services/variants';
 import type { SimpleVariantData } from '@/lib/types/domain/variant';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 /**
  * POST /api/admin/products/[id]/variants/simple
- * Crée des variantes simples avec noms EN/FR (pour l'UI admin simplifiée)
+ * Creates simple variants with multi-language names.
  *
  * Body:
  * {
  *   variants: [
- *     { nameEN: "Green", nameFR: "Vert", price: 49.99, stock: 100 },
- *     { nameEN: "White", nameFR: "Blanc", price: 49.99, stock: 50 }
+ *     { names: { en: "Green", fr: "Vert" }, prices: { CAD: 49.99 }, stock: 100 },
+ *     { names: { en: "White", fr: "Blanc" }, prices: { CAD: 49.99 }, stock: 50 }
  *   ]
  * }
  */
@@ -38,7 +39,7 @@ async function createSimpleVariantsHandler(
         productId,
         variantCount: body.variants?.length || 0,
       },
-      `Création de variantes simples pour le produit: ${productId}`
+      `Creating simple variants for product: ${productId}`
     );
 
     const variants: SimpleVariantData[] = body.variants;
@@ -48,28 +49,43 @@ async function createSimpleVariantsHandler(
         {
           success: false,
           requestId,
-          error: 'Variantes manquantes',
-          message: 'Au moins 1 variante est requise',
+          error: 'Missing variants',
+          message: 'At least one variant is required',
           timestamp: new Date().toISOString(),
         },
         { status: 400 }
       );
     }
 
-    // Validation des variantes
+    // Dynamic validation based on supported locales
     for (let i = 0; i < variants.length; i++) {
       const v = variants[i];
-      if (!v.nameEN || !v.nameFR) {
+      if (!v.names) {
         return NextResponse.json(
           {
             success: false,
             requestId,
-            error: 'Données invalides',
-            message: `Variante ${i + 1}: nameEN et nameFR sont requis`,
+            error: 'Invalid data',
+            message: `Variant ${i + 1}: names object is required`,
             timestamp: new Date().toISOString(),
           },
           { status: 400 }
         );
+      }
+
+      for (const locale of SUPPORTED_LOCALES) {
+        if (!v.names[locale]) {
+          return NextResponse.json(
+            {
+              success: false,
+              requestId,
+              error: 'Invalid data',
+              message: `Variant ${i + 1}: name for locale "${locale}" is required`,
+              timestamp: new Date().toISOString(),
+            },
+            { status: 400 }
+          );
+        }
       }
       const hasPrice =
         v.prices &&

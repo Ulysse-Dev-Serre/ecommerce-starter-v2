@@ -2,12 +2,32 @@ import { Language } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { VariantWithRelations } from '@/lib/types/domain/variant';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export const GENERIC_ATTRIBUTE_KEY = 'variant_type';
 
 /**
- * Assure qu'un attribut générique "variant_type" existe
- * Crée l'attribut s'il n'existe pas, sinon le retourne
+ * Helper to convert a locale string to a Prisma Language enum value.
+ */
+function toPrismaLanguage(locale: string): Language {
+  const lang = locale.toUpperCase();
+  if (Object.values(Language).includes(lang as Language)) {
+    return lang as Language;
+  }
+  return Language.EN;
+}
+
+const DEFAULT_VARIANT_NAMES: Record<string, string> = {
+  en: 'Variant',
+  fr: 'Variante',
+  es: 'Variante',
+  de: 'Variante',
+  it: 'Variante',
+};
+
+/**
+ * Ensures a generic "variant_type" attribute exists.
+ * Creates the attribute if it doesn't exist, otherwise returns it.
  */
 export async function ensureGenericVariantAttribute() {
   let attribute = await prisma.productAttribute.findUnique({
@@ -20,7 +40,7 @@ export async function ensureGenericVariantAttribute() {
         action: 'create_generic_attribute',
         key: GENERIC_ATTRIBUTE_KEY,
       },
-      "Création de l'attribut générique variant_type"
+      'Creating generic attribute variant_type'
     );
 
     attribute = await prisma.productAttribute.create({
@@ -30,10 +50,10 @@ export async function ensureGenericVariantAttribute() {
         isRequired: true,
         sortOrder: 0,
         translations: {
-          create: [
-            { language: Language.EN, name: 'Variant' },
-            { language: Language.FR, name: 'Variante' },
-          ],
+          create: SUPPORTED_LOCALES.map(locale => ({
+            language: toPrismaLanguage(locale),
+            name: DEFAULT_VARIANT_NAMES[locale] || 'Variant',
+          })),
         },
       },
     });
@@ -43,13 +63,12 @@ export async function ensureGenericVariantAttribute() {
 }
 
 /**
- * Crée ou récupère une valeur d'attribut pour un nom de variante
+ * Creates or retrieves an attribute value for variant names (multi-language).
  */
 export async function ensureAttributeValue(
   attributeId: string,
   valueKey: string,
-  nameEN: string,
-  nameFR: string
+  names: Record<string, string>
 ) {
   let attributeValue = await prisma.productAttributeValue.findUnique({
     where: {
@@ -66,10 +85,10 @@ export async function ensureAttributeValue(
         attributeId,
         value: valueKey,
         translations: {
-          create: [
-            { language: Language.EN, displayName: nameEN },
-            { language: Language.FR, displayName: nameFR },
-          ],
+          create: Object.entries(names).map(([locale, displayName]) => ({
+            language: toPrismaLanguage(locale),
+            displayName,
+          })),
         },
       },
     });
@@ -79,12 +98,12 @@ export async function ensureAttributeValue(
 }
 
 /**
- * Récupérer toutes les variantes d'un produit
+ * Retrieves all variants for a given product.
  */
 export async function getProductVariants(
   productId: string
 ): Promise<VariantWithRelations[]> {
-  logger.info({ productId }, 'Récupération des variantes du produit');
+  logger.info({ productId }, 'Fetching product variants');
 
   return prisma.productVariant.findMany({
     where: {
@@ -119,12 +138,12 @@ export async function getProductVariants(
 }
 
 /**
- * Récupérer une variante par ID
+ * Retrieves a single variant by its ID.
  */
 export async function getVariantById(
   variantId: string
 ): Promise<VariantWithRelations | null> {
-  logger.info({ variantId }, 'Récupération de la variante');
+  logger.info({ variantId }, 'Fetching variant');
 
   return prisma.productVariant.findFirst({
     where: {

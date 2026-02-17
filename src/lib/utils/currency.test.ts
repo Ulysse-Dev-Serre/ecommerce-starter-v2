@@ -38,15 +38,12 @@ describe('Currency Utils', () => {
       const result = getPriceForCurrency(prices, 'USD' as any);
       expect(result.price).toBe('80');
       expect(result.currency).toBe('USD');
-      expect(result.isFallback).toBe(false);
     });
 
-    it('should fallback to SITE_CURRENCY if requested is missing', () => {
-      // Simulation: Site default is CAD
-      const result = getPriceForCurrency({ CAD: '100' }, 'USD' as any);
-      expect(result.price).toBe('100');
-      expect(result.currency).toBe('CAD');
-      expect(result.isFallback).toBe(true);
+    it('should throw error if requested is missing (Zero Fallback Policy)', () => {
+      expect(() => getPriceForCurrency({ CAD: '100' }, 'USD' as any)).toThrow(
+        /PRICING_ERROR/
+      );
     });
   });
 

@@ -13,7 +13,7 @@ export interface UTMData {
 export interface AnalyticsEventInput {
   eventType: string;
   eventName?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   path?: string;
   anonymousId?: string;
   utmSource?: string;

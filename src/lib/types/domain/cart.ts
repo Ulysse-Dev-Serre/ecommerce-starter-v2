@@ -1,4 +1,5 @@
 import { CartStatus } from '@/generated/prisma';
+import { Dimensions } from './product';
 
 /**
  * Entrée pour ajouter un article au panier
@@ -32,12 +33,12 @@ export interface CartProjection {
       id: string;
       sku: string;
       weight: string;
-      dimensions: any;
+      dimensions: Dimensions | null;
       product: {
         id: string;
         slug: string;
         weight?: string;
-        dimensions?: any;
+        dimensions?: Dimensions | null;
         translations: {
           language: string;
           name: string;

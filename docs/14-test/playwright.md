@@ -19,42 +19,67 @@ Cible les processus métier critiques et les intégrations tierces (Stripe, Ship
 
 ---
 
+## 📊 Matrice de Couverture (Hybride)
+
+Pour les étapes critiques, nous maintenons deux versions du même test pour une robustesse maximale :
+
+| Étape | Version API / Backend (Smoke) | Version UI (Storefront/Admin) |
+| :--- | :--- | :--- |
+| **4 (Checkout)** | `api-checkout-full.spec.ts` | `checkout.spec.ts` |
+| **5 (Status)** | `api-order-status.spec.ts` | `order-lifecycle.spec.ts` |
+| **6 (Refund)** | `api-refund.spec.ts` | `cancel-order.spec.ts` |
+
+---
+
 ## 🏗️ Structure des Tests
 
 ### Test 1 : Santé & Accès Dashboard Admin
 - **Fichier** : `src/tests/e2e/admin/dashboard.spec.ts`
 - **Objectifs** : Vérifie le Status 200, la présence du texte "Admin Panel" et la redirection de sécurité si non authentifié.
+- **Commande** : `npx playwright test src/tests/e2e/admin/dashboard.spec.ts --project=chromium`
 
 ### Test 2 : Cycle de Vie Produit (Logistique & CRUD)
 - **Fichier** : `src/tests/e2e/admin/product-crud.spec.ts`
 - **Objectifs** : Création d'un Supplier, création d'un produit DRAFT, passage en ACTIVE avec prix/stock et visibilité storefront.
+- **Commande** : `npx playwright test src/tests/e2e/admin/product-crud.spec.ts --project=chromium`
 
 ### Test 3 : Flux Panier & Authenticité
 - **Fichier** : `src/tests/e2e/storefront/cart.spec.ts`
 - **Objectifs** : Injection de produit via seed validé par Zod, ajout au panier et accès à la page Checkout.
+- **Commande** : `npx playwright test src/tests/e2e/storefront/cart.spec.ts --project=chromium`
 
-### Test 4 : Parcours Checkout Complet (100% Intégration)
+### Test 4 : Parcours Checkout (Backend - 100% Intégration)
 - **Fichier** : `src/tests/e2e/smoke/api-checkout-full.spec.ts`
-- **Objectifs Validés** :
-  - **Stripe Réel** : Utilise une vraie carte de test Visa pour créer un paiement.
-  - **Webhook ngrok** : Vérifie que le signal de Stripe revient bien sur le serveur local via ngrok.
-  - **Confirmation** : Création de la commande en DB (Status PAID) et envoi des emails Resend.
-- **Isolation** : Utilise le slug `e2e-checkout-full-smoke`.
+- **Objectifs** : Validation profonde du moteur (Stripe Réel, Webhook ngrok, Création DB, Emails Resend).
+- **Commande** : `npx playwright test src/tests/e2e/smoke/api-checkout-full.spec.ts --project=chromium --workers=1`
 
-### Test 5 : État de Commande & Historique Prisma
+### Test 4.1 : Parcours Checkout (UI - Storefront)
+- **Fichier** : `src/tests/e2e/storefront/checkout.spec.ts`
+- **Objectifs** : Valide l'expérience utilisateur complète (remplissage formulaires, sélection tarifs Shippo via UI, iframe Stripe).
+- **Commande** : `npx playwright test src/tests/e2e/storefront/checkout.spec.ts --project=chromium`
+- **Note** : ⚠️ *Peut présenter des instabilités UI (Stripe Radar).*
+
+### Test 5 : Cycle de Vie & Transitions (Backend - Smoke)
 - **Fichier** : `src/tests/e2e/smoke/api-order-status.spec.ts`
-- **Objectifs Validés** :
-  - **Transitions** : PAID -> SHIPPED -> IN_TRANSIT -> DELIVERED.
-  - **Deep DB Check** : Vérifie avec Prisma que chaque étape crée une entrée dans l'historique (`statusHistory`).
-  - **Emails** : Vérifie le déclenchement des notifications d'expédition et de livraison.
-- **Isolation** : Utilise le slug `e2e-order-status-smoke`.
+- **Objectifs** : Vérifie l'intégrité technique des transitions d'états et de l'historique Prisma sans passer par l'UI.
+- **Commande** : `npx playwright test src/tests/e2e/smoke/api-order-status.spec.ts --project=chromium`
 
-### Test 6 : Retours, Annulations & Sécurité Métier
+### Test 5.1 : Cycle de Vie & Transitions (UI - Admin)
+- **Fichier** : `src/tests/e2e/admin/order-lifecycle.spec.ts`
+- **Objectifs** : Valide la visibilité des badges et des boutons d'actions (Expédier, Livrer) dans le panel Admin.
+- **Commande** : `npx playwright test src/tests/e2e/admin/order-lifecycle.spec.ts --project=chromium`
+- **Note** : ⚠️ *Peut générer des erreurs Clerk ("infinite redirect loop") et des ECONNRESET lors du rafraîchissement de session.*
+
+### Test 6 : Retours & Sécurité Métier (Backend - Smoke)
 - **Fichier** : `src/tests/e2e/smoke/api-refund.spec.ts`
-- **Objectifs Validés** :
-  - **Cycle de Retour** : Demande client (avec image mockée) -> Alerte Admin -> Approbation -> Remboursement.
-  - **Sécurité (Negative Tests)** : Vérifie qu'il est **impossible** d'annuler une commande déjà SHIPPED ou DELIVERED (Code 400 exigé).
-- **Isolation** : Utilise le slug `e2e-refund-smoke`.
+- **Objectifs** : Teste les règles de sécurité (bloquer annulation si expédié) et le processus de remboursement via API.
+- **Commande** : `npx playwright test src/tests/e2e/smoke/api-refund.spec.ts --project=chromium`
+
+### Test 6.1 : Retours & Sécurité Métier (UI - Client/Admin)
+- **Fichier** : `src/tests/e2e/storefront/cancel-order.spec.ts`
+- **Objectifs** : Valide le formulaire de demande de remboursement côté client et la confirmation visuelle côté admin.
+- **Commande** : `npx playwright test src/tests/e2e/storefront/cancel-order.spec.ts --project=chromium`
+- **Note** : ⚠️ *Instabilités UI connues - Préférer la version Backend.*
 
 ---
 

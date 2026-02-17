@@ -67,9 +67,9 @@ test.describe('Storefront Product Discovery', () => {
     await page.click('#addVariantBtn');
     const variantForm = page.locator('.rounded-lg.border.bg-gray-50').first();
     await expect(variantForm).toBeVisible();
-    await variantForm.locator('input[name="variantNameEN"]').fill('Standard');
+    await variantForm.locator('input[name="variantName_en"]').fill('Standard');
     await variantForm
-      .locator('input[name="variantNameFR"]')
+      .locator('input[name="variantName_fr"]')
       .fill('Standard FR');
     await variantForm
       .locator('input[name="variantPrice_CAD"]')

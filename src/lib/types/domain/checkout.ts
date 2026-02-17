@@ -1,4 +1,5 @@
 import { SupportedCurrency } from '@/lib/config/site';
+import { ShippingRate, Address } from '@/lib/integrations/shippo';
 
 /**
  * Types centralisés pour le domaine Checkout
@@ -112,7 +113,7 @@ export interface CreateIntentOptions {
 
 export interface UpdateIntentOptions {
   paymentIntentId: string;
-  shippingRate: any;
+  shippingRate: ShippingRate;
   currency: CheckoutCurrency;
-  shippingDetails: any;
+  shippingDetails: Address;
 }

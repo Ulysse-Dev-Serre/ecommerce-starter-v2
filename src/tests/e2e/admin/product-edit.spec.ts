@@ -65,10 +65,10 @@ test.describe('Admin Product Edition', () => {
 
     // Fill variant details
     await variantForm
-      .locator('input[name="variantNameEN"]')
+      .locator('input[name="variantName_en"]')
       .fill(variantNameEN);
     await variantForm
-      .locator('input[name="variantNameFR"]')
+      .locator('input[name="variantName_fr"]')
       .fill(`Édition Standard ${timestamp}`);
     await variantForm.locator('input[name="variantPrice_CAD"]').fill('49.99');
     await variantForm.locator('input[name="variantPrice_USD"]').fill('39.99');

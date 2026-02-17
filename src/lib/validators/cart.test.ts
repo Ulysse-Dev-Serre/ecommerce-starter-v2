@@ -16,7 +16,7 @@ describe('Cart Validator', () => {
     const result = cartCalculationSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toContain('Invalid currency');
+      expect(result.error.issues[0].message).toContain('Invalid option');
     }
   });
 

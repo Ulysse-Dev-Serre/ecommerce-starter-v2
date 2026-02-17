@@ -24,7 +24,7 @@ export interface ExternalPaymentInfo {
   externalId: string;
   provider: 'STRIPE' | 'PAYPAL' | 'OTHER';
   status: string;
-  rawData?: any;
+  rawData?: Record<string, unknown>;
 }
 
 // ==================== Inputs (Paramètres) ====================
@@ -39,7 +39,7 @@ export interface CreatePaymentRecordInput {
   method: PaymentMethod;
   externalId: string;
   status: PaymentStatus;
-  transactionData?: any;
+  transactionData?: Record<string, unknown>;
 }
 
 /**

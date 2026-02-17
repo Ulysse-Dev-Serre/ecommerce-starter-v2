@@ -1,7 +1,7 @@
 'use client';
 
 import { Plus, Trash2, Save } from 'lucide-react';
-import { SUPPORTED_CURRENCIES } from '@/lib/config/site';
+import { SUPPORTED_CURRENCIES, SUPPORTED_LOCALES } from '@/lib/config/site';
 import { Variant, NewVariant } from './product-form';
 
 interface ProductVariantsManagerProps {
@@ -49,10 +49,14 @@ export function ProductVariantsManager({
       initialPrices[curr] = '';
     });
 
+    const initialNames: Record<string, string> = {};
+    SUPPORTED_LOCALES.forEach((loc: string) => {
+      initialNames[loc] = '';
+    });
+
     const newVariant: NewVariant = {
       id: crypto.randomUUID(),
-      nameEN: '',
-      nameFR: '',
+      names: initialNames,
       prices: initialPrices,
       stock: '0',
       weight: '',
@@ -67,7 +71,8 @@ export function ProductVariantsManager({
     id: string,
     field: string,
     value: string,
-    currency?: string
+    currency?: string,
+    locale_key?: string
   ) => {
     setNewVariants(
       newVariants.map(v => {
@@ -76,6 +81,12 @@ export function ProductVariantsManager({
           return {
             ...v,
             prices: { ...v.prices, [currency]: value },
+          };
+        }
+        if (field === 'name' && locale_key) {
+          return {
+            ...v,
+            names: { ...v.names, [locale_key]: value },
           };
         }
         return { ...v, [field as keyof NewVariant]: value } as NewVariant;
@@ -207,42 +218,28 @@ export function ProductVariantsManager({
                   </button>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {t('productName')} (EN) *
-                    </label>
-                    <input
-                      type="text"
-                      name="variantNameEN"
-                      value={variant.nameEN}
-                      onChange={e =>
-                        handleNewVariantChange(
-                          variant.id,
-                          'nameEN',
-                          e.target.value
-                        )
-                      }
-                      className="admin-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {t('productName')} (FR) *
-                    </label>
-                    <input
-                      type="text"
-                      name="variantNameFR"
-                      value={variant.nameFR}
-                      onChange={e =>
-                        handleNewVariantChange(
-                          variant.id,
-                          'nameFR',
-                          e.target.value
-                        )
-                      }
-                      className="admin-input"
-                    />
-                  </div>
+                  {SUPPORTED_LOCALES.map((loc: string) => (
+                    <div key={loc}>
+                      <label className="block text-sm font-medium text-gray-700 uppercase">
+                        {t('productName')} ({loc}) *
+                      </label>
+                      <input
+                        type="text"
+                        name={`variantName_${loc}`}
+                        value={variant.names[loc] || ''}
+                        onChange={e =>
+                          handleNewVariantChange(
+                            variant.id,
+                            'name',
+                            e.target.value,
+                            undefined,
+                            loc
+                          )
+                        }
+                        className="admin-input"
+                      />
+                    </div>
+                  ))}
                   {SUPPORTED_CURRENCIES.map((curr: string) => (
                     <div key={curr}>
                       <label className="block text-sm font-medium text-gray-700">

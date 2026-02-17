@@ -5,6 +5,8 @@
 
 import { prisma } from '@/lib/core/db';
 import { CreateProductSchema } from '@/lib/validators/product';
+import { createLocationSchema } from '@/lib/validators/admin';
+import { updateIntentSchema } from '@/lib/validators/checkout';
 import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
 
 /**
@@ -17,28 +19,51 @@ export async function seedTestSupplier() {
     where: { name: 'E2E Test Warehouse - Repentigny V2' },
   });
 
+  const rawData = {
+    name: 'E2E Test Warehouse - Repentigny V2',
+    type: 'LOCAL_STOCK' as const,
+    incoterm: 'DDP' as const,
+    address: {
+      name: 'E2E Test Warehouse',
+      street1: '435 Rue Notre-Dame',
+      city: 'Repentigny',
+      state: 'QC',
+      zip: 'J6A 2T8',
+      country: 'CA',
+      email: 'agtechnest@gmail.com',
+      phone: '5145550100',
+    },
+  };
+
+  // 1. Validate with Zod - "Zod is the only source of truth"
+  console.log('🧐 Validating warehouse seed data with Zod...');
+  const validatedData = createLocationSchema.parse(rawData);
+
   if (existing) {
-    console.log('✅ Test supplier already exists:', existing.id);
-    return existing;
+    console.log('✅ Updating existing test supplier info:', existing.id);
+    return await prisma.supplier.update({
+      where: { id: existing.id },
+      data: {
+        contactEmail: validatedData.address.email,
+        contactPhone: validatedData.address.phone,
+        incoterm: validatedData.incoterm,
+        address: validatedData.address as any,
+      },
+    });
   }
 
-  // Create supplier with real Repentigny coordinates
+  // Create supplier using validated data
+  console.log('🆕 Creating new test supplier:', validatedData.name);
   const supplier = await prisma.supplier.create({
     data: {
-      name: 'E2E Test Warehouse - Repentigny V2',
-      type: 'LOCAL_STOCK',
+      name: validatedData.name,
+      type: validatedData.type,
       isActive: true,
-      contactEmail: 'warehouse@e2etest.com',
-      contactPhone: '+1 (450) 555-0100',
-      address: {
-        street1: '435 Rue Notre-Dame',
-        city: 'Repentigny',
-        state: 'QC',
-        zip: 'J6A 2T8',
-        country: 'CA',
-      },
+      contactEmail: validatedData.address.email,
+      contactPhone: validatedData.address.phone,
+      address: validatedData.address as any,
       defaultCurrency: 'CAD',
-      incoterm: 'DDP', // Delivered Duty Paid
+      incoterm: validatedData.incoterm,
       defaultShippingDays: 3,
       minimumOrderAmount: 0,
     },
@@ -257,42 +282,38 @@ export async function createTestOrder(
 
   console.log('🆕 Seeding a direct PAID order for Admin tests...');
 
-  const order = await prisma.order.create({
+  const orderData = {
     data: {
-      status: 'PAID',
-      userId: userId, // Link to user if provided
+      status: 'PAID' as const,
+      userId: userId,
       orderNumber: `ORD-TEST-${Date.now()}`,
       orderEmail: testEmail,
-      language: 'EN', // Required for email templates
+      language: 'EN' as const,
       currency: 'CAD',
       totalAmount: 39.99,
       subtotalAmount: 29.99,
       shippingAmount: 10.0,
       taxAmount: 0,
-
-      // Crucial: Full Shipping Address
       shippingAddress: {
         name: 'John Test Seeder',
-        firstName: 'John',
-        lastName: 'Test Seeder',
         email: testEmail,
         phone: '5145550000',
         street1: '1100 Rue de la Gauchetière O',
         city: 'Montréal',
         state: 'QC',
-        zip: 'H3B 2S2' as any,
-        country: 'CA' as any,
+        zip: 'H3B 2S2',
+        country: 'CA',
       },
-
       billingAddress: {
         name: 'John Test Seeder',
+        email: testEmail,
+        phone: '5145550000',
         street1: '1100 Rue de la Gauchetière O',
         city: 'Montréal',
         state: 'QC',
-        zip: 'H3B 2S2' as any,
-        country: 'CA' as any,
+        zip: 'H3B 2S2',
+        country: 'CA',
       },
-
       items: {
         create: [
           {
@@ -302,28 +323,36 @@ export async function createTestOrder(
             totalPrice: 29.99,
             productId: product.id,
             productSnapshot: {
-              name: product.slug, // Translations not loaded, using slug
+              name: product.slug,
               sku: variant.sku,
             },
             currency: 'CAD',
           },
         ],
       },
-
       shipments: withShipment
         ? {
             create: [
               {
                 trackingCode: `TRK-TEST-${Date.now()}`,
                 carrier: 'CNE_EXPRESS',
-                status: 'PENDING',
+                status: 'PENDING' as const,
                 labelUrl: 'https://example.com/label.pdf',
               },
             ],
           }
         : undefined,
     },
-  });
+  };
+
+  // 1. Validate addresses with Zod - "Zod is the only source of truth"
+  console.log('🧐 Validating order addresses with Zod...');
+  const addressSchema = updateIntentSchema.shape.shippingDetails.unwrap();
+  addressSchema.parse(orderData.data.shippingAddress);
+  addressSchema.parse(orderData.data.billingAddress);
+
+  // 2. Create in DB
+  const order = await prisma.order.create(orderData);
 
   console.log(`✅ Seeded order: ${order.orderNumber} (${order.id})`);
   return order;

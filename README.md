@@ -146,12 +146,11 @@ npm run build            # Build production
 
 ---
 
-## 🚛 Logistique & Origine
+## ⚙️ Configuration Centralisée
 
-Le starter suit une politique de **0 Fallback** pour garantir la validité des tarifs.
-- **Source Primaire** : L'adresse globale définie dans `src/lib/config/site.ts` (`STORE_ORIGIN_ADDRESS`).
-- **Source Secondaire (Fallback)** : En cas d'adresse globale non configurée, le système tente de résoudre l'origine via le produit lui-même (champ `shippingOrigin` en base de données).
-- **Échec critique** : Si aucune adresse n'est résolue, l'opération s'arrête pour éviter toute erreur d'étiquetage.
+Le starter adopte une philosophie de **"Zéro Hardcoding"**.
+- **SSOT (Single Source of Truth)** : Toute la configuration métier (devises, pays, adresses d'origine, frais de port) est centralisée dans `src/lib/config/site.ts`.
+- **Zéro Fallback** : Le système est conçu pour échouer de manière explicite si une configuration vitale est manquante, garantissant l'intégrité des données transactionnelles.
 
 ---
 

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/core/db';
 import { getStorageProvider } from '@/lib/integrations/storage/storage.service';
 import { MediaType } from '@/generated/prisma';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 export const productMediaService = {
   /**
@@ -39,6 +40,7 @@ export const productMediaService = {
         'video/mp4',
         'video/webm',
         'application/pdf',
+        'image/avif',
       ],
     });
 
@@ -88,7 +90,7 @@ export const productMediaService = {
     const media = await prisma.productMedia.findUnique({
       where: { id: mediaId },
     });
-    if (!media) throw new Error('Media not found');
+    if (!media) throw new AppError(ErrorCode.NOT_FOUND, 'Media not found', 404);
 
     // Optional: Delete from storage provider
     // const storage = getStorageProvider();

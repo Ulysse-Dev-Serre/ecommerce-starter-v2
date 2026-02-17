@@ -73,7 +73,7 @@ describe('ProductCatalogService', () => {
       const result = await getProductBySlug('test-product', Language.EN);
 
       expect(result.id).toBe('prod_123');
-      expect(result.variants[0].pricing[0].price).toBe('100.00');
+      expect(result.variants[0].pricing[0].price).toBe(100);
       expect(prisma.product.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { slug: 'test-product', deletedAt: null },

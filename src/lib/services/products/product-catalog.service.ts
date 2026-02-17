@@ -9,8 +9,8 @@ import {
 } from '@/lib/types/domain/product';
 
 /**
- * Récupère une liste de produits avec pagination, filtres et tri
- * Utilisé pour: page d'accueil, shop, recherche
+ * Retrieves a list of products with pagination, filters, and sorting.
+ * Used for: home page, shop, search.
  */
 export async function getProducts(
   filters: ProductListFilters = {},
@@ -62,7 +62,7 @@ export async function getProducts(
     };
   }
 
-  // Tri: fallback sur createdAt pour name/price (tris relationnels coûteux)
+  // Sorting: fallback to createdAt for name/price (relational sorting is expensive)
   const orderBy: Prisma.ProductOrderByWithRelationInput = {};
   const sortBy = options.sortBy ?? 'createdAt';
 
@@ -73,7 +73,7 @@ export async function getProducts(
         sortBy,
         fallback: 'createdAt',
       },
-      `Tri par ${sortBy} non supporté, fallback sur createdAt`
+      `Sorting by ${sortBy} not supported, falling back to createdAt`
     );
     orderBy.createdAt = (options.sortOrder ?? 'desc') as Prisma.SortOrder;
   } else {
@@ -243,8 +243,8 @@ export async function getProducts(
 }
 
 /**
- * Récupère un produit par son slug avec tous les détails
- * Utilisé pour: page produit
+ * Retrieves a product by its slug with all details.
+ * Used for: product detail page.
  */
 export async function getProductBySlug(
   slug: string,
@@ -379,7 +379,7 @@ export async function getProductBySlug(
 }
 
 /**
- * Vérifie si un produit est disponible à l'achat
+ * Checks if a product is available for purchase.
  */
 export function isProductAvailable(product: ProductProjection): boolean {
   if (product.status !== ProductStatus.ACTIVE) {
@@ -402,7 +402,7 @@ export function isProductAvailable(product: ProductProjection): boolean {
 }
 
 /**
- * Compte le nombre total de produits actifs (health check)
+ * Counts total active products (health check).
  */
 export async function getProductCount(): Promise<number> {
   const count = await prisma.product.count({
@@ -416,7 +416,7 @@ export async function getProductCount(): Promise<number> {
 }
 
 /**
- * Transforme ProductProjection en ViewModel pour le composant client
+ * Transforms ProductProjection into a ViewModel for client components.
  */
 export function getProductViewModel(product: ProductProjection) {
   const images = product.media.map(m => ({

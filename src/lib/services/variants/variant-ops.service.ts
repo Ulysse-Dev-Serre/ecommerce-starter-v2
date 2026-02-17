@@ -15,9 +15,10 @@ import {
   getVariantById,
 } from './variant-management.service';
 import { validateVariantAttributes } from './variant-generator.service';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
- * Créer des variantes simples avec noms EN/FR
+ * Creates simple variants with EN/FR names using the generic attribute system.
  */
 export async function createSimpleVariants(
   productId: string,
@@ -28,46 +29,54 @@ export async function createSimpleVariants(
       productId,
       variantCount: variants.length,
     },
-    'Création de variantes simples'
+    'Creating simple variants'
   );
 
   if (variants.length === 0) {
-    throw new Error('Au moins 1 variante est requise');
+    throw new AppError(
+      ErrorCode.VALIDATION_ERROR,
+      'At least one variant is required',
+      400
+    );
   }
 
-  // Assurer que l'attribut générique existe
+  // Ensure generic attribute exists
   const attribute = await ensureGenericVariantAttribute();
 
-  // Récupérer le produit pour générer les SKU
+  // Fetch product to generate SKUs
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { slug: true },
   });
 
   if (!product) {
-    throw new Error(`Produit non trouvé: ${productId}`);
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      `Product not found: ${productId}`,
+      404
+    );
   }
 
   const createdVariants = [];
 
   for (const variantData of variants) {
-    // Générer une clé unique pour la valeur d'attribut
-    const valueKey = variantData.nameEN
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_');
+    // Generate unique key for attribute value
+    // Use first available name for the key
+    const firstLocale = Object.keys(variantData.names)[0] || 'en';
+    const firstName = variantData.names[firstLocale] || 'variant';
+    const valueKey = firstName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
-    // Créer ou récupérer la valeur d'attribut
+    // Create or retrieve attribute value
     const attributeValue = await ensureAttributeValue(
       attribute.id,
       valueKey,
-      variantData.nameEN,
-      variantData.nameFR
+      variantData.names
     );
 
-    // Générer le SKU
+    // Generate SKU
     const sku = `${product.slug.toUpperCase()}-${valueKey.toUpperCase()}`;
 
-    // Préparer les prix dynamiquement
+    // Prepare pricing data dynamically
     const pricingData: Array<{
       price: Prisma.Decimal;
       currency: string;
@@ -87,12 +96,14 @@ export async function createSimpleVariants(
     });
 
     if (pricingData.length === 0) {
-      throw new Error(
-        `Variante "${variantData.nameEN}": au moins un prix est requis`
+      throw new AppError(
+        ErrorCode.MISSING_REQUIRED_FIELD,
+        `Variant "${firstName}": at least one price is required`,
+        400
       );
     }
 
-    // Créer la variante
+    // Create variant
     const variant = await prisma.productVariant.create({
       data: {
         productId,
@@ -102,11 +113,11 @@ export async function createSimpleVariants(
             ? new Prisma.Decimal(variantData.weight)
             : undefined,
         dimensions:
-          variantData.length || variantData.width || variantData.height
+          variantData.length && variantData.width && variantData.height
             ? {
-                length: Number(variantData.length) || 0,
-                width: Number(variantData.width) || 0,
-                height: Number(variantData.height) || 0,
+                length: Number(variantData.length),
+                width: Number(variantData.width),
+                height: Number(variantData.height),
               }
             : undefined,
         attributeValues: {
@@ -150,14 +161,14 @@ export async function createSimpleVariants(
       productId,
       createdCount: createdVariants.length,
     },
-    `${createdVariants.length} variante(s) simple(s) créée(s)`
+    `Successfully created ${createdVariants.length} simple variant(s)`
   );
 
   return createdVariants as unknown as VariantWithRelations[];
 }
 
 /**
- * Créer une ou plusieurs variantes pour un produit
+ * Creates one or multiple variants for a product.
  */
 export async function createVariants(
   productId: string,
@@ -168,28 +179,36 @@ export async function createVariants(
       productId,
       variantCount: variants.length,
     },
-    'Création de variantes'
+    'Creating multiple variants'
   );
 
-  // Valider que le produit existe
+  // Validate product exists
   const product = await prisma.product.findUnique({
     where: { id: productId },
   });
 
   if (!product) {
-    throw new Error(`Produit non trouvé: ${productId}`);
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      `Product not found: ${productId}`,
+      404
+    );
   }
 
-  // Valider chaque variante
+  // Validate each variant
   variants.forEach((variant, index) => {
     validateVariantAttributes(variant.attributeValueIds);
 
     if (!variant.sku) {
-      throw new Error(`SKU manquant pour la variante ${index + 1}`);
+      throw new AppError(
+        ErrorCode.VALIDATION_ERROR,
+        `SKU missing for variant ${index + 1}`,
+        400
+      );
     }
   });
 
-  // Créer toutes les variantes en transaction
+  // Create all variants in a transaction
   const createdVariants = await prisma.$transaction(
     variants.map(variantData =>
       prisma.productVariant.create({
@@ -201,17 +220,17 @@ export async function createVariants(
             ? new Prisma.Decimal(variantData.weight)
             : undefined,
           dimensions: variantData.dimensions
-            ? (variantData.dimensions as Prisma.InputJsonValue)
+            ? (variantData.dimensions as unknown as Prisma.InputJsonValue)
             : undefined,
 
-          // Lier les attributs
+          // Link attributes
           attributeValues: {
             create: variantData.attributeValueIds.map(attributeValueId => ({
               attributeValueId,
             })),
           },
 
-          // Créer le pricing
+          // Create pricing
           pricing: {
             create: [
               ...(variantData.pricing
@@ -237,7 +256,7 @@ export async function createVariants(
             ],
           },
 
-          // Créer l'inventaire si fourni
+          // Create inventory if provided
           inventory: variantData.inventory
             ? {
                 create: {
@@ -273,29 +292,33 @@ export async function createVariants(
       productId,
       createdCount: createdVariants.length,
     },
-    `${createdVariants.length} variante(s) créée(s) avec succès`
+    `Successfully created ${createdVariants.length} variant(s)`
   );
 
   return createdVariants as unknown as VariantWithRelations[];
 }
 
 /**
- * Mettre à jour une variante
+ * Updates a product variant.
  */
 export async function updateVariant(
   variantId: string,
   updateData: UpdateVariantData
 ): Promise<VariantWithRelations | null> {
-  logger.info({ variantId }, 'Mise à jour de la variante');
+  logger.info({ variantId }, 'Updating variant');
 
-  // Vérifier que la variante existe
+  // Verify variant exists
   const variant = await getVariantById(variantId);
   if (!variant) {
-    throw new Error(`Variante non trouvée: ${variantId}`);
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      `Variant not found: ${variantId}`,
+      404
+    );
   }
 
-  // Construire les données de mise à jour
-  const variantUpdate: any = {};
+  // Build update data
+  const variantUpdate: Prisma.ProductVariantUpdateInput = {};
 
   if (updateData.sku !== undefined) variantUpdate.sku = updateData.sku;
   if (updateData.barcode !== undefined)
@@ -305,12 +328,13 @@ export async function updateVariant(
       updateData.weight !== null ? new Prisma.Decimal(updateData.weight) : null;
   }
   if (updateData.dimensions !== undefined) {
-    variantUpdate.dimensions = updateData.dimensions as Prisma.InputJsonValue;
+    variantUpdate.dimensions =
+      updateData.dimensions as unknown as Prisma.InputJsonValue;
   }
 
-  // Transaction pour mettre à jour variante + pricing + inventory
+  // Use transaction to update variant + pricing + inventory
   await prisma.$transaction(async tx => {
-    // Mise à jour de la variante elle-même
+    // Update the variant itself
     await tx.productVariant.update({
       where: { id: variantId },
       data: {
@@ -319,7 +343,7 @@ export async function updateVariant(
       },
     });
 
-    // Mise à jour du pricing si fourni (ancien format)
+    // Update pricing if provided (legacy format)
     if (updateData.pricing && variant.pricing.length > 0) {
       const currentPricing = variant.pricing[0];
 
@@ -337,7 +361,7 @@ export async function updateVariant(
       });
     }
 
-    // Mise à jour des prix générique
+    // Update generic prices
     if (updateData.prices) {
       for (const [currency, price] of Object.entries(updateData.prices)) {
         const currentPricing = variant.pricing.find(
@@ -364,7 +388,7 @@ export async function updateVariant(
       }
     }
 
-    // Mise à jour de l'inventaire si fourni
+    // Update inventory if provided
     if (updateData.inventory && variant.inventory) {
       await tx.productVariantInventory.update({
         where: { id: variant.inventory.id },
@@ -383,30 +407,34 @@ export async function updateVariant(
       variantId,
       sku: variantUpdate.sku || variant.sku,
     },
-    'Variante mise à jour avec succès'
+    'Variant updated successfully'
   );
 
-  // Retourner la variante mise à jour avec toutes ses relations
+  // Return updated variant with relations
   return getVariantById(variantId);
 }
 
 /**
- * Supprimer une variante (HARD DELETE)
+ * Deletes a variant (HARD DELETE).
  */
 export async function deleteVariant(variantId: string) {
-  logger.info({ variantId }, 'Suppression de la variante');
+  logger.info({ variantId }, 'Deleting variant');
 
   const variant = await getVariantById(variantId);
   if (!variant) {
-    throw new Error(`Variante non trouvée: ${variantId}`);
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      `Variant not found: ${variantId}`,
+      404
+    );
   }
 
-  // Hard delete (cascade supprimera pricing, inventory, attributeValues)
+  // Hard delete (cascade will remove pricing, inventory, attributeValues)
   const deleted = await prisma.productVariant.delete({
     where: { id: variantId },
   });
 
-  // Nettoyage automatique des attributs orphelins
+  // Automated cleanup of orphaned attributes
   await cleanupOrphanedAttributes();
 
   logger.info(
@@ -414,7 +442,7 @@ export async function deleteVariant(variantId: string) {
       variantId,
       sku: deleted.sku,
     },
-    'Variante supprimée définitivement'
+    'Variant permanently deleted'
   );
 
   return deleted;

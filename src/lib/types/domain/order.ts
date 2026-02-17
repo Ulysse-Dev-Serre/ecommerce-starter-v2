@@ -1,11 +1,4 @@
-import {
-  OrderStatus,
-  Language,
-  Product,
-  ProductVariant,
-  Payment,
-  Shipment,
-} from '@/generated/prisma';
+import { OrderStatus, Language, Shipment } from '@/generated/prisma';
 import { CartProjection } from './cart';
 import Stripe from 'stripe';
 import { JsonValue } from '@prisma/client/runtime/library';

@@ -128,7 +128,8 @@ export class ProductPage {
       await this.saveButton.click();
 
       // Rule: Check redirection after save
-      await this.page.waitForURL(/\/admin\/products\/[a-zA-Z0-9-]+$/);
+      // Rule: Check redirection after save (either back to list or to the product detail)
+      await this.page.waitForURL(/\/admin\/products(\/[a-zA-Z0-9-]+)?$/);
 
       const response = await responsePromise;
       if (response && !response.ok()) {
@@ -154,10 +155,10 @@ export class ProductPage {
       await expect(variantContainer).toBeVisible({ timeout: 5000 });
 
       await variantContainer
-        .locator('input[name="variantNameEN"]')
+        .locator('input[name="variantName_en"]')
         .fill('Standard Variant');
       await variantContainer
-        .locator('input[name="variantNameFR"]')
+        .locator('input[name="variantName_fr"]')
         .fill('Variante Standard');
       await variantContainer
         .locator('input[name="variantPrice_CAD"]')
@@ -198,11 +199,32 @@ export class ProductPage {
 
   async verifyStorefront(slug: string) {
     await test.step('Verify Storefront Access', async () => {
-      // Navigate directly (no tab handling for simplicity)
-      await this.page.goto(`/en/products/${slug}`);
-      await expect(this.page).toHaveURL(new RegExp(`/products/${slug}`));
-      // Check if status is 200 via any element (e.g. h1 with slug/name)
-      await expect(this.page.locator('h1')).toBeVisible();
+      // Small delay to ensure any potential ISR/cache update is processed
+      await this.page.waitForTimeout(4000);
+
+      console.log(`🌐 Navigating to storefront: /en/product/${slug}`);
+      const response = await this.page.goto(`/en/product/${slug}`, {
+        waitUntil: 'networkidle',
+      });
+
+      const status = response?.status();
+      console.log(`📊 Storefront response status: ${status}`);
+
+      if (status !== 200) {
+        const content = await this.page.textContent('body');
+        console.error(
+          `❌ Storefront Error Page Content: ${content?.substring(0, 200)}...`
+        );
+      }
+
+      expect(status).toBe(200);
+      await expect(this.page).toHaveURL(new RegExp(`/product/${slug}`));
+
+      // Check for an H1 containing the product slug identifier (E2E Product)
+      // We skip the first H1 if it's the logo ("AgTechNest")
+      const h1 = this.page.locator('h1').filter({ hasText: /E2E Product/i });
+      await expect(h1).toBeVisible({ timeout: 15000 });
+
       console.log(`✅ Storefront access confirmed for product: ${slug}`);
     });
   }

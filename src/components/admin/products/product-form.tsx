@@ -88,8 +88,7 @@ interface Product {
 
 export interface NewVariant {
   id: string;
-  nameEN: string;
-  nameFR: string;
+  names: Record<string, string>; // { en: "", fr: "" }
   prices: Record<string, string>;
   stock: string;
   weight: string;
@@ -404,8 +403,7 @@ export function ProductForm({
     if (!productId || newVariants.length === 0) return;
     try {
       const variantPayload = newVariants.map(v => ({
-        nameEN: v.nameEN,
-        nameFR: v.nameFR,
+        names: v.names,
         prices: Object.fromEntries(
           Object.entries(v.prices).map(([c, p]) => [
             c,

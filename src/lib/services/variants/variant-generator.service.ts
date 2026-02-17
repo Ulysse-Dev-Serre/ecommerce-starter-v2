@@ -4,9 +4,10 @@ import {
   CreateVariantData,
   GenerateVariantsConfig,
 } from '@/lib/types/domain/variant';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
- * Génère un SKU automatique basé sur l'attribut
+ * Generates an automatic SKU based on an attribute value.
  */
 export function generateSku(
   productSlug: string,
@@ -19,23 +20,25 @@ export function generateSku(
       .replace('{attr}', attrValue.toUpperCase());
   }
 
-  // Pattern par défaut: PRODUCTSLUG-ATTR
+  // Default pattern: PRODUCTSLUG-ATTR
   return `${productSlug.toUpperCase()}-${attrValue.toUpperCase()}`;
 }
 
 /**
- * Valide qu'une variante a exactement 1 attribut
+ * Validates that a variant has exactly 1 attribute value.
  */
 export function validateVariantAttributes(attributeValueIds: string[]): void {
   if (attributeValueIds.length !== 1) {
-    throw new Error(
-      `Une variante doit avoir exactement 1 attribut (reçu ${attributeValueIds.length})`
+    throw new AppError(
+      ErrorCode.VALIDATION_ERROR,
+      `A variant must have exactly 1 attribute (received ${attributeValueIds.length})`,
+      400
     );
   }
 }
 
 /**
- * Génère toutes les variantes possibles pour 1 attribut
+ * Generates all possible variant combinations for a single attribute.
  */
 export async function generateVariantCombinations(
   productId: string,
@@ -46,32 +49,38 @@ export async function generateVariantCombinations(
       productId,
       attributeId: config.attributeId,
     },
-    'Génération des variantes'
+    'Generating variants combinations'
   );
 
-  // Récupérer le produit avec son slug
+  // Fetch product with slug
   const product = await prisma.product.findUnique({
     where: { id: productId },
     select: { slug: true },
   });
 
   if (!product) {
-    throw new Error(`Produit non trouvé: ${productId}`);
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      `Product not found: ${productId}`,
+      404
+    );
   }
 
-  // Récupérer les valeurs de l'attribut
+  // Fetch attribute values
   const attrValues = await prisma.productAttributeValue.findMany({
     where: { attributeId: config.attributeId },
     select: { id: true, value: true },
   });
 
   if (attrValues.length === 0) {
-    throw new Error(
-      `Aucune valeur trouvée pour l'attribut ${config.attributeId}`
+    throw new AppError(
+      ErrorCode.VALIDATION_ERROR,
+      `No values found for attribute ${config.attributeId}`,
+      400
     );
   }
 
-  // Générer une variante pour chaque valeur
+  // Generate a variant for each value
   const variants: CreateVariantData[] = [];
 
   for (const attrValue of attrValues) {
@@ -93,7 +102,7 @@ export async function generateVariantCombinations(
       variantsGenerated: variants.length,
       attrValuesCount: attrValues.length,
     },
-    `${variants.length} variante(s) générée(s)`
+    `Successfully generated ${variants.length} variant(s)`
   );
 
   return variants;

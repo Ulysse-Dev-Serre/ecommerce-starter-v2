@@ -2,14 +2,14 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 
 /**
- * Nettoie les attributs et valeurs d'attributs orphelins.
- * Un orphelin est une valeur d'attribut qui n'est plus liée à aucun variant de produit,
- * ou un attribut qui n'a plus aucune valeur.
+ * Cleans up orphaned product attributes and attribute values.
+ * An orphan is an attribute value that is no longer linked to any product variant,
+ * or an attribute that has no values remaining.
  */
 export async function cleanupOrphanedAttributes(): Promise<void> {
   try {
-    // 1. Identifier les valeurs d'attributs qui ne sont plus utilisées par aucun variant
-    // On cherche les IDs dans ProductAttributeValue qui ne sont pas dans ProductVariantAttributeValue
+    // 1. Identify attribute values that are no longer used by any variant
+    // We look for IDs in ProductAttributeValue that are not in ProductVariantAttributeValue
     const usedValueIds = await prisma.productVariantAttributeValue.findMany({
       select: { attributeValueId: true },
       distinct: ['attributeValueId'],
@@ -17,8 +17,8 @@ export async function cleanupOrphanedAttributes(): Promise<void> {
 
     const usedIdsList = usedValueIds.map(v => v.attributeValueId);
 
-    // 2. Supprimer les ProductAttributeValue orphelines
-    // Le cascade delete dans le schéma s'occupera des ProductAttributeValueTranslation
+    // 2. Delete orphaned ProductAttributeValues
+    // Cascade delete in schema will handle ProductAttributeValueTranslation
     const deletedValues = await prisma.productAttributeValue.deleteMany({
       where: {
         id: {
@@ -34,7 +34,7 @@ export async function cleanupOrphanedAttributes(): Promise<void> {
       );
     }
 
-    // 3. Identifier les ProductAttribute qui n'ont plus aucune valeur
+    // 3. Identify ProductAttributes that have no values remaining
     const orphanedAttributes = await prisma.productAttribute.findMany({
       where: {
         values: {
@@ -47,8 +47,8 @@ export async function cleanupOrphanedAttributes(): Promise<void> {
     if (orphanedAttributes.length > 0) {
       const attributeIds = orphanedAttributes.map(a => a.id);
 
-      // 4. Supprimer les ProductAttribute orphelins
-      // Le cascade delete s'occupera des ProductAttributeTranslation
+      // 4. Delete orphaned ProductAttributes
+      // Cascade delete will handle ProductAttributeTranslation
       const deletedAttributes = await prisma.productAttribute.deleteMany({
         where: {
           id: {
@@ -63,7 +63,7 @@ export async function cleanupOrphanedAttributes(): Promise<void> {
       );
     }
 
-    // 5. Nettoyer les paniers vides (Carts sans CartItems)
+    // 5. Clean up empty carts (Carts without CartItems)
     const emptyCarts = await prisma.cart.findMany({
       where: {
         items: {
@@ -83,6 +83,6 @@ export async function cleanupOrphanedAttributes(): Promise<void> {
     }
   } catch (error) {
     logger.error({ error }, 'Error during orphaned attributes cleanup');
-    // On ne jette pas l'erreur pour ne pas bloquer le flux principal de suppression
+    // We don't throw the error to avoid blocking the main deletion flow
   }
 }

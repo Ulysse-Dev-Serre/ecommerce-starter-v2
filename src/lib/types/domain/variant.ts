@@ -1,6 +1,4 @@
 import {
-  Prisma,
-  Language,
   ProductVariant,
   ProductVariantPricing,
   ProductVariantInventory,
@@ -9,13 +7,13 @@ import {
   ProductAttributeValue,
   ProductVariantAttributeValue,
 } from '@/generated/prisma';
+import { Dimensions } from './product';
 
 /**
- * Données simplifiées pour la création rapide de variantes (Client Side / Admin Form)
+ * Simplified data for quick variant creation (Client Side / Admin Form)
  */
 export interface SimpleVariantData {
-  nameEN: string;
-  nameFR: string;
+  names: Record<string, string>; // { en: "Green", fr: "Vert", ... }
   prices: Record<string, number>; // { CAD: 10, USD: 8, ... }
   stock: number;
   weight?: number | null;
@@ -51,7 +49,7 @@ export interface CreateVariantData {
   sku: string;
   barcode?: string;
   weight?: number;
-  dimensions?: { length?: number; width?: number; height?: number };
+  dimensions?: Dimensions;
   attributeValueIds: string[]; // Exactement 1 ID dans le modèle actuel
   prices?: Record<string, number>; // Nouveau format générique
   pricing?: VariantPricing; // Ancien format / Fallback
@@ -65,11 +63,7 @@ export interface UpdateVariantData {
   sku?: string;
   barcode?: string;
   weight?: number | null;
-  dimensions?: {
-    length?: number | null;
-    width?: number | null;
-    height?: number | null;
-  } | null;
+  dimensions?: Dimensions | null;
   pricing?: VariantPricing; // Legacy / Fallback
   prices?: Record<string, number>; // New generic format
   inventory?: VariantInventory;

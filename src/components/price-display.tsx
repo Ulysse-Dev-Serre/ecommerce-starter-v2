@@ -24,11 +24,10 @@ export function PriceDisplay({
   const currentLocale = locale || defaultLocale;
   const currency = SITE_CURRENCY;
 
-  const {
-    price,
-    currency: displayCurrency,
-    isFallback,
-  } = getPriceFromPricingArray(pricing, currency);
+  const { price, currency: displayCurrency } = getPriceFromPricingArray(
+    pricing,
+    currency
+  );
 
   const formattedPrice = formatPrice(
     parseFloat(price),
@@ -39,11 +38,6 @@ export function PriceDisplay({
   return (
     <span className={className} data-testid={dataTestId}>
       {formattedPrice}
-      {showFallbackIndicator && isFallback && (
-        <span className="vibe-text-xs text-muted-foreground ml-1">
-          ({displayCurrency})
-        </span>
-      )}
     </span>
   );
 }
