@@ -185,23 +185,49 @@ export class ShippingService {
     );
 
     // 6. Fetch rates from Shippo
-    logger.info(
-      { origin: originAddress, destination: addressTo, parcels },
-      'Fetching rates from Shippo'
-    );
-    const shipment = await getShippingRates(
-      originAddress,
-      addressTo,
-      parcels,
-      customsDeclaration
-    );
+    try {
+      logger.info(
+        {
+          origin: originAddress,
+          destination: addressTo,
+          parcelsCount: parcels.length,
+          hasCustoms: !!customsDeclaration,
+        },
+        'Calling Shippo Integration'
+      );
 
-    return {
-      parcels,
-      rates: (shipment.rates || []) as ShippingRate[],
-      customsDeclaration,
-      packingResult: packedParcelsResult,
-    };
+      const shipment = await getShippingRates(
+        originAddress,
+        addressTo,
+        parcels,
+        customsDeclaration
+      );
+
+      logger.info(
+        {
+          ratesCount: shipment.rates?.length || 0,
+          shipmentId: (shipment as any).object_id,
+        },
+        'Shippo Integration responded successfully'
+      );
+
+      return {
+        parcels,
+        rates: (shipment.rates || []) as ShippingRate[],
+        customsDeclaration,
+        packingResult: packedParcelsResult,
+      };
+    } catch (shippoError) {
+      logger.error(
+        {
+          error:
+            shippoError instanceof Error ? shippoError.message : 'Shippo Error',
+          details: shippoError,
+        },
+        'Shippo Integration call failed'
+      );
+      throw shippoError;
+    }
   }
 
   /**

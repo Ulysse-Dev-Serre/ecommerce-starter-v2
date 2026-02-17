@@ -127,8 +127,16 @@ export async function createOrderFromCart({
         shippingAmount,
         discountAmount,
         totalAmount,
-        shippingAddress: (shippingAddress || {}) as InputJsonValue,
-        billingAddress: (billingAddress || {}) as InputJsonValue,
+        shippingAddress: (() => {
+          if (!shippingAddress) return {};
+          const { email: _s, ...rest } = shippingAddress as any;
+          return rest;
+        })() as InputJsonValue,
+        billingAddress: (() => {
+          if (!billingAddress) return {};
+          const { email: _b, ...rest } = billingAddress as any;
+          return rest;
+        })() as InputJsonValue,
         packingResult: packingResult as unknown as InputJsonValue,
         language: (Object.values(Language) as string[]).includes(
           locale.split('-')[0].toUpperCase()

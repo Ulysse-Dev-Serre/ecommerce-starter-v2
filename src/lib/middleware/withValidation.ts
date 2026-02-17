@@ -59,9 +59,11 @@ export function withValidation<T>(
       logger.error(
         {
           action: 'validation_middleware_error',
-          error: error instanceof Error ? error.message : 'Unknown',
+          error: error instanceof Error ? error.message : 'Non-Error Object',
+          stack: error instanceof Error ? error.stack : undefined,
+          fullError: error,
         },
-        'Middleware validation error'
+        'Middleware execution failed during service call'
       );
 
       return NextResponse.json(

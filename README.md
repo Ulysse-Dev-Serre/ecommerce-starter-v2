@@ -146,6 +146,15 @@ npm run build            # Build production
 
 ---
 
+## 🚛 Logistique & Origine
+
+Le starter suit une politique de **0 Fallback** pour garantir la validité des tarifs.
+- **Source Primaire** : L'adresse globale définie dans `src/lib/config/site.ts` (`STORE_ORIGIN_ADDRESS`).
+- **Source Secondaire (Fallback)** : En cas d'adresse globale non configurée, le système tente de résoudre l'origine via le produit lui-même (champ `shippingOrigin` en base de données).
+- **Échec critique** : Si aucune adresse n'est résolue, l'opération s'arrête pour éviter toute erreur d'étiquetage.
+
+---
+
 ## Licence
 
 MIT License - Utilisation libre pour projets commerciaux.

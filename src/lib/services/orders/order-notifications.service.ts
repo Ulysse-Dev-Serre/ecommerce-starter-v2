@@ -5,9 +5,7 @@ import { render } from '@react-email/render';
 import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
 import { env } from '@/lib/core/env';
 
-import fr from '@/lib/i18n/dictionaries/fr.json';
-import en from '@/lib/i18n/dictionaries/en.json';
-const dictionaries: Record<string, any> = { fr, en };
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 
 /**
  * Envoie l'email de confirmation de commande au client
@@ -48,7 +46,7 @@ export async function sendOrderConfirmationEmail(
       })
     );
 
-    const dict = dictionaries[order.language.toLowerCase()] || dictionaries.en;
+    const dict = await getDictionary(order.language.toLowerCase());
     const subject = dict.Emails.confirmation.subject.replace(
       '{orderNumber}',
       order.orderNumber
@@ -137,13 +135,7 @@ export async function sendAdminNewOrderAlert(
  */
 export async function sendShippedEmail(order: any) {
   try {
-    let recipientEmail = order.orderEmail || order.user?.email;
-
-    if (!recipientEmail && order.payments?.length > 0) {
-      const paymentMetadata = order.payments[0].transactionData as any;
-      recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
-    }
-
+    const recipientEmail = order.orderEmail;
     const shipment = order.shipments[0];
 
     if (recipientEmail && shipment && shipment.trackingCode) {
@@ -172,8 +164,7 @@ export async function sendShippedEmail(order: any) {
         })
       );
 
-      const dict =
-        dictionaries[order.language.toLowerCase()] || dictionaries.en;
+      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.shipped.subject.replace(
         '{orderNumber}',
         order.orderNumber
@@ -214,12 +205,7 @@ export async function sendShippedEmail(order: any) {
  */
 export async function sendDeliveredEmail(order: any) {
   try {
-    let recipientEmail = order.orderEmail || order.user?.email;
-
-    if (!recipientEmail && order.payments?.length > 0) {
-      const paymentMetadata = order.payments[0].transactionData as any;
-      recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
-    }
+    const recipientEmail = order.orderEmail;
 
     if (recipientEmail) {
       const { OrderDeliveredEmail } = await import(
@@ -244,8 +230,7 @@ export async function sendDeliveredEmail(order: any) {
         })
       );
 
-      const dict =
-        dictionaries[order.language.toLowerCase()] || dictionaries.en;
+      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.delivered.subject.replace(
         '{orderNumber}',
         order.orderNumber
@@ -282,16 +267,7 @@ export async function sendRefundedEmail(order: any) {
       'sendRefundedEmail called'
     );
 
-    let recipientEmail = order.orderEmail || order.user?.email;
-
-    if (!recipientEmail && order.payments?.length > 0) {
-      const paymentMetadata = order.payments[0].transactionData as any;
-      recipientEmail = paymentMetadata?.receipt_email || paymentMetadata?.email;
-      logger.info(
-        { recipientEmail, source: 'payment_metadata' },
-        'Email extracted from payment metadata'
-      );
-    }
+    const recipientEmail = order.orderEmail;
 
     logger.info(
       {
@@ -321,8 +297,7 @@ export async function sendRefundedEmail(order: any) {
         })
       );
 
-      const dict =
-        dictionaries[order.language.toLowerCase()] || dictionaries.en;
+      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.refunded.subject.replace(
         '{orderNumber}',
         order.orderNumber

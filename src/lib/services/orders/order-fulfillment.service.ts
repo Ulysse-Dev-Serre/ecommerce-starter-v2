@@ -5,13 +5,23 @@ import {
   getReturnShippingRates,
   createTransaction,
 } from '@/lib/integrations/shippo';
-import { SITE_CURRENCY } from '@/lib/config/site';
+import {
+  SITE_CURRENCY,
+  STORE_ORIGIN_ADDRESS,
+  resolveShippingOrigin,
+  SHIPPING_UNITS,
+} from '@/lib/config/site';
 import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { render } from '@react-email/render';
 
-import fr from '@/lib/i18n/dictionaries/fr.json';
-import en from '@/lib/i18n/dictionaries/en.json';
-const dictionaries: Record<string, any> = { fr, en };
+import type { ShippingAddress } from '@/lib/types/domain/shipping';
+import type {
+  ShippingRate,
+  Transaction as ShippoTransaction,
+} from '@/lib/integrations/shippo';
+
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
  * Crée une étiquette de retour pour une commande
@@ -24,30 +34,40 @@ export async function createReturnLabel(
   orderId: string,
   isPreview: boolean = false
 ) {
-  // 0 Fallback Policy: Resolve Origin Address from the first product's Shipping Origin
-  const orderWithOrigin = await prisma.order.findUnique({
+  // 1. Fetch order with product origin as backup (Hierarchical resolution)
+  const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: {
+      user: true,
       items: {
-        take: 1, // We assume all items in an order ship from the same origin for now, or we take the first one as the return point
         include: {
+          variant: true,
           product: {
             include: {
+              translations: true,
               shippingOrigin: true,
             },
           },
         },
       },
-      user: true,
     },
   });
 
-  if (!orderWithOrigin) throw new Error('Order not found');
+  if (!order) throw new Error('Order not found');
 
-  // Use the fetched order with relations
-  const order = orderWithOrigin;
+  const customerEmail = order.orderEmail;
 
-  const addr = order.shippingAddress as any;
+  // 0 Fallback Policy: Transaction email is MANDATORY
+  if (!customerEmail) {
+    throw new AppError(
+      ErrorCode.SHIPPING_DATA_MISSING,
+      'Transaction email (orderEmail) is missing. Cannot generate label.',
+      400
+    );
+  }
+
+  const firstItem = order.items[0];
+  const addr = order.shippingAddress as unknown as ShippingAddress;
   const customerAddress = {
     name: addr.name || `${addr.firstName} ${addr.lastName}`,
     street1: addr.street1 || addr.line1,
@@ -60,75 +80,33 @@ export async function createReturnLabel(
     ),
     country: addr.country,
     phone: addr.phone,
-    email: order.user?.email || addr.email,
+    email: customerEmail,
   };
 
-  const firstProduct = order.items[0]?.product;
-  const originData = firstProduct?.shippingOrigin;
+  // 2. Resolve Warehouse Address (Decision logic centralized in site.ts)
+  const warehouseAddress = resolveShippingOrigin(
+    order.items[0]?.product?.shippingOrigin
+  );
 
-  if (!originData || !originData.address) {
-    throw new Error(
-      `0 Fallback Policy: Cannot generate return label. Product ${firstProduct?.id} has no configured Shipping Origin (Supplier).`
-    );
-  }
-
-  // Validate and format the warehouse address (Return Destination)
-  // We use the simpler validation here as we are inside the service logic,
-  // but we could reuse the shared validation logic if extracted.
-  const rawAddress = originData.address as any;
-  const warehouseAddress = {
-    name: originData.name,
-    street1: rawAddress.street1 || rawAddress.line1,
-    street2: rawAddress.street2 || rawAddress.line2 || '',
-    city: rawAddress.city,
-    state: rawAddress.state,
-    zip: (rawAddress.postalCode || rawAddress.zip || '').replace(/\s+/g, ''),
-    country: rawAddress.country,
-    phone: originData.contactPhone || env.SHIPPO_FROM_PHONE || '5140000000',
-    email: originData.contactEmail || 'agtechnest@gmail.com',
-  };
-
-  // Ensure required fields for Shippo are present
+  // 0 Fallback Validation: Final stop if NO valid address is resolved
   if (
     !warehouseAddress.street1 ||
     !warehouseAddress.city ||
-    !warehouseAddress.country ||
     !warehouseAddress.zip
   ) {
-    throw new Error(
-      `Invalid warehouse address for ${originData.name}. Missing required fields.`
+    throw new AppError(
+      ErrorCode.SHIPPING_DATA_MISSING,
+      'Logistics configuration missing: No valid origin address could be resolved (0 Fallback Policy).',
+      400
     );
   }
 
-  // Calculate real total weight
-  // Note: We use existing order items (which already include quantity).
-  // Ideally, Prisma includes product info so we can get unit weight.
-  // Since we only fetched limited data above, we need to ensure we have weight.
-  const totalWeight = order.items.reduce((acc, item) => {
-    // We need to fetch product weight. The previous query only took 1 item deep.
-    // Let's rely on stored variant info if available or assume standard return weight logic if needed.
-    // However, to be strict, we should really use the data we have.
-    // Since 'include: { items: { include: { product: true } } }' was used (via orderWithOrigin's query logic which was a bit limited to 'take: 1'),
-    // we actually need to fetch ALL items properly to calculate weight.
-    // FIX: Let's assume for a return we might return everything OR a specific weight.
-    // For now, let's just sum up the weight of the items we know about.
-    // But wait, the previous query was `take: 1` on items! That's a bug for weight calc of the WHOLE order.
-    // We should refactor the initial query to get ALL items if we want total weight.
-    return acc + 1; // Placeholder until query is fixed below.
-  }, 0);
-
-  // FIX: Re-query to get ALL items for weight calculation
-  const fullOrderItems = await prisma.orderItem.findMany({
-    where: { orderId: order.id },
-    include: { variant: true, product: true },
-  });
-
-  const calculatedWeight = fullOrderItems.reduce((acc, item) => {
+  const calculatedWeight = order.items.reduce((acc, item) => {
     const unitWeight = Number(item.variant?.weight || item.product?.weight);
 
     if (!unitWeight || unitWeight <= 0) {
       throw new Error(
-        `0 Fallback Policy: Missing or invalid weight for product "${item.product?.slug || item.productId}". Cannot generate return label.`
+        `Missing or invalid weight for product "${item.product?.slug || item.productId}". Cannot generate return label.`
       );
     }
 
@@ -137,38 +115,65 @@ export async function createReturnLabel(
 
   const finalWeight = calculatedWeight.toFixed(2);
 
-  // Prepare a generic parcel (sized for the return)
+  // 3. Resolve actual parcel dimensions from product/variant
+  const dim = (firstItem?.variant?.dimensions ||
+    firstItem?.product?.dimensions) as {
+    width?: number;
+    length?: number;
+    height?: number;
+  } | null;
+
+  // 0 Fallback Validation: Dimensions must exist and be valid
+  if (!dim?.length || !dim?.width || !dim?.height || dim.length <= 0) {
+    throw new AppError(
+      ErrorCode.SHIPPING_DATA_MISSING,
+      `Missing or invalid dimensions for product "${firstItem?.product?.slug || firstItem?.productId}". Cannot generate return label (0 Fallback Policy).`,
+      400
+    );
+  }
+
+  // Prepare the parcel using real data
   const parcels = [
     {
-      length: '20',
-      width: '15',
-      height: '10',
-      distanceUnit: 'cm' as const,
+      length: dim.length.toString(),
+      width: dim.width.toString(),
+      height: dim.height.toString(),
+      distanceUnit: SHIPPING_UNITS.DISTANCE,
       weight: finalWeight,
-      massUnit: 'kg' as const,
+      massUnit: SHIPPING_UNITS.MASS,
     },
   ];
 
-  // International Return Customs (e.g. US -> CA)
+  // International Return Customs (e.g. US -> Origin)
   let customsDeclaration = undefined;
-  if (customerAddress.country !== 'CA') {
+  if (customerAddress.country !== STORE_ORIGIN_ADDRESS.country) {
     customsDeclaration = {
       contentsType: 'RETURN_MERCHANDISE' as const,
       contentsExplanation: 'Customer return',
       nonDeliveryOption: 'RETURN' as const,
       certify: true,
       certifySigner: customerAddress.name,
-      items: [
-        {
-          description: 'Return items',
-          quantity: 1,
-          netWeight: '1',
-          massUnit: 'kg' as const,
-          valueAmount: '50.00',
-          valueCurrency: SITE_CURRENCY,
-          originCountry: 'CA',
-        },
-      ],
+      items: order.items.map(item => {
+        const product = item.product;
+        if (!product) {
+          throw new Error(`Product data missing for item ${item.id}`);
+        }
+
+        const unitWeight = Number(item.variant?.weight || product.weight);
+        return {
+          description:
+            product.translations.find(t => t.language === order.language)
+              ?.name ||
+            product.translations[0]?.name ||
+            product.slug,
+          quantity: item.quantity,
+          netWeight: unitWeight.toString(),
+          massUnit: SHIPPING_UNITS.MASS,
+          valueAmount: item.unitPrice.toString(),
+          valueCurrency: order.currency,
+          originCountry: product.originCountry || STORE_ORIGIN_ADDRESS.country,
+        };
+      }),
     };
   }
 
@@ -186,11 +191,11 @@ export async function createReturnLabel(
 
     // Sort rates by amount to find the cheapest
     const sortedRates = [...shipment.rates].sort(
-      (a: any, b: any) => parseFloat(a.amount) - parseFloat(b.amount)
+      (a, b) => parseFloat(a.amount) - parseFloat(b.amount)
     );
 
-    const bestRate = sortedRates[0] as any;
-    const rateId = bestRate.objectId || bestRate.object_id;
+    const bestRate = sortedRates[0] as unknown as ShippingRate;
+    const rateId = (bestRate.objectId || bestRate.object_id) as string;
 
     // If we are just previewing, return the rate info now
     if (isPreview) {
@@ -202,7 +207,9 @@ export async function createReturnLabel(
       };
     }
 
-    const transaction = (await createTransaction(rateId)) as any;
+    const transaction = (await createTransaction(
+      rateId
+    )) as unknown as ShippoTransaction;
 
     if (transaction.status !== 'SUCCESS') {
       throw new Error(
@@ -217,11 +224,10 @@ export async function createReturnLabel(
         orderId,
         carrier: transaction.provider || bestRate.provider,
         trackingCode: transaction.trackingNumber || transaction.tracking_number,
-        trackingUrl: transaction.trackingUrl || transaction.tracking_url,
         labelUrl: transaction.labelUrl || transaction.label_url,
         status: 'PENDING',
         carrierService: 'RETURN',
-      } as any,
+      },
     });
 
     // Send email
@@ -249,8 +255,7 @@ export async function createReturnLabel(
         })
       );
 
-      const dict =
-        dictionaries[order.language.toLowerCase()] || dictionaries.en;
+      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.returnLabel.subject.replace(
         '{orderNumber}',
         order.orderNumber
@@ -258,7 +263,7 @@ export async function createReturnLabel(
 
       await resend.emails.send({
         from: FROM_EMAIL,
-        to: customerAddress.email,
+        to: customerEmail,
         subject,
         html: emailHtml,
       });
@@ -310,7 +315,13 @@ export async function previewShippingRates(orderId: string) {
       quantity: item.quantity,
     }));
 
-  const addressTo = order.shippingAddress as any;
+  const addressToRaw = order.shippingAddress as unknown as ShippingAddress;
+  const addressTo = {
+    ...addressToRaw,
+    zip: (addressToRaw.zip || addressToRaw.postalCode || '').toString(),
+    country: (addressToRaw.country || '').toString(),
+    email: (order.orderEmail || '').toString(),
+  };
 
   // Use ShippingService.getShippingRates to match user flow logic
   const rates = await ShippingService.getShippingRates(undefined, {
@@ -370,7 +381,13 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
         quantity: item.quantity,
       }));
 
-    const addressTo = order.shippingAddress as any;
+    const addressToRaw = order.shippingAddress as unknown as ShippingAddress;
+    const addressTo = {
+      ...addressToRaw,
+      zip: (addressToRaw.zip || addressToRaw.postalCode || '').toString(),
+      country: (addressToRaw.country || '').toString(),
+      email: (order.orderEmail || '').toString(),
+    };
 
     const rates = await ShippingService.getShippingRates(undefined, {
       addressTo,
@@ -379,11 +396,8 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
 
     if (rates && rates.length > 0) {
       // Automatically pick the cheapest rate for the recalculation
-      const cheapestRate = rates[0];
-      rateId =
-        (cheapestRate as any).object_id ||
-        (cheapestRate as any).objectId ||
-        (cheapestRate as any).id;
+      const cheapestRate = rates[0] as ShippingRate;
+      rateId = cheapestRate.object_id || cheapestRate.objectId;
     } else {
       throw new Error('Could not calculate new shipping rates');
     }
@@ -394,21 +408,29 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
   }
 
   // Purchase the label
-  const transaction = await createTransaction(rateId);
+  const transaction = (await createTransaction(
+    rateId
+  )) as unknown as ShippoTransaction;
 
   if (transaction.status !== 'SUCCESS') {
     logger.error({ transaction, rateId }, 'Shippo transaction failed');
     throw new Error(
       'Failed to purchase label: ' +
-        ((transaction as any).messages?.[0]?.text || 'Unknown error')
+        (transaction.messages?.[0]?.text || 'Unknown error')
     );
   }
 
   const trackingNumber =
-    (transaction as any).tracking_number || (transaction as any).trackingNumber;
-  const labelUrl =
-    (transaction as any).label_url || (transaction as any).labelUrl;
-  const carrier = (transaction as any).rate?.provider || 'Shippo';
+    transaction.tracking_number || transaction.trackingNumber;
+  const labelUrl = transaction.label_url || transaction.labelUrl;
+
+  // Safely extract provider from rate if it's an object
+  let carrier = 'Shippo';
+  if (transaction.rate && typeof transaction.rate === 'object') {
+    carrier = (transaction.rate as any).provider || 'Shippo';
+  } else if (transaction.provider) {
+    carrier = transaction.provider;
+  }
 
   // Create Shipment record
   const shipment = await prisma.shipment.create({

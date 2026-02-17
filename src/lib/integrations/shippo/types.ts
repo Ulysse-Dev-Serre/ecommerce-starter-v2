@@ -90,4 +90,5 @@ export interface Transaction {
   label_url?: string;
   messages?: { text: string; code?: string }[];
   provider?: string;
+  rate?: string | ShippingRate;
 }

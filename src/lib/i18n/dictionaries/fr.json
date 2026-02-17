@@ -111,7 +111,8 @@
     "description": "Découvrez notre catalogue complet de produits de haute qualité.",
     "addToCart": "Ajouter",
     "viewOptions": "Voir les options",
-    "noImage": "Pas d'image"
+    "noImage": "Pas d'image",
+    "noProducts": "Aucun produit trouvé."
   },
   "cart": {
     "title": "Panier",
@@ -229,6 +230,7 @@
       "allStatus": "Tous les statuts",
       "noProductsYet": "Aucun produit pour le moment",
       "noProductsFound": "Aucun produit trouvé",
+      "noProducts": "Aucun produit ne correspond à vos critères",
       "getStarted": "Commencez par créer votre premier produit",
       "adjustFilters": "Essayez d'ajuster votre recherche ou vos filtres",
       "product": "Produit",

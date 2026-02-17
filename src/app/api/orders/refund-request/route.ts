@@ -84,7 +84,7 @@ async function refundRequestHandler(
   await sendRefundRequestAlert({
     orderNumber: order.orderNumber,
     customerName: `${user.firstName} ${user.lastName}`.trim() || 'Client',
-    customerEmail: user.email,
+    customerEmail: order.orderEmail || user.email,
     reason,
     hasAttachment: !!file,
     attachments,

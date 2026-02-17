@@ -12,7 +12,12 @@ const schema = z.object({
     street1: z.string().min(1),
     street2: z.string().optional(),
     city: z.string().min(1),
-    state: z.string().min(1),
+    state: z
+      .string()
+      .min(2)
+      .refine(val => val !== 'Select', {
+        message: 'Please select a valid province/state',
+      }),
     zip: z.string().min(1),
     country: z.string().length(2),
     email: z.string().email(),
@@ -34,9 +39,20 @@ export async function PUT(
 
     const { id } = await params;
     const body = await req.json();
+
+    // Log incoming data for debugging
+    logger.info(
+      { supplierId: id, data: body },
+      'Processing logistics location update'
+    );
+
     const result = schema.safeParse(body);
 
     if (!result.success) {
+      logger.warn(
+        { supplierId: id, errors: result.error.format() },
+        'Logistics location validation failed'
+      );
       return NextResponse.json(
         { error: 'Invalid data', details: result.error.format() },
         { status: 400 }
@@ -49,8 +65,8 @@ export async function PUT(
     );
 
     logger.info(
-      { supplierId: supplier.id, userId },
-      'Updated logistics location'
+      { supplierId: supplier.id, savedData: supplier.address },
+      'Updated logistics location saved to database'
     );
 
     return NextResponse.json(supplier);

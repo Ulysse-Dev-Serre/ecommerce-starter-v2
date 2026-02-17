@@ -111,7 +111,8 @@
     "description": "Browse our full catalog of high-quality products.",
     "addToCart": "Add",
     "viewOptions": "View options",
-    "noImage": "No image"
+    "noImage": "No image",
+    "noProducts": "No products found."
   },
   "cart": {
     "title": "Cart",
@@ -229,6 +230,7 @@
       "allStatus": "All Status",
       "noProductsYet": "No products yet",
       "noProductsFound": "No products found",
+      "noProducts": "No products matched your criteria",
       "getStarted": "Get started by creating your first product",
       "adjustFilters": "Try adjusting your search or filters",
       "product": "Product",
@@ -343,6 +345,8 @@
       "localStock": "Local Stock (Warehouse)",
       "dropshipper": "Dropshipper",
       "other": "Other",
+      "deleteConfirm": "Are you sure you want to delete {name}?",
+      "deleteError": "Failed to delete location",
       "saveError": "Failed to save logistics location"
     }
   },

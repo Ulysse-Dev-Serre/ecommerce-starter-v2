@@ -68,7 +68,64 @@ export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
  * =============================================================================
  */
 export const SITE_EMAIL = 'agtechnest@gmail.com';
-export const SITE_ADDRESS = 'Montreal, QC\nCanada';
+
+/**
+ * Structured Origin Address (Single Source of Truth)
+ * Used for both shipping calculations and return labels.
+ */
+export const STORE_ORIGIN_ADDRESS = {
+  name: SITE_NAME,
+  company: 'AgTechNest Inc.',
+  street1: '123 Avenue de la Technologie', // TODO: Remplacer par votre adresse réelle
+  street2: '',
+  city: 'Montreal',
+  state: 'QC',
+  zip: 'H1A 1A1', // TODO: Remplacer par votre code postal
+  country: 'CA',
+  phone: '5140000000',
+  email: SITE_EMAIL,
+} as const;
+
+export const SITE_ADDRESS = `${STORE_ORIGIN_ADDRESS.street1}, ${STORE_ORIGIN_ADDRESS.city}, ${STORE_ORIGIN_ADDRESS.state} ${STORE_ORIGIN_ADDRESS.zip}, ${STORE_ORIGIN_ADDRESS.country}`;
+
+/**
+ * Resolves the shipping origin address based on hierarchy:
+ * 1. Global Store Origin (if configured in site.ts)
+ * 2. Product-specific Origin (Fallback from database)
+ * 3. Global Store Origin (Final placeholder if nothing else exists)
+ */
+export function resolveShippingOrigin(productOrigin?: any) {
+  const isGlobalConfigured =
+    STORE_ORIGIN_ADDRESS.street1 &&
+    !STORE_ORIGIN_ADDRESS.street1.includes('Technology');
+
+  if (isGlobalConfigured) {
+    return {
+      ...STORE_ORIGIN_ADDRESS,
+      zip: STORE_ORIGIN_ADDRESS.zip.replace(/\s+/g, ''),
+    };
+  }
+
+  if (productOrigin?.address) {
+    const addr = productOrigin.address as any;
+    return {
+      name: productOrigin.name || STORE_ORIGIN_ADDRESS.name,
+      street1: addr.street1 || addr.line1,
+      street2: addr.street2 || addr.line2 || '',
+      city: addr.city,
+      state: addr.state,
+      zip: (addr.postalCode || addr.zip || '').replace(/\s+/g, ''),
+      country: addr.country,
+      phone: productOrigin.contactPhone || STORE_ORIGIN_ADDRESS.phone,
+      email: productOrigin.contactEmail || STORE_ORIGIN_ADDRESS.email,
+    };
+  }
+
+  return {
+    ...STORE_ORIGIN_ADDRESS,
+    zip: STORE_ORIGIN_ADDRESS.zip.replace(/\s+/g, ''),
+  };
+}
 
 /**
  * Manual exchange rate fallback.
