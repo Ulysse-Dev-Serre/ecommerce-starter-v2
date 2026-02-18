@@ -18,6 +18,7 @@ test.describe('Admin Logistics & Product Workflow', () => {
   const locationData = {
     name: locationName,
     type: 'LOCAL_STOCK',
+    incoterm: 'DDP',
     address: {
       name: 'E2E Sender',
       street1: '123 Test St',

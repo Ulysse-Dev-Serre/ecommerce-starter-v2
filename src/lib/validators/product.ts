@@ -83,10 +83,6 @@ export const CreateProductSchema = z.object({
   exportExplanation: z
     .string()
     .min(1, 'Export explanation is required for customs'),
-  incoterm: z
-    .string()
-    .length(3, 'Incoterm must be 3 letters (e.g. DDP, EXW)')
-    .toUpperCase(),
   shippingOriginId: z.string().cuid('Shipping origin is required (Location)'),
   weight: z.union([
     z.number().positive('Weight must be positive'),
@@ -127,11 +123,6 @@ export const UpdateProductSchema = z.object({
     .optional(),
   shippingOriginId: z.string().cuid('Invalid shipping origin').optional(),
   exportExplanation: z.string().optional(),
-  incoterm: z
-    .string()
-    .length(3, 'Incoterm must be 3 letters')
-    .toUpperCase()
-    .optional(),
   weight: z
     .union([
       z.number().positive('Must be a positive number'),

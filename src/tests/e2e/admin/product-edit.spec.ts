@@ -40,7 +40,6 @@ test.describe('Admin Product Edition', () => {
     await page.fill('#length', '10');
     await page.fill('#width', '10');
     await page.fill('#height', '10');
-    await page.fill('#incoterm', 'DDP');
     await page.fill('#exportExplanation', 'Initial draft');
 
     await page.getByRole('button', { name: /Save/i }).first().click();

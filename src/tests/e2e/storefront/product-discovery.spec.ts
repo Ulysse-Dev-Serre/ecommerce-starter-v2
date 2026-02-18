@@ -42,7 +42,6 @@ test.describe('Storefront Product Discovery', () => {
     await page.fill('#length', '10');
     await page.fill('#width', '10');
     await page.fill('#height', '10');
-    await page.fill('#incoterm', 'DDP');
     await page.fill('#exportExplanation', 'Storefront test discovery');
 
     // Save Product (Draft by default, variants not available yet without ID)

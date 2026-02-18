@@ -1,3 +1,4 @@
+import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { SITE_CURRENCY } from '@/lib/config/site';
@@ -5,7 +6,7 @@ import { SITE_CURRENCY } from '@/lib/config/site';
 export interface CreateLocationData {
   name: string;
   type: 'LOCAL_STOCK' | 'DROPSHIPPER' | 'OTHER';
-  incoterm?: 'DDP' | 'DDU';
+  incoterm: 'DDP' | 'DDU';
   address: {
     name: string;
     street1: string;
@@ -49,8 +50,8 @@ export const logisticsLocationService = {
       data: {
         name: data.name,
         type: data.type,
-        incoterm: data.incoterm || 'DDU',
-        address: data.address as any, // Typed as Json in Prisma
+        incoterm: data.incoterm,
+        address: data.address as Prisma.InputJsonValue,
         isActive: true,
         defaultCurrency: SITE_CURRENCY,
       },
@@ -70,7 +71,9 @@ export const logisticsLocationService = {
         name: data.name,
         type: data.type,
         incoterm: data.incoterm,
-        address: data.address ? (data.address as any) : undefined,
+        address: data.address
+          ? (data.address as Prisma.InputJsonValue)
+          : undefined,
       },
     });
 

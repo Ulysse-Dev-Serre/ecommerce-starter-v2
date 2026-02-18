@@ -18,6 +18,13 @@
   --admin-warning: #f59e0b;
   --admin-info: #3b82f6;
 
+  /* Couleurs de Graphiques (Charts) */
+  --admin-chart-1: #0ea5e9;
+  --admin-chart-2: #38bdf8;
+  --admin-chart-3: #7dd3fc;
+  --admin-chart-4: #bae6fd;
+  --admin-chart-5: #e0f2fe;
+
   /* Layout & Structure */
   --admin-sidebar-width: 17rem;
   --admin-header-height: 4rem;
@@ -205,6 +212,11 @@
   line-height: 1.25;
 }
 
+.admin-text-subtle {
+  color: var(--admin-text-muted);
+  font-size: 0.875rem;
+}
+
 .admin-card {
   background-color: var(--admin-card-bg);
   border: 1px solid var(--admin-border);
@@ -214,8 +226,33 @@
   transition: box-shadow 0.3s ease;
 }
 
+.admin-bg-subtle {
+  background-color: var(--admin-bg);
+}
+
+.admin-border-subtle {
+  border-color: var(--admin-border);
+}
+
+.admin-text-main {
+  color: var(--admin-text-main);
+}
+
 .admin-card:hover {
   box-shadow: var(--admin-shadow);
+}
+
+.admin-info-card {
+  border-radius: 0.5rem;
+  border: 1px solid var(--admin-border);
+  padding: 1rem;
+  background-color: var(--admin-bg);
+  transition: all 0.2s;
+}
+
+.admin-info-card:hover {
+  border-color: #d1d5db;
+  background-color: #f3f4f6;
 }
 
 .admin-alert-error {
@@ -236,6 +273,46 @@
   color: var(--admin-success);
   border: 1px solid #dcfce7;
   font-weight: 700;
+}
+
+/* Status Colors & Utilities */
+.admin-text-success {
+  color: var(--admin-success);
+}
+.admin-text-error {
+  color: var(--admin-error);
+}
+.admin-text-warning {
+  color: var(--admin-warning);
+}
+.admin-text-info {
+  color: var(--admin-info);
+}
+
+.admin-bg-success-subtle {
+  background-color: #f0fdf4;
+}
+.admin-bg-error-subtle {
+  background-color: #fef2f2;
+}
+.admin-bg-warning-subtle {
+  background-color: #fffbeb;
+}
+.admin-bg-info-subtle {
+  background-color: #eff6ff;
+}
+.admin-bg-primary-subtle {
+  background-color: #f3f4f6;
+}
+
+.admin-border-success {
+  border-color: var(--admin-success);
+}
+.admin-border-error {
+  border-color: var(--admin-error);
+}
+.admin-border-warning {
+  border-color: var(--admin-warning);
 }
 
 /* Admin Form Elements */
@@ -358,6 +435,27 @@
 }
 
 .admin-btn-info:hover:not(:disabled) {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.admin-btn-success {
+  background-color: var(--admin-success);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.admin-btn-success:hover:not(:disabled) {
   filter: brightness(0.9);
   transform: translateY(-1px);
 }

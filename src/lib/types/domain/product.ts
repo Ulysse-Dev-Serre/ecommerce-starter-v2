@@ -128,7 +128,6 @@ export interface CreateProductData {
   originCountry?: string;
   hsCode?: string;
   exportExplanation?: string;
-  incoterm?: string;
   shippingOriginId?: string;
   weight?: number;
   dimensions?: Dimensions;
@@ -154,7 +153,6 @@ export interface UpdateProductData {
   hsCode?: string | null;
   shippingOriginId?: string | null;
   exportExplanation?: string | null;
-  incoterm?: string | null;
   weight?: number | null;
   dimensions?: Dimensions | null;
   translations?: {

@@ -3,18 +3,25 @@ import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
-// Type helper pour éviter l'erreur de spread avec rest parameters
+// Type helper for middleware handlers
 type AnyHandler = (...args: any[]) => Promise<NextResponse> | NextResponse;
+
+function isAppError(error: unknown): error is AppError {
+  return (
+    error instanceof AppError ||
+    (error !== null &&
+      typeof error === 'object' &&
+      'isAppError' in error &&
+      (error as { isAppError: boolean }).isAppError === true)
+  );
+}
 
 export function withError(handler: AnyHandler): AnyHandler {
   return async (...args: any[]) => {
     try {
       return await handler(...args);
     } catch (error) {
-      if (
-        error instanceof AppError ||
-        (error && typeof error === 'object' && (error as any).isAppError)
-      ) {
+      if (isAppError(error)) {
         const appError = error as AppError;
         logger.warn(
           {

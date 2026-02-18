@@ -92,7 +92,13 @@ async function createAttributeHandler(
 
   try {
     // Data is validated by middleware
-    const attributeData: CreateAttributeData = data as any; // Type alignment
+    const attributeData: CreateAttributeData = {
+      ...data,
+      translations: data.translations.map(t => ({
+        ...t,
+        language: t.language.toUpperCase() as Language,
+      })),
+    };
 
     logger.info(
       {

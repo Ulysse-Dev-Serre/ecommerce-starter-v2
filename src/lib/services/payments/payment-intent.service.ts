@@ -175,15 +175,7 @@ export async function updatePaymentIntent(
     };
   }
 ): Promise<Stripe.PaymentIntent> {
-  const {
-    paymentIntentId: id,
-    shippingAmount,
-    currency,
-    shippingDetails,
-  } = {
-    ...data,
-    paymentIntentId,
-  };
+  const { shippingAmount, currency, shippingDetails } = data;
 
   // 1. Récupérer l'intent courant pour avoir le sous-total
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId);

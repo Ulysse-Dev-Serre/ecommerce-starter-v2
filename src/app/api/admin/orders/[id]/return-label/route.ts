@@ -9,7 +9,7 @@ import type { AuthContext } from '@/lib/middleware/withAuth';
 async function handler(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  _authContext: AuthContext
 ) {
   const { id } = await context.params;
 
@@ -24,25 +24,28 @@ async function handler(
       message: 'Return label created and sent to customer',
       data: result,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const stack = error instanceof Error ? error.stack : undefined;
+
     logger.error(
       {
         error: {
-          message: error.message,
-          stack: error.stack,
-          ...error,
+          message,
+          stack,
+          ...(typeof error === 'object' ? error : {}),
         },
         orderId: id,
       },
       'Failed to create return label'
     );
 
-    const status = error.message === 'Order not found' ? 404 : 500;
+    const status = message === 'Order not found' ? 404 : 500;
 
     return NextResponse.json(
       {
         success: false,
-        message: error.message || 'Failed to create return label',
+        message: message || 'Failed to create return label',
       },
       { status }
     );

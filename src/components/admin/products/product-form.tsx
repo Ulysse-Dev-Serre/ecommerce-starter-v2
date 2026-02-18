@@ -32,12 +32,12 @@ import { ProductMediaManager } from './product-media-manager';
 import { ProductShippingInfo } from './product-shipping-info';
 import { ProductVariantsManager } from './product-variants-manager';
 import { AdminSupplier } from '@/lib/types/domain/logistics';
-import { ProductMedia } from '@/generated/prisma';
+import { ProductMedia, Language } from '@/generated/prisma';
 
 // ---- Types ----
 export interface Translation {
   id: string;
-  language: SupportedLocale;
+  language: Language;
   name: string;
   description: string | null;
   shortDescription: string | null;
@@ -62,7 +62,7 @@ export interface Variant {
   }[];
 }
 
-interface Product {
+export interface AdminProduct {
   id: string;
   slug: string;
   status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
@@ -72,7 +72,6 @@ interface Product {
   hsCode?: string | null;
   shippingOriginId?: string | null;
   exportExplanation?: string | null;
-  incoterm?: string | null;
   weight?: string | null;
   dimensions?: {
     length?: number;
@@ -98,7 +97,7 @@ export interface NewVariant {
 }
 
 interface ProductFormProps {
-  initialProduct?: Product | null;
+  initialProduct?: AdminProduct | null;
   locale: string;
   suppliers: AdminSupplier[];
 }
@@ -143,7 +142,6 @@ export function ProductForm({
     hsCode: initialProduct?.hsCode || '',
     shippingOriginId: initialProduct?.shippingOriginId || '',
     exportExplanation: initialProduct?.exportExplanation || '',
-    incoterm: initialProduct?.incoterm || '',
     weight: initialProduct?.weight ? String(initialProduct.weight) : '',
     length: initialProduct?.dimensions?.length
       ? String(initialProduct.dimensions.length)
@@ -156,10 +154,18 @@ export function ProductForm({
       : '',
   });
 
-  const [translations, setTranslations] = useState<Record<string, any>>({});
+  const [translations, setTranslations] = useState<
+    Record<
+      string,
+      { name: string; description: string; shortDescription: string }
+    >
+  >({});
 
   useEffect(() => {
-    const initialTranslations: Record<string, any> = {};
+    const initialTranslations: Record<
+      string,
+      { name: string; description: string; shortDescription: string }
+    > = {};
     const productTrans = initialProduct?.translations || [];
 
     SUPPORTED_LOCALES.forEach((lang: string) => {
@@ -361,7 +367,10 @@ export function ProductForm({
   ) => {
     if (!productId) return;
     try {
-      const payload: any = {};
+      const payload: {
+        prices?: Record<string, string>;
+        inventory?: { stock: number };
+      } = {};
       if (updates.prices) payload.prices = updates.prices;
       if (updates.stock !== undefined)
         payload.inventory = { stock: updates.stock };
@@ -436,7 +445,7 @@ export function ProductForm({
             href={`/${locale}/admin/products`}
             className="admin-btn-secondary p-2"
           >
-            <ArrowLeft className="h-5 w-5 text-gray-600" />
+            <ArrowLeft className="h-5 w-5 admin-text-subtle" />
           </Link>
           <div>
             <h1 className="admin-page-title">

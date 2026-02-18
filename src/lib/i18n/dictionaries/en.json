@@ -185,9 +185,6 @@
       "searchHSCodes": "Search HS Codes",
       "exportExplanation": "Export Explanation",
       "exportExplanationHelp": "Brief description of goods for customs (overrides global default).",
-      "incotermOverride": "Incoterm Override",
-      "incoterm": "Incoterm",
-      "incotermHelp": "Force specific Incoterm for this product.",
       "weight": "Weight",
       "weightKg": "Weight (kg)",
       "dimensions": "Dimensions",
@@ -347,7 +344,9 @@
       "other": "Other",
       "deleteConfirm": "Are you sure you want to delete {name}?",
       "deleteError": "Failed to delete location",
-      "saveError": "Failed to save logistics location"
+      "saveError": "Failed to save logistics location",
+      "incoterm": "Incoterm",
+      "selectIncoterm": "Select Incoterm..."
     }
   },
   "checkout": {
@@ -493,6 +492,12 @@
     },
     "delivered": {
       "subject": "Your order {orderNumber} has been delivered"
+    },
+    "admin_new_order_alert": {
+      "subject": "New Order: {totalAmount} {currency} ({orderNumber})"
+    },
+    "refund_request_admin": {
+      "subject": "⚠️ Refund Request - Order {orderNumber}"
     }
   },
   "geography": {

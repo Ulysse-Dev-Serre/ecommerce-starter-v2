@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/core/logger';
-import { withAdmin } from '@/lib/middleware/withAuth';
+import { withAdmin, AuthContext } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withValidation } from '@/lib/middleware/withValidation';
 import {
@@ -15,7 +15,7 @@ import {
 
 async function createLocationHandler(
   req: NextRequest,
-  authContext: any,
+  authContext: AuthContext,
   data: CreateLocationInput
 ) {
   const { userId } = authContext;
@@ -36,7 +36,7 @@ export const POST = withError(
   withAdmin(withValidation(createLocationSchema, createLocationHandler))
 );
 
-async function getLocationsHandler(req: NextRequest) {
+async function getLocationsHandler(_req: NextRequest) {
   const suppliers = await logisticsLocationService.getLocations();
   return NextResponse.json({ data: suppliers });
 }

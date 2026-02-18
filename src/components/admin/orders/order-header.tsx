@@ -5,9 +5,10 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { formatDate } from '@/lib/utils/date';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
 import { StatusActions } from './status-actions';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
 
 interface OrderHeaderProps {
-  order: any;
+  order: OrderWithIncludes;
   locale: string;
 }
 
@@ -20,9 +21,9 @@ export async function OrderHeader({ order, locale }: OrderHeaderProps) {
       <div className="flex items-center gap-4">
         <Link
           href={`/${locale}/admin/orders`}
-          className="admin-btn-secondary p-2 rounded-full"
+          className="admin-btn-secondary p-2"
         >
-          <ArrowLeft className="h-4 w-4 text-gray-600" />
+          <ArrowLeft className="h-4 w-4 admin-text-subtle" />
         </Link>
         <div>
           <div className="flex items-center gap-3">

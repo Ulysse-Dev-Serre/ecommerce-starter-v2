@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { OrderStatus } from '../../../../../generated/prisma';
 import { getOrderByIdAdmin, updateOrderStatus } from '@/lib/services/orders';
 
 /**
@@ -60,7 +61,10 @@ async function updateOrderAdminHandler(
 
   try {
     const body = await request.json();
-    const { status, comment } = body;
+    const { status, comment } = body as {
+      status: OrderStatus;
+      comment?: string;
+    };
 
     if (!status) {
       return NextResponse.json(

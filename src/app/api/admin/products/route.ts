@@ -43,7 +43,6 @@ async function createProductHandler(
       hsCode: validatedData.hsCode ?? undefined,
       shippingOriginId: validatedData.shippingOriginId || undefined,
       exportExplanation: validatedData.exportExplanation ?? undefined,
-      incoterm: validatedData.incoterm ?? undefined,
       weight: validatedData.weight ?? undefined,
       dimensions: validatedData.dimensions
         ? {

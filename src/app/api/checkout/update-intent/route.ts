@@ -8,6 +8,7 @@ import {
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { updatePaymentIntent } from '@/lib/services/payments';
+import { SupportedCurrency } from '@/lib/config/site';
 import {
   updateIntentSchema,
   UpdateIntentInput,
@@ -22,12 +23,12 @@ async function updateIntentHandler(
 
   const updatedIntent = await updatePaymentIntent(paymentIntentId, {
     shippingAmount: shippingRate.amount.toString(),
-    currency: currency as any,
+    currency: currency as SupportedCurrency,
     shippingDetails: shippingDetails
       ? {
           name: shippingDetails.name,
           phone: shippingDetails.phone,
-          email: shippingDetails.email || undefined,
+          email: shippingDetails.email,
           street1: shippingDetails.street1,
           street2: shippingDetails.street2,
           city: shippingDetails.city,

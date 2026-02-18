@@ -4,7 +4,7 @@ import { SUPPORTED_LOCALES } from '@/lib/config/site';
 export const createLocationSchema = z.object({
   name: z.string().min(1),
   type: z.enum(['LOCAL_STOCK', 'DROPSHIPPER', 'OTHER']),
-  incoterm: z.enum(['DDP', 'DDU']).default('DDU'),
+  incoterm: z.enum(['DDP', 'DDU']),
   address: z.object({
     name: z.string().min(1),
     street1: z.string().min(1),

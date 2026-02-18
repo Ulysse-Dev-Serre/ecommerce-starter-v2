@@ -1,8 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 import { MapPin, Phone } from 'lucide-react';
+import { Address } from '@/generated/prisma';
 
 interface CustomerAddressBookProps {
-  addresses: any[];
+  addresses: Address[];
 }
 
 export async function CustomerAddressBook({
@@ -20,26 +21,23 @@ export async function CustomerAddressBook({
           </p>
         ) : (
           addresses.map(addr => (
-            <div
-              key={addr.id}
-              className="rounded-lg border border-gray-100 p-4 bg-gray-50/50"
-            >
+            <div key={addr.id} className="admin-info-card">
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+                <MapPin className="h-5 w-5 admin-text-subtle mt-0.5" />
                 <div>
                   <p className="font-medium text-gray-900">
                     {addr.firstName} {addr.lastName}
                   </p>
-                  <p className="text-sm text-gray-600">{addr.street}</p>
+                  <p className="admin-text-subtle">{addr.street}</p>
                   {addr.street2 && (
-                    <p className="text-sm text-gray-600">{addr.street2}</p>
+                    <p className="admin-text-subtle">{addr.street2}</p>
                   )}
-                  <p className="text-sm text-gray-600">
+                  <p className="admin-text-subtle">
                     {addr.city}, {addr.state} {addr.zipCode}
                   </p>
-                  <p className="text-sm text-gray-600">{addr.country}</p>
+                  <p className="admin-text-subtle">{addr.country}</p>
                   {addr.phone && (
-                    <p className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                    <p className="mt-2 text-xs flex items-center gap-1 admin-text-subtle">
                       <Phone className="h-3 w-3" /> {addr.phone}
                     </p>
                   )}

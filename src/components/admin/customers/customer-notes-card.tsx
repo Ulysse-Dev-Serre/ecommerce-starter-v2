@@ -1,10 +1,13 @@
 import { getTranslations } from 'next-intl/server';
+import { User } from '@/generated/prisma';
 
 interface CustomerNotesCardProps {
-  customer: any;
+  customer: User;
 }
 
-export async function CustomerNotesCard({ customer }: CustomerNotesCardProps) {
+export async function CustomerNotesCard({
+  customer: _customer,
+}: CustomerNotesCardProps) {
   const t = await getTranslations('adminDashboard.customers.detail');
 
   return (

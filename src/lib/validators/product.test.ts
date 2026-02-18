@@ -43,7 +43,6 @@ describe('Product Validators', () => {
       originCountry: 'CN',
       hsCode: '123456',
       exportExplanation: 'Electronic component',
-      incoterm: 'DDP',
       shippingOriginId: 'cld123456789012345678901', // Fake CUID
       weight: '1.5',
       dimensions: {
@@ -63,7 +62,6 @@ describe('Product Validators', () => {
         'originCountry',
         'hsCode',
         'exportExplanation',
-        'incoterm',
         'shippingOriginId',
         'weight',
         'dimensions',
@@ -81,14 +79,6 @@ describe('Product Validators', () => {
       const result = CreateProductSchema.safeParse({
         ...validBaseData,
         originCountry: 'USA',
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject invalid incoterm', () => {
-      const result = CreateProductSchema.safeParse({
-        ...validBaseData,
-        incoterm: 'INVALID',
       });
       expect(result.success).toBe(false);
     });

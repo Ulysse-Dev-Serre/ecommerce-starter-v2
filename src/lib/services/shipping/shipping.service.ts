@@ -112,10 +112,14 @@ export class ShippingService {
         { ...(originData.address as object), name: originData.name },
         `Shipping Origin: ${originData.name}`
       );
-      originIncoterm =
-        firstProduct.incoterm ||
-        originData.incoterm ||
-        DEFAULT_SHIPPING_INCOTERM;
+      if (!originData.incoterm) {
+        throw new AppError(
+          ErrorCode.SHIPPING_DATA_MISSING,
+          `Incoterm is missing for shipping origin: ${originData.name}. 0 Fallback Policy: Please configure an Incoterm (DDP/DDU) for this location.`,
+          400
+        );
+      }
+      originIncoterm = originData.incoterm;
     } else {
       throw new AppError(
         ErrorCode.SHIPPING_DATA_MISSING,

@@ -141,25 +141,29 @@ export function StatusActions({
   // On n'affiche les boutons que si le statut actuel permet ces transitions
   const canShip = currentStatus === OrderStatus.PAID;
   const canTransit = currentStatus === OrderStatus.SHIPPED;
-  const canDeliver = [OrderStatus.IN_TRANSIT].includes(currentStatus as any);
-  const canRefund = [
-    OrderStatus.PAID,
-    OrderStatus.SHIPPED,
-    OrderStatus.IN_TRANSIT,
-    OrderStatus.DELIVERED,
-    OrderStatus.REFUND_REQUESTED,
-  ].includes(currentStatus as any);
+  const canDeliver = currentStatus === OrderStatus.IN_TRANSIT;
+  const canRefund = (
+    [
+      OrderStatus.PAID,
+      OrderStatus.SHIPPED,
+      OrderStatus.IN_TRANSIT,
+      OrderStatus.DELIVERED,
+      OrderStatus.REFUND_REQUESTED,
+    ] as OrderStatus[]
+  ).includes(currentStatus as OrderStatus);
 
   // Étiquette de retour possible si la commande est payée ou au-delà (analyse cas par cas)
-  const canReturn = [
-    OrderStatus.PAID,
-    OrderStatus.SHIPPED,
-    OrderStatus.IN_TRANSIT,
-    OrderStatus.DELIVERED,
-    OrderStatus.REFUND_REQUESTED,
-    OrderStatus.REFUNDED,
-    OrderStatus.CANCELLED,
-  ].includes(currentStatus as any);
+  const canReturn = (
+    [
+      OrderStatus.PAID,
+      OrderStatus.SHIPPED,
+      OrderStatus.IN_TRANSIT,
+      OrderStatus.DELIVERED,
+      OrderStatus.REFUND_REQUESTED,
+      OrderStatus.REFUNDED,
+      OrderStatus.CANCELLED,
+    ] as OrderStatus[]
+  ).includes(currentStatus as OrderStatus);
 
   if (!canShip && !canRefund && !canReturn && !canTransit && !canDeliver) {
     return null;
@@ -167,7 +171,7 @@ export function StatusActions({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+      <div className="flex items-center gap-2 text-xs font-bold admin-text-subtle uppercase tracking-widest">
         <AlertTriangle className="h-3.5 w-3.5" />
         {t('title')}
       </div>

@@ -1,10 +1,10 @@
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Package } from 'lucide-react';
 import { formatPrice } from '@/lib/utils/currency';
-import { SupportedCurrency } from '@/lib/config/site';
+import { SupportedCurrency, DEFAULT_LOCALE } from '@/lib/config/site';
 import { OrderItem } from '@/lib/types/domain/order';
 
-interface AdminOrderItem extends OrderItem {
+export interface AdminOrderItem extends OrderItem {
   variant?: {
     sku: string;
     media?: Array<{ url: string; isPrimary: boolean }>;
@@ -37,7 +37,7 @@ export async function OrderItemsTable({
   });
 
   return (
-    <div className="admin-items-list divide-y divide-gray-200">
+    <div className="admin-items-list divide-y admin-border-subtle">
       {items.map(item => {
         const snapshot = item.productSnapshot as {
           name?: string | Record<string, string>;
@@ -52,8 +52,8 @@ export async function OrderItemsTable({
           productName = snapshot.name;
         } else if (snapshot?.name?.[locale]) {
           productName = snapshot.name[locale];
-        } else if (snapshot?.name?.en) {
-          productName = snapshot.name.en;
+        } else if (snapshot?.name?.[DEFAULT_LOCALE]) {
+          productName = snapshot.name[DEFAULT_LOCALE];
         } else {
           // Fallback to live product/variant data
           const liveProduct = item.product || item.variant?.product;
@@ -62,7 +62,7 @@ export async function OrderItemsTable({
               tr => tr.language === locale.toUpperCase()
             );
             const enTranslation = liveProduct.translations?.find(
-              tr => tr.language === 'EN'
+              tr => tr.language === DEFAULT_LOCALE.toUpperCase()
             );
 
             productName =
@@ -86,7 +86,7 @@ export async function OrderItemsTable({
             // Try product media
             const liveProduct = item.product || item.variant?.product;
             const productMedia =
-              liveProduct?.media?.find((m: any) => m.isPrimary) ||
+              liveProduct?.media?.find(m => m.isPrimary) ||
               liveProduct?.media?.[0];
             if (productMedia) {
               imageUrl = productMedia.url;
@@ -96,7 +96,7 @@ export async function OrderItemsTable({
 
         return (
           <div key={item.id} className="px-6 py-4 flex items-center">
-            <div className="h-12 w-12 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+            <div className="h-12 w-12 flex-shrink-0 admin-bg-subtle rounded overflow-hidden">
               {imageUrl && (
                 <img
                   src={imageUrl}
@@ -106,13 +106,13 @@ export async function OrderItemsTable({
               )}
             </div>
             <div className="ml-4 flex-1">
-              <p className="font-medium text-gray-900">{productName}</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-medium admin-text-main">{productName}</p>
+              <p className="text-sm admin-text-subtle">
                 {t('sku')}: {item.variant?.sku || t('na')}
               </p>
             </div>
             <div className="text-right ml-4">
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium admin-text-main">
                 {item.quantity} ×{' '}
                 {formatPrice(
                   item.unitPrice,
@@ -120,7 +120,7 @@ export async function OrderItemsTable({
                   locale
                 )}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm admin-text-subtle">
                 {formatPrice(
                   item.totalPrice,
                   currency as SupportedCurrency,

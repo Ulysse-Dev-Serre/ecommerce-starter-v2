@@ -4,12 +4,17 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import {
+  OrderWithIncludes,
+  OrderItem,
+  OrderPayment,
+} from '@/lib/types/domain/order';
 import { getOrderById } from '@/lib/services/orders';
 
 /**
  * Helper to map Prisma order object to API response DTO
  */
-function mapOrderResponse(order: any) {
+function mapOrderResponse(order: OrderWithIncludes) {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -22,7 +27,7 @@ function mapOrderResponse(order: any) {
     totalAmount: order.totalAmount.toString(),
     shippingAddress: order.shippingAddress,
     billingAddress: order.billingAddress,
-    items: order.items.map((item: any) => ({
+    items: order.items.map((item: OrderItem) => ({
       id: item.id,
       productSnapshot: item.productSnapshot,
       quantity: item.quantity,
@@ -30,7 +35,7 @@ function mapOrderResponse(order: any) {
       totalPrice: item.totalPrice.toString(),
       currency: item.currency,
     })),
-    payments: order.payments.map((payment: any) => ({
+    payments: order.payments.map((payment: OrderPayment) => ({
       id: payment.id,
       amount: payment.amount.toString(),
       currency: payment.currency,

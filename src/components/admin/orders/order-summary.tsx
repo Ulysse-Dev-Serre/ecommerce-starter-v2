@@ -26,35 +26,35 @@ export async function OrderSummary({
   });
 
   return (
-    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+    <div className="admin-bg-subtle px-6 py-4 border-t admin-border-subtle">
       <div className="flex flex-col gap-2 max-w-xs ml-auto">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">{t('summary.subtotal')}</span>
-          <span className="text-gray-900">
+          <span className="admin-text-subtle">{t('summary.subtotal')}</span>
+          <span className="admin-text-main font-medium">
             {formatPrice(subtotal, currency as SupportedCurrency, locale)}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">{t('summary.tax')}</span>
-          <span className="text-gray-900">
+          <span className="admin-text-subtle">{t('summary.tax')}</span>
+          <span className="admin-text-main font-medium">
             {formatPrice(tax, currency as SupportedCurrency, locale)}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">{t('summary.shipping')}</span>
-          <span className="text-gray-900">
+          <span className="admin-text-subtle">{t('summary.shipping')}</span>
+          <span className="admin-text-main font-medium">
             {formatPrice(shipping, currency as SupportedCurrency, locale)}
           </span>
         </div>
         {Number(discount) > 0 && (
-          <div className="flex justify-between text-sm text-green-600">
+          <div className="flex justify-between text-sm admin-text-success font-medium">
             <span>{t('summary.discount')}</span>
             <span>
               -{formatPrice(discount, currency as SupportedCurrency, locale)}
             </span>
           </div>
         )}
-        <div className="flex justify-between text-lg font-bold border-t border-gray-200 pt-2 mt-1">
+        <div className="flex justify-between text-lg font-bold border-t admin-border-subtle pt-2 mt-1 admin-text-main">
           <span>{t('summary.total')}</span>
           <span>
             {formatPrice(total, currency as SupportedCurrency, locale)}

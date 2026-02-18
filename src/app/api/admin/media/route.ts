@@ -8,7 +8,7 @@ import {
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
 import { prisma } from '../../../../lib/core/db';
-import { MediaType } from '../../../../generated/prisma';
+import { MediaType, Prisma } from '../../../../generated/prisma';
 
 /**
  * GET /api/admin/media
@@ -50,7 +50,7 @@ async function getMediaHandler(
     );
 
     // Construire les filtres
-    const where: any = {};
+    const where: Prisma.ProductMediaWhereInput = {};
 
     if (productId) {
       where.productId = productId;

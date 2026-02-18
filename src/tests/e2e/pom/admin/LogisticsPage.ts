@@ -4,6 +4,7 @@ import { TEST_ROUTES } from '../../config/routes';
 export interface LocationData {
   name: string;
   type: string; // 'LOCAL_STOCK' | 'DROPSHIPPER' | 'OTHER'
+  incoterm?: string;
   address: {
     name: string;
     street1: string;
@@ -35,6 +36,7 @@ export class LogisticsPage {
   readonly countryInput: Locator;
   readonly emailInput: Locator;
   readonly phoneInput: Locator;
+  readonly incotermSelect: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -56,6 +58,7 @@ export class LogisticsPage {
     this.countryInput = page.locator('#logistics-country');
     this.emailInput = page.locator('#logistics-email');
     this.phoneInput = page.locator('#logistics-phone');
+    this.incotermSelect = page.locator('#logistics-incoterm');
   }
 
   async goto() {
@@ -91,6 +94,9 @@ export class LogisticsPage {
       await this.countryInput.fill(data.address.country);
       await this.emailInput.fill(data.address.email);
       await this.phoneInput.fill(data.address.phone);
+
+      // New mandatory field
+      await this.incotermSelect.selectOption(data.incoterm || 'DDP');
     });
   }
 

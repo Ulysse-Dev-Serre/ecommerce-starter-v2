@@ -4,18 +4,21 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, X, MapPin } from 'lucide-react';
 import { Address } from '@/lib/integrations/shippo';
+import { SupplierType } from '@/generated/prisma';
 import { useTranslations } from 'next-intl';
 import { saveLogisticsLocation } from '@/lib/client/admin/logistics';
+import { AdminSupplier } from '@/lib/types/domain/logistics';
+import { STORE_ORIGIN_ADDRESS } from '@/lib/config/site';
 
 interface AddLocationModalProps {
   onClose: () => void;
   locale: string;
-  initialData?: any; // To support editing
+  initialData?: AdminSupplier | null; // To support editing
 }
 
 export function AddLocationModal({
   onClose,
-  locale,
+  locale: _locale,
   initialData,
 }: AddLocationModalProps) {
   const router = useRouter();
@@ -23,20 +26,23 @@ export function AddLocationModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const initialAddress = initialData?.address as unknown as Address | undefined;
+
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
-    type: initialData?.type || 'LOCAL_STOCK', // Default
+    type: (initialData?.type as string) || '', // Force user selection if new
+    incoterm: initialData?.incoterm || '', // Force selection
     address: {
-      name: initialData?.address?.name || '',
-      street1: initialData?.address?.street1 || '',
-      street2: initialData?.address?.street2 || '',
-      city: initialData?.address?.city || '',
-      state: initialData?.address?.state || '',
-      zip: initialData?.address?.zip || '',
-      country: initialData?.address?.country || 'CA', // Default
-      email: initialData?.address?.email || '',
-      phone: initialData?.address?.phone || '',
-    } as Address,
+      name: initialAddress?.name || '',
+      street1: initialAddress?.street1 || '',
+      street2: initialAddress?.street2 || '',
+      city: initialAddress?.city || '',
+      state: initialAddress?.state || '',
+      zip: initialAddress?.zip || '',
+      country: initialAddress?.country || STORE_ORIGIN_ADDRESS.country,
+      email: initialAddress?.email || '',
+      phone: initialAddress?.phone || '',
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,7 +76,7 @@ export function AddLocationModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+        <div className="flex items-center justify-between border-b admin-border-subtle pb-4 mb-6">
           <h2 className="admin-section-title flex items-center gap-2">
             {initialData ? (
               <MapPin className="h-5 w-5" />
@@ -81,25 +87,18 @@ export function AddLocationModal({
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="rounded-lg p-2 admin-text-subtle hover:admin-bg-subtle hover:admin-text-main transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-100">
-            {error}
-          </div>
-        )}
+        {error && <div className="mb-6 admin-alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label
-                htmlFor="logistics-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="logistics-name" className="admin-label">
                 {t('locationName')}
               </label>
               <input
@@ -115,30 +114,56 @@ export function AddLocationModal({
               />
             </div>
             <div>
-              <label
-                htmlFor="logistics-type"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label htmlFor="logistics-type" className="admin-label">
                 {t('locationType')}
               </label>
               <select
                 required
                 value={formData.type}
                 onChange={e =>
-                  setFormData({ ...formData, type: e.target.value })
+                  setFormData({
+                    ...formData,
+                    type: e.target.value as SupplierType,
+                  })
                 }
                 id="logistics-type"
                 className="admin-input"
               >
+                <option value="" disabled>
+                  {t('selectType')}
+                </option>
                 <option value="LOCAL_STOCK">{t('localStock')}</option>
                 <option value="DROPSHIPPER">{t('dropshipper')}</option>
                 <option value="OTHER">{t('other')}</option>
               </select>
             </div>
+            <div>
+              <label htmlFor="logistics-incoterm" className="admin-label">
+                {t('incoterm')}
+              </label>
+              <select
+                required
+                value={formData.incoterm}
+                onChange={e =>
+                  setFormData({
+                    ...formData,
+                    incoterm: e.target.value as 'DDP' | 'DDU',
+                  })
+                }
+                id="logistics-incoterm"
+                className="admin-input"
+              >
+                <option value="" disabled>
+                  {t('selectIncoterm')}
+                </option>
+                <option value="DDP">DDP (Delivered Duty Paid)</option>
+                <option value="DDU">DDU (Delivered Duty Unpaid)</option>
+              </select>
+            </div>
           </div>
 
-          <div className="border-t border-gray-100 pt-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="border-t admin-border-subtle pt-6">
+            <h3 className="text-sm font-semibold admin-text-main mb-4 flex items-center gap-2">
               <MapPin className="h-4 w-4 admin-text-subtle" />
               {t('originAddress')}
             </h3>
@@ -292,7 +317,7 @@ export function AddLocationModal({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-6 border-t admin-border-subtle">
             <button
               type="button"
               onClick={onClose}

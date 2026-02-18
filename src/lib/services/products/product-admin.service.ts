@@ -77,7 +77,6 @@ export async function createProduct(
       originCountry: productData.originCountry,
       hsCode: productData.hsCode,
       exportExplanation: productData.exportExplanation,
-      incoterm: productData.incoterm,
       shippingOriginId: productData.shippingOriginId,
       weight:
         productData.weight != null

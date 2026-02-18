@@ -1,9 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import { Truck, Phone } from 'lucide-react';
 
+import { Address } from '@/lib/types/domain/order';
+import { User } from '@/generated/prisma';
+
 interface OrderShippingCardProps {
-  address: any;
-  user?: any;
+  address: Address | null | undefined;
+  user?: User | null;
 }
 
 export async function OrderShippingCard({
@@ -11,17 +14,17 @@ export async function OrderShippingCard({
   user,
 }: OrderShippingCardProps) {
   const t = await getTranslations('adminDashboard.orders.detail');
-  const shippingAddr = address as any;
+  const shippingAddr = address;
 
   return (
     <div className="admin-card">
-      <h3 className="admin-section-title !mb-4 text-sm">
-        <Truck className="h-4 w-4 text-gray-500" />
+      <h2 className="admin-section-title !mb-4 text-sm">
+        <Truck className="h-4 w-4 admin-text-subtle" />
         {t('shippingAddress')}
-      </h3>
+      </h2>
       {shippingAddr ? (
-        <div className="text-sm text-gray-600 space-y-1">
-          <p className="font-medium text-gray-900">
+        <div className="text-sm admin-text-subtle space-y-1">
+          <p className="font-medium admin-text-main">
             {shippingAddr.name ||
               (user ? user.firstName + ' ' + user.lastName : '')}
           </p>
@@ -36,7 +39,7 @@ export async function OrderShippingCard({
           </p>
           <p className="uppercase">{shippingAddr.country}</p>
           {shippingAddr.phone && (
-            <div className="mt-2 pt-2 border-t border-gray-100">
+            <div className="mt-2 pt-2 border-t admin-border-subtle">
               <div className="flex items-center gap-1">
                 <Phone className="h-3 w-3 inline" /> {shippingAddr.phone}
               </div>
@@ -44,7 +47,9 @@ export async function OrderShippingCard({
           )}
         </div>
       ) : (
-        <p className="text-sm text-gray-400 italic">{t('noShippingAddress')}</p>
+        <p className="text-sm admin-text-subtle italic opacity-60">
+          {t('noShippingAddress')}
+        </p>
       )}
     </div>
   );

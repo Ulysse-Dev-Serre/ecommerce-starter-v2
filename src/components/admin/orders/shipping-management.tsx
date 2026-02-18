@@ -19,7 +19,7 @@ interface ShippingManagementProps {
   shippingRateId?: string;
   shippingCost?: number;
   currency?: string;
-  debugMetadata?: any;
+  debugMetadata?: unknown;
 }
 
 export function ShippingManagement({
@@ -28,7 +28,7 @@ export function ShippingManagement({
   shippingRateId,
   shippingCost,
   currency,
-  debugMetadata,
+  debugMetadata: _debugMetadata,
 }: ShippingManagementProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -70,8 +70,9 @@ export function ShippingManagement({
 
       alert(t('successPurchase'));
       router.refresh();
-    } catch (error: any) {
-      alert(t('errorPrefix', { message: t(error.message) }));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'errorPurchase';
+      alert(t('errorPrefix', { message: t(message) }));
     } finally {
       setIsLoading(false);
     }
@@ -79,12 +80,12 @@ export function ShippingManagement({
 
   if (!shippingRateId && !hasLabel) {
     return (
-      <div className="admin-card border-yellow-200 bg-yellow-50/50">
-        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-yellow-800">
+      <div className="admin-card admin-border-warning admin-bg-warning-subtle">
+        <h2 className="mb-4 flex items-center gap-2 text-lg font-bold admin-text-warning">
           <AlertCircle className="h-5 w-5" />
           {t('actionRequired')}
         </h2>
-        <p className="text-gray-900 font-medium mb-4">{t('rateNotFound')}</p>
+        <p className="admin-text-main font-medium mb-4">{t('rateNotFound')}</p>
         <div className="flex gap-4">
           <button
             onClick={handlePurchaseLabel}
@@ -112,12 +113,12 @@ export function ShippingManagement({
 
       <div className="space-y-4">
         {/* Résumé du choix client */}
-        <div className="rounded-lg border border-gray-100 bg-gray-50/50 p-4">
+        <div className="admin-info-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Box className="h-5 w-5 admin-text-subtle" />
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium admin-text-main">
                   {hasLabel
                     ? shipment?.carrier || t('carrierDefault')
                     : t('customerSelection')}
@@ -131,7 +132,7 @@ export function ShippingManagement({
             </div>
             <div className="text-right">
               {shippingCost && (
-                <p className="font-bold text-gray-900">
+                <p className="font-bold admin-text-main">
                   {shippingCost} {currency}
                 </p>
               )}

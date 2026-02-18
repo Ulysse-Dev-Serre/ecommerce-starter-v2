@@ -30,7 +30,6 @@ export class ProductPage {
   readonly heightInput: Locator;
   readonly originCountryInput: Locator;
   readonly hsCodeInput: Locator;
-  readonly incotermInput: Locator;
   readonly exportExplanationInput: Locator;
   readonly shippingOriginSelect: Locator;
 
@@ -60,7 +59,6 @@ export class ProductPage {
     this.heightInput = page.locator('#height');
     this.originCountryInput = page.locator('#originCountry');
     this.hsCodeInput = page.locator('#hsCode');
-    this.incotermInput = page.locator('#incoterm');
     this.exportExplanationInput = page.locator('#exportExplanation');
     this.shippingOriginSelect = page.locator('#shippingOriginId');
   }
@@ -100,7 +98,6 @@ export class ProductPage {
       await this.heightInput.fill('10');
       await this.originCountryInput.fill('CA');
       await this.hsCodeInput.fill('123456');
-      await this.incotermInput.fill('EXW');
       await this.exportExplanationInput.fill('Standard E-commerce Product');
 
       if (shippingOriginName) {

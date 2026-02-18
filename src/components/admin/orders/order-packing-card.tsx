@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { PackedParcel } from '@/lib/services/shipping/packing.service';
 
 interface OrderPackingCardProps {
-  packingResult: any; // Using any because it's stored as Json in DB
+  packingResult: unknown;
 }
 
 /**

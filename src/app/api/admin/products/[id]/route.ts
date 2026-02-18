@@ -211,8 +211,6 @@ async function updateProductHandler(
       updateData.shippingOriginId = validatedData.shippingOriginId || null;
     if (validatedData.exportExplanation !== undefined)
       updateData.exportExplanation = validatedData.exportExplanation;
-    if (validatedData.incoterm !== undefined)
-      updateData.incoterm = validatedData.incoterm;
     if (validatedData.weight !== undefined)
       updateData.weight = validatedData.weight;
     if (validatedData.dimensions !== undefined) {
@@ -227,7 +225,7 @@ async function updateProductHandler(
 
     // Handle translations update
     if (validatedData.translations && validatedData.translations.length > 0) {
-      updateData.translations = validatedData.translations.map((t: any) => ({
+      updateData.translations = validatedData.translations.map(t => ({
         language: t.language.toUpperCase() as Language, // Convert 'en'/'fr' to Language enum 'EN'/'FR'
         name: t.name,
         description: t.description || null,

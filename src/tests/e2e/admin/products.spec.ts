@@ -76,9 +76,6 @@ test.describe('Admin Products', () => {
     // HS Code
     await page.fill('#hsCode', '123456');
 
-    // Incoterm
-    await page.fill('#incoterm', 'DDP');
-
     // Weight
     await page.fill('#weight', '1.5');
 

@@ -185,9 +185,6 @@
       "searchHSCodes": "Rechercher les codes SH",
       "exportExplanation": "Explication d'exportation",
       "exportExplanationHelp": "Brève description des marchandises pour les douanes (remplace la valeur par défaut).",
-      "incoterm": "Incoterm",
-      "incotermOverride": "Remplacement de l'Incoterm",
-      "incotermHelp": "Forcer un Incoterm spécifique pour ce produit.",
       "weight": "Poids",
       "weightKg": "Poids (kg)",
       "dimensions": "Dimensions",
@@ -347,7 +344,9 @@
       "other": "Autre",
       "deleteConfirm": "Êtes-vous sûr de vouloir supprimer {name} ?",
       "deleteError": "Échec de la suppression du lieu",
-      "saveError": "Erreur lors de la sauvegarde du lieu"
+      "saveError": "Erreur lors de la sauvegarde du lieu",
+      "incoterm": "Incoterm",
+      "selectIncoterm": "Sélectionner un Incoterm..."
     }
   },
   "checkout": {
@@ -493,6 +492,12 @@
     },
     "delivered": {
       "subject": "Votre commande {orderNumber} a été livrée"
+    },
+    "admin_new_order_alert": {
+      "subject": "Nouvelle commande : {totalAmount} {currency} ({orderNumber})"
+    },
+    "refund_request_admin": {
+      "subject": "⚠️ Demande de remboursement - Commande {orderNumber}"
     }
   },
   "geography": {

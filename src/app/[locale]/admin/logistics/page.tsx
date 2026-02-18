@@ -2,6 +2,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { prisma } from '@/lib/core/db';
 import { LogisticsClient } from '@/components/admin/logistics/logistics-client';
+import { AdminSupplier } from '@/lib/types/domain/logistics';
 
 interface LogisticsPageProps {
   params: Promise<{ locale: string }>;
@@ -31,7 +32,10 @@ export default async function LogisticsPage({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <LogisticsClient suppliers={suppliers as any} locale={locale} />
+      <LogisticsClient
+        suppliers={suppliers as unknown as AdminSupplier[]}
+        locale={locale}
+      />
     </NextIntlClientProvider>
   );
 }

@@ -27,7 +27,13 @@ export default function CookieConsentComponent() {
   return null;
 }
 
-function updateGtmConsent(cookie: any) {
+interface CookieConsentValue {
+  categories: string[];
+}
+
+type GtagArgs = Array<string | string[] | Record<string, string> | undefined>;
+
+function updateGtmConsent(cookie: CookieConsentValue) {
   if (typeof window === 'undefined') return;
 
   const grantedCategories = cookie.categories || [];
@@ -40,10 +46,12 @@ function updateGtmConsent(cookie: any) {
     : 'denied';
 
   // Extend window interface
-  const w = window as unknown as Window & { dataLayer: any[] };
+  const w = window as unknown as Window & {
+    dataLayer: (Record<string, unknown> | GtagArgs)[];
+  };
   w.dataLayer = w.dataLayer || [];
 
-  function gtag(...args: any[]) {
+  function gtag(...args: GtagArgs) {
     w.dataLayer.push(args);
   }
 

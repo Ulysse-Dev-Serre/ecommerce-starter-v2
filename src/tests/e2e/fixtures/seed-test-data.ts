@@ -96,7 +96,6 @@ export async function getOrCreateTestProduct(
     dimensions: { length: 20, width: 15, height: 10, unit: 'cm' },
     originCountry: 'CA',
     hsCode: '123456',
-    incoterm: 'DDP',
     exportExplanation: 'Stable automated test product for customs validation',
     translations: [
       {
@@ -127,7 +126,6 @@ export async function getOrCreateTestProduct(
       dimensions: validatedData.dimensions,
       originCountry: validatedData.originCountry,
       hsCode: validatedData.hsCode,
-      incoterm: validatedData.incoterm,
       exportExplanation: validatedData.exportExplanation,
       translations: {
         create: validatedData.translations.map(t => ({

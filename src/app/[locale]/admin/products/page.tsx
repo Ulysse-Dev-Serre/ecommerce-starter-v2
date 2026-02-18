@@ -1,5 +1,3 @@
-import { getTranslations } from 'next-intl/server';
-import { prisma } from '@/lib/core/db';
 import { ProductsList } from '@/components/admin/products/products-list';
 
 export const dynamic = 'force-dynamic';

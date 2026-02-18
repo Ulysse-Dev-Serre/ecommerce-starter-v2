@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/core/db';
-import { env } from '@/lib/core/env';
 import { SITE_CURRENCY } from '@/lib/config/site';
 import { CustomerHeader } from '@/components/admin/customers/customer-header';
 import { CustomerStats } from '@/components/admin/customers/customer-stats';

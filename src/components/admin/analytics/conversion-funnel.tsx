@@ -23,7 +23,13 @@ interface ConversionFunnelProps {
   };
 }
 
-const COLORS = ['#0ea5e9', '#38bdf8', '#7dd3fc', '#bae6fd', '#e0f2fe'];
+const COLORS = [
+  'var(--admin-chart-1)',
+  'var(--admin-chart-2)',
+  'var(--admin-chart-3)',
+  'var(--admin-chart-4)',
+  'var(--admin-chart-5)',
+];
 
 export function ConversionFunnel({ data, labels }: ConversionFunnelProps) {
   return (
@@ -41,12 +47,16 @@ export function ConversionFunnel({ data, labels }: ConversionFunnelProps) {
             axisLine={false}
             tickLine={false}
             width={100}
-            tick={{ fill: '#64748b', fontSize: 12 }}
+            tick={{ fill: 'var(--admin-text-muted)', fontSize: 12 }}
           />
           <Tooltip
             cursor={{ fill: 'transparent' }}
-            formatter={(value: any, name: any, props: any) => [
-              `${value} (${props.payload.percentage}%)`,
+            formatter={(
+              value: number | string | undefined,
+              _name: number | string | undefined,
+              entry: { payload?: FunnelData }
+            ) => [
+              `${value ?? 0} (${entry?.payload?.percentage ?? 0}%)`,
               labels.visitors,
             ]}
           />

@@ -38,7 +38,7 @@ export const updateIntentSchema = z.object({
   shippingDetails: z
     .object({
       name: z.string().min(1),
-      email: z.string().email().optional().or(z.literal('')),
+      email: z.string().email(),
       phone: z.string().min(10),
       street1: z.string().min(1),
       street2: z.string().optional().nullable(),

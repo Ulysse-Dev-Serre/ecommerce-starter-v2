@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { prisma } from '@/lib/core/db';
+import { Prisma, OrderStatus } from '@/generated/prisma';
 import { OrderFilters } from '@/components/admin/orders/filters';
-import { OrderStatus } from '@/generated/prisma';
 import { OrderListTable } from '@/components/admin/orders/order-list-table';
 import { OrderPagination } from '@/components/admin/orders/order-pagination';
 
@@ -34,7 +34,7 @@ export default async function OrdersPage({
   const skip = (pageNum - 1) * limitNum;
 
   // Build where clause
-  const where: any = {};
+  const where: Prisma.OrderWhereInput = {};
   if (status && status !== 'ALL') {
     where.status = status as OrderStatus;
   }

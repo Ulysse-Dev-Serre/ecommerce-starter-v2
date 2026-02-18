@@ -6,6 +6,7 @@ import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
 import { Order, Shipment } from '@/generated/prisma';
+import { SupportedCurrency } from '@/lib/config/site';
 
 type OrderWithRelations = Order & { shipments: Shipment[] };
 
@@ -37,7 +38,7 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y admin-border-subtle">
             {orders.length === 0 ? (
               <tr>
                 <td
@@ -50,7 +51,7 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
             ) : (
               orders.map(order => (
                 <tr key={order.id} className="admin-table-tr">
-                  <td className="admin-table-td font-medium text-primary">
+                  <td className="admin-table-td font-medium admin-text-info">
                     <Link
                       href={`/${locale}/admin/orders/${order.id}`}
                       className="hover:underline"
@@ -61,10 +62,10 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
                   <td className="admin-table-td admin-text-subtle">
                     {formatDate(order.createdAt, locale)}
                   </td>
-                  <td className="admin-table-td font-medium text-gray-900">
+                  <td className="admin-table-td font-medium admin-text-main">
                     {formatPrice(
                       Number(order.totalAmount),
-                      order.currency as any,
+                      order.currency as SupportedCurrency,
                       locale
                     )}
                   </td>
@@ -77,16 +78,18 @@ export async function CustomerOrderTable({ orders }: CustomerOrderTableProps) {
                   <td className="admin-table-td text-right">
                     {order.shipments?.[0]?.trackingCode ? (
                       <div className="flex flex-col items-end">
-                        <span className="text-xs font-semibold text-gray-500 uppercase">
+                        <span className="text-xs font-semibold admin-text-subtle uppercase">
                           {order.shipments[0].carrier}
                         </span>
-                        <span className="text-xs text-primary flex items-center gap-1">
+                        <span className="text-xs admin-text-info flex items-center gap-1">
                           {order.shipments[0].trackingCode}
                           <ExternalLink className="h-3 w-3" />
                         </span>
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400">—</span>
+                      <span className="text-xs admin-text-subtle opacity-60">
+                        —
+                      </span>
                     )}
                   </td>
                 </tr>

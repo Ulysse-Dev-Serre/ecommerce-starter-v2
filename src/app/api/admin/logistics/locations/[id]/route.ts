@@ -6,7 +6,7 @@ import { z } from 'zod';
 const schema = z.object({
   name: z.string().min(1),
   type: z.enum(['LOCAL_STOCK', 'DROPSHIPPER', 'OTHER']),
-  incoterm: z.enum(['DDP', 'DDU']).default('DDU'),
+  incoterm: z.enum(['DDP', 'DDU']),
   address: z.object({
     name: z.string().min(1),
     street1: z.string().min(1),
@@ -25,7 +25,10 @@ const schema = z.object({
   }),
 });
 
-import { logisticsLocationService } from '@/lib/services/logistics/logistics-location.service';
+import {
+  logisticsLocationService,
+  UpdateLocationData,
+} from '@/lib/services/logistics/logistics-location.service';
 
 export async function PUT(
   req: NextRequest,
@@ -61,7 +64,7 @@ export async function PUT(
 
     const supplier = await logisticsLocationService.updateLocation(
       id,
-      result.data as any
+      result.data as UpdateLocationData
     );
 
     logger.info(

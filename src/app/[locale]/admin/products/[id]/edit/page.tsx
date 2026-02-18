@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { prisma } from '@/lib/core/db';
-import { ProductForm } from '@/components/admin/products/product-form';
+import {
+  ProductForm,
+  AdminProduct,
+} from '@/components/admin/products/product-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +82,7 @@ export default async function EditProductPage({
 
   return (
     <ProductForm
-      initialProduct={serializedProduct as any}
+      initialProduct={serializedProduct as AdminProduct}
       suppliers={serializedSuppliers}
       locale={locale}
     />

@@ -64,7 +64,6 @@ export async function createProductAction(formData: FormData | unknown) {
       hsCode: validatedData.hsCode ?? undefined,
       shippingOriginId: validatedData.shippingOriginId || undefined,
       exportExplanation: validatedData.exportExplanation ?? undefined,
-      incoterm: validatedData.incoterm ?? undefined,
       weight: validatedData.weight ?? undefined,
       dimensions: validatedData.dimensions
         ? {
@@ -141,8 +140,6 @@ export async function updateProductAction(productId: string, rawData: unknown) {
       updateData.shippingOriginId = validatedData.shippingOriginId || null;
     if (validatedData.exportExplanation !== undefined)
       updateData.exportExplanation = validatedData.exportExplanation;
-    if (validatedData.incoterm !== undefined)
-      updateData.incoterm = validatedData.incoterm;
     if (validatedData.weight !== undefined)
       updateData.weight = validatedData.weight;
     if (validatedData.dimensions !== undefined) {

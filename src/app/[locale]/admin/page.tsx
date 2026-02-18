@@ -10,9 +10,8 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { prisma } from '@/lib/core/db';
 import { RevenueChart } from '@/components/admin/analytics/revenue-chart';
 import { formatPrice } from '@/lib/utils/currency';
-import { SITE_CURRENCY, SupportedCurrency } from '@/lib/config/site';
+import { SITE_CURRENCY } from '@/lib/config/site';
 import { formatDate } from '@/lib/utils/date';
-import { env } from '@/lib/core/env';
 import {
   DashboardStatsGrid,
   StatItem,

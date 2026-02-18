@@ -4,40 +4,61 @@ import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { render } from '@react-email/render';
 import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
 import { env } from '@/lib/core/env';
-
+import { SupportedCurrency } from '@/lib/config/site';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { Address, OrderWithIncludes } from '@/lib/types/domain/order';
+import { Decimal } from '@prisma/client/runtime/library';
+
+/**
+ * Interface simplifiée pour les items de notification (emails)
+ */
+export interface NotificationLineItem {
+  productName: string;
+  quantity: number;
+  unitPrice: Decimal | number;
+  currency: SupportedCurrency;
+  sku?: string;
+  variantId?: string | null;
+}
 
 /**
  * Envoie l'email de confirmation de commande au client
  */
 export async function sendOrderConfirmationEmail(
-  order: any,
-  calculation: any,
-  shippingAddress: any,
+  order: OrderWithIncludes,
+  calculation: { items: NotificationLineItem[] },
+  shippingAddress: Address | null,
   recipientEmail: string
 ) {
   try {
+    const dict = await getDictionary(order.language.toLowerCase());
+
     const emailHtml = await render(
       OrderConfirmationEmail({
         orderId: order.orderNumber,
-        customerName: shippingAddress?.firstName || 'Client',
-        items: calculation.items.map((item: any) => ({
+        customerName: (
+          shippingAddress?.name ||
+          (order.user?.firstName
+            ? `${order.user.firstName} ${order.user.lastName || ''}`
+            : '')
+        ).trim(),
+        items: calculation.items.map((item: NotificationLineItem) => ({
           name: item.productName,
           quantity: item.quantity,
           price: item.unitPrice.toString(),
-          currency: item.currency,
+          currency: item.currency as SupportedCurrency,
         })),
         subtotal: order.subtotalAmount.toString(),
         shippingCost: order.shippingAmount.toString(),
         taxCost: order.taxAmount.toString(),
         totalAmount: order.totalAmount.toString(),
-        currency: order.currency,
+        currency: order.currency as SupportedCurrency,
         locale: order.language.toLowerCase(),
         shippingAddress: {
           street: shippingAddress?.street1
             ? shippingAddress.street1 +
               (shippingAddress.street2 ? ' ' + shippingAddress.street2 : '')
-            : 'N/A',
+            : '',
           city: shippingAddress?.city || '',
           state: shippingAddress?.state || '',
           postalCode: shippingAddress?.postalCode || '',
@@ -45,8 +66,6 @@ export async function sendOrderConfirmationEmail(
         },
       })
     );
-
-    const dict = await getDictionary(order.language.toLowerCase());
     const subject = dict.Emails.confirmation.subject.replace(
       '{orderNumber}',
       order.orderNumber
@@ -70,11 +89,12 @@ export async function sendOrderConfirmationEmail(
         'Order confirmation email sent'
       );
     }
-  } catch (emailError: any) {
+  } catch (emailError: unknown) {
+    const error = emailError as Error;
     logger.error(
       {
-        error: emailError,
-        message: emailError.message,
+        error,
+        message: error.message,
         orderId: order.id,
       },
       'Error sending confirmation email'
@@ -86,9 +106,9 @@ export async function sendOrderConfirmationEmail(
  * Envoie la notification admin de nouvelle commande
  */
 export async function sendAdminNewOrderAlert(
-  order: any,
-  calculation: any,
-  shippingAddress: any
+  order: OrderWithIncludes,
+  calculation: { items: NotificationLineItem[] },
+  shippingAddress: Address | null
 ) {
   if (!env.ADMIN_EMAIL) return;
 
@@ -97,32 +117,41 @@ export async function sendAdminNewOrderAlert(
       '@/components/emails/admin-new-order'
     );
 
+    const dict = await getDictionary(env.ADMIN_LOCALE);
     const siteUrl = env.NEXT_PUBLIC_SITE_URL;
 
     const adminHtml = await render(
       AdminNewOrderEmail({
         orderId: order.orderNumber,
         internalOrderId: order.id,
-        customerName: shippingAddress?.firstName
-          ? `${shippingAddress.firstName} ${shippingAddress.lastName || ''}`
-          : 'Client',
+        customerName: (
+          shippingAddress?.name ||
+          (order.user?.firstName
+            ? `${order.user.firstName} ${order.user.lastName || ''}`
+            : '')
+        ).trim(),
         totalAmount: order.totalAmount.toString(),
-        currency: order.currency,
+        currency: order.currency as SupportedCurrency,
         itemsCount: calculation.items.length,
         siteUrl,
-        locale: env.ADMIN_LOCALE || 'fr',
+        locale: env.ADMIN_LOCALE as string,
       })
     );
+
+    const subject = dict.Emails.admin_new_order_alert.subject
+      .replace('{totalAmount}', order.totalAmount.toString())
+      .replace('{currency}', order.currency)
+      .replace('{orderNumber}', order.orderNumber);
 
     await resend.emails.send({
       from: FROM_EMAIL,
       to: env.ADMIN_EMAIL,
-      subject: `Nouvelle commande : ${order.totalAmount} ${order.currency} (${order.orderNumber})`,
+      subject,
       html: adminHtml,
     });
 
     logger.info({}, 'Admin notification email sent');
-  } catch (adminEmailError) {
+  } catch (adminEmailError: unknown) {
     logger.error(
       { error: adminEmailError },
       'Failed to send admin notification'
@@ -133,7 +162,9 @@ export async function sendAdminNewOrderAlert(
 /**
  * Envoie l'email d'expédition au client
  */
-export async function sendShippedEmail(order: any) {
+export async function sendShippedEmail(
+  order: OrderWithIncludes & { orderEmail?: string | null }
+) {
   try {
     const recipientEmail = order.orderEmail;
     const shipment = order.shipments[0];
@@ -143,18 +174,24 @@ export async function sendShippedEmail(order: any) {
         '@/components/emails/order-shipped'
       );
 
-      const shippingAddr = order.shippingAddress as any;
+      const shippingAddr = order.shippingAddress as Address;
+
+      const dict = await getDictionary(order.language.toLowerCase());
 
       const emailHtml = await render(
         OrderShippedEmail({
           orderId: order.orderNumber,
-          customerName:
-            shippingAddr?.firstName || order.user?.firstName || 'Client',
+          customerName: (
+            shippingAddr?.name ||
+            (order.user?.firstName
+              ? `${order.user.firstName} ${order.user.lastName || ''}`
+              : '')
+          ).trim(),
           trackingNumber: shipment.trackingCode,
           trackingUrl: `https://parcelsapp.com/en/tracking/${shipment.trackingCode}`,
-          carrierName: shipment.carrier || 'Transporteur',
+          carrierName: shipment.carrier || '',
           shippingAddress: {
-            street: shippingAddr?.street1 || shippingAddr?.street || '',
+            street: shippingAddr?.street1 || '',
             city: shippingAddr?.city || '',
             state: shippingAddr?.state || '',
             postalCode: shippingAddr?.postalCode || '',
@@ -164,7 +201,6 @@ export async function sendShippedEmail(order: any) {
         })
       );
 
-      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.shipped.subject.replace(
         '{orderNumber}',
         order.orderNumber
@@ -195,7 +231,7 @@ export async function sendShippedEmail(order: any) {
         'Skipping shipped email: Missing email or shipment info'
       );
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error({ err }, 'Error in shipped email flow');
   }
 }
@@ -203,7 +239,9 @@ export async function sendShippedEmail(order: any) {
 /**
  * Envoie l'email de livraison au client
  */
-export async function sendDeliveredEmail(order: any) {
+export async function sendDeliveredEmail(
+  order: OrderWithIncludes & { orderEmail?: string | null }
+) {
   try {
     const recipientEmail = order.orderEmail;
 
@@ -212,15 +250,21 @@ export async function sendDeliveredEmail(order: any) {
         '@/components/emails/order-delivered'
       );
 
-      const shippingAddr = order.shippingAddress as any;
+      const shippingAddr = order.shippingAddress as Address;
+
+      const dict = await getDictionary(order.language.toLowerCase());
 
       const emailHtml = await render(
         OrderDeliveredEmail({
           orderId: order.orderNumber,
-          customerName:
-            shippingAddr?.firstName || order.user?.firstName || 'Client',
+          customerName: (
+            shippingAddr?.name ||
+            (order.user?.firstName
+              ? `${order.user.firstName} ${order.user.lastName || ''}`
+              : '')
+          ).trim(),
           shippingAddress: {
-            street: shippingAddr?.street1 || shippingAddr?.street || '',
+            street: shippingAddr?.street1 || '',
             city: shippingAddr?.city || '',
             state: shippingAddr?.state || '',
             postalCode: shippingAddr?.postalCode || '',
@@ -230,7 +274,6 @@ export async function sendDeliveredEmail(order: any) {
         })
       );
 
-      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.delivered.subject.replace(
         '{orderNumber}',
         order.orderNumber
@@ -252,7 +295,7 @@ export async function sendDeliveredEmail(order: any) {
         logger.info({ emailId: data?.id }, 'Delivered email sent successfully');
       }
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error({ err }, 'Error in delivered email flow');
   }
 }
@@ -260,7 +303,9 @@ export async function sendDeliveredEmail(order: any) {
 /**
  * Envoie l'email de remboursement au client
  */
-export async function sendRefundedEmail(order: any) {
+export async function sendRefundedEmail(
+  order: OrderWithIncludes & { orderEmail?: string | null }
+) {
   try {
     logger.info(
       { orderId: order.id, orderNumber: order.orderNumber },
@@ -280,24 +325,29 @@ export async function sendRefundedEmail(order: any) {
     );
 
     if (recipientEmail) {
+      const dict = await getDictionary(order.language.toLowerCase());
+
       const { OrderRefundedEmail } = await import(
         '@/components/emails/order-refunded'
       );
 
-      const shippingAddr = order.shippingAddress as any;
+      const shippingAddr = order.shippingAddress as Address;
 
       const emailHtml = await render(
         OrderRefundedEmail({
           orderId: order.orderNumber,
-          customerName:
-            shippingAddr?.firstName || order.user?.firstName || 'Client',
+          customerName: (
+            shippingAddr?.name ||
+            (order.user?.firstName
+              ? `${order.user.firstName} ${order.user.lastName || ''}`
+              : '')
+          ).trim(),
           amountRefunded: order.totalAmount.toString(),
-          currency: order.currency,
+          currency: order.currency as SupportedCurrency,
           locale: order.language.toLowerCase(),
         })
       );
 
-      const dict = await getDictionary(order.language.toLowerCase());
       const subject = dict.Emails.refunded.subject.replace(
         '{orderNumber}',
         order.orderNumber
@@ -332,9 +382,10 @@ export async function sendRefundedEmail(order: any) {
         'No recipient email found - skipping refund email'
       );
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     logger.error(
-      { err, message: err.message, orderId: order?.id },
+      { err: error, message: error.message, orderId: order?.id },
       'Error in refund email flow'
     );
   }
@@ -344,7 +395,7 @@ export async function sendRefundedEmail(order: any) {
  * Envoie l'email approprié basé sur un changement de statut de commande
  */
 export async function sendStatusChangeEmail(
-  order: any,
+  order: OrderWithIncludes & { orderEmail?: string | null },
   newStatus: OrderStatus
 ) {
   switch (newStatus) {
@@ -373,7 +424,11 @@ export async function sendRefundRequestAlert(params: {
   customerEmail: string;
   reason: string;
   hasAttachment: boolean;
-  attachments?: any[];
+  attachments?: Array<{
+    filename: string;
+    content: string | Buffer;
+    contentType?: string;
+  }>;
 }) {
   const adminEmail = env.ADMIN_EMAIL;
 
@@ -396,6 +451,8 @@ export async function sendRefundRequestAlert(params: {
       '@/components/emails/refund-request-admin'
     );
 
+    const dict = await getDictionary(env.ADMIN_LOCALE);
+
     const emailHtml = await render(
       RefundRequestAdminEmail({
         orderNumber: params.orderNumber,
@@ -403,11 +460,14 @@ export async function sendRefundRequestAlert(params: {
         customerEmail: params.customerEmail,
         reason: params.reason,
         imageUrl: params.hasAttachment ? 'Attached' : undefined,
-        locale: env.ADMIN_LOCALE || 'fr',
+        locale: env.ADMIN_LOCALE as string,
       })
     );
 
-    const subject = `⚠️ Refund Request - Order ${params.orderNumber}`;
+    const subject = dict.Emails.refund_request_admin.subject.replace(
+      '{orderNumber}',
+      params.orderNumber
+    );
 
     logger.info(
       {
@@ -438,7 +498,7 @@ export async function sendRefundRequestAlert(params: {
         'Refund request email sent to admin successfully'
       );
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(
       { error, orderNumber: params.orderNumber },
       'Error sending refund request email'

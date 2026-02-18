@@ -58,6 +58,13 @@ export interface OrderWithIncludes {
   id: string;
   orderNumber: string;
   userId: string | null;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    clerkId?: string;
+  } | null;
   orderEmail?: string | null;
   status: OrderStatus;
   currency: string;

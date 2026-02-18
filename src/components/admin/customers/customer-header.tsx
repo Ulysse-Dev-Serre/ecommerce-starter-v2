@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { ArrowLeft } from 'lucide-react';
+import { User } from '@/generated/prisma';
 
 interface CustomerHeaderProps {
-  customer: any;
+  customer: User;
   locale: string;
 }
 
@@ -20,7 +21,7 @@ export async function CustomerHeader({
           href={`/${locale}/admin/customers`}
           className="admin-btn-secondary p-2"
         >
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
+          <ArrowLeft className="h-5 w-5 admin-text-subtle" />
         </Link>
         <div>
           <h1 className="admin-page-title">

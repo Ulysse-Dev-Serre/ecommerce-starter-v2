@@ -13,7 +13,6 @@ export interface ProductBasicFormData {
   hsCode: string;
   shippingOriginId: string;
   exportExplanation: string;
-  incoterm: string;
   weight: string;
   length: string;
   width: string;
@@ -78,7 +77,7 @@ export function ProductBasicInfo({
                 setFormData(prev => ({ ...prev, slug: e.target.value }))
               }
               placeholder="product-url-slug"
-              className={`admin-input ${fieldErrors.slug ? 'border-red-500 bg-red-50' : ''}`}
+              className={`admin-input ${fieldErrors.slug ? 'admin-border-error admin-bg-error-subtle' : ''}`}
               required
             />
             {fieldErrors.slug && (
@@ -86,7 +85,7 @@ export function ProductBasicInfo({
             )}
             {formData.slug && (
               <p
-                className={`mt-1 text-xs ${isSlugValid ? 'text-green-600' : 'text-red-600'}`}
+                className={`mt-1 text-xs ${isSlugValid ? 'admin-text-success' : 'admin-text-error'}`}
               >
                 {isSlugValid ? (
                   <span className="flex items-center gap-1">
@@ -104,9 +103,7 @@ export function ProductBasicInfo({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                {t('status')}
-              </label>
+              <label className="admin-label">{t('status')}</label>
               <select
                 id="statusSelect"
                 name="status"
@@ -142,9 +139,9 @@ export function ProductBasicInfo({
                       isFeatured: e.target.checked,
                     }))
                   }
-                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  className="h-4 w-4 rounded admin-border-subtle text-primary focus:ring-primary"
                 />
-                <span className="text-sm font-medium text-gray-700">
+                <span className="text-sm font-medium admin-text-main">
                   {t('featured')}
                 </span>
               </label>
@@ -156,7 +153,7 @@ export function ProductBasicInfo({
       <div className="space-y-4">
         {SUPPORTED_LOCALES.map((lang: string, index: number) => (
           <div key={lang} className="admin-card">
-            <h2 className="mb-4 text-lg font-semibold text-gray-900">
+            <h2 className="mb-4 text-lg font-semibold admin-text-main">
               {lang.toUpperCase()}
               {lang === 'en' && (
                 <span className="ml-2 text-sm font-normal text-red-500">*</span>
@@ -177,7 +174,7 @@ export function ProductBasicInfo({
                     handleTranslationChange(lang, 'name', e.target.value)
                   }
                   placeholder={t('productName')}
-                  className={`admin-input ${fieldErrors[`translations.${index}.name`] ? 'border-red-500 bg-red-50' : ''}`}
+                  className={`admin-input ${fieldErrors[`translations.${index}.name`] ? 'admin-border-error admin-bg-error-subtle' : ''}`}
                   required={lang === 'en'}
                 />
                 {fieldErrors[`translations.${index}.name`] && (
@@ -206,7 +203,7 @@ export function ProductBasicInfo({
 
               <div>
                 <label
-                  className="block text-sm font-medium text-gray-700"
+                  className="admin-label"
                   htmlFor={`product-description-${lang}`}
                 >
                   {t('fullDescription')}
