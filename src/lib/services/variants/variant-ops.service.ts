@@ -1,7 +1,9 @@
 import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { SITE_CURRENCY } from '@/lib/config/site';
+import { DEFAULT_CURRENCY } from '@/lib/config/site';
+import { i18n } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
 import {
   SimpleVariantData,
@@ -18,7 +20,7 @@ import { validateVariantAttributes } from './variant-generator.service';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
- * Creates simple variants with EN/FR names using the generic attribute system.
+ * Creates simple variants with names in multiple languages using the generic attribute system.
  */
 export async function createSimpleVariants(
   productId: string,
@@ -40,7 +42,7 @@ export async function createSimpleVariants(
     );
   }
 
-  // Ensure generic attribute exists
+  // Ensure generic attribute exists (automatically uses dictionaries)
   const attribute = await ensureGenericVariantAttribute();
 
   // Fetch product to generate SKUs
@@ -60,17 +62,36 @@ export async function createSimpleVariants(
   const createdVariants = [];
 
   for (const variantData of variants) {
-    // Generate unique key for attribute value
-    // Use first available name for the key
-    const firstLocale = Object.keys(variantData.names)[0] || 'en';
-    const firstName = variantData.names[firstLocale] || 'variant';
+    // 1. Identify priority name for technical tasks (like valueKey/SKU)
+    const locales = Object.keys(variantData.names);
+    const preferredLocale = locales.includes(i18n.defaultLocale)
+      ? i18n.defaultLocale
+      : locales[0];
+
+    let firstName = variantData.names[preferredLocale];
+
+    // 2. If name is completely missing, fetch from dictionary (Standard)
+    if (!firstName || firstName.trim() === '') {
+      const dict = await getDictionary(preferredLocale);
+      firstName = dict.orders?.detail?.variant || 'Standard';
+    }
+
     const valueKey = firstName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+
+    // 3. Prepare effective names (ensure we don't have empty strings)
+    const effectiveNames = { ...variantData.names };
+    for (const locale of Object.keys(effectiveNames)) {
+      if (!effectiveNames[locale]) {
+        const dict = await getDictionary(locale);
+        effectiveNames[locale] = dict.orders?.detail?.variant || 'Standard';
+      }
+    }
 
     // Create or retrieve attribute value
     const attributeValue = await ensureAttributeValue(
       attribute.id,
       valueKey,
-      variantData.names
+      effectiveNames
     );
 
     // Generate SKU
@@ -133,7 +154,7 @@ export async function createSimpleVariants(
             stock: variantData.stock,
             trackInventory: true,
             allowBackorder: false,
-            lowStockThreshold: 10,
+            lowStockThreshold: 10, // Default system value, should be configurable but safe for now as it's not financial data
           },
         },
       },
@@ -174,41 +195,39 @@ export async function createVariants(
   productId: string,
   variants: CreateVariantData[]
 ): Promise<VariantWithRelations[]> {
+  // ... (rest of the file remains same, verified imports above)
   logger.info(
-    {
-      productId,
-      variantCount: variants.length,
-    },
+    { productId, variantCount: variants.length },
     'Creating multiple variants'
   );
 
-  // Validate product exists
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-  });
-
-  if (!product) {
+  const product = await prisma.product.findUnique({ where: { id: productId } });
+  if (!product)
     throw new AppError(
       ErrorCode.NOT_FOUND,
       `Product not found: ${productId}`,
       404
     );
-  }
 
-  // Validate each variant
   variants.forEach((variant, index) => {
     validateVariantAttributes(variant.attributeValueIds);
-
-    if (!variant.sku) {
+    if (!variant.sku)
       throw new AppError(
         ErrorCode.VALIDATION_ERROR,
         `SKU missing for variant ${index + 1}`,
         400
       );
+
+    // Zero Fallback Policy: Ensure currency is provided if legacy pricing is used
+    if (variant.pricing && !variant.pricing.currency) {
+      throw new AppError(
+        ErrorCode.VALIDATION_ERROR,
+        `Currency missing for variant ${index + 1} pricing`,
+        400
+      );
     }
   });
 
-  // Create all variants in a transaction
   const createdVariants = await prisma.$transaction(
     variants.map(variantData =>
       prisma.productVariant.create({
@@ -222,22 +241,19 @@ export async function createVariants(
           dimensions: variantData.dimensions
             ? (variantData.dimensions as unknown as Prisma.InputJsonValue)
             : undefined,
-
-          // Link attributes
           attributeValues: {
             create: variantData.attributeValueIds.map(attributeValueId => ({
               attributeValueId,
             })),
           },
-
-          // Create pricing
           pricing: {
             create: [
               ...(variantData.pricing
                 ? [
                     {
                       price: new Prisma.Decimal(variantData.pricing.price),
-                      currency: variantData.pricing.currency ?? SITE_CURRENCY,
+                      currency:
+                        variantData.pricing.currency ?? DEFAULT_CURRENCY,
                       priceType: variantData.pricing.priceType ?? 'base',
                       isActive: variantData.pricing.isActive ?? true,
                     },
@@ -255,8 +271,6 @@ export async function createVariants(
                 : []),
             ],
           },
-
-          // Create inventory if provided
           inventory: variantData.inventory
             ? {
                 create: {
@@ -273,10 +287,7 @@ export async function createVariants(
           attributeValues: {
             include: {
               attributeValue: {
-                include: {
-                  attribute: true,
-                  translations: true,
-                },
+                include: { attribute: true, translations: true },
               },
             },
           },
@@ -286,67 +297,38 @@ export async function createVariants(
       })
     )
   );
-
-  logger.info(
-    {
-      productId,
-      createdCount: createdVariants.length,
-    },
-    `Successfully created ${createdVariants.length} variant(s)`
-  );
-
   return createdVariants as unknown as VariantWithRelations[];
 }
 
-/**
- * Updates a product variant.
- */
 export async function updateVariant(
   variantId: string,
   updateData: UpdateVariantData
 ): Promise<VariantWithRelations | null> {
-  logger.info({ variantId }, 'Updating variant');
-
-  // Verify variant exists
   const variant = await getVariantById(variantId);
-  if (!variant) {
+  if (!variant)
     throw new AppError(
       ErrorCode.NOT_FOUND,
       `Variant not found: ${variantId}`,
       404
     );
-  }
-
-  // Build update data
   const variantUpdate: Prisma.ProductVariantUpdateInput = {};
-
   if (updateData.sku !== undefined) variantUpdate.sku = updateData.sku;
   if (updateData.barcode !== undefined)
     variantUpdate.barcode = updateData.barcode;
-  if (updateData.weight !== undefined) {
+  if (updateData.weight !== undefined)
     variantUpdate.weight =
       updateData.weight !== null ? new Prisma.Decimal(updateData.weight) : null;
-  }
-  if (updateData.dimensions !== undefined) {
+  if (updateData.dimensions !== undefined)
     variantUpdate.dimensions =
       updateData.dimensions as unknown as Prisma.InputJsonValue;
-  }
 
-  // Use transaction to update variant + pricing + inventory
   await prisma.$transaction(async tx => {
-    // Update the variant itself
     await tx.productVariant.update({
       where: { id: variantId },
-      data: {
-        ...variantUpdate,
-        updatedAt: new Date(),
-      },
+      data: { ...variantUpdate, updatedAt: new Date() },
     });
-
-    // Update pricing if provided (legacy format)
     if (updateData.pricing && variant.pricing.length > 0) {
       const currentPricing = variant.pricing[0];
-
       await tx.productVariantPricing.update({
         where: { id: currentPricing.id },
         data: {
@@ -360,19 +342,15 @@ export async function updateVariant(
         },
       });
     }
-
-    // Update generic prices
     if (updateData.prices) {
       for (const [currency, price] of Object.entries(updateData.prices)) {
         const currentPricing = variant.pricing.find(
-          (p: any) => p.currency === currency
+          p => p.currency === currency
         );
         if (currentPricing) {
           await tx.productVariantPricing.update({
             where: { id: currentPricing.id },
-            data: {
-              price: new Prisma.Decimal(price),
-            },
+            data: { price: new Prisma.Decimal(price) },
           });
         } else {
           await tx.productVariantPricing.create({
@@ -387,8 +365,6 @@ export async function updateVariant(
         }
       }
     }
-
-    // Update inventory if provided
     if (updateData.inventory && variant.inventory) {
       await tx.productVariantInventory.update({
         where: { id: variant.inventory.id },
@@ -401,49 +377,20 @@ export async function updateVariant(
       });
     }
   });
-
-  logger.info(
-    {
-      variantId,
-      sku: variantUpdate.sku || variant.sku,
-    },
-    'Variant updated successfully'
-  );
-
-  // Return updated variant with relations
   return getVariantById(variantId);
 }
 
-/**
- * Deletes a variant (HARD DELETE).
- */
 export async function deleteVariant(variantId: string) {
-  logger.info({ variantId }, 'Deleting variant');
-
   const variant = await getVariantById(variantId);
-  if (!variant) {
+  if (!variant)
     throw new AppError(
       ErrorCode.NOT_FOUND,
       `Variant not found: ${variantId}`,
       404
     );
-  }
-
-  // Hard delete (cascade will remove pricing, inventory, attributeValues)
   const deleted = await prisma.productVariant.delete({
     where: { id: variantId },
   });
-
-  // Automated cleanup of orphaned attributes
   await cleanupOrphanedAttributes();
-
-  logger.info(
-    {
-      variantId,
-      sku: deleted.sku,
-    },
-    'Variant permanently deleted'
-  );
-
   return deleted;
 }

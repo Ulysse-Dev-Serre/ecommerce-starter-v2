@@ -100,7 +100,7 @@ export function AddressSection({
           <p>{tempAddress.line1}</p>
           {tempAddress.line2 && <p>{tempAddress.line2}</p>}
           <p>
-            {tempAddress.city}, {tempAddress.state} {tempAddress.postal_code}
+            {tempAddress.city}, {tempAddress.state} {tempAddress.zip}
           </p>
           <p>{tempAddress.country}</p>
           <p className="mt-2 vibe-text-sm vibe-text-muted-foreground">
@@ -168,7 +168,7 @@ export function AddressSection({
                 line1: selected.line1,
                 city: selected.city,
                 state: selected.state,
-                postal_code: selected.postal_code,
+                zip: selected.zip,
                 country: instanceCountryCode,
               });
             }}
@@ -252,12 +252,12 @@ export function AddressSection({
           <FormInput
             label={t('zipCode')}
             required
-            value={tempAddress?.postal_code || ''}
+            value={tempAddress?.zip || ''}
             data-testid="checkout-zip"
             onChange={e =>
               setTempAddress({
                 ...tempAddress,
-                postal_code: e.target.value,
+                zip: e.target.value,
               })
             }
           />

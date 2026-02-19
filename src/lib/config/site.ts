@@ -109,7 +109,7 @@ export const SITE_ADDRESS = `${STORE_ORIGIN_ADDRESS.street1}, ${STORE_ORIGIN_ADD
 export function resolveShippingOrigin(
   productOrigin?: {
     name: string | null;
-    address: any;
+    address: unknown;
     contactPhone: string | null;
     contactEmail: string | null;
   } | null
@@ -126,15 +126,15 @@ export function resolveShippingOrigin(
   }
 
   if (productOrigin?.address) {
-    const addr = productOrigin.address as Record<string, any>;
+    const addr = productOrigin.address as Record<string, string | undefined>;
     return {
       name: productOrigin.name || STORE_ORIGIN_ADDRESS.name,
-      street1: addr.street1 || addr.line1,
+      street1: addr.street1 || addr.line1 || STORE_ORIGIN_ADDRESS.street1,
       street2: addr.street2 || addr.line2 || '',
-      city: addr.city,
-      state: addr.state,
+      city: addr.city || STORE_ORIGIN_ADDRESS.city,
+      state: addr.state || STORE_ORIGIN_ADDRESS.state,
       zip: (addr.postalCode || addr.zip || '').replace(/\s+/g, ''),
-      country: addr.country,
+      country: addr.country || STORE_ORIGIN_ADDRESS.country,
       phone: productOrigin.contactPhone || STORE_ORIGIN_ADDRESS.phone,
       email: productOrigin.contactEmail || STORE_ORIGIN_ADDRESS.email,
     };

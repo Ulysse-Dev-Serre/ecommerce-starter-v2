@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/core/db';
+import { OrderStatus } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
@@ -66,13 +67,13 @@ async function refundRequestHandler(
   // 3. Update status (Sync logic including history)
   await updateOrderStatus({
     orderId: order.id,
-    status: newStatus as any,
+    status: newStatus as OrderStatus,
     comment,
     userId: user.id,
   });
 
   // 4. Send email alert via specialized service
-  let attachments: any[] = [];
+  let attachments: { filename: string; content: Buffer }[] = [];
   if (file) {
     const buffer = Buffer.from(await file.arrayBuffer());
     attachments.push({

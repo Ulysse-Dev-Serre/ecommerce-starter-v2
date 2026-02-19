@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { UserWithBasicInfo } from '@/lib/types/domain/user';
 import { UserSearchInput } from '@/lib/validators/user';
-import { UserRole } from '@/generated/prisma';
+import { UserRole, Prisma } from '@/generated/prisma';
 
 /**
  * Récupère tous les utilisateurs avec filtres et pagination
@@ -13,7 +12,7 @@ export async function getAllUsersAdmin(options: Partial<UserSearchInput> = {}) {
   const limit = options.limit || 20;
   const skip = (page - 1) * limit;
 
-  const where: any = {};
+  const where: Prisma.UserWhereInput = {};
 
   if (options.role) {
     where.role = options.role;
@@ -70,7 +69,7 @@ export async function getAllUsersAdmin(options: Partial<UserSearchInput> = {}) {
 /**
  * Récupère un utilisateur par ID pour l'admin
  */
-export async function getUserByIdAdmin(id: string): Promise<any | null> {
+export async function getUserByIdAdmin(id: string) {
   return prisma.user.findUnique({
     where: { id },
     select: {

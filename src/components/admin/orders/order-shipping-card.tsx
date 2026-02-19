@@ -35,7 +35,7 @@ export async function OrderShippingCard({
           <p>
             {shippingAddr.city}
             {shippingAddr.state ? `, ${shippingAddr.state}` : ''}{' '}
-            {shippingAddr.postal_code || shippingAddr.zip}
+            {shippingAddr.zip}
           </p>
           <p className="uppercase">{shippingAddr.country}</p>
           {shippingAddr.phone && (

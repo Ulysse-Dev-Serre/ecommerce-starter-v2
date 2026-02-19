@@ -15,11 +15,8 @@ import { formatZodErrors } from '@/lib/validators';
  * ou
  * export const POST = withValidation(MySchema, async (req, data) => { ... })
  */
-export function withValidation<T>(
-  schema: ZodSchema<T>,
-  handler: ApiHandler<T>
-) {
-  return async (request: NextRequest, ...args: any[]) => {
+export function withValidation<T>(schema: ZodSchema<T>, handler: ApiHandler) {
+  return async (request: NextRequest, ...args: unknown[]) => {
     try {
       // 1. Parser le body (on doit cloner si on veut le relire ailleurs, mais ici on le consomme)
       // Note: On assume que c'est du JSON.

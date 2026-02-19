@@ -11,9 +11,7 @@ export interface ShippingAddress {
   line2?: string;
   city: string;
   state: string;
-  postalCode?: string;
-  postal_code?: string;
-  zip?: string;
+  zip: string;
   country: string;
   phone?: string;
   email?: string;

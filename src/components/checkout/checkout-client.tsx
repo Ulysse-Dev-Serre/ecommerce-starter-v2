@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
-import AddressAutocomplete from './AddressAutocomplete';
 import { trackEvent } from '@/lib/client/analytics';
-import { formatPrice } from '@/lib/utils/currency';
 
 import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
@@ -26,11 +24,10 @@ import { OrderSummary } from './OrderSummary';
 import { AddressSection } from './AddressSection';
 import { ShippingSection } from './ShippingSection';
 import { PaymentSection } from './PaymentSection';
+import { SupportedCurrency } from '@/lib/config/site';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-
-import { SupportedCurrency } from '@/lib/config/site';
 
 interface CheckoutClientProps {
   cartId: string;
@@ -56,7 +53,6 @@ export function CheckoutClient({
   summaryItems,
 }: CheckoutClientProps) {
   const t = useTranslations('checkout');
-  const { showToast } = useToast();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,27 +71,25 @@ export function CheckoutClient({
         }
       : undefined;
 
-  // 1. Au chargement, on crée une PaymentIntent (ou Session) vide pour avoir le clientSecret
-  // C'est nécessaire pour initialiser <Elements> de Stripe
   useEffect(() => {
-    // Si mode direct, on prépare l'objet directItem (déjà calculé au dessus)
-
     if (initialized.current) return;
     initialized.current = true;
 
-    // Create intent
     createPaymentIntentAction({
       cartId,
       currency,
       locale,
       directItem,
     })
-      .then((data: any) => {
+      .then((data: { clientSecret?: string; error?: string }) => {
         if (data.clientSecret) setClientSecret(data.clientSecret);
-        else setError(t('errorInit'));
+        else setError(data.error || t('errorInit'));
       })
-      .catch(() => setError(t('errorInit')));
-  }, [cartId, currency, directVariantId, directQuantity]);
+      .catch(err => {
+        logger.error({ err }, 'Checkout init error');
+        setError(t('errorInit'));
+      });
+  }, [cartId, currency, directItem, locale, t]);
 
   if (error)
     return (
@@ -131,7 +125,7 @@ export function CheckoutClient({
             },
           },
         },
-        locale: locale as any,
+        locale: locale as import('@stripe/stripe-js').StripeElementLocale,
       }}
     >
       <CheckoutForm
@@ -179,7 +173,6 @@ export function CheckoutForm({
   directItem,
 }: CheckoutFormProps) {
   const t = useTranslations('checkout');
-  const tCommon = useTranslations('common');
   const { showToast } = useToast();
   const stripe = useStripe();
   const elements = useElements();
@@ -194,11 +187,9 @@ export function CheckoutForm({
 
   useEffect(() => {
     void trackEvent('begin_checkout', { cartId, currency, initialTotal });
-  }, []);
+  }, [cartId, currency, initialTotal]);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [hasAttemptedShippingRatesFetch, setHasAttemptedShippingRatesFetch] =
-    useState(false);
 
   // States for address and contact
   const [tempAddress, setTempAddress] = useState<CheckoutAddress>({
@@ -206,7 +197,7 @@ export function CheckoutForm({
     line2: '',
     city: '',
     state: '',
-    postal_code: '',
+    zip: '',
     country: '',
   });
   const [tempName, setTempName] = useState<string>('');
@@ -219,11 +210,11 @@ export function CheckoutForm({
     const isReady =
       tempName?.trim() !== '' &&
       phone?.trim().length >= 10 &&
-      email?.trim() !== '' && // Validate Email
+      email?.trim() !== '' &&
       tempAddress?.line1?.trim() !== '' &&
       tempAddress?.city?.trim() !== '' &&
       tempAddress?.state?.trim() !== '' &&
-      tempAddress?.postal_code?.trim() !== '' &&
+      tempAddress?.zip?.trim() !== '' &&
       tempAddress?.country?.trim() !== '';
     setIsAddressReady(isReady);
   }, [tempName, phone, tempAddress, email]);
@@ -242,7 +233,7 @@ export function CheckoutForm({
 
   const updatePaymentIntent = async (
     rate: ShippingRate,
-    shippingDetailsArg?: any
+    shippingDetailsArg?: Record<string, string | null | undefined>
   ) => {
     try {
       setSelectedRate(rate);
@@ -254,21 +245,21 @@ export function CheckoutForm({
         street2: tempAddress.line2 || '',
         city: tempAddress.city,
         state: tempAddress.state,
-        zip: tempAddress.postal_code,
+        zip: tempAddress.zip,
         country: tempAddress.country,
         phone: phone,
       };
 
       const finalShippingDetails = {
         ...detailsToSend,
-        email: email, // Use local email state
+        email: email,
       };
 
       await updatePaymentIntentAction({
         paymentIntentId,
         shippingRate: rate,
         currency,
-        shippingDetails: finalShippingDetails,
+        shippingDetails: finalShippingDetails as any, // Cast to any as a temporary glue between UI and Action types
       });
     } catch (err) {
       logger.error({ err }, 'Failed to update shipping cost');
@@ -285,7 +276,6 @@ export function CheckoutForm({
     }
 
     setIsLoading(true);
-    setHasAttemptedShippingRatesFetch(true);
 
     try {
       const cleanPhone = phone.replace(/\D/g, '');
@@ -301,9 +291,9 @@ export function CheckoutForm({
           street2: tempAddress.line2 || '',
           city: tempAddress.city,
           state: tempAddress.state,
-          zip: tempAddress.postal_code,
+          zip: tempAddress.zip,
           country: tempAddress.country,
-          email: email || '', // Use local email state
+          email: email || '',
           phone: formattedPhone,
         },
         directItem ? [directItem] : undefined
@@ -311,12 +301,10 @@ export function CheckoutForm({
 
       if (data.rates && data.rates.length > 0) {
         setShippingRates(data.rates);
-        // Move to shipping step
         setStep('shipping');
       } else {
         setShippingRates([]);
         setSelectedRate(null);
-        // Stay on address step but show error maybe?
         showToast(t('noShippingRates'), 'error');
       }
     } catch (error) {
@@ -329,7 +317,6 @@ export function CheckoutForm({
   };
 
   const handleRateSelect = async (rate: ShippingRate) => {
-    // Just select the rate locally, don't move step yet
     setSelectedRate(rate);
   };
 
@@ -348,7 +335,7 @@ export function CheckoutForm({
       street2: tempAddress.line2 || '',
       city: tempAddress.city,
       state: tempAddress.state,
-      zip: tempAddress.postal_code,
+      zip: tempAddress.zip,
       country: tempAddress.country,
       phone: stripePhone,
     });
@@ -361,12 +348,10 @@ export function CheckoutForm({
     setStep('address');
     setShippingRates([]);
     setSelectedRate(null);
-    setHasAttemptedShippingRatesFetch(false);
   };
 
   const handleEditShipping = () => {
     setStep('shipping');
-    // We keep selectedRate but user can change it
   };
 
   const handlePay = async () => {
@@ -392,7 +377,6 @@ export function CheckoutForm({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-      {/* Left Column: Address & Shipping */}
       <div className="lg:col-span-12 xl:col-span-8 space-y-8">
         <AddressSection
           tempAddress={tempAddress}
@@ -401,8 +385,8 @@ export function CheckoutForm({
           setTempName={setTempName}
           phone={phone}
           setPhone={setPhone}
-          email={email} // Pass email
-          setEmail={setEmail} // Pass setEmail
+          email={email}
+          setEmail={setEmail}
           isAddressReady={isAddressReady}
           isLoading={isLoading}
           onCalculateShipping={handleCalculateShipping}
@@ -428,7 +412,6 @@ export function CheckoutForm({
         )}
       </div>
 
-      {/* Right Column: Summary & Payment */}
       <div className="lg:col-span-12 xl:col-span-4 h-full">
         <div className="sticky top-8 space-y-6">
           <OrderSummary
@@ -447,7 +430,7 @@ export function CheckoutForm({
                 elements={elements}
                 selectedRate={selectedRate}
                 onPay={handlePay}
-                userEmail={email} // Pass current email state
+                userEmail={email}
               />
             </div>
           )}

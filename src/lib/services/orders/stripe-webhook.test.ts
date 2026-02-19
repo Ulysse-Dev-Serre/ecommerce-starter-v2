@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { StripeWebhookService } from './stripe-webhook.service';
 import { prisma } from '@/lib/core/db';
+import { AppError } from '@/lib/types/api/errors';
 // Need to mock the entire module to spy on exported functions
 import * as OrderService from '@/lib/services/orders';
 import * as CartService from '@/lib/services/cart';
@@ -51,7 +52,12 @@ describe('StripeWebhookService', () => {
       customer_details: {
         email: 'test@example.com',
         name: 'John Doe',
-        address: { country: 'FR' },
+        address: {
+          line1: '123 Main St',
+          city: 'Paris',
+          country: 'FR',
+          postal_code: '75001',
+        },
       },
     };
 
@@ -91,12 +97,14 @@ describe('StripeWebhookService', () => {
       expect(OrderService.createOrderFromCart).not.toHaveBeenCalled();
     });
 
-    it('should skip if invalid metadata', async () => {
+    it('should throw if invalid metadata', async () => {
       const badSession = { ...mockSession, metadata: { items: '[]' } };
-      await StripeWebhookService.handleCheckoutSessionCompleted(
-        badSession,
-        requestId
-      );
+      await expect(
+        StripeWebhookService.handleCheckoutSessionCompleted(
+          badSession,
+          requestId
+        )
+      ).rejects.toThrow(AppError);
       expect(OrderService.createOrderFromCart).not.toHaveBeenCalled();
     });
   });

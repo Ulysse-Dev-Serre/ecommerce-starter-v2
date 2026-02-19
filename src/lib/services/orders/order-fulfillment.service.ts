@@ -22,6 +22,8 @@ import type {
 
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { ShippingService } from '../shipping/shipping.service';
+import { SHIPPING_VARIANT_INCLUDE } from '../shipping/shipping.repository';
 
 /**
  * Crée une étiquette de retour pour une commande
@@ -53,11 +55,13 @@ export async function createReturnLabel(
     },
   });
 
-  if (!order) throw new Error('Order not found');
+  if (!order) {
+    throw new AppError(ErrorCode.NOT_FOUND, `Order not found: ${orderId}`, 404);
+  }
 
   const customerEmail = order.orderEmail;
 
-  // 0 Fallback Policy: Transaction email is MANDATORY
+  // Zero Fallback Policy: Transaction email is MANDATORY for labels (we need to send them)
   if (!customerEmail) {
     throw new AppError(
       ErrorCode.SHIPPING_DATA_MISSING,
@@ -68,20 +72,10 @@ export async function createReturnLabel(
 
   const firstItem = order.items[0];
   const addr = order.shippingAddress as unknown as ShippingAddress;
-  const customerAddress = {
-    name: addr.name || `${addr.firstName} ${addr.lastName}`,
-    street1: addr.street1 || addr.line1,
-    street2: addr.street2 || addr.line2,
-    city: addr.city,
-    state: addr.state,
-    zip: (addr.postalCode || addr.postal_code || addr.zip || '').replace(
-      /\s+/g,
-      ''
-    ),
-    country: addr.country,
-    phone: addr.phone,
-    email: customerEmail,
-  };
+  const customerAddress = ShippingService.validateAddress(
+    { ...addr, email: customerEmail },
+    `Customer Order: ${order.orderNumber}`
+  );
 
   // 2. Resolve Warehouse Address (Decision logic centralized in site.ts)
   const warehouseAddress = resolveShippingOrigin(
@@ -105,8 +99,10 @@ export async function createReturnLabel(
     const unitWeight = Number(item.variant?.weight || item.product?.weight);
 
     if (!unitWeight || unitWeight <= 0) {
-      throw new Error(
-        `Missing or invalid weight for product "${item.product?.slug || item.productId}". Cannot generate return label.`
+      throw new AppError(
+        ErrorCode.SHIPPING_DATA_MISSING,
+        `Missing or invalid weight for product "${item.product?.slug || item.productId}". 0 Fallback Policy enforced.`,
+        400
       );
     }
 
@@ -152,11 +148,15 @@ export async function createReturnLabel(
       contentsExplanation: 'Customer return',
       nonDeliveryOption: 'RETURN' as const,
       certify: true,
-      certifySigner: customerAddress.name,
+      certifySigner: customerAddress.name!, // Guaranteed by validateAddress
       items: order.items.map(item => {
         const product = item.product;
         if (!product) {
-          throw new Error(`Product data missing for item ${item.id}`);
+          throw new AppError(
+            ErrorCode.NOT_FOUND,
+            `Product data missing for item ${item.id}`,
+            404
+          );
         }
 
         const unitWeight = Number(item.variant?.weight || product.weight);
@@ -186,7 +186,11 @@ export async function createReturnLabel(
     );
 
     if (!shipment.rates || shipment.rates.length === 0) {
-      throw new Error('No return rates found');
+      throw new AppError(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        'No return rates found from shipping carrier.',
+        502
+      );
     }
 
     // Sort rates by amount to find the cheapest
@@ -212,9 +216,12 @@ export async function createReturnLabel(
     )) as unknown as ShippoTransaction;
 
     if (transaction.status !== 'SUCCESS') {
-      throw new Error(
-        'Failed to purchase return label: ' +
-          (transaction.messages?.[0]?.text || 'Unknown error')
+      const shippoMsg =
+        transaction.messages?.[0]?.text || 'Unknown carrier error';
+      throw new AppError(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        `Failed to purchase return label: ${shippoMsg}`,
+        502
       );
     }
 
@@ -235,8 +242,10 @@ export async function createReturnLabel(
       const finalLabelUrl = transaction.labelUrl || transaction.label_url;
 
       if (!finalLabelUrl) {
-        throw new Error(
-          "Shippo a confirmé l'achat mais n'a pas renvoyé d'URL pour le PDF. Veuillez réessayer ou vérifier sur Shippo."
+        throw new AppError(
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+          'Carrier confirmed purchase but did not return a label URL.',
+          502
         );
       }
 
@@ -248,8 +257,7 @@ export async function createReturnLabel(
       const emailHtml = await render(
         OrderReturnLabelEmail({
           orderId: order.orderNumber,
-          customerName:
-            addr.name?.split(' ')[0] || order.user?.firstName || 'Client',
+          customerName: addr.name?.split(' ')[0] || order.user?.firstName || '',
           labelUrl: finalLabelUrl,
           locale: order.language.toLowerCase(),
         })
@@ -276,14 +284,12 @@ export async function createReturnLabel(
     }
 
     return transaction;
-  } catch (err: any) {
-    logger.error({ err: err.message, orderId }, 'Error in createReturnLabel');
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    logger.error({ err: msg, orderId }, 'Error in createReturnLabel');
     throw err;
   }
 }
-
-import { SHIPPING_VARIANT_INCLUDE } from '@/lib/services/shipping/shipping.repository';
-import { ShippingService } from '@/lib/services/shipping/shipping.service';
 
 /**
  * Prévisualise les tarifs d'expédition pour une commande
@@ -304,7 +310,11 @@ export async function previewShippingRates(orderId: string) {
   });
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(
+      ErrorCode.NOT_FOUND,
+      `Order findUnique returned null for ${orderId}`,
+      404
+    );
   }
 
   // Dynamic Rate Calculation
@@ -315,13 +325,13 @@ export async function previewShippingRates(orderId: string) {
       quantity: item.quantity,
     }));
 
-  const addressToRaw = order.shippingAddress as unknown as ShippingAddress;
-  const addressTo = {
-    ...addressToRaw,
-    zip: (addressToRaw.zip || addressToRaw.postalCode || '').toString(),
-    country: (addressToRaw.country || '').toString(),
-    email: (order.orderEmail || '').toString(),
-  };
+  const addressTo = ShippingService.validateAddress(
+    {
+      ...(order.shippingAddress as unknown as ShippingAddress),
+      email: order.orderEmail,
+    },
+    `Order Preview: ${order.orderNumber}`
+  );
 
   // Use ShippingService.getShippingRates to match user flow logic
   const rates = await ShippingService.getShippingRates(undefined, {
@@ -330,7 +340,11 @@ export async function previewShippingRates(orderId: string) {
   });
 
   if (!rates || rates.length === 0) {
-    throw new Error('No shipping rates found');
+    throw new AppError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      'No shipping rates found matching your criteria.',
+      404
+    );
   }
 
   return rates;
@@ -361,13 +375,17 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
   });
 
   if (!order) {
-    throw new Error('Order not found');
+    throw new AppError(ErrorCode.NOT_FOUND, `Order not found: ${orderId}`, 404);
   }
 
   // Check if shipment already exists with tracking
   const existingShipment = order.shipments.find(s => s.trackingCode);
   if (existingShipment) {
-    throw new Error('Label already exists');
+    throw new AppError(
+      ErrorCode.VALIDATION_ERROR,
+      'A shipping label already exists for this order.',
+      400
+    );
   }
 
   // RECALCULATION LOGIC: Use ShippingService if rate is missing or expired
@@ -381,13 +399,13 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
         quantity: item.quantity,
       }));
 
-    const addressToRaw = order.shippingAddress as unknown as ShippingAddress;
-    const addressTo = {
-      ...addressToRaw,
-      zip: (addressToRaw.zip || addressToRaw.postalCode || '').toString(),
-      country: (addressToRaw.country || '').toString(),
-      email: (order.orderEmail || '').toString(),
-    };
+    const addressTo = ShippingService.validateAddress(
+      {
+        ...(order.shippingAddress as unknown as ShippingAddress),
+        email: order.orderEmail,
+      },
+      `Label Purchase: ${order.orderNumber}`
+    );
 
     const rates = await ShippingService.getShippingRates(undefined, {
       addressTo,
@@ -399,12 +417,20 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
       const cheapestRate = rates[0] as ShippingRate;
       rateId = cheapestRate.object_id || cheapestRate.objectId;
     } else {
-      throw new Error('Could not calculate new shipping rates');
+      throw new AppError(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        'Could not recalculate shipping rates (0 Fallback Policy).',
+        502
+      );
     }
   }
 
   if (!rateId) {
-    throw new Error('Rate ID missing and recalculation failed');
+    throw new AppError(
+      ErrorCode.SHIPPING_DATA_MISSING,
+      'Rate ID is required to purchase a label.',
+      400
+    );
   }
 
   // Purchase the label
@@ -413,10 +439,12 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
   )) as unknown as ShippoTransaction;
 
   if (transaction.status !== 'SUCCESS') {
+    const errorMsg = transaction.messages?.[0]?.text || 'Unknown carrier error';
     logger.error({ transaction, rateId }, 'Shippo transaction failed');
-    throw new Error(
-      'Failed to purchase label: ' +
-        (transaction.messages?.[0]?.text || 'Unknown error')
+    throw new AppError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      `Failed to purchase label: ${errorMsg}`,
+      502
     );
   }
 
@@ -425,9 +453,9 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
   const labelUrl = transaction.label_url || transaction.labelUrl;
 
   // Safely extract provider from rate if it's an object
-  let carrier = 'Shippo';
+  let carrier = 'Carrier';
   if (transaction.rate && typeof transaction.rate === 'object') {
-    carrier = (transaction.rate as any).provider || 'Shippo';
+    carrier = (transaction.rate as ShippingRate).provider || 'Carrier';
   } else if (transaction.provider) {
     carrier = transaction.provider;
   }

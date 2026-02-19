@@ -4,6 +4,7 @@
  */
 
 import { prisma } from '@/lib/core/db';
+import { Prisma, Language, Order, Product } from '@/generated/prisma';
 import { CreateProductSchema } from '@/lib/validators/product';
 import { createLocationSchema } from '@/lib/validators/admin';
 import { updateIntentSchema } from '@/lib/validators/checkout';
@@ -47,7 +48,7 @@ export async function seedTestSupplier() {
         contactEmail: validatedData.address.email,
         contactPhone: validatedData.address.phone,
         incoterm: validatedData.incoterm,
-        address: validatedData.address as any,
+        address: validatedData.address as Prisma.InputJsonValue,
       },
     });
   }
@@ -61,7 +62,7 @@ export async function seedTestSupplier() {
       isActive: true,
       contactEmail: validatedData.address.email,
       contactPhone: validatedData.address.phone,
-      address: validatedData.address as any,
+      address: validatedData.address as Prisma.InputJsonValue,
       defaultCurrency: 'CAD',
       incoterm: validatedData.incoterm,
       defaultShippingDays: 3,
@@ -129,7 +130,7 @@ export async function getOrCreateTestProduct(
       exportExplanation: validatedData.exportExplanation,
       translations: {
         create: validatedData.translations.map(t => ({
-          language: t.language.toUpperCase() as any, // DB uses 'EN', Zod uses 'en'
+          language: t.language.toUpperCase() as Language, // DB uses 'EN', Zod uses 'en'
           name: t.name,
           description: t.description,
         })),
@@ -247,10 +248,11 @@ export async function resetTestOrders(testEmail: string) {
     });
     console.log('✅ Stale orders deleted.');
     // ...existing code...
-  } catch (err: any) {
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     console.warn(
       '⚠️ Failed to delete stale orders (likely foreign key constraints):',
-      err.message
+      message
     );
   }
 }
@@ -362,7 +364,7 @@ export async function createTestOrder(
 export async function verifyOrderCreated(
   email: string,
   maxAttempts = 20
-): Promise<any> {
+): Promise<Order | null> {
   console.log(`🔍 Polling DB for order created by ${email}...`);
   for (let i = 0; i < maxAttempts; i++) {
     const order = await prisma.order.findFirst({
@@ -388,7 +390,7 @@ export async function verifyProductCreated(
   slug: string,
   status = 'ACTIVE',
   maxAttempts = 20
-): Promise<any> {
+): Promise<Product | null> {
   console.log(`🔍 Polling DB for product slug: ${slug}...`);
   for (let i = 0; i < maxAttempts; i++) {
     const product = await prisma.product.findUnique({

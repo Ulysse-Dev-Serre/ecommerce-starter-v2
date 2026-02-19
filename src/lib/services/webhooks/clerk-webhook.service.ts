@@ -1,10 +1,9 @@
-import { UserRole, User } from '@/generated/prisma';
+import { User } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
 import { UserClerkService } from '../users/user-clerk.service';
 import {
-  userCreatedSchema,
-  userUpdatedSchema,
-  userDeletedSchema,
+  ClerkUserCreatedEvent,
+  ClerkUserUpdatedEvent,
 } from '@/lib/validators/clerk-webhook';
 import { ClerkWebhookEventData } from '@/lib/types/domain/webhook';
 
@@ -14,7 +13,7 @@ import { ClerkWebhookEventData } from '@/lib/types/domain/webhook';
 export async function handleUserCreated(
   eventData: ClerkWebhookEventData
 ): Promise<User> {
-  return UserClerkService.handleUserCreated(eventData as any);
+  return UserClerkService.handleUserCreated(eventData as ClerkUserCreatedEvent);
 }
 
 /**
@@ -23,7 +22,7 @@ export async function handleUserCreated(
 export async function handleUserUpdated(
   eventData: ClerkWebhookEventData
 ): Promise<User> {
-  return UserClerkService.handleUserUpdated(eventData as any);
+  return UserClerkService.handleUserUpdated(eventData as ClerkUserUpdatedEvent);
 }
 
 /**

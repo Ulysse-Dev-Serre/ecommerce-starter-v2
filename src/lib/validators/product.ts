@@ -135,7 +135,7 @@ export const UpdateProductSchema = z.object({
         }),
     ])
     .optional(),
-  dimensions: DimensionsSchema.partial().optional(),
+  dimensions: DimensionsSchema.optional(),
   translations: z.array(ProductTranslationSchema).optional(),
 });
 

@@ -19,6 +19,7 @@ import {
   OrderWithIncludes,
   OrderItem,
   OrderPayment,
+  Address,
 } from '@/lib/types/domain/order';
 import { sendStatusChangeEmail } from './order-notifications.service';
 
@@ -68,19 +69,19 @@ function mapToOrderWithIncludes(
 ): OrderWithIncludes {
   return {
     ...order,
-    shippingAddress: order.shippingAddress as any,
-    billingAddress: order.billingAddress as any,
+    shippingAddress: order.shippingAddress as unknown as Address,
+    billingAddress: order.billingAddress as unknown as Address,
     subtotalAmount: Number(order.subtotalAmount),
     taxAmount: Number(order.taxAmount),
     shippingAmount: Number(order.shippingAmount),
     discountAmount: Number(order.discountAmount),
     totalAmount: Number(order.totalAmount),
-    items: order.items.map(item => ({
+    items: (order.items?.map(item => ({
       ...item,
       variantId: item.variantId,
       unitPrice: Number(item.unitPrice),
       totalPrice: Number(item.totalPrice),
-    })) as OrderItem[],
+    })) || []) as OrderItem[],
     payments: (order.payments?.map(payment => ({
       ...payment,
       amount: Number(payment.amount),
@@ -379,11 +380,13 @@ export async function updateOrderStatus(params: {
   });
 
   // 4. Envoyer l'email de notification (Fire & Forget)
-  sendStatusChangeEmail(updatedOrder as any, newStatus).catch(
-    (error: unknown) => {
-      console.error('Failed to send status change email:', error);
-    }
+  // Casting to expected type for the notification service
+  const emailPayload = mapToOrderWithIncludes(
+    updatedOrder as PrismaOrderWithIncludes
   );
+  sendStatusChangeEmail(emailPayload, newStatus).catch((error: unknown) => {
+    console.error('Failed to send status change email:', error);
+  });
 
   return updatedOrder;
 }

@@ -9,11 +9,17 @@ interface ProductVariantsManagerProps {
   newVariants: NewVariant[];
   setNewVariants: (data: NewVariant[]) => void;
   productId?: string;
-  onUpdateVariant: (id: string, updates: any) => Promise<void>;
+  onUpdateVariant: (
+    id: string,
+    updates: {
+      prices?: Record<string, number>;
+      stock?: number;
+    }
+  ) => Promise<void>;
   onDeleteVariant: (id: string, name: string) => Promise<void>;
   onSaveNewVariants: () => Promise<void>;
   locale: string;
-  t: (key: string) => string;
+  t: (key: string, values?: any) => string;
   tc: (key: string) => string;
 }
 
@@ -34,7 +40,7 @@ export function ProductVariantsManager({
       return variant.sku;
     const translation =
       variant.attributeValues[0].attributeValue.translations.find(
-        (tr: any) => tr.language === locale.toUpperCase()
+        tr => tr.language.toUpperCase() === locale.toUpperCase()
       );
     return (
       translation?.displayName ||
@@ -59,10 +65,6 @@ export function ProductVariantsManager({
       names: initialNames,
       prices: initialPrices,
       stock: '0',
-      weight: '',
-      length: '',
-      width: '',
-      height: '',
     };
     setNewVariants([...newVariants, newVariant]);
   };
@@ -123,7 +125,7 @@ export function ProductVariantsManager({
                   <th className="admin-table-th text-right">{t('actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="admin-divider admin-bg-card">
                 {variants.map(variant => (
                   <tr key={variant.id} className="admin-table-tr">
                     <td className="admin-table-td font-medium">
@@ -138,9 +140,8 @@ export function ProductVariantsManager({
                           type="number"
                           step="0.01"
                           defaultValue={
-                            variant.pricing.find(
-                              (p: any) => p.currency === curr
-                            )?.price || ''
+                            variant.pricing.find(p => p.currency === curr)
+                              ?.price || ''
                           }
                           onBlur={e =>
                             e.target.value &&
@@ -170,7 +171,7 @@ export function ProductVariantsManager({
                         onClick={() =>
                           onDeleteVariant(variant.id, getVariantName(variant))
                         }
-                        className="text-red-600 hover:text-red-900"
+                        className="admin-text-danger"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -201,18 +202,15 @@ export function ProductVariantsManager({
         {newVariants.length > 0 && (
           <div className="space-y-4">
             {newVariants.map((variant, index) => (
-              <div
-                key={variant.id}
-                className="rounded-lg border border-gray-200 bg-gray-50 p-4"
-              >
+              <div key={variant.id} className="admin-card-subtle">
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="font-medium text-gray-900">
+                  <h3 className="font-medium admin-text-main">
                     {t('variant')} #{index + 1}
                   </h3>
                   <button
                     type="button"
                     onClick={() => handleDeleteNewVariant(variant.id)}
-                    className="text-red-600 hover:text-red-900"
+                    className="admin-text-danger"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -220,7 +218,7 @@ export function ProductVariantsManager({
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {SUPPORTED_LOCALES.map((loc: string) => (
                     <div key={loc}>
-                      <label className="block text-sm font-medium text-gray-700 uppercase">
+                      <label className="admin-label uppercase">
                         {t('productName')} ({loc}) *
                       </label>
                       <input
@@ -242,7 +240,7 @@ export function ProductVariantsManager({
                   ))}
                   {SUPPORTED_CURRENCIES.map((curr: string) => (
                     <div key={curr}>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="admin-label">
                         {t('price')} ({curr})
                       </label>
                       <input
@@ -263,9 +261,7 @@ export function ProductVariantsManager({
                     </div>
                   ))}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {t('stock')}
-                    </label>
+                    <label className="admin-label">{t('stock')}</label>
                     <input
                       type="number"
                       name="variantStock"

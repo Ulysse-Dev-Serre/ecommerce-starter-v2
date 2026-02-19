@@ -6,17 +6,16 @@ import {
   CustomsDeclaration,
 } from '@/lib/integrations/shippo';
 import { logger } from '@/lib/core/logger';
-import { env } from '@/lib/core/env';
 import { convertCurrency } from '@/lib/utils/currency';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   SITE_CURRENCY,
   SHIPPING_UNITS,
-  DEFAULT_SHIPPING_INCOTERM,
   SHIPPING_PROVIDERS_FILTER,
   SHIPPING_STRATEGIES,
+  COUNTRY_TO_CURRENCY,
 } from '@/lib/config/site';
-import { PackingService, PackableItem } from './packing.service';
+import { PackingService, PackableItem, PackedParcel } from './packing.service';
 import { ShippingItem, ShippingRepository } from './shipping.repository';
 import { CustomsService } from './customs.service';
 
@@ -26,7 +25,7 @@ export interface CalculateRatesResult {
   parcels: Parcel[];
   rates: ShippingRate[];
   customsDeclaration?: CustomsDeclaration;
-  packingResult: any;
+  packingResult: PackedParcel[];
 }
 
 /**
@@ -46,12 +45,12 @@ export class ShippingService {
       { cartId, addressTo: data.addressTo },
       'Service received shipping rates request'
     );
-    const { addressTo, items: bodyItems } = data;
-
-    // Standardize zip code
-    if (addressTo.zip) {
-      addressTo.zip = addressTo.zip.replace(/\s+/g, '');
-    }
+    const { items: bodyItems } = data;
+    // 0. Standardize and validate destination address early
+    const addressTo = this.validateAddress(
+      data.addressTo,
+      'Destination Address'
+    );
 
     // 1. Resolve shipping items (Enriched from Prisma via Repository)
     const shippingItems = await ShippingRepository.resolveItems(
@@ -93,21 +92,24 @@ export class ShippingService {
       );
     }
 
-    // 0. Sanitize destination address (ensure no nulls from DB)
+    // 0. Sanitize and Normalize destination address (SSOT)
     addressTo = this.validateAddress(addressTo, 'Destination Address');
-
-    // Standardize zip code
-    if (addressTo.zip) {
-      addressTo.zip = addressTo.zip.replace(/\s+/g, '');
-    }
 
     // 1. Resolve Origin Address & Incoterm
     const firstProduct = items[0].variant.product;
     let originAddress: Address;
-    let originIncoterm = DEFAULT_SHIPPING_INCOTERM;
+    let originIncoterm: string; // Zero Fallback: No default here, must be resolved from origin or fail
 
     if (firstProduct?.shippingOrigin) {
       const originData = firstProduct.shippingOrigin;
+      if (!originData.address || typeof originData.address !== 'object') {
+        throw new AppError(
+          ErrorCode.SHIPPING_DATA_MISSING,
+          `Origin address is invalid or missing for location: ${originData.name}. 0 Fallback Policy enforced.`,
+          400
+        );
+      }
+
       originAddress = this.validateAddress(
         { ...(originData.address as object), name: originData.name },
         `Shipping Origin: ${originData.name}`
@@ -210,7 +212,7 @@ export class ShippingService {
       logger.info(
         {
           ratesCount: shipment.rates?.length || 0,
-          shipmentId: (shipment as any).object_id,
+          shipmentId: (shipment as Record<string, unknown>).object_id,
         },
         'Shippo Integration responded successfully'
       );
@@ -222,15 +224,23 @@ export class ShippingService {
         packingResult: packedParcelsResult,
       };
     } catch (shippoError) {
+      const errorMessage =
+        shippoError instanceof Error
+          ? shippoError.message
+          : 'Unknown Shippo error';
       logger.error(
         {
-          error:
-            shippoError instanceof Error ? shippoError.message : 'Shippo Error',
+          error: errorMessage,
           details: shippoError,
         },
         'Shippo Integration call failed'
       );
-      throw shippoError;
+
+      throw new AppError(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        `Shipping carrier integration failed: ${errorMessage}`,
+        502
+      );
     }
   }
 
@@ -330,10 +340,11 @@ export class ShippingService {
   }
 
   /**
-   * Strict validation for Address objects.
+   * Strict validation and normalization for Address objects.
+   * Handles multiple incoming formats (Stripe line1, Prisma postalCode, etc.)
    * Throws AppError if required fields are missing.
    */
-  private static validateAddress(data: any, source: string): Address {
+  public static validateAddress(data: unknown, source: string): Address {
     if (!data || typeof data !== 'object') {
       throw new AppError(
         ErrorCode.SHIPPING_DATA_MISSING,
@@ -342,33 +353,65 @@ export class ShippingService {
       );
     }
 
-    // Map postalCode to zip if missing
-    if (!data.zip && data.postalCode) {
-      data.zip = data.postalCode;
+    const d = data as Record<string, unknown>;
+
+    // 1. Normalize Fields from common sources (Stripe, Prisma, DB)
+    const normalized: Record<string, any> = { ...d };
+
+    // Zip / Postal code
+    if (!normalized.zip) {
+      normalized.zip = d.zip || d.zipCode || d.postalCode || d.postal_code;
     }
 
+    // Street / Line
+    if (!normalized.street1) {
+      normalized.street1 = d.street1 || d.line1;
+    }
+    if (!normalized.street2) {
+      normalized.street2 = d.street2 || d.line2;
+    }
+
+    // Name
+    if (!normalized.name && (d.firstName || d.lastName)) {
+      normalized.name = `${d.firstName || ''} ${d.lastName || ''}`.trim();
+    }
+
+    // 2. Validate Required Fields
     const required = ['street1', 'city', 'country', 'zip', 'name'];
     for (const field of required) {
-      if (!data[field]) {
+      if (!normalized[field]) {
         throw new AppError(
           ErrorCode.SHIPPING_DATA_MISSING,
-          `Incomplete address from ${source}. Missing required field: ${field}.`,
+          `Incomplete address from ${source}. Missing required field: ${field}. (Zero Fallback Policy)`,
           400
         );
       }
     }
 
+    // Country-specific validation for State/Province (Dynamic via site.ts)
+    const country = String(normalized.country).toUpperCase();
+    const isSupportedRegionalMarket =
+      Object.keys(COUNTRY_TO_CURRENCY).includes(country);
+
+    if (isSupportedRegionalMarket && !normalized.state) {
+      throw new AppError(
+        ErrorCode.SHIPPING_DATA_MISSING,
+        `State/Province is required for ${country} addresses (Regional Market) in ${source}. (Zero Fallback Policy)`,
+        400
+      );
+    }
+
     return {
-      name: String(data.name),
-      company: data.company ? String(data.company) : '',
-      street1: String(data.street1),
-      street2: data.street2 ? String(data.street2) : '',
-      city: String(data.city),
-      state: data.state ? String(data.state) : '',
-      zip: String(data.zip),
-      country: String(data.country),
-      phone: data.phone ? String(data.phone) : '',
-      email: data.email ? String(data.email) : '',
-    };
+      name: String(normalized.name),
+      company: normalized.company ? String(normalized.company) : undefined,
+      street1: String(normalized.street1),
+      street2: normalized.street2 ? String(normalized.street2) : undefined,
+      city: String(normalized.city),
+      state: normalized.state ? String(normalized.state) : undefined,
+      zip: String(normalized.zip).replace(/\s+/g, ''), // Standardize zip
+      country,
+      phone: normalized.phone ? String(normalized.phone) : undefined,
+      email: normalized.email ? String(normalized.email) : undefined,
+    } as Address;
   }
 }

@@ -12,9 +12,9 @@ import {
  * Dimensions d'un produit
  */
 export interface Dimensions {
-  length: number | null | undefined;
-  width: number | null | undefined;
-  height: number | null | undefined;
+  length: number;
+  width: number;
+  height: number;
 }
 
 /**
@@ -122,16 +122,16 @@ export interface ProductProjection {
  */
 export interface CreateProductData {
   slug: string;
-  status?: ProductStatus;
-  isFeatured?: boolean;
-  sortOrder?: number;
-  originCountry?: string;
-  hsCode?: string;
-  exportExplanation?: string;
-  shippingOriginId?: string;
-  weight?: number;
-  dimensions?: Dimensions;
-  translations?: {
+  status: ProductStatus;
+  isFeatured: boolean;
+  sortOrder: number;
+  originCountry: string;
+  hsCode: string;
+  exportExplanation: string;
+  shippingOriginId: string;
+  weight: number;
+  dimensions: Dimensions;
+  translations: {
     language: Language;
     name: string;
     description?: string;

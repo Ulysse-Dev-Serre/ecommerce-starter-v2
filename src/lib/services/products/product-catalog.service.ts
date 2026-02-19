@@ -76,8 +76,8 @@ export async function getProducts(
       `Sorting by ${sortBy} not supported, falling back to createdAt`
     );
     orderBy.createdAt = (options.sortOrder ?? 'desc') as Prisma.SortOrder;
-  } else {
-    (orderBy as any)[sortBy] = options.sortOrder ?? 'desc';
+  } else if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
+    orderBy[sortBy] = (options.sortOrder ?? 'desc') as Prisma.SortOrder;
   }
 
   const includeAttributes = options.includeAttributes ?? false;

@@ -23,7 +23,7 @@ interface OrderShippedEmailProps {
     street: string;
     city: string;
     state: string;
-    postalCode: string;
+    zip: string;
     country: string;
   };
   locale: string;
@@ -108,7 +108,7 @@ export const OrderShippedEmail = ({
               {shippingAddress.street}
               <br />
               {shippingAddress.city}, {shippingAddress.state}{' '}
-              {shippingAddress.postalCode}
+              {shippingAddress.zip}
               <br />
               {shippingAddress.country}
             </Text>

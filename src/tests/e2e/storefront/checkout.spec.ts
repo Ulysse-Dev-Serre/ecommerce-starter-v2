@@ -224,6 +224,7 @@ async function fillStripeCard(
 // ─── Test Suite ─────────────────────────────────────────────
 
 test.describe('Checkout and Payment Flow', () => {
+  test.describe.configure({ mode: 'serial' });
   let testSupplierId: string;
   const testEmail = process.env.TEST_ADMIN_EMAIL || 'test@yopmail.com';
 

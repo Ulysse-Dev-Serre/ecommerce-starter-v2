@@ -9,7 +9,7 @@ import { AppError, ErrorCode } from '@/lib/types/api/errors';
  */
 export const SHIPPING_VARIANT_INCLUDE =
   Prisma.validator<Prisma.ProductVariantInclude>()({
-    pricing: { orderBy: { validFrom: 'desc' } as any, take: 1 },
+    pricing: { orderBy: { validFrom: 'desc' as Prisma.SortOrder }, take: 1 },
     product: {
       include: {
         translations: true,

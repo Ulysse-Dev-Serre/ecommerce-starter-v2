@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import Stripe from 'stripe';
+import { Product } from '@/generated/prisma';
 import {
   getTestSupplierId,
   getOrCreateTestProduct,
@@ -22,11 +23,11 @@ import {
 test.describe('Full API Checkout Flow (Shippo + Stripe + Resend)', () => {
   let testSupplierId: string;
   let testVariantId: string;
-  let testProduct: any;
+  let testProduct: Product & { variants: any[] }; // still need any for variants if we don't define the full include type, but let's try Product first
   const testEmail = process.env.TEST_ADMIN_EMAIL || 'agtechnest@gmail.com';
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2024-12-18.acacia' as any,
+    apiVersion: '2024-12-18.acacia' as Stripe.LatestApiVersion,
   });
 
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
@@ -163,6 +164,8 @@ test.describe('Full API Checkout Flow (Shippo + Stripe + Resend)', () => {
     console.log('');
 
     expect(order).not.toBeNull();
+    if (!order) return; // Should not happen due to expect above
+
     console.log(`🎉 SUCCESS! Order ${order.orderNumber} created and PAID.`);
     console.log(
       `✅ Verified: The real Stripe signal reached your server through ngrok!`

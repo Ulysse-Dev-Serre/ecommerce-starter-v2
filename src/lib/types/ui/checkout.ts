@@ -13,7 +13,7 @@ export interface CheckoutAddress {
   line2?: string;
   city: string;
   state: string;
-  postal_code: string;
+  zip: string;
   country: string;
 }
 

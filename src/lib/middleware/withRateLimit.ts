@@ -91,7 +91,10 @@ import { ApiHandler } from './types';
 export function withRateLimit(handler: ApiHandler, config: RateLimitConfig) {
   const rateLimiter = createRateLimiter(config);
 
-  return async (req: NextRequest, ...args: any[]): Promise<NextResponse> => {
+  return async (
+    req: NextRequest,
+    ...args: unknown[]
+  ): Promise<NextResponse> => {
     const limitResponse = await rateLimiter(req);
     if (limitResponse) return limitResponse;
 

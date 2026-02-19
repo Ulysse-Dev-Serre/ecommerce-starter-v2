@@ -96,13 +96,7 @@ export function OrderSummary({ order, locale, labels }: OrderSummaryProps) {
               <p>{shippingAddr?.line2 || shippingAddr?.street2}</p>
             )}
             <p>
-              {[
-                shippingAddr?.city,
-                shippingAddr?.state,
-                shippingAddr?.postal_code ||
-                  shippingAddr?.postalCode ||
-                  shippingAddr?.zip,
-              ]
+              {[shippingAddr?.city, shippingAddr?.state, shippingAddr?.zip]
                 .filter(Boolean)
                 .join(', ')}
             </p>
@@ -126,13 +120,7 @@ export function OrderSummary({ order, locale, labels }: OrderSummaryProps) {
               <p className="vibe-text-lg vibe-mb-2">{billingAddr.name}</p>
               <p>{billingAddr.line1 || billingAddr.street1}</p>
               <p>
-                {[
-                  billingAddr.city,
-                  billingAddr.state,
-                  billingAddr.postal_code ||
-                    billingAddr.postalCode ||
-                    billingAddr.zip,
-                ]
+                {[billingAddr.city, billingAddr.state, billingAddr.zip]
                   .filter(Boolean)
                   .join(', ')}
               </p>

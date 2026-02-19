@@ -146,9 +146,7 @@ export class ProductPage {
   async addVariant(price: string, stock: string) {
     await test.step(`Add Variant: Price=${price}, Stock=${stock}`, async () => {
       await this.page.locator('#addVariantBtn').click();
-      const variantContainer = this.page
-        .locator('div.rounded-lg.border.bg-gray-50')
-        .last();
+      const variantContainer = this.page.locator('.admin-card-subtle').last();
       await expect(variantContainer).toBeVisible({ timeout: 5000 });
 
       await variantContainer

@@ -33,7 +33,7 @@ interface OrderConfirmationEmailProps {
     street: string;
     city: string;
     state: string;
-    postalCode: string;
+    zip: string;
     country: string;
   };
   trackingNumber?: string;
@@ -139,7 +139,7 @@ export const OrderConfirmationEmail = ({
               {shippingAddress.street}
               <br />
               {shippingAddress.city}, {shippingAddress.state}{' '}
-              {shippingAddress.postalCode}
+              {shippingAddress.zip}
               <br />
               {shippingAddress.country}
             </Text>

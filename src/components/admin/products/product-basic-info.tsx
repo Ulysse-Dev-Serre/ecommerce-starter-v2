@@ -68,7 +68,7 @@ export function ProductBasicInfo({
         <div className="space-y-4">
           <div>
             <label className="admin-label">
-              {t('slug')} <span className="text-red-500">*</span>
+              {t('slug')} <span className="admin-text-required">*</span>
             </label>
             <input
               type="text"
@@ -156,7 +156,9 @@ export function ProductBasicInfo({
             <h2 className="mb-4 text-lg font-semibold admin-text-main">
               {lang.toUpperCase()}
               {lang === 'en' && (
-                <span className="ml-2 text-sm font-normal text-red-500">*</span>
+                <span className="ml-2 text-sm font-normal admin-text-required">
+                  *
+                </span>
               )}
             </h2>
 
@@ -164,7 +166,9 @@ export function ProductBasicInfo({
               <div>
                 <label className="admin-label" htmlFor={`product-name-${lang}`}>
                   {t('productName')}
-                  {lang === 'en' && <span className="text-red-500"> *</span>}
+                  {lang === 'en' && (
+                    <span className="admin-text-required"> *</span>
+                  )}
                 </label>
                 <input
                   id={`product-name-${lang}`}

@@ -4,6 +4,7 @@ import {
   CreatePaymentRecordInput,
   UpdatePaymentStatusInput,
 } from '@/lib/types/domain/payment';
+import { Prisma } from '@/generated/prisma';
 
 /**
  * Crée un enregistrement de paiement en base de données
@@ -32,7 +33,7 @@ export async function createPaymentRecord(
       method,
       externalId,
       status,
-      transactionData: transactionData as any,
+      transactionData: transactionData as Prisma.InputJsonValue,
       processedAt: new Date(),
     },
   });

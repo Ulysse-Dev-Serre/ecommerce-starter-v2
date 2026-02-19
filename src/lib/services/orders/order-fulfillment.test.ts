@@ -26,6 +26,7 @@ vi.mock('@/lib/core/db', () => ({
 vi.mock('@/lib/services/shipping/shipping.service', () => ({
   ShippingService: {
     getShippingRates: vi.fn(),
+    validateAddress: vi.fn(addr => addr),
   },
 }));
 
@@ -59,7 +60,7 @@ describe('OrderFulfillmentService', () => {
     it('should throw if order not found', async () => {
       vi.mocked(prisma.order.findUnique).mockResolvedValue(null);
       await expect(previewShippingRates('invalid')).rejects.toThrow(
-        'Order not found'
+        'Order findUnique returned null for invalid'
       );
     });
   });
@@ -99,7 +100,7 @@ describe('OrderFulfillmentService', () => {
       } as any);
 
       await expect(purchaseShippingLabel('ord_1', 'rate_123')).rejects.toThrow(
-        'Label already exists'
+        'A shipping label already exists for this order.'
       );
     });
 

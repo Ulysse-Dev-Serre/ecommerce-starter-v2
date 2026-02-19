@@ -60,19 +60,17 @@ export async function createProductAction(formData: FormData | unknown) {
       status: validatedData.status,
       isFeatured: validatedData.isFeatured,
       sortOrder: validatedData.sortOrder,
-      originCountry: validatedData.originCountry ?? undefined,
-      hsCode: validatedData.hsCode ?? undefined,
-      shippingOriginId: validatedData.shippingOriginId || undefined,
-      exportExplanation: validatedData.exportExplanation ?? undefined,
-      weight: validatedData.weight ?? undefined,
-      dimensions: validatedData.dimensions
-        ? {
-            length: validatedData.dimensions.length ?? undefined,
-            width: validatedData.dimensions.width ?? undefined,
-            height: validatedData.dimensions.height ?? undefined,
-          }
-        : undefined,
-      translations: validatedData.translations?.map(t => ({
+      originCountry: validatedData.originCountry,
+      hsCode: validatedData.hsCode,
+      shippingOriginId: validatedData.shippingOriginId,
+      exportExplanation: validatedData.exportExplanation,
+      weight: validatedData.weight,
+      dimensions: {
+        length: validatedData.dimensions.length,
+        width: validatedData.dimensions.width,
+        height: validatedData.dimensions.height,
+      },
+      translations: validatedData.translations.map(t => ({
         ...t,
         language: t.language.toUpperCase() as Language,
         description: t.description ?? undefined,
@@ -145,15 +143,15 @@ export async function updateProductAction(productId: string, rawData: unknown) {
     if (validatedData.dimensions !== undefined) {
       updateData.dimensions = validatedData.dimensions
         ? {
-            length: validatedData.dimensions.length,
-            width: validatedData.dimensions.width,
-            height: validatedData.dimensions.height,
+            length: Number(validatedData.dimensions.length),
+            width: Number(validatedData.dimensions.width),
+            height: Number(validatedData.dimensions.height),
           }
         : null;
     }
 
     if (validatedData.translations && validatedData.translations.length > 0) {
-      updateData.translations = validatedData.translations.map((t: any) => ({
+      updateData.translations = validatedData.translations.map(t => ({
         language: t.language.toUpperCase() as Language,
         name: t.name,
         description: t.description || null,
@@ -319,7 +317,10 @@ export async function reorderMediaAction(
 export async function updateVariantAction(
   productId: string,
   variantId: string,
-  payload: any
+  payload: {
+    prices?: Record<string, number>;
+    inventory?: { stock: number };
+  }
 ) {
   await requireAdmin();
   try {
@@ -345,10 +346,23 @@ export async function deleteVariantAction(
   }
 }
 
-export async function addVariantsAction(productId: string, variants: any[]) {
+export async function addVariantsAction(
+  productId: string,
+  variants: Array<{
+    names: Record<string, string>;
+    prices: Record<string, number | null>;
+    stock: number;
+  }>
+) {
   await requireAdmin();
   try {
-    await createSimpleVariants(productId, variants);
+    const payload = variants.map(v => ({
+      ...v,
+      prices: Object.fromEntries(
+        Object.entries(v.prices).map(([c, p]) => [c, p ?? 0])
+      ) as Record<string, number>,
+    }));
+    await createSimpleVariants(productId, payload);
     revalidatePath(`/admin/products/${productId}`);
     return { success: true };
   } catch (error) {

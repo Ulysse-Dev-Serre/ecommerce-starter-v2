@@ -43,14 +43,14 @@ const SENSITIVE_KEYS = [
 ];
 
 // Fonction récursive de nettoyage
-function redactSensitiveData(data: any): any {
+function redactSensitiveData(data: unknown): unknown {
   if (!data || typeof data !== 'object') return data;
 
   if (Array.isArray(data)) {
     return data.map(redactSensitiveData);
   }
 
-  const redacted = { ...data };
+  const redacted = { ...(data as Record<string, unknown>) };
 
   for (const key of Object.keys(redacted)) {
     const lowerKey = key.toLowerCase();

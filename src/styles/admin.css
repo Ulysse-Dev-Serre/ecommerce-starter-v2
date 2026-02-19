@@ -507,3 +507,128 @@
   color: var(--admin-text-main);
   white-space: nowrap;
 }
+
+/* --- Specialized Cards --- */
+.admin-card-tip {
+  background-color: rgba(239, 246, 255, 0.3); /* blue-50/30 */
+  border: 1px solid #dbeafe; /* blue-100 */
+}
+
+.admin-tip-title {
+  color: #1e3a8a; /* blue-900 */
+  font-weight: 600;
+}
+
+.admin-tip-text {
+  color: #1d4ed8; /* blue-700 */
+  line-height: 1.625;
+}
+
+.admin-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.75rem;
+}
+
+/* --- Typographie & Couleurs Spéciales --- */
+.admin-text-required {
+  color: var(--admin-error);
+}
+
+.admin-text-danger {
+  color: var(--admin-error);
+  transition: color 0.2s;
+}
+
+.admin-text-danger:hover {
+  filter: brightness(0.8);
+}
+
+.admin-card-subtle {
+  background-color: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.admin-divider {
+  border-top: 1px solid var(--admin-border);
+}
+
+/* --- Media & Interactivité --- */
+.admin-badge-success {
+  background-color: var(--admin-success);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-empty-state {
+  border: 2px dashed var(--admin-border);
+  padding: 2rem;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 0.75rem;
+}
+
+.admin-icon-btn-glass {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--admin-text-muted);
+  border: 1px solid var(--admin-border);
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-icon-btn-glass:hover {
+  background-color: white;
+  color: var(--admin-text-main);
+}
+
+.admin-icon-btn-danger {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-icon-btn-danger:hover {
+  background-color: rgb(185, 28, 28);
+}
+
+/* --- Overlays & Modales --- */
+.admin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  padding: 1rem;
+}
+
+.admin-modal-content {
+  width: 100%;
+  max-width: 28rem;
+  background-color: var(--admin-card-bg);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}

@@ -90,7 +90,7 @@ function SortableMediaItem({
       <div
         {...attributes}
         {...listeners}
-        className="absolute bottom-2 left-2 z-10 cursor-grab rounded-lg bg-white/90 p-1.5 text-gray-700 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing border border-gray-200 shadow-sm"
+        className="absolute bottom-2 left-2 z-10 opacity-0 transition-opacity group-hover:opacity-100 admin-icon-btn-glass cursor-grab active:cursor-grabbing"
       >
         <GripVertical className="h-4 w-4" />
       </div>
@@ -98,7 +98,7 @@ function SortableMediaItem({
         <button
           type="button"
           onClick={() => onEdit(item)}
-          className="rounded-lg bg-white/90 p-1.5 text-gray-700 hover:text-primary hover:bg-white shadow-sm"
+          className="admin-icon-btn-glass"
           title={labels.edit}
         >
           <Edit2 className="h-4 w-4" />
@@ -106,7 +106,7 @@ function SortableMediaItem({
         <button
           type="button"
           onClick={() => onDelete(item.id)}
-          className="rounded-lg bg-red-600/90 p-1.5 text-white hover:bg-red-700 shadow-sm"
+          className="admin-icon-btn-danger shadow-sm"
           title={labels.delete}
         >
           <Trash2 className="h-4 w-4" />
@@ -178,7 +178,7 @@ export function ProductMediaManager({
     return (
       <div className="admin-card">
         <h2 className="admin-section-title">{t('productMedia')}</h2>
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center bg-gray-50/50">
+        <div className="admin-empty-state">
           <ImageIcon className="mx-auto h-12 w-12 admin-text-subtle" />
           <p className="mt-2 text-sm admin-text-subtle">
             {t('uploadAfterSave')}
@@ -235,29 +235,31 @@ export function ProductMediaManager({
         </DndContext>
 
         {media.length === 0 && !uploading && (
-          <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center bg-gray-50/50">
-            <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-600">{t('noMediaYet')}</p>
+          <div className="admin-empty-state">
+            <ImageIcon className="mx-auto h-12 w-12 admin-text-subtle" />
+            <p className="mt-2 text-sm admin-text-subtle">{t('noMediaYet')}</p>
           </div>
         )}
       </div>
 
       {/* Edit Modal */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+        <div className="admin-overlay">
+          <div className="admin-modal-content">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold">{tc('edit')} Media SEO</h3>
+              <h3 className="text-lg font-bold admin-text-main">
+                {tc('edit')} Media SEO
+              </h3>
               <button
                 onClick={() => setEditingItem(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="admin-text-subtle hover:admin-text-main"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mb-4 flex justify-center">
-              <div className="relative h-40 w-40 overflow-hidden rounded-md border border-gray-200">
+              <div className="relative h-40 w-40 overflow-hidden rounded-md border admin-border-subtle">
                 <Image
                   src={editingItem.url}
                   alt="Preview"
@@ -269,7 +271,7 @@ export function ProductMediaManager({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="admin-label mb-1">
                   Alt Text (SEO description)
                 </label>
                 <input
@@ -283,9 +285,7 @@ export function ProductMediaManager({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title (Hover text)
-                </label>
+                <label className="admin-label mb-1">Title (Hover text)</label>
                 <input
                   type="text"
                   value={editForm.title}

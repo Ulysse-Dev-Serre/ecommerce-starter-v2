@@ -3,6 +3,8 @@ import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { VariantWithRelations } from '@/lib/types/domain/variant';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { i18n } from '@/lib/i18n/config';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 
 export const GENERIC_ATTRIBUTE_KEY = 'variant_type';
 
@@ -14,20 +16,13 @@ function toPrismaLanguage(locale: string): Language {
   if (Object.values(Language).includes(lang as Language)) {
     return lang as Language;
   }
-  return Language.EN;
+  return i18n.defaultLocale.toUpperCase() as Language;
 }
-
-const DEFAULT_VARIANT_NAMES: Record<string, string> = {
-  en: 'Variant',
-  fr: 'Variante',
-  es: 'Variante',
-  de: 'Variante',
-  it: 'Variante',
-};
 
 /**
  * Ensures a generic "variant_type" attribute exists.
  * Creates the attribute if it doesn't exist, otherwise returns it.
+ * Uses dynamic dictionnaires i18n to populate names.
  */
 export async function ensureGenericVariantAttribute() {
   let attribute = await prisma.productAttribute.findUnique({
@@ -43,6 +38,23 @@ export async function ensureGenericVariantAttribute() {
       'Creating generic attribute variant_type'
     );
 
+    // Load translations from dictionaries
+    const translations = await Promise.all(
+      SUPPORTED_LOCALES.map(async locale => {
+        const dict = await getDictionary(locale);
+        // Fallback hierarchy: "Variant type" (from detail) -> "Variant" -> locale name
+        const name =
+          dict.admin?.products?.primaryAttribute ||
+          dict.orders?.detail?.variant ||
+          'Variant';
+
+        return {
+          language: toPrismaLanguage(locale),
+          name: name,
+        };
+      })
+    );
+
     attribute = await prisma.productAttribute.create({
       data: {
         key: GENERIC_ATTRIBUTE_KEY,
@@ -50,10 +62,7 @@ export async function ensureGenericVariantAttribute() {
         isRequired: true,
         sortOrder: 0,
         translations: {
-          create: SUPPORTED_LOCALES.map(locale => ({
-            language: toPrismaLanguage(locale),
-            name: DEFAULT_VARIANT_NAMES[locale] || 'Variant',
-          })),
+          create: translations,
         },
       },
     });

@@ -26,6 +26,11 @@ import {
   getProductVariants,
   getProductMedia,
 } from '@/lib/client/admin/products';
+import {
+  CreateProductSchema,
+  UpdateProductSchema,
+} from '@/lib/validators/product';
+import { formatZodErrors } from '@/lib/validators';
 
 import { ProductBasicInfo } from './product-basic-info';
 import { ProductMediaManager } from './product-media-manager';
@@ -90,10 +95,6 @@ export interface NewVariant {
   names: Record<string, string>; // { en: "", fr: "" }
   prices: Record<string, string>;
   stock: string;
-  weight: string;
-  length: string;
-  width: string;
-  height: string;
 }
 
 interface ProductFormProps {
@@ -298,15 +299,16 @@ export function ProductForm({
     setSuccessMessage(null);
 
     try {
-      const payload = {
+      // 1. Préparation du payload brut pour validation
+      const rawPayload = {
         ...formData,
         translations: Object.entries(translations)
           .filter(([_, data]) => data.name && data.name.trim() !== '')
           .map(([lang, data]) => ({
             language: lang,
             name: data.name.trim(),
-            description: data.description || null,
-            shortDescription: data.shortDescription || null,
+            description: data.description || undefined,
+            shortDescription: data.shortDescription || undefined,
           })),
         dimensions: {
           length: formData.length,
@@ -315,13 +317,30 @@ export function ProductForm({
         },
       };
 
-      console.log('📦 Sending Product Payload:', payload);
+      // 2. Validation Client-side avec Zod
+      // On utilise le même schéma que le serveur pour une cohérence totale
+      const schema = productId ? UpdateProductSchema : CreateProductSchema;
+      const validation = schema.safeParse(rawPayload);
+
+      if (!validation.success) {
+        const errors = formatZodErrors(validation.error);
+        const errorsObj: Record<string, string> = {};
+        errors.forEach(err => {
+          errorsObj[err.field] = err.message;
+        });
+        setFieldErrors(errorsObj);
+        throw new Error(t('messages.validationError'));
+      }
+
+      // 3. Envoi des données validées
+      const validatedPayload = validation.data;
+      console.log('📦 Sending Validated Product Payload:', validatedPayload);
 
       let result;
       if (productId) {
-        result = await updateProductAction(productId, payload);
+        result = await updateProductAction(productId, validatedPayload);
       } else {
-        result = await createProductAction(payload);
+        result = await createProductAction(validatedPayload);
       }
 
       if (!result.success) {
@@ -360,20 +379,23 @@ export function ProductForm({
 
   const handleUpdateVariant = async (
     variantId: string,
-    updates: Partial<NewVariant> & {
-      prices?: Record<string, string>;
+    updates: {
+      prices?: Record<string, number>;
       stock?: number;
     }
   ) => {
     if (!productId) return;
     try {
       const payload: {
-        prices?: Record<string, string>;
+        prices?: Record<string, number>;
         inventory?: { stock: number };
       } = {};
-      if (updates.prices) payload.prices = updates.prices;
-      if (updates.stock !== undefined)
+      if (updates.prices) {
+        payload.prices = updates.prices;
+      }
+      if (updates.stock !== undefined) {
         payload.inventory = { stock: updates.stock };
+      }
 
       const result = await updateVariantAction(productId, variantId, payload);
       if (!result.success) throw new Error(result.error);
@@ -568,18 +590,14 @@ export function ProductForm({
             </div>
           </div>
 
-          <div className="admin-card bg-blue-50/30 border-blue-100">
-            <h3 className="text-sm font-semibold text-blue-900 mb-2">
-              {t('proTip')}
-            </h3>
-            <p className="text-xs text-blue-700 leading-relaxed">
-              {t('seoProTip')}
-            </p>
+          <div className="admin-card admin-card-tip">
+            <h3 className="text-sm admin-tip-title mb-2">{t('proTip')}</h3>
+            <p className="text-xs admin-tip-text">{t('seoProTip')}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between admin-card p-4">
+      <div className="admin-footer-bar">
         <Link
           href={`/${locale}/admin/products`}
           className="admin-btn-secondary"

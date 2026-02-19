@@ -9,7 +9,7 @@ import { NextResponse, NextRequest } from 'next/server';
  * Handler type pour les routes API Next.js
  * Accepte request et arguments optionnels (routeContext, authContext, validatedData, etc.)
  */
-export type ApiHandler<T = any> = (
+export type ApiHandler = (
   request: NextRequest,
-  ...args: any[]
+  ...args: unknown[]
 ) => Promise<NextResponse> | NextResponse;

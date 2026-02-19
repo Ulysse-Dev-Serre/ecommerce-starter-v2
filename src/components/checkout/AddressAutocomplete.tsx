@@ -7,19 +7,30 @@ declare global {
     google: {
       maps: {
         places: {
-          AutocompleteSessionToken: new () => any;
+          AutocompleteSessionToken: new () => google.maps.places.AutocompleteSessionToken;
           AutocompleteSuggestion: {
             fetchAutocompleteSuggestions: (
-              config: any
+              config: google.maps.places.AutocompleteOptions
             ) => Promise<{ suggestions: GoogleMapsSuggestion[] }>;
           };
-          Place: new (config: { id: string }) => {
-            fetchFields: (config: { fields: string[] }) => Promise<void>;
-            addressComponents: AddressComponent[];
-          };
+          Place: new (config: { id: string }) => google.maps.places.Place;
         };
       };
     };
+  }
+}
+
+// Add minimalist types if google.maps is not available in @types
+namespace google.maps.places {
+  export interface AutocompleteSessionToken {}
+  export interface AutocompleteOptions {
+    input: string;
+    sessionToken?: AutocompleteSessionToken | null;
+    includedRegionCodes?: string[];
+  }
+  export interface Place {
+    fetchFields: (config: { fields: string[] }) => Promise<void>;
+    addressComponents: AddressComponent[];
   }
 }
 
@@ -41,7 +52,7 @@ interface AddressAutocompleteProps {
     line1: string;
     city: string;
     state: string;
-    postal_code: string;
+    zip: string;
     country: string;
   }) => void;
   onInputChange: (value: string) => void;
@@ -61,7 +72,8 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 }) => {
   const [suggestions, setSuggestions] = useState<GoogleMapsSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const sessionTokenRef = useRef<any>(null);
+  const sessionTokenRef =
+    useRef<google.maps.places.AutocompleteSessionToken | null>(null);
 
   // Initialisation du Token de session (Places New)
   useEffect(() => {
@@ -161,7 +173,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           line1: streetAddress,
           city,
           state,
-          postal_code: zipCode,
+          zip: zipCode,
           country,
         });
 

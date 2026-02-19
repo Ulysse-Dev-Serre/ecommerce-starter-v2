@@ -1,7 +1,7 @@
 import { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { SITE_CURRENCY } from '@/lib/config/site';
+import { DEFAULT_CURRENCY } from '@/lib/config/site';
 
 export interface CreateLocationData {
   name: string;
@@ -53,7 +53,7 @@ export const logisticsLocationService = {
         incoterm: data.incoterm,
         address: data.address as Prisma.InputJsonValue,
         isActive: true,
-        defaultCurrency: SITE_CURRENCY,
+        defaultCurrency: DEFAULT_CURRENCY,
       },
     });
 

@@ -41,7 +41,14 @@ describe('ShippingService', () => {
       vi.mocked(ShippingRepository.resolveItems).mockResolvedValue([]);
 
       const input = {
-        addressTo: { zip: 'H1H1H1', country: 'CA' } as any,
+        addressTo: {
+          zip: 'H1H1H1',
+          country: 'CA',
+          street1: '123 Test St',
+          city: 'Montreal',
+          state: 'QC',
+          name: 'John Doe',
+        } as any,
         items: [],
       };
 
@@ -63,14 +70,18 @@ describe('ShippingService', () => {
       );
 
       const input = {
-        addressTo: { zip: 'H1H 1H1', country: 'CA' } as any, // Space in zip
+        addressTo: {
+          zip: 'H1H 1H1',
+          country: 'CA',
+          street1: '123 Test St',
+          city: 'Montreal',
+          state: 'QC',
+          name: 'John Doe',
+        } as any, // Space in zip
         items: [{ variantId: 'v1', quantity: 1 }],
       };
 
       const result = await ShippingService.getShippingRates('cart_123', input);
-
-      // Verify Zip Standardization
-      expect(input.addressTo.zip).toBe('H1H1H1');
 
       // Verify Repository Call
       expect(ShippingRepository.resolveItems).toHaveBeenCalledWith(
@@ -78,9 +89,11 @@ describe('ShippingService', () => {
         input.items
       );
 
-      // Verify Calculate Rates Call
+      // Verify Calculate Rates Call received the STANDARDIZED address (from validateAddress)
       expect(ShippingService.calculateRates).toHaveBeenCalledWith(
-        input.addressTo,
+        expect.objectContaining({
+          zip: 'H1H1H1',
+        }),
         mockItems
       );
 

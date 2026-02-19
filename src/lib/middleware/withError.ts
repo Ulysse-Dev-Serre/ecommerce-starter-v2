@@ -4,7 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 // Type helper for middleware handlers
-type AnyHandler = (...args: any[]) => Promise<NextResponse> | NextResponse;
+type AnyHandler = (...args: unknown[]) => Promise<NextResponse> | NextResponse;
 
 function isAppError(error: unknown): error is AppError {
   return (
@@ -17,7 +17,7 @@ function isAppError(error: unknown): error is AppError {
 }
 
 export function withError(handler: AnyHandler): AnyHandler {
-  return async (...args: any[]) => {
+  return async (...args: unknown[]) => {
     try {
       return await handler(...args);
     } catch (error) {
@@ -41,6 +41,30 @@ export function withError(handler: AnyHandler): AnyHandler {
             timestamp: new Date().toISOString(),
           },
           { status: appError.statusCode }
+        );
+      }
+
+      // 2. Gestion des erreurs de validation Zod (Fallback de sécurité)
+      const { ZodError } = await import('zod');
+      if (error instanceof ZodError) {
+        const { formatZodErrors } = await import('@/lib/validators');
+        logger.warn(
+          {
+            action: 'validation_error_fallback',
+            errors: error.flatten(),
+          },
+          'ZodError caught by withError fallback'
+        );
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: ErrorCode.VALIDATION_ERROR,
+            message: 'Validation failed',
+            details: formatZodErrors(error),
+            timestamp: new Date().toISOString(),
+          },
+          { status: 400 }
         );
       }
 

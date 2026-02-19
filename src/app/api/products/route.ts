@@ -52,8 +52,8 @@ async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
     {
       page: filters.page,
       limit: filters.limit,
-      sortBy: filters.sortBy as any, // Schema guarantees valid values
-      sortOrder: filters.sortOrder as any,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
     }
   );
 

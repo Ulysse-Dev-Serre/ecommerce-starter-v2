@@ -100,8 +100,9 @@ export async function cleanupAllE2EData(testEmail?: string) {
     }
 
     console.log('✅ E2E cleanup complete');
-  } catch (error: any) {
-    console.warn('⚠️ Cleanup encountered errors:', error.message);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn('⚠️ Cleanup encountered errors:', message);
   }
 }
 

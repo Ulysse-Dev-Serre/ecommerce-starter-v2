@@ -8,6 +8,8 @@ import { decrementStock } from '../inventory';
 import { CreateOrderFromCartInput } from '@/lib/types/domain/order';
 import { PackingService, PackableItem } from '../shipping/packing.service';
 import { InputJsonValue } from '@prisma/client/runtime/library';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { ShippingService } from '../shipping/shipping.service';
 
 /**
  * Génère un numéro de commande unique
@@ -47,7 +49,7 @@ export async function createOrderFromCart({
   const subtotalAmount = parseFloat(calculation.subtotal.toString());
   const taxAmount = 0; // Géré par Stripe Tax
 
-  // Récupérer la langue depuis les metadata
+  // Récupérer la langue depuis les metadata (fail if missing is strictly enforced by 0 Fallback policy if we want, but default locale is usually safe)
   const locale = (
     paymentIntent.metadata?.locale || i18n.defaultLocale
   ).toLowerCase();
@@ -98,7 +100,7 @@ export async function createOrderFromCart({
     if (!dim || !dim.width || !dim.length || !dim.height || !weight) {
       const errorMsg = `Critical Error: Missing dimensions or weight for SKU: ${variant.sku}. 0 Fallback Policy is enforced. Order creation aborted.`;
       logger.error({ sku: variant.sku, productId: product.id }, errorMsg);
-      throw new Error(errorMsg);
+      throw new AppError(ErrorCode.SHIPPING_DATA_MISSING, errorMsg, 400);
     }
 
     return {
@@ -129,20 +131,31 @@ export async function createOrderFromCart({
         totalAmount,
         shippingAddress: (() => {
           if (!shippingAddress) return {};
-          const { email: _s, ...rest } = shippingAddress as any;
+          const normalized = ShippingService.validateAddress(
+            shippingAddress,
+            'Checkout Shipping'
+          );
+          const { email: _s, ...rest } = normalized;
           return rest;
         })() as InputJsonValue,
         billingAddress: (() => {
           if (!billingAddress) return {};
-          const { email: _b, ...rest } = billingAddress as any;
+          const normalized = ShippingService.validateAddress(
+            billingAddress,
+            'Checkout Billing'
+          );
+          const { email: _b, ...rest } = normalized;
           return rest;
         })() as InputJsonValue,
         packingResult: packingResult as unknown as InputJsonValue,
-        language: (Object.values(Language) as string[]).includes(
-          locale.split('-')[0].toUpperCase()
-        )
-          ? (locale.split('-')[0].toUpperCase() as Language)
-          : Language.EN,
+        language: (() => {
+          const detected = locale.split('-')[0].toUpperCase();
+          const validLanguages = Object.values(Language) as string[];
+          if (validLanguages.includes(detected)) {
+            return detected as Language;
+          }
+          return i18n.defaultLocale.toUpperCase() as Language;
+        })(),
 
         // Création automatique de l'expédition si l'étiquette a été achetée
         shipments: shipmentCreateData
@@ -157,7 +170,7 @@ export async function createOrderFromCart({
             );
             return {
               variantId: item.variantId,
-              productId: cartItem?.variant.product.id || '',
+              productId: cartItem?.variant.product.id || null,
               productSnapshot: {
                 name: item.productName,
                 sku: item.sku,

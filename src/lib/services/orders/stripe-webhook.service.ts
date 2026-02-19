@@ -13,7 +13,13 @@ import {
   sendOrderConfirmationEmail,
   sendAdminNewOrderAlert,
 } from '@/lib/services/orders';
-import { Address, OrderWithIncludes } from '@/lib/types/domain/order';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import {
+  Address,
+  OrderWithIncludes,
+  OrderItem,
+} from '@/lib/types/domain/order';
+import { CartProjection } from '@/lib/types/domain/cart';
 
 export class StripeWebhookService {
   /**
@@ -44,11 +50,11 @@ export class StripeWebhookService {
     const items = parseStripeItems(metadata.items);
 
     if (!metadata.userId || items.length === 0) {
-      logger.warn(
-        { requestId, metadata },
-        'Missing critical metadata (userId or items)'
+      throw new AppError(
+        ErrorCode.VALIDATION_ERROR,
+        `Missing critical metadata: userId=${metadata.userId}, itemsCount=${items.length}`,
+        400
       );
-      return;
     }
 
     const paymentIntentId = session.payment_intent as string;
@@ -61,14 +67,22 @@ export class StripeWebhookService {
       return;
     }
 
+    if (!session.amount_total || !session.currency) {
+      throw new AppError(
+        ErrorCode.PAYMENT_FAILED,
+        `Missing amount or currency in Stripe Session: ${session.id}`,
+        400
+      );
+    }
+
     // Create Virtual Cart & Order
     await this.processOrderCreation(
       session.id,
       paymentIntentId,
       metadata.userId!,
       items,
-      session.amount_total || 0,
-      session.currency || 'eur',
+      session.amount_total,
+      session.currency,
       session.customer_details, // Address source for Session
       metadata,
       requestId,
@@ -115,20 +129,33 @@ export class StripeWebhookService {
 
     // Determine address source. For PaymentIntent, email is in receipt_email
     const shippingDetails =
-      paymentIntent.shipping || (paymentIntent as any).customer_details;
+      paymentIntent.shipping ||
+      (
+        paymentIntent as unknown as {
+          customer_details?: Stripe.Checkout.Session.CustomerDetails;
+        }
+      ).customer_details;
     const addressSource = {
       ...shippingDetails,
       email: paymentIntent.receipt_email, // IMPORTANT for PI
     };
 
+    if (!paymentIntent.amount || !paymentIntent.currency) {
+      throw new AppError(
+        ErrorCode.PAYMENT_FAILED,
+        `Missing amount or currency in PaymentIntent: ${paymentIntent.id}`,
+        400
+      );
+    }
+
     await this.processOrderCreation(
-      'pi_' + paymentIntent.id, // Virtual ID prefix
+      paymentIntent.id,
       paymentIntent.id,
       metadata.userId, // Can be undefined (Guest)
       items,
       paymentIntent.amount,
       paymentIntent.currency,
-      addressSource,
+      addressSource as Stripe.Checkout.Session.CustomerDetails,
       metadata,
       requestId,
       metadata.anonymousId,
@@ -271,9 +298,8 @@ export class StripeWebhookService {
         ? (addressSource as { email?: string | null }).email
         : undefined) || fullPaymentIntent?.receipt_email;
 
-    // 4. Create Order
     const order = (await createOrderFromCart({
-      cart: virtualCart as any,
+      cart: virtualCart as unknown as CartProjection,
       userId: userId || undefined,
       orderEmail: orderEmail,
       paymentIntent:
@@ -282,7 +308,7 @@ export class StripeWebhookService {
           id: paymentIntentId,
           amount: amountTotal,
           currency: currencyCode,
-          metadata: metadata as any,
+          metadata: metadata as Record<string, string>,
           receipt_email: orderEmail,
         } as Stripe.PaymentIntent),
       shippingAddress: shippingAddress as Address,
@@ -318,20 +344,26 @@ export class StripeWebhookService {
     // Stripe structures vary (shipping vs customer_details)
     // We expect a normalized "source" passed in (either customer_details or shipping)
     const addr = source.address;
-    if (!addr) return undefined;
+    if (!addr || !addr.line1 || !source.name || !addr.city || !addr.country) {
+      logger.error(
+        { source },
+        'Missing critical shipping information in Stripe webhook'
+      );
+      throw new Error('Critical shipping information missing');
+    }
 
     return {
-      name: source.name || '',
-      street1: addr.line1 || '',
+      name: source.name,
+      street1: addr.line1,
       street2: addr.line2 || undefined,
-      city: addr.city || '',
+      city: addr.city,
       state: addr.state || '',
-      postalCode: addr.postal_code || undefined,
-      country: addr.country || '',
-      firstName: source.name?.split(' ')[0] || '',
-      lastName: source.name?.split(' ').slice(1).join(' ') || '',
+      zip: addr.postal_code || '',
+      country: addr.country,
+      firstName: source.name.split(' ')[0] || '',
+      lastName: source.name.split(' ').slice(1).join(' ') || '',
       phone: source.phone || undefined,
-      email: (source as any).email || undefined,
+      email: (source as { email?: string }).email,
     };
   }
 
@@ -344,15 +376,19 @@ export class StripeWebhookService {
 
     try {
       const calculation = {
-        items: order.items.map((item: any) => ({
-          productName: item.productSnapshot?.name || 'Product',
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          lineTotal: item.totalPrice,
-          variantId: item.variantId,
-          sku: item.productSnapshot?.sku || '',
-          currency: item.currency,
-        })),
+        items: order.items.map((item: OrderItem) => {
+          const snapshot = item.productSnapshot as Record<string, unknown>;
+          return {
+            productName: (snapshot?.name as string) || 'Product',
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            lineTotal: item.totalPrice,
+            variantId: item.variantId,
+            sku: (snapshot?.sku as string) || '',
+            currency:
+              item.currency as import('@/lib/config/site').SupportedCurrency,
+          };
+        }),
       };
 
       await sendOrderConfirmationEmail(
