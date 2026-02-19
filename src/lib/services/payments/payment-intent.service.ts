@@ -6,11 +6,10 @@ import {
   PaymentIntentInput,
   PaymentIntentResult,
 } from '@/lib/types/domain/payment';
-import { CheckoutCurrency, CheckoutItem } from '@/lib/types/domain/checkout';
 import Stripe from 'stripe';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { env } from '@/lib/core/env';
-import { SupportedCurrency } from '@/lib/config/site';
+import { SupportedCurrency, DEFAULT_CURRENCY } from '@/lib/config/site';
 
 /**
  * Crée un PaymentIntent Stripe
@@ -67,11 +66,9 @@ export async function createPaymentIntent(
     }
 
     let pricing = variant.pricing.find(p => p.currency === currency);
-    // Fallback simple si devise non trouvée
-    if (!pricing) {
-      pricing = variant.pricing.find(
-        p => p.currency === (currency === 'CAD' ? 'USD' : 'CAD')
-      );
+    // Fallback to default currency from config if requested currency is not found
+    if (!pricing && currency !== DEFAULT_CURRENCY) {
+      pricing = variant.pricing.find(p => p.currency === DEFAULT_CURRENCY);
     }
 
     if (!pricing) {
@@ -141,7 +138,7 @@ export async function createPaymentIntent(
   );
 
   return {
-    clientSecret: paymentIntent.client_secret!,
+    clientSecret: paymentIntent.client_secret ?? '',
     paymentIntentId: paymentIntent.id,
     amount: totalAmount,
     currency,
@@ -246,7 +243,7 @@ export async function updatePaymentIntent(
         updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
           ...updatePayload,
           automatic_tax: { enabled: true },
-        } as any);
+        } as Stripe.PaymentIntentUpdateParams);
       } catch (taxError) {
         logger.warn(
           { error: taxError },

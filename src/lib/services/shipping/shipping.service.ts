@@ -356,7 +356,7 @@ export class ShippingService {
     const d = data as Record<string, unknown>;
 
     // 1. Normalize Fields from common sources (Stripe, Prisma, DB)
-    const normalized: Record<string, any> = { ...d };
+    const normalized: Record<string, unknown> = { ...d };
 
     // Zip / Postal code
     if (!normalized.zip) {

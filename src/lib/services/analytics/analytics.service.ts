@@ -29,7 +29,7 @@ export class AnalyticsService {
           eventName: data.eventName,
           path: data.path,
           anonymousId: data.anonymousId,
-          metadata: data.metadata as any,
+          metadata: data.metadata ?? {},
           userId: dbUserId,
           utmSource: data.utmSource,
           utmMedium: data.utmMedium,

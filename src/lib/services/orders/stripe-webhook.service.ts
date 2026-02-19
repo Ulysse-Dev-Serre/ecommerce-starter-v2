@@ -79,7 +79,7 @@ export class StripeWebhookService {
     await this.processOrderCreation(
       session.id,
       paymentIntentId,
-      metadata.userId!,
+      metadata.userId ?? '',
       items,
       session.amount_total,
       session.currency,
@@ -298,6 +298,12 @@ export class StripeWebhookService {
         ? (addressSource as { email?: string | null }).email
         : undefined) || fullPaymentIntent?.receipt_email;
 
+    if (!orderEmail) {
+      throw new Error(
+        'Order creation aborted: Missing orderEmail from Stripe metadata or session.'
+      );
+    }
+
     const order = (await createOrderFromCart({
       cart: virtualCart as unknown as CartProjection,
       userId: userId || undefined,
@@ -320,7 +326,11 @@ export class StripeWebhookService {
     );
 
     // 5. Send Emails
-    await this.sendConfirmationEmails(order, shippingAddress!, orderEmail);
+    await this.sendConfirmationEmails(
+      order,
+      shippingAddress ?? ({} as Address),
+      orderEmail
+    );
 
     // 6. Clear Original Cart
     if (metadata.cartId) {

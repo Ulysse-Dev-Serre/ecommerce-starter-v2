@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
+
 import { logger } from '@/lib/core/logger';
 import { requireAdmin } from '@/lib/auth/server';
 import {
@@ -11,9 +11,9 @@ import {
 } from '@/lib/services/products/product-admin.service';
 import { updateVariant, deleteVariant } from '@/lib/services/variants';
 import { createSimpleVariants } from '@/lib/services/variants';
-import { getStorageProvider } from '@/lib/integrations/storage/storage.service';
+
 import { prisma } from '@/lib/core/db';
-import { MediaType } from '@/generated/prisma';
+
 import {
   CreateProductSchema,
   UpdateProductSchema,
@@ -231,7 +231,7 @@ export async function reorderProductsAction(
 
     revalidatePath('/admin/products');
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Failed to reorder products' };
   }
 }
@@ -306,7 +306,7 @@ export async function reorderMediaAction(
     await productMediaService.reorderMedia(items);
     if (productId) revalidatePath(`/admin/products/${productId}`);
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Failed to reorder media' };
   }
 }
@@ -327,7 +327,7 @@ export async function updateVariantAction(
     await updateVariant(variantId, payload);
     revalidatePath(`/admin/products/${productId}`);
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Failed to update variant' };
   }
 }
@@ -341,7 +341,7 @@ export async function deleteVariantAction(
     await deleteVariant(variantId);
     revalidatePath(`/admin/products/${productId}`);
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Failed to delete variant' };
   }
 }
@@ -365,7 +365,7 @@ export async function addVariantsAction(
     await createSimpleVariants(productId, payload);
     revalidatePath(`/admin/products/${productId}`);
     return { success: true };
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Failed to add variants' };
   }
 }

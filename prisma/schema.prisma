@@ -428,7 +428,7 @@ model Order {
   id               String      @id @default(cuid())
   orderNumber      String      @unique // Numéro de commande public
   userId           String?
-  orderEmail       String?     // Email de la commande/facturation (Formulaire)
+  orderEmail       String      // Email de la commande/facturation (Formulaire)
   status           OrderStatus @default(PENDING)
   currency         String      @db.Char(3)
   subtotalAmount   Decimal     @db.Decimal(10, 2)

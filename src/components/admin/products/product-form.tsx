@@ -7,11 +7,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import {
-  SUPPORTED_LOCALES,
-  SupportedLocale,
-  SUPPORTED_CURRENCIES,
-} from '@/lib/config/site';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import {
   uploadMediaAction,
   deleteMediaAction,
@@ -183,7 +179,7 @@ export function ProductForm({
   }, [initialProduct]);
 
   const [uploading, setUploading] = useState(false);
-  const [reorderingMedia, setReorderingMedia] = useState(false);
+  const [_reorderingMedia, setReorderingMedia] = useState(false);
 
   const loadVariants = async (id: string) => {
     try {

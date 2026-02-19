@@ -1,7 +1,14 @@
 import { ExternalLink, Package } from 'lucide-react';
 
+interface Shipment {
+  id: string;
+  carrier?: string | null;
+  trackingCode?: string | null;
+  trackingUrl?: string | null;
+}
+
 interface OrderTrackingProps {
-  shipments: any[];
+  shipments: Shipment[];
   labels: {
     tracking: string;
     trackPackage: string;
@@ -20,7 +27,7 @@ export function OrderTracking({ shipments, labels }: OrderTrackingProps) {
         </h2>
       </div>
       <div className="space-y-6">
-        {shipments.map((shipment: any) => (
+        {shipments.map(shipment => (
           <div
             key={shipment.id}
             className="flex flex-col sm:flex vibe-flex-between-items-start sm:vibe-items-center gap-6 vibe-p-6 bg-background vibe-card-rounded-xl border-primary/20"

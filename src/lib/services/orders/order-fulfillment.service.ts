@@ -1,12 +1,11 @@
-import { env } from '@/lib/core/env';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { Decimal } from '@prisma/client/runtime/library';
 import {
   getReturnShippingRates,
   createTransaction,
 } from '@/lib/integrations/shippo';
 import {
-  SITE_CURRENCY,
   STORE_ORIGIN_ADDRESS,
   resolveShippingOrigin,
   SHIPPING_UNITS,
@@ -95,19 +94,30 @@ export async function createReturnLabel(
     );
   }
 
-  const calculatedWeight = order.items.reduce((acc, item) => {
-    const unitWeight = Number(item.variant?.weight || item.product?.weight);
+  const calculatedWeight = order.items.reduce(
+    (
+      acc: number,
+      item: {
+        variant: { weight: number | null | Decimal } | null;
+        product: { weight: number | null | Decimal; slug: string } | null;
+        productId: string | null;
+        quantity: number;
+      }
+    ) => {
+      const unitWeight = Number(item.variant?.weight || item.product?.weight);
 
-    if (!unitWeight || unitWeight <= 0) {
-      throw new AppError(
-        ErrorCode.SHIPPING_DATA_MISSING,
-        `Missing or invalid weight for product "${item.product?.slug || item.productId}". 0 Fallback Policy enforced.`,
-        400
-      );
-    }
+      if (!unitWeight || unitWeight <= 0) {
+        throw new AppError(
+          ErrorCode.SHIPPING_DATA_MISSING,
+          `Missing or invalid weight for product "${item.product?.slug || item.productId}". 0 Fallback Policy enforced.`,
+          400
+        );
+      }
 
-    return acc + unitWeight * item.quantity;
-  }, 0);
+      return acc + unitWeight * item.quantity;
+    },
+    0
+  );
 
   const finalWeight = calculatedWeight.toFixed(2);
 
@@ -148,7 +158,7 @@ export async function createReturnLabel(
       contentsExplanation: 'Customer return',
       nonDeliveryOption: 'RETURN' as const,
       certify: true,
-      certifySigner: customerAddress.name!, // Guaranteed by validateAddress
+      certifySigner: customerAddress.name ?? '', // Guaranteed by validateAddress
       items: order.items.map(item => {
         const product = item.product;
         if (!product) {
@@ -321,7 +331,7 @@ export async function previewShippingRates(orderId: string) {
   const mappingItems = order.items
     .filter(item => item.variant)
     .map(item => ({
-      variantId: item.variant!.id,
+      variantId: item.variant?.id ?? '',
       quantity: item.quantity,
     }));
 
@@ -395,7 +405,7 @@ export async function purchaseShippingLabel(orderId: string, rateId?: string) {
     const mappingItems = order.items
       .filter(item => item.variant)
       .map(item => ({
-        variantId: item.variant!.id,
+        variantId: item.variant?.id ?? '',
         quantity: item.quantity,
       }));
 

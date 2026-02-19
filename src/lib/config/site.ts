@@ -55,6 +55,12 @@ export const COUNTRY_TO_CURRENCY: Record<string, SupportedCurrency> = {
 };
 
 /**
+ * List of supported countries for shipping and address validation.
+ * Derived from COUNTRY_TO_CURRENCY for single source of truth.
+ */
+export const SUPPORTED_COUNTRIES = Object.keys(COUNTRY_TO_CURRENCY);
+
+/**
  * Site-wide active currency for this specific deployment.
  * Use this for checkout and primary price displays.
  */

@@ -5,7 +5,7 @@ import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { CreateVariantsSchema } from '@/lib/validators/product';
-import { formatZodErrors } from '@/lib/validators';
+
 import {
   getProductVariants,
   createVariants,

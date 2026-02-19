@@ -1,4 +1,5 @@
 import { Page, Locator, expect, test } from '@playwright/test';
+import { DEFAULT_LOCALE } from '@/lib/config/site';
 
 export class AdminOrderPage {
   readonly page: Page;
@@ -28,7 +29,7 @@ export class AdminOrderPage {
 
   async goto(orderId: string) {
     await test.step('Navigate to Admin Order Details', async () => {
-      await this.page.goto(`/en/admin/orders/${orderId}`);
+      await this.page.goto(`/${DEFAULT_LOCALE}/admin/orders/${orderId}`);
     });
   }
 

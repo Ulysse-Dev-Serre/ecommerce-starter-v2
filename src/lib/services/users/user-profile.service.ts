@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/core/db';
-import { logger } from '@/lib/core/logger';
+import { Prisma } from '@/generated/prisma';
 import { UserWithBasicInfo } from '@/lib/types/domain/user';
 
 /**
@@ -19,7 +19,7 @@ export async function getAllUsers(options: Partial<UserSearchInput> = {}) {
   const limit = options.limit || 20;
   const skip = (page - 1) * limit;
 
-  const where: any = {};
+  const where: Prisma.UserWhereInput = {};
 
   if (options.role) {
     where.role = options.role;

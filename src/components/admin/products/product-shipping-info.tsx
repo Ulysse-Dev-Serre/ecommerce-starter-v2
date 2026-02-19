@@ -24,6 +24,7 @@ interface ProductShippingInfoProps {
     width: string;
     height: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFormData: (fn: (prev: any) => any) => void;
   suppliers: AdminSupplier[];
   fieldErrors?: Record<string, string>;

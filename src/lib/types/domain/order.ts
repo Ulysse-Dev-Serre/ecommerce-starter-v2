@@ -28,7 +28,7 @@ export interface Address {
 export interface CreateOrderFromCartInput {
   cart: CartProjection;
   userId?: string | null;
-  orderEmail?: string | null;
+  orderEmail: string;
   paymentIntent: Stripe.PaymentIntent;
   shippingAddress?: Address;
   billingAddress?: Address;
@@ -63,7 +63,7 @@ export interface OrderWithIncludes {
     lastName: string | null;
     clerkId?: string;
   } | null;
-  orderEmail?: string | null;
+  orderEmail: string;
   status: OrderStatus;
   currency: string;
   subtotalAmount: number;

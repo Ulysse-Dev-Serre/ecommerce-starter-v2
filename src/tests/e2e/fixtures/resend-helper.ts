@@ -1,8 +1,12 @@
-import { env } from '@/lib/core/env';
-
 /**
  * Helper to verify emails sent via Resend API during E2E tests
  */
+interface ResendEmail {
+  to: string[];
+  subject: string;
+  created_at: string;
+}
+
 export async function verifyEmailSent(params: {
   recipient: string;
   subjectInclude?: string;
@@ -48,10 +52,10 @@ export async function verifyEmailSent(params: {
         throw new Error(`Resend API error: ${JSON.stringify(error)}`);
       }
 
-      const { data } = await response.json();
+      const { data } = (await response.json()) as { data: ResendEmail[] };
 
       // Look for the email in the last 20 emails
-      const found = data.find((email: any) => {
+      const found = data.find(email => {
         const matchesRecipient = email.to.includes(recipient);
         const matchesSubject = subjectInclude
           ? email.subject.toLowerCase().includes(subjectInclude.toLowerCase())

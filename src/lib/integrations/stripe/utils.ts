@@ -3,17 +3,7 @@
  * Fonctions spécifiques à l'intégration Stripe
  */
 
-import { SupportedCurrency } from '@/lib/config/site';
-
-// Décimales par devise (partagé avec currency.ts mais pour contexte Stripe)
-const CURRENCY_DECIMALS: Record<string, number> = {
-  CAD: 2,
-  USD: 2,
-  EUR: 2,
-  GBP: 2,
-  JPY: 0,
-  CLP: 0,
-};
+import { SupportedCurrency, CURRENCY_DECIMALS } from '@/lib/config/site';
 
 /**
  * Convertit un montant en centimes pour Stripe

@@ -33,8 +33,8 @@ export class S3StorageProvider implements StorageProvider {
   }
 
   async upload(
-    file: File | Buffer,
-    options?: UploadOptions
+    _file: File | Buffer,
+    _options?: UploadOptions
   ): Promise<UploadResult> {
     // TODO: Implémenter l'upload S3
     // Exemple d'implémentation:
@@ -76,7 +76,7 @@ export class S3StorageProvider implements StorageProvider {
     );
   }
 
-  async delete(options: DeleteOptions): Promise<void> {
+  async delete(_options: DeleteOptions): Promise<void> {
     // TODO: Implémenter la suppression S3
     //
     // import { DeleteObjectCommand } from '@aws-sdk/client-s3';
@@ -102,7 +102,7 @@ export class S3StorageProvider implements StorageProvider {
     throw new Error('S3StorageProvider not yet implemented.');
   }
 
-  async exists(path: string): Promise<boolean> {
+  async exists(_path: string): Promise<boolean> {
     // TODO: Vérifier l'existence d'un fichier S3
     //
     // import { HeadObjectCommand } from '@aws-sdk/client-s3';

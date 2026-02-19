@@ -1,11 +1,12 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { Language } from '@/generated/prisma';
+
 import { env } from '@/lib/core/env';
 import { toStripeAmount } from '@/lib/integrations/stripe/utils';
 import { stripe } from '@/lib/integrations/stripe/client';
 import { StripeCheckoutInput } from '@/lib/types/domain/checkout';
 import Stripe from 'stripe';
+import { DEFAULT_CURRENCY } from '@/lib/config/site';
 
 /**
  * Crée une session Stripe Checkout
@@ -64,9 +65,9 @@ export async function createCheckoutSession(
       let pricing = variant.pricing.find(p => p.currency === currency);
       let usedCurrency = currency;
 
-      if (!pricing) {
-        // Fallback sur l'autre devise
-        const fallbackCurrency = currency === 'CAD' ? 'USD' : 'CAD';
+      if (!pricing && currency !== DEFAULT_CURRENCY) {
+        // Fallback to default currency from config
+        const fallbackCurrency = DEFAULT_CURRENCY;
         pricing = variant.pricing.find(p => p.currency === fallbackCurrency);
         if (pricing) {
           usedCurrency = fallbackCurrency;

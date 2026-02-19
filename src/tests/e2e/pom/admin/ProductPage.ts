@@ -1,5 +1,10 @@
 import { type Page, type Locator, expect, test } from '@playwright/test';
 import { TEST_ROUTES } from '../../config/routes';
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  DEFAULT_CURRENCY,
+} from '@/lib/config/site';
 
 export interface ProductData {
   name: string;
@@ -40,15 +45,24 @@ export class ProductPage {
     this.saveButton = page
       .getByRole('button', { name: /Save|Enregistrer/i })
       .last();
-    this.nameInput = page.locator('#product-name-en');
-    this.descriptionInput = page.locator('#product-description-en');
+
+    // Use DEFAULT_LOCALE from config for primary inputs
+    this.nameInput = page.locator(`#product-name-${DEFAULT_LOCALE}`);
+    this.descriptionInput = page.locator(
+      `#product-description-${DEFAULT_LOCALE}`
+    );
+
     this.slugInput = page.getByPlaceholder('product-url-slug');
     this.statusSelect = page.locator('#statusSelect');
 
     this.addVariantButton = page.getByRole('button', {
       name: /Add Variant|Ajouter une variante/i,
     });
-    this.priceInput = page.getByLabel(/Price|Prix/i);
+
+    // Use DEFAULT_CURRENCY from config for primary price
+    this.priceInput = page.getByLabel(
+      new RegExp(`Price|Prix.*${DEFAULT_CURRENCY}`, 'i')
+    );
     this.skuInput = page.getByLabel(/SKU/i);
     this.stockInput = page.getByLabel(/Stock|Quantité/i);
 
@@ -74,7 +88,7 @@ export class ProductPage {
 
   async gotoCreate() {
     await test.step('Navigate to Create Product', async () => {
-      await this.page.goto('/en/admin/products/new');
+      await this.page.goto(`/${DEFAULT_LOCALE}/admin/products/new`);
       await expect(this.page).toHaveURL(TEST_ROUTES.ADMIN.PRODUCT_CREATE);
     });
   }
@@ -82,7 +96,9 @@ export class ProductPage {
   async createDraftProduct(name: string, shippingOriginName?: string) {
     await test.step(`Create Draft Product: ${name}`, async () => {
       await this.nameInput.fill(name);
-      await this.descriptionInput.fill(`Description for ${name}`);
+      await this.descriptionInput.fill(
+        `Description for ${name} (${DEFAULT_LOCALE})`
+      );
 
       // Slug is required in this project
       const slug = name
@@ -149,15 +165,18 @@ export class ProductPage {
       const variantContainer = this.page.locator('.admin-card-subtle').last();
       await expect(variantContainer).toBeVisible({ timeout: 5000 });
 
+      // Dynamically fill all supported locales
+      for (const loc of SUPPORTED_LOCALES) {
+        await variantContainer
+          .locator(`input[name="variantName_${loc}"]`)
+          .fill(`Standard Variant ${loc.toUpperCase()}`);
+      }
+
+      // Fill price for the default currency (or all if needed, but here we follow the test logic)
       await variantContainer
-        .locator('input[name="variantName_en"]')
-        .fill('Standard Variant');
-      await variantContainer
-        .locator('input[name="variantName_fr"]')
-        .fill('Variante Standard');
-      await variantContainer
-        .locator('input[name="variantPrice_CAD"]')
+        .locator(`input[name="variantPrice_${DEFAULT_CURRENCY}"]`)
         .fill(price);
+
       await variantContainer.locator('input[name="variantStock"]').fill(stock);
 
       await this.page.locator('#saveNewVariantsBtn').click();
@@ -197,10 +216,15 @@ export class ProductPage {
       // Small delay to ensure any potential ISR/cache update is processed
       await this.page.waitForTimeout(4000);
 
-      console.log(`🌐 Navigating to storefront: /en/product/${slug}`);
-      const response = await this.page.goto(`/en/product/${slug}`, {
-        waitUntil: 'networkidle',
-      });
+      console.log(
+        `🌐 Navigating to storefront: /${DEFAULT_LOCALE}/product/${slug}`
+      );
+      const response = await this.page.goto(
+        `/${DEFAULT_LOCALE}/product/${slug}`,
+        {
+          waitUntil: 'networkidle',
+        }
+      );
 
       const status = response?.status();
       console.log(`📊 Storefront response status: ${status}`);

@@ -1,4 +1,3 @@
-import Stripe from 'stripe';
 import { OrderStatus, Language } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
@@ -59,7 +58,7 @@ export async function createOrderFromCart({
   const shippingAmount = shippingCostMeta ? parseFloat(shippingCostMeta) : 0;
 
   // Récupérer l'ID du tarif Shippo (si le client a choisi une livraison)
-  const shippingRateId = paymentIntent.metadata?.shipping_rate_id;
+  const _shippingRateId = paymentIntent.metadata?.shipping_rate_id;
   let shipmentCreateData;
 
   const discountAmount = 0;
@@ -121,7 +120,7 @@ export async function createOrderFromCart({
       data: {
         orderNumber,
         userId: userId || null, // Ensure explicit null if undefined/empty
-        orderEmail: orderEmail || null,
+        orderEmail: orderEmail,
         status: OrderStatus.PAID,
         currency: cart.currency,
         subtotalAmount,

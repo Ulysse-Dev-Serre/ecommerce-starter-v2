@@ -19,7 +19,7 @@ interface ProductVariantsManagerProps {
   onDeleteVariant: (id: string, name: string) => Promise<void>;
   onSaveNewVariants: () => Promise<void>;
   locale: string;
-  t: (key: string, values?: any) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
   tc: (key: string) => string;
 }
 

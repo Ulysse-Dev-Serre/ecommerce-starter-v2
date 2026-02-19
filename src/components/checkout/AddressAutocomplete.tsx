@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { SUPPORTED_COUNTRIES } from '@/lib/config/site';
 
 declare global {
   interface Window {
@@ -21,7 +22,9 @@ declare global {
 }
 
 // Add minimalist types if google.maps is not available in @types
+/* eslint-disable @typescript-eslint/no-namespace */
 namespace google.maps.places {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
   export interface AutocompleteSessionToken {}
   export interface AutocompleteOptions {
     input: string;
@@ -33,6 +36,7 @@ namespace google.maps.places {
     addressComponents: AddressComponent[];
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
 
 interface GoogleMapsSuggestion {
   placePrediction: {
@@ -68,7 +72,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   value,
   placeholder = '',
   className = '',
-  countryRestriction = ['ca', 'us'],
+  countryRestriction = SUPPORTED_COUNTRIES.map(c => c.toLowerCase()),
 }) => {
   const [suggestions, setSuggestions] = useState<GoogleMapsSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);

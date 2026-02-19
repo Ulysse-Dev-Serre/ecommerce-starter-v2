@@ -29,7 +29,7 @@ export function parseStripeItems(itemsJson: string | undefined): StripeItem[] {
   try {
     const raw = JSON.parse(itemsJson);
     return z.array(stripeItemSchema).parse(raw);
-  } catch (error) {
+  } catch (_error) {
     // Si le parsing échoue, on retourne un tableau vide ou on throw selon la stratégie
     // Ici on préfére retourner vide pour ne pas crasher tout le processus,
     // mais le service devra vérifier si items.length > 0

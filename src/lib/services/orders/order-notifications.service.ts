@@ -162,9 +162,7 @@ export async function sendAdminNewOrderAlert(
 /**
  * Envoie l'email d'expédition au client
  */
-export async function sendShippedEmail(
-  order: OrderWithIncludes & { orderEmail?: string | null }
-) {
+export async function sendShippedEmail(order: OrderWithIncludes) {
   try {
     const recipientEmail = order.orderEmail;
     const shipment = order.shipments[0];
@@ -239,9 +237,7 @@ export async function sendShippedEmail(
 /**
  * Envoie l'email de livraison au client
  */
-export async function sendDeliveredEmail(
-  order: OrderWithIncludes & { orderEmail?: string | null }
-) {
+export async function sendDeliveredEmail(order: OrderWithIncludes) {
   try {
     const recipientEmail = order.orderEmail;
 
@@ -303,9 +299,7 @@ export async function sendDeliveredEmail(
 /**
  * Envoie l'email de remboursement au client
  */
-export async function sendRefundedEmail(
-  order: OrderWithIncludes & { orderEmail?: string | null }
-) {
+export async function sendRefundedEmail(order: OrderWithIncludes) {
   try {
     logger.info(
       { orderId: order.id, orderNumber: order.orderNumber },
@@ -395,7 +389,7 @@ export async function sendRefundedEmail(
  * Envoie l'email approprié basé sur un changement de statut de commande
  */
 export async function sendStatusChangeEmail(
-  order: OrderWithIncludes & { orderEmail?: string | null },
+  order: OrderWithIncludes,
   newStatus: OrderStatus
 ) {
   switch (newStatus) {

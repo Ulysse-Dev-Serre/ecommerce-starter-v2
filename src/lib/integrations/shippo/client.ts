@@ -1,12 +1,12 @@
 import { Shippo } from 'shippo';
-import { logger } from '@/lib/core/logger';
+
 import { env } from '@/lib/core/env';
+import { STORE_ORIGIN_ADDRESS } from '@/lib/config/site';
 import type {
   Address,
   Parcel,
   CustomsDeclaration,
   ShippingRate,
-  Transaction,
 } from './types';
 
 // Initialize Shippo only if API key is present, otherwise we relies on Mock mode or error out later
@@ -71,9 +71,10 @@ export async function getReturnShippingRates(
   }
 
   try {
-    // If shipping from outside CA (e.g. US), don't restrict to Canadian UPS account
+    // If shipping from outside the store's origin country, don't restrict to the origin UPS account
     const carrierAccounts =
-      addressFrom.country === 'CA' && env.SHIPPO_UPS_ACCOUNT_ID
+      addressFrom.country === STORE_ORIGIN_ADDRESS.country &&
+      env.SHIPPO_UPS_ACCOUNT_ID
         ? [env.SHIPPO_UPS_ACCOUNT_ID]
         : undefined;
 

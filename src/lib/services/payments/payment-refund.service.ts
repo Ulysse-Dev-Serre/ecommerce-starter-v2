@@ -10,7 +10,6 @@ import {
   RefundResult,
   UpdateOrderStatusInput,
 } from '@/lib/types/domain/payment';
-import Stripe from 'stripe'; // Import Stripe for type definitions
 
 /**
  * Traite un remboursement complet ou partiel sur Stripe

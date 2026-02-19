@@ -17,10 +17,10 @@ interface RefundRequestFormProps {
 
 export function RefundRequestForm({
   orderId,
-  orderNumber,
-  locale,
+  orderNumber: _orderNumber,
+  locale: _locale,
   status,
-  hasLabel,
+  hasLabel: _hasLabel,
 }: RefundRequestFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState('');
@@ -45,7 +45,7 @@ export function RefundRequestForm({
       setIsSubmitted(true);
       showToast(t('successTitle'), 'success');
       window.location.reload();
-    } catch (err) {
+    } catch (_) {
       showToast(t('error'), 'error');
     } finally {
       setIsSubmitting(false);
@@ -69,7 +69,7 @@ export function RefundRequestForm({
       setIsSubmitted(true);
       showToast(t('successTitle'), 'success');
       window.location.reload();
-    } catch (err) {
+    } catch (_) {
       showToast(t('error'), 'error');
     } finally {
       setIsSubmitting(false);

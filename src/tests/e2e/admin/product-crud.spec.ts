@@ -5,6 +5,7 @@ import { prisma } from '@/lib/core/db';
 import { verifyProductCreated } from '../fixtures/seed-test-data';
 import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
 import { cleanupAllE2EData, disconnectPrisma } from '../fixtures/cleanup-e2e';
+import { DEFAULT_LOCALE } from '@/lib/config/site';
 
 test.describe('Admin Logistics & Product Workflow', () => {
   // Tests in this file are dependent on each other
@@ -144,7 +145,7 @@ test.describe('Admin Logistics & Product Workflow', () => {
     expect(product).not.toBeNull();
 
     await test.step('Navigate to Edit Page', async () => {
-      await page.goto(`/en/admin/products/${product?.id}/edit`);
+      await page.goto(`/${DEFAULT_LOCALE}/admin/products/${product?.id}/edit`);
     });
 
     // 1. Add Variant (Price & Stock)

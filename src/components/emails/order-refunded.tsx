@@ -11,7 +11,7 @@ import {
   Text,
 } from '@react-email/components';
 import { formatPrice } from '@/lib/utils/currency';
-import { siteConfig } from '@/lib/config/site';
+import { siteConfig, SupportedCurrency } from '@/lib/config/site';
 import * as styles from './styles';
 
 interface OrderRefundedEmailProps {
@@ -29,7 +29,11 @@ export const OrderRefundedEmail = ({
   currency,
   locale,
 }: OrderRefundedEmailProps) => {
-  const formattedAmount = formatPrice(amountRefunded, currency as any, locale);
+  const formattedAmount = formatPrice(
+    amountRefunded,
+    currency as SupportedCurrency,
+    locale
+  );
 
   const t = {
     fr: {

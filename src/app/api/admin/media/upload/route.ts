@@ -30,7 +30,7 @@ async function uploadMediaHandler(
     const file = formData.get('file') as File | null;
     const productId = formData.get('productId') as string | null;
     const variantId = formData.get('variantId') as string | null;
-    const typeStr = formData.get('type') as string | null;
+
     const alt = formData.get('alt') as string | null;
     const title = formData.get('title') as string | null;
     const isPrimary = formData.get('isPrimary') === 'true';

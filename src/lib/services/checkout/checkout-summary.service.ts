@@ -54,8 +54,7 @@ export async function getCheckoutSummary(
       const price = Number(priceRecord?.price || 0);
       initialTotal = price * parseInt(directQuantity);
 
-      const image = (variant.media[0]?.url ||
-        (variant.product as any).media[0]?.url) as string | undefined;
+      const image = variant.media[0]?.url || variant.product.media[0]?.url;
 
       summaryItems.push({
         name:

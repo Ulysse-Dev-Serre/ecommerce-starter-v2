@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, Page } from '@playwright/test';
 import {
   getTestSupplierId,
   getOrCreateTestProduct,
@@ -37,7 +37,7 @@ test.describe('Checkout Security - Stripe Radar Cards', () => {
     await disconnectPrisma();
   });
 
-  async function setupCheckout(page: any) {
+  async function setupCheckout(page: Page) {
     const cart = new CartPage(page);
     const checkout = new CheckoutPage(page);
 

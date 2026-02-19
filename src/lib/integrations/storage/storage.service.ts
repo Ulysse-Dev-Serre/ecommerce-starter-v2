@@ -1,4 +1,4 @@
-import { StorageProvider, StorageProviderType, StorageConfig } from './types';
+import { StorageProvider, StorageConfig } from './types';
 import { LocalStorageProvider } from './providers/local.provider';
 import { S3StorageProvider } from './providers/s3.provider';
 import { env } from '@/lib/core/env';

@@ -1,15 +1,11 @@
-import {
-  PaymentElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
+import { PaymentElement } from '@stripe/react-stripe-js';
 import { useTranslations } from 'next-intl';
 import { Lock, ShieldCheck } from 'lucide-react';
 
 interface PaymentSectionProps {
-  stripe: any;
-  elements: any;
-  selectedRate: any;
+  stripe: unknown;
+  elements: unknown;
+  selectedRate: unknown;
   onPay: () => void;
   userEmail?: string | null;
 }

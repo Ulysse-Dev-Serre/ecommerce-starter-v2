@@ -1,11 +1,15 @@
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/config/site';
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  SupportedLocale,
+} from '@/lib/config/site';
 
 /**
  * Charge dynamiquement le dictionnaire pour une langue donnée.
  * Évite le hardcoding des imports dans les services.
  */
 export async function getDictionary(locale: string) {
-  const targetLocale = SUPPORTED_LOCALES.includes(locale as any)
+  const targetLocale = SUPPORTED_LOCALES.includes(locale as SupportedLocale)
     ? locale
     : DEFAULT_LOCALE;
 

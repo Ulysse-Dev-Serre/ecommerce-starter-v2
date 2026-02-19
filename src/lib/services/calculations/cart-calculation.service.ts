@@ -17,7 +17,7 @@ import { roundHalfEven } from './math-utils.service';
  * @returns Le prix et la devise ou null
  */
 export function getPrice(
-  pricing: Array<{ price: any; currency: string }>,
+  pricing: Array<{ price: Decimal | number | string; currency: string }>,
   preferredCurrency: Currency
 ): { price: Decimal; currency: Currency } | null {
   const priceEntry = pricing.find(p => p.currency === preferredCurrency);

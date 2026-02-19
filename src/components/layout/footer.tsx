@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { logger } from '../../lib/core/logger';
 import { siteConfig } from '@/lib/config/site';
 
 interface FooterProps {
@@ -14,7 +13,6 @@ export function Footer({ locale }: FooterProps): React.JSX.Element {
   const t = useTranslations('footer');
   const tShop = useTranslations('shop');
   const tCart = useTranslations('cart');
-  const tNavbar = useTranslations('navbar');
 
   const year = new Date().getFullYear();
   const storeName = siteConfig.name;

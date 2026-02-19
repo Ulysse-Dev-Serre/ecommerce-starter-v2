@@ -19,7 +19,7 @@ interface ImageGalleryProps {
 export function ImageGallery({
   images,
   productName,
-  locale,
+  locale: _locale,
 }: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const tCommon = useTranslations('common');

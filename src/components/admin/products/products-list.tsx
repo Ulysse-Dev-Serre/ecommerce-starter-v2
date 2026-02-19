@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, Search, Filter, Lightbulb, Save, Package } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -19,7 +19,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/utils/currency';
 import {
   deleteProductAction,
@@ -31,8 +31,6 @@ import {
   ProductProjection,
   ProductVariantProjection,
 } from '@/lib/types/domain/product';
-
-import { ProductStatus } from '@/generated/prisma';
 
 // Status colors mapping
 const statusColors: Record<string, string> = {

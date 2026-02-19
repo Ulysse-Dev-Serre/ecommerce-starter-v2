@@ -3,8 +3,6 @@
 import {
   VIBE_ANIMATION_FADE_IN,
   VIBE_ANIMATION_ZOOM_IN,
-  VIBE_ANIMATION_SLIDE_IN_RIGHT,
-  VIBE_ANIMATION_SLIDE_IN_BOTTOM,
 } from '@/lib/config/vibe-styles';
 
 import { useEffect, useState } from 'react';

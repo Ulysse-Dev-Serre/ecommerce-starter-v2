@@ -17,7 +17,7 @@ export function PriceDisplay({
   pricing,
   className = '',
   locale,
-  showFallbackIndicator = false,
+  showFallbackIndicator: _showFallbackIndicator = false,
   dataTestId,
 }: PriceDisplayProps) {
   const defaultLocale = useLocale();

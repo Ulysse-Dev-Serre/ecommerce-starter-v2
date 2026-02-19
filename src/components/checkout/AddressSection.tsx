@@ -13,6 +13,7 @@ import {
   SITE_CURRENCY,
   COUNTRY_TO_CURRENCY,
   PHONE_PREFIX,
+  STORE_ORIGIN_ADDRESS,
 } from '@/lib/config/site';
 
 interface AddressSectionProps {
@@ -54,7 +55,7 @@ export function AddressSection({
     const entry = Object.entries(COUNTRY_TO_CURRENCY).find(
       ([_, currency]) => currency === SITE_CURRENCY
     );
-    return entry ? entry[0] : 'CA';
+    return entry ? entry[0] : STORE_ORIGIN_ADDRESS.country;
   }, []);
 
   // Ensure country is set to the instance default on mount or if missing

@@ -6,7 +6,6 @@ import {
   getAdminUserId,
   cleanupTestSupplier,
   disconnectPrisma,
-  verifyOrderCreated,
 } from '../fixtures/seed-test-data';
 
 /**

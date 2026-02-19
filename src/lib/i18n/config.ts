@@ -1,5 +1,9 @@
 import { env } from '@/lib/core/env';
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/config/site';
+import {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  SupportedLocale,
+} from '@/lib/config/site';
 
 export const i18n = {
   defaultLocale: DEFAULT_LOCALE,
@@ -13,5 +17,7 @@ export function getLocaleFromPath(pathname: string): Locale {
   const localeMatch = pathname.match(/^\/([a-z]{2})(\/|$)/);
   const locale = localeMatch ? (localeMatch[1] as Locale) : i18n.defaultLocale;
 
-  return i18n.locales.includes(locale as any) ? locale : i18n.defaultLocale;
+  return i18n.locales.includes(locale as SupportedLocale)
+    ? locale
+    : i18n.defaultLocale;
 }

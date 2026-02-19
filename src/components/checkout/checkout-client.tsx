@@ -178,7 +178,7 @@ export function CheckoutForm({
   const elements = useElements();
   const [shippingRates, setShippingRates] = useState<ShippingRate[]>([]);
   const [selectedRate, setSelectedRate] = useState<ShippingRate | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [_isProcessing, setIsProcessing] = useState(false);
 
   // STEP STATE: 'address' -> 'shipping' -> 'payment'
   const [step, setStep] = useState<'address' | 'shipping' | 'payment'>(

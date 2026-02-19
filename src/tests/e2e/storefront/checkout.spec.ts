@@ -58,10 +58,11 @@ async function fillAddressAndGetRates(
           throw new Error(`Shippo Error: ${msg}`);
         }),
     ]);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const error = err as Error;
     if (attempt < maxRetries) {
       console.warn(
-        `⚠️ Shippo attempt ${attempt} failed: ${err.message}. Retrying in 5s...`
+        `⚠️ Shippo attempt ${attempt} failed: ${error.message}. Retrying in 5s...`
       );
       // Go back to address step (click "Edit" if available, or reload)
       const editAddressBtn = page

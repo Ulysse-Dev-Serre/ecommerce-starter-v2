@@ -23,14 +23,12 @@ import {
 test.describe('Full API Checkout Flow (Shippo + Stripe + Resend)', () => {
   let testSupplierId: string;
   let testVariantId: string;
-  let testProduct: Product & { variants: any[] }; // still need any for variants if we don't define the full include type, but let's try Product first
+  let testProduct: Product & { variants: Array<{ id: string }> };
   const testEmail = process.env.TEST_ADMIN_EMAIL || 'agtechnest@gmail.com';
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
     apiVersion: '2024-12-18.acacia' as Stripe.LatestApiVersion,
   });
-
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 
   const productSlug = 'e2e-checkout-full-smoke';
 

@@ -13,7 +13,6 @@ import { OrderTracking } from '@/components/orders/order-tracking';
 import { OrderItemsList } from '@/components/orders/order-items-list';
 import { OrderSummary } from '@/components/orders/order-summary';
 import { RefundRequestForm } from '@/components/orders/refund-request-form';
-import { Order, OrderItem, Payment, Shipment } from '@/generated/prisma';
 
 // Ideally we should import OrderWithIncludes from the service or types definition
 import { OrderWithIncludes } from '@/lib/types/domain/order';
