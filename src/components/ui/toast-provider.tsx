@@ -36,10 +36,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
       setToasts(prev => [...prev, newToast]);
 
-      // Auto-dismiss after 3 seconds
+      // Auto-dismiss after 8 seconds (increased for E2E stability)
       setTimeout(() => {
         setToasts(prev => prev.filter(toast => toast.id !== id));
-      }, 3000);
+      }, 8000);
     },
     []
   );

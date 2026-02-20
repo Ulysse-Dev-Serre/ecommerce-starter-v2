@@ -7,7 +7,10 @@ import { API_ROUTES } from '@/lib/config/api-routes';
 /**
  * Handle creation or update of a logistics location
  */
-export async function saveLogisticsLocation(payload: any, locationId?: string) {
+export async function saveLogisticsLocation(
+  payload: unknown,
+  locationId?: string
+) {
   const url = locationId
     ? API_ROUTES.ADMIN.LOGISTICS.ITEM(locationId)
     : API_ROUTES.ADMIN.LOGISTICS.BASE;

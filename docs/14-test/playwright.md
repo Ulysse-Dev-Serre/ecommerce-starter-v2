@@ -67,7 +67,7 @@ Pour les étapes critiques, nous maintenons deux versions du même test pour une
 ### Test 5.1 : Cycle de Vie & Transitions (UI - Admin)
 - **Fichier** : `src/tests/e2e/admin/order-lifecycle.spec.ts`
 - **Objectifs** : Valide la visibilité des badges et des boutons d'actions (Expédier, Livrer) dans le panel Admin.
-- **Commande** : `npx playwright test src/tests/e2e/admin/order-lifecycle.spec.ts --project=chromium`
+- **Commande** : `npx playwright test src/tests/e2e/admin/order-lifecycle.spec.ts --project=chromium --workers=1`
 - **Note** : ⚠️ *Peut générer des erreurs Clerk ("infinite redirect loop") et des ECONNRESET lors du rafraîchissement de session.*
 
 ### Test 6 : Retours & Sécurité Métier (Backend - Smoke)

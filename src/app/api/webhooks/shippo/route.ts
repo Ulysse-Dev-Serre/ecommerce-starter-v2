@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import {
-  updateOrderStatus,
-  sendStatusChangeEmail,
-} from '@/lib/services/orders';
+import { updateOrderStatus } from '@/lib/services/orders';
 import { OrderStatus } from '@/generated/prisma';
 import { env } from '@/lib/core/env';
 

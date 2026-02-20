@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Minus, Plus, Loader2 } from 'lucide-react';
 import { updateCartItem } from '@/lib/client/cart';
-import { cn } from '@/lib/utils/cn';
 
 interface QuantitySelectorProps {
   cartItemId?: string;
@@ -20,7 +19,6 @@ export function QuantitySelector({
   initialQuantity,
   maxQuantity = 99,
   onQuantityChange,
-  locale,
 }: QuantitySelectorProps) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(initialQuantity);
@@ -52,7 +50,7 @@ export function QuantitySelector({
         await updateCartItem(cartItemId, quantity);
         lastSentQuantity.current = quantity;
         router.refresh();
-      } catch (error) {
+      } catch {
         setQuantity(lastSentQuantity.current);
       } finally {
         setIsLoading(false);
@@ -64,7 +62,7 @@ export function QuantitySelector({
         clearTimeout(debounceTimeout.current);
       }
     };
-  }, [quantity, cartItemId]);
+  }, [quantity, cartItemId, router]);
 
   const increment = () => {
     if (quantity < maxQuantity) {

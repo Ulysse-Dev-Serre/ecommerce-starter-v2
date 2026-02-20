@@ -51,7 +51,7 @@ export function getStoredUTM(): UTMData {
 
 export async function trackEvent(
   eventType: string,
-  metadata?: any,
+  metadata?: Record<string, unknown>,
   eventName?: string
 ) {
   if (typeof window === 'undefined') return;

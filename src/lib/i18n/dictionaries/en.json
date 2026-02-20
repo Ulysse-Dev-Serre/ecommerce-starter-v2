@@ -358,6 +358,7 @@
     "loading": "Loading checkout...",
     "error": "Error initializing checkout",
     "errorInit": "Failed to initialize payment",
+    "errorPayment": "Payment failed. Please try again.",
     "anonymousCustomer": "Customer",
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",

@@ -4,7 +4,6 @@ import { ProductPage } from '../pom/admin/ProductPage';
 import { prisma } from '@/lib/core/db';
 import { verifyProductCreated } from '../fixtures/seed-test-data';
 import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
-import { cleanupAllE2EData, disconnectPrisma } from '../fixtures/cleanup-e2e';
 import { DEFAULT_LOCALE } from '@/lib/config/site';
 
 test.describe('Admin Logistics & Product Workflow', () => {
@@ -142,10 +141,10 @@ test.describe('Admin Logistics & Product Workflow', () => {
     const product = await prisma.product.findFirst({
       where: { slug: { contains: `e2e-product-${timestamp}` } },
     });
-    expect(product).not.toBeNull();
+    if (!product) throw new Error('Product not found');
 
     await test.step('Navigate to Edit Page', async () => {
-      await page.goto(`/${DEFAULT_LOCALE}/admin/products/${product?.id}/edit`);
+      await page.goto(`/${DEFAULT_LOCALE}/admin/products/${product.id}/edit`);
     });
 
     // 1. Add Variant (Price & Stock)
@@ -163,10 +162,10 @@ test.describe('Admin Logistics & Product Workflow', () => {
     // const { verifyProductCreated } = require('../../fixtures/seed-test-data');
 
     await test.step('Verify Product Active in DB', async () => {
-      const activeProduct = await verifyProductCreated(product!.slug, 'ACTIVE');
+      const activeProduct = await verifyProductCreated(product.slug, 'ACTIVE');
       if (!activeProduct) {
         throw new Error(
-          `❌ Product ${product!.slug} did not become ACTIVE in DB.`
+          `❌ Product ${product.slug} did not become ACTIVE in DB.`
         );
       }
       expect(activeProduct.status).toBe('ACTIVE');
@@ -176,7 +175,7 @@ test.describe('Admin Logistics & Product Workflow', () => {
     await test.step('Verify Storefront Access', async () => {
       // Optional: Add a small delay to ensure ISR/Revalidation is done
       // await page.waitForTimeout(1000);
-      await products.verifyStorefront(product!.slug);
+      await products.verifyStorefront(product.slug);
     });
   });
 });

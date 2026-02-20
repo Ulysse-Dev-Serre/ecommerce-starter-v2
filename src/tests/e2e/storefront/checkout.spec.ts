@@ -95,7 +95,7 @@ async function prepareCheckoutForPayment(
   testEmail: string
 ) {
   // ── 1. Add to Cart ──
-  console.log('🛒 Adding to cart...');
+  console.log('� Adding to cart...');
   await page.goto(`/en/product/${productSlug}`);
   await page.click('[data-testid="add-to-cart-button"]');
   await expect(

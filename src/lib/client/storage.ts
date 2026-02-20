@@ -68,7 +68,7 @@ export const storage = {
       try {
         const item = window.sessionStorage.getItem(key);
         return item ? (JSON.parse(item) as T) : defaultValue;
-      } catch (_error) {
+      } catch {
         return defaultValue;
       }
     },
@@ -76,7 +76,7 @@ export const storage = {
       if (!isBrowser) return;
       try {
         window.sessionStorage.setItem(key, JSON.stringify(value));
-      } catch (_error) {}
+      } catch {}
     },
   },
 };

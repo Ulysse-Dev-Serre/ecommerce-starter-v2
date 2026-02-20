@@ -35,7 +35,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
       await removeFromCart(itemId);
       showToast(t('itemRemoved'), 'success');
       router.refresh();
-    } catch (error) {
+    } catch {
       showToast(t('errorRemovingItem'), 'error');
     } finally {
       setLoadingItems(prev => {
@@ -88,7 +88,7 @@ export function CartClient({ cart, locale }: CartClientProps) {
         <CartSummary
           items={summaryItems}
           locale={locale}
-          isSignedIn={!!isSignedIn}
+          _isSignedIn={!!isSignedIn}
         />
       </div>
     </div>

@@ -4,7 +4,6 @@ import { getTranslations } from 'next-intl/server';
 
 import { auth } from '@clerk/nextjs/server';
 
-import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { getCartPageData } from '@/lib/services/cart';
 import { getCurrentUser } from '@/lib/services/users';

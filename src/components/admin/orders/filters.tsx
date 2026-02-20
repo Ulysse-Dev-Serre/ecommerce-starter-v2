@@ -5,7 +5,6 @@ import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export function OrderFilters({ locale }: { locale: string }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const currentStatus = searchParams.get('status') || '';
   const currentSearch = searchParams.get('search') || '';

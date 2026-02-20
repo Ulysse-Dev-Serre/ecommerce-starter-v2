@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/sortable';
 import { useTranslations } from 'next-intl';
 import { formatPrice } from '@/lib/utils/currency';
+import { DEFAULT_LOCALE, SUPPORTED_CURRENCIES } from '@/lib/config/site';
 import {
   deleteProductAction,
   reorderProductsAction,
@@ -81,7 +82,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
   const getProductName = (translations: ProductProjection['translations']) => {
     const translation =
       translations.find(tr => tr.language === locale.toUpperCase()) ||
-      translations.find(tr => tr.language === 'EN') ||
+      translations.find(tr => tr.language === DEFAULT_LOCALE.toUpperCase()) ||
       translations[0];
     return translation?.name || t('unnamedProduct');
   };
@@ -90,38 +91,26 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
     if (variants.length === 0) return null;
     const allPricing = variants
       .flatMap(v => v.pricing)
-      .filter(p => (p as any).priceType === 'base');
+      .filter(p => p.priceType === 'base');
     if (allPricing.length === 0) return null;
 
-    const cadPrices = allPricing
-      .filter(p => p.currency === 'CAD')
-      .map(p => Number(p.price));
-    const usdPrices = allPricing
-      .filter(p => p.currency === 'USD')
-      .map(p => Number(p.price));
-
     const parts: string[] = [];
-    const localeCode = locale; // Renaming to avoid conflict if any, though explicit usage is better
 
-    if (cadPrices.length > 0) {
-      const min = Math.min(...cadPrices);
-      const max = Math.max(...cadPrices);
-      parts.push(
-        min === max
-          ? formatPrice(min, 'CAD', localeCode)
-          : `${formatPrice(min, 'CAD', localeCode)} - ${formatPrice(max, 'CAD', localeCode)}`
-      );
-    }
+    SUPPORTED_CURRENCIES.forEach(currency => {
+      const currencyPrices = allPricing
+        .filter(p => p.currency === currency)
+        .map(p => Number(p.price));
 
-    if (usdPrices.length > 0) {
-      const min = Math.min(...usdPrices);
-      const max = Math.max(...usdPrices);
-      parts.push(
-        min === max
-          ? formatPrice(min, 'USD', localeCode)
-          : `${formatPrice(min, 'USD', localeCode)} - ${formatPrice(max, 'USD', localeCode)}`
-      );
-    }
+      if (currencyPrices.length > 0) {
+        const min = Math.min(...currencyPrices);
+        const max = Math.max(...currencyPrices);
+        parts.push(
+          min === max
+            ? formatPrice(min, currency, locale)
+            : `${formatPrice(min, currency, locale)} - ${formatPrice(max, currency, locale)}`
+        );
+      }
+    });
 
     return parts.join(' / ');
   };
@@ -223,12 +212,12 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
       <div className="flex items-center justify-between">
         <h1 className="admin-page-title">{t('title')}</h1>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 shadow-sm">
+          <div className="flex items-center gap-2 rounded-lg border admin-border-subtle admin-bg-card px-3 py-1.5 shadow-sm">
             <span className="admin-text-tiny">
               {isSavingOrder ? t('saving') : t('orderMode')}
             </span>
             <div
-              className={`h-2 w-2 rounded-full ${isSavingOrder ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}
+              className={`h-2 w-2 rounded-full ${isSavingOrder ? 'admin-bg-warning animate-pulse' : 'admin-bg-success'}`}
             />
           </div>
           <Link
@@ -259,7 +248,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
               onChange={e => setSearchTerm(e.target.value)}
               className="admin-input pl-10"
             />
-            <div className="absolute left-3 top-2.5 text-gray-400">
+            <div className="absolute left-3 top-2.5 admin-text-subtle">
               <Search className="h-5 w-5" />
             </div>
           </div>
@@ -300,7 +289,7 @@ export function ProductsList({ initialProducts, locale }: ProductsListProps) {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y admin-border-subtle">
                 <SortableContext
                   items={filteredProducts.map(p => p.id)}
                   strategy={verticalListSortingStrategy}

@@ -32,7 +32,7 @@ export async function generateMetadata({
         robots: { index: false, follow: false },
       };
     }
-  } catch (e) {
+  } catch {
     // Fallback silencieux
   }
 

@@ -111,7 +111,7 @@ test.describe('Stripe Checkout Scenarios', () => {
       await page.waitForTimeout(2000);
 
       // Step A: Click "Card" tab if it exists
-      let clickedCardTab = false;
+      let _clickedCardTab = false;
       for (const frame of page.frames()) {
         if (!frame.url().includes('stripe.com')) continue;
         try {
@@ -119,7 +119,7 @@ test.describe('Stripe Checkout Scenarios', () => {
           if ((await cardTab.count()) > 0) {
             await cardTab.first().click();
             console.log('✅ Clicked "Card" payment tab');
-            clickedCardTab = true;
+            _clickedCardTab = true;
             await page.waitForTimeout(2000);
             break;
           }
@@ -223,7 +223,7 @@ test.describe('Stripe Checkout Scenarios', () => {
         console.log('❌ Waiting for decline message...');
         // Stripe Elements shows error message within the element or via toast
         // We look for common error patterns
-        const errorMessage = page.locator(
+        const _errorMessage = page.locator(
           '.vibe-toast-error, [role="alert"], #error-message'
         );
         await expect(async () => {

@@ -3,8 +3,7 @@ import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
-// Type helper for middleware handlers
-type AnyHandler = (...args: unknown[]) => Promise<NextResponse> | NextResponse;
+import { ApiHandler } from './types';
 
 function isAppError(error: unknown): error is AppError {
   return (
@@ -16,10 +15,10 @@ function isAppError(error: unknown): error is AppError {
   );
 }
 
-export function withError(handler: AnyHandler): AnyHandler {
-  return async (...args: unknown[]) => {
+export function withError(handler: ApiHandler): ApiHandler {
+  return async (request, ...args: unknown[]) => {
     try {
-      return await handler(...args);
+      return await handler(request, ...args);
     } catch (error) {
       if (isAppError(error)) {
         const appError = error as AppError;

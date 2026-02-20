@@ -40,7 +40,6 @@ export default async function Home({
 }: HomeProps): Promise<React.ReactElement> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'home' });
-  const tShop = await getTranslations({ locale, namespace: 'shop' });
 
   const language = locale.toUpperCase() as Language;
 

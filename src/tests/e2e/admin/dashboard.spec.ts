@@ -20,7 +20,7 @@ test.describe('Admin Dashboard Status Check', () => {
     await page.context().clearCookies();
 
     // Attempt access
-    const response = await page.goto('/en/admin');
+    const _response = await page.goto('/en/admin');
 
     // Should either be redirected to sign-in or return a non-200 if unauthorized
     // Note: Next.js redirects usually result in the final page status or handled by Playwright

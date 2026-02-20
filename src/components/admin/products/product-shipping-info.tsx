@@ -13,19 +13,22 @@ const getSupplierAddress = (supplier: AdminSupplier) => {
   };
 };
 
+interface ProductShippingFormData {
+  originCountry: string;
+  hsCode: string;
+  shippingOriginId: string;
+  exportExplanation: string;
+  weight: string;
+  length: string;
+  width: string;
+  height: string;
+}
+
 interface ProductShippingInfoProps {
-  formData: {
-    originCountry: string;
-    hsCode: string;
-    shippingOriginId: string;
-    exportExplanation: string;
-    weight: string;
-    length: string;
-    width: string;
-    height: string;
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setFormData: (fn: (prev: any) => any) => void;
+  formData: ProductShippingFormData;
+  setFormData: (
+    fn: (prev: ProductShippingFormData) => ProductShippingFormData
+  ) => void;
   suppliers: AdminSupplier[];
   fieldErrors?: Record<string, string>;
   t: (key: string) => string;

@@ -59,11 +59,11 @@ export function SortableProductRow({
       style={style}
       data-testid="product-row"
       data-product-slug={product.slug}
-      className={`admin-table-tr ${isDragging ? 'bg-blue-50/50 shadow-inner' : ''}`}
+      className={`admin-table-tr ${isDragging ? 'admin-bg-info-subtle shadow-inner' : ''}`}
     >
       <td className="admin-table-td w-10">
         <button
-          className="cursor-grab active:cursor-grabbing p-1 text-gray-400 hover:text-gray-600 outline-none"
+          className="cursor-grab active:cursor-grabbing p-1 admin-text-subtle hover:admin-text-main outline-none"
           {...attributes}
           {...listeners}
         >
@@ -72,7 +72,7 @@ export function SortableProductRow({
       </td>
       <td className="admin-table-td">
         <div className="flex items-center gap-3">
-          <div className="relative h-10 w-10 flex-shrink-0 bg-gray-100 rounded border overflow-hidden">
+          <div className="relative h-10 w-10 flex-shrink-0 admin-bg-subtle rounded border border-admin-border overflow-hidden">
             {primaryImage ? (
               <Image
                 src={primaryImage.url}
@@ -82,13 +82,13 @@ export function SortableProductRow({
                 sizes="40px"
               />
             ) : (
-              <div className="h-full w-full flex items-center justify-center text-gray-400">
+              <div className="h-full w-full flex items-center justify-center admin-text-subtle">
                 —
               </div>
             )}
           </div>
           <div>
-            <div className="font-medium text-gray-900">
+            <div className="font-medium admin-text-main">
               {getProductName(product.translations)}
             </div>
             <div className="text-xs admin-text-subtle font-mono">
@@ -107,7 +107,7 @@ export function SortableProductRow({
         </span>
       </td>
       <td className="admin-table-td">
-        <div className="text-gray-900">
+        <div className="admin-text-main">
           {getBasePrice(product.variants) || '—'}
         </div>
         <div className="text-xs admin-text-subtle">
@@ -115,7 +115,7 @@ export function SortableProductRow({
         </div>
       </td>
       <td className="admin-table-td">
-        <div className="text-gray-900">{getTotalStock(product.variants)}</div>
+        <div className="admin-text-main">{getTotalStock(product.variants)}</div>
         <div className="text-xs admin-text-subtle">{t('stats.units')}</div>
       </td>
       <td className="admin-table-td text-right font-medium">
@@ -129,7 +129,7 @@ export function SortableProductRow({
           <button
             onClick={() => handleDelete(product.id)}
             disabled={deletingId === product.id}
-            className="text-red-600 hover:text-red-800 disabled:opacity-50"
+            className="admin-text-danger hover:brightness-90 disabled:opacity-50"
           >
             {deletingId === product.id ? (
               tc('loading')

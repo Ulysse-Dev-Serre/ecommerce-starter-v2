@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import {
   OptionalAuthContext,

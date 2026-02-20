@@ -24,7 +24,7 @@ declare global {
 // Add minimalist types if google.maps is not available in @types
 /* eslint-disable @typescript-eslint/no-namespace */
 namespace google.maps.places {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   export interface AutocompleteSessionToken {}
   export interface AutocompleteOptions {
     input: string;
@@ -81,11 +81,11 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
   // Initialisation du Token de session (Places New)
   useEffect(() => {
-    if (window.google && window.google.maps && window.google.maps.places) {
+    if (window.google?.maps?.places) {
       sessionTokenRef.current =
         new window.google.maps.places.AutocompleteSessionToken();
     }
-  }, [window.google]);
+  }, []);
 
   // Récupération des suggestions via l'API "Places (New)"
   useEffect(() => {
@@ -115,7 +115,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         if (results) {
           setSuggestions(results);
         }
-      } catch (error) {
+      } catch {
         setSuggestions([]);
       }
     };
@@ -181,12 +181,11 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           country,
         });
 
-        // Renouveler le token pour la prochaine session
         sessionTokenRef.current =
           new window.google.maps.places.AutocompleteSessionToken();
       }
-    } catch (error) {
-      console.error('Error fetching place details:', error);
+    } catch {
+      // Quiet fail or silent error
     }
   };
 

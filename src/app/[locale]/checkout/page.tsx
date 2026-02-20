@@ -1,5 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import { cookies } from 'next/headers';

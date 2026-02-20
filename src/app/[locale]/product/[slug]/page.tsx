@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { SITE_CURRENCY, SUPPORTED_LOCALES } from '@/lib/config/site';
-import { Language, ProductStatus } from '@/generated/prisma';
+import { Language } from '@/generated/prisma';
 import { env } from '@/lib/core/env';
 
 import { ImageGallery } from '@/components/product/image-gallery';

@@ -1,7 +1,6 @@
 // src/app/[locale]/layout.tsx
 import { env } from '@/lib/core/env';
 import { ClerkProvider } from '@clerk/nextjs';
-import { auth } from '@clerk/nextjs/server';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { getTranslations, getMessages } from 'next-intl/server';
@@ -9,7 +8,6 @@ import { NextIntlClientProvider } from 'next-intl';
 import { siteConfig } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
 import { getCurrentUser } from '@/lib/services/users';
-import { Navbar } from '@/components/layout/navbar';
 import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
 import { ConditionalFooter } from '@/components/layout/conditional-footer';
 import GoogleTagManager from '@/components/analytics/google-tag-manager';

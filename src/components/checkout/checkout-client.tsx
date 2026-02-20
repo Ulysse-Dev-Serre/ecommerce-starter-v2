@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -12,7 +12,7 @@ import { logger } from '@/lib/core/logger';
 import { useToast } from '@/components/ui/toast-provider';
 import { siteTokens } from '@/styles/tokens';
 import { CheckoutAddress } from '@/lib/types/ui/checkout';
-import { ShippingRate } from '@/lib/integrations/shippo';
+import { ShippingRate, Address } from '@/lib/integrations/shippo';
 import {
   createPaymentIntent as createPaymentIntentAction,
   updatePaymentIntent as updatePaymentIntentAction,
@@ -27,7 +27,7 @@ import { PaymentSection } from './PaymentSection';
 import { SupportedCurrency } from '@/lib/config/site';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
-const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface CheckoutClientProps {
   cartId: string;
@@ -63,13 +63,14 @@ export function CheckoutClient({
   const directQuantity = searchParams.get(CHECKOUT_URL_PARAMS.DIRECT_QUANTITY);
   const initialized = useRef(false);
 
-  const directItem =
-    directVariantId && directQuantity
+  const directItem = useMemo(() => {
+    return directVariantId && directQuantity
       ? {
           variantId: directVariantId,
           quantity: parseInt(directQuantity),
         }
       : undefined;
+  }, [directVariantId, directQuantity]);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -250,16 +251,18 @@ export function CheckoutForm({
         phone: phone,
       };
 
-      const finalShippingDetails = {
+      const finalShippingDetails: Address = {
         ...detailsToSend,
         email: email,
+        zip: detailsToSend.zip || '',
+        country: detailsToSend.country || '',
       };
 
       await updatePaymentIntentAction({
         paymentIntentId,
         shippingRate: rate,
         currency,
-        shippingDetails: finalShippingDetails as any, // Cast to any as a temporary glue between UI and Action types
+        shippingDetails: finalShippingDetails,
       });
     } catch (err) {
       logger.error({ err }, 'Failed to update shipping cost');

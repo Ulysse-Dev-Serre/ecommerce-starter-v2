@@ -8,6 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { SupportedCurrency } from '@/lib/config/site';
 import { OrderStepper } from '@/components/orders/order-stepper';
 import { OrderTracking } from '@/components/orders/order-tracking';
 import { OrderItemsList } from '@/components/orders/order-items-list';
@@ -79,7 +80,7 @@ export async function OrderDetailContent({
     billingAddress: t('billingAddress'),
   };
 
-  const shippingAddr = order.shippingAddress as Record<string, any> | null;
+  const shippingAddr = order.shippingAddress;
 
   return (
     <div
@@ -130,7 +131,7 @@ export async function OrderDetailContent({
                           tRefund('clientFallback'),
                         amount: formatPrice(
                           order.totalAmount,
-                          order.currency as any,
+                          order.currency as SupportedCurrency,
                           locale
                         ),
                         orderNumber: order.orderNumber,
@@ -138,7 +139,7 @@ export async function OrderDetailContent({
                     : tRefund('refundDoneMessage', {
                         amount: formatPrice(
                           order.totalAmount,
-                          order.currency as any,
+                          order.currency as SupportedCurrency,
                           locale
                         ),
                         currency: order.currency,

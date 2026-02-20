@@ -1,5 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { createTestOrder, disconnectPrisma } from '../fixtures/seed-test-data';
+import {
+  createTestOrder,
+  resetTestOrders,
+  cleanupTestProduct,
+  cleanupTestSupplier,
+  disconnectPrisma,
+} from '../fixtures/seed-test-data';
 
 /**
  * Admin Orders E2E Test
@@ -17,7 +23,10 @@ test.describe('Admin Orders Management', () => {
   let testOrderNumber: string;
 
   test.beforeAll(async () => {
-    // Seed a specific order for this test suite to avoid dependency on other tests
+    // 1. Clean up any stale data from previous failed runs
+    await resetTestOrders(TEST_LABEL_EMAIL);
+
+    // 2. Seed a specific order for this test suite
     const order = await createTestOrder(TEST_LABEL_EMAIL);
     testOrderNumber = order.orderNumber;
     console.log(
@@ -26,6 +35,10 @@ test.describe('Admin Orders Management', () => {
   });
 
   test.afterAll(async () => {
+    // Clean up everything to leave DB in a pristine state
+    await resetTestOrders(TEST_LABEL_EMAIL);
+    await cleanupTestProduct('e2e-checkout-product-fixed');
+    await cleanupTestSupplier();
     await disconnectPrisma();
   });
   test('View orders list and navigate to order detail', async ({ page }) => {
@@ -85,7 +98,7 @@ test.describe('Admin Orders Management', () => {
     });
 
     // Verify key sections are visible
-    const pageContent = await page.locator('body').innerText();
+    const _pageContent = await page.locator('body').innerText();
     console.log('✅ Order detail page loaded successfully');
 
     // Check key elements on the page — status badge shows "Paid" (translated)

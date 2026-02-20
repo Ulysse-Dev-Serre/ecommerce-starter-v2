@@ -52,7 +52,6 @@ export function ProductClient({
     variants[0]?.id || ''
   );
   const t = useTranslations('product');
-  const tCommon = useTranslations('shop'); // For "viewOptions" etc
 
   const selectedVariant = variants.find(v => v.id === selectedVariantId);
 

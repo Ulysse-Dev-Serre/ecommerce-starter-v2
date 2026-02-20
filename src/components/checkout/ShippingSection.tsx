@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { ShippingRate } from '@/lib/integrations/shippo';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin } from 'lucide-react';
+import { SupportedCurrency } from '@/lib/config/site';
 
 interface ShippingSectionProps {
   shippingRates: ShippingRate[];
@@ -64,7 +65,7 @@ export function ShippingSection({
           <span className="vibe-text-lg-bold">
             {formatPrice(
               selectedRate.amount,
-              selectedRate.currency as any,
+              selectedRate.currency as SupportedCurrency,
               locale
             )}
           </span>
@@ -138,7 +139,11 @@ export function ShippingSection({
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-foreground">
-                        {formatPrice(rate.amount, rate.currency as any, locale)}
+                        {formatPrice(
+                          rate.amount,
+                          rate.currency as SupportedCurrency,
+                          locale
+                        )}
                       </div>
                     </div>
                   </div>

@@ -10,7 +10,6 @@ import { useToast } from '@/components/ui/toast-provider';
 
 interface AddToCartButtonProps {
   variantId: string;
-  locale: string;
   disabled?: boolean;
   fullWidth?: boolean;
   quantity?: number;
@@ -18,7 +17,6 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({
   variantId,
-  locale,
   disabled,
   fullWidth,
   quantity = 1,

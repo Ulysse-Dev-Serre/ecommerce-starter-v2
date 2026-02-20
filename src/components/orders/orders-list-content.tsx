@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { formatDate } from '@/lib/utils/date';
 import { formatPrice } from '@/lib/utils/currency';
 import { Order, OrderItem, Payment } from '@/generated/prisma';
+import { SupportedCurrency } from '@/lib/config/site';
 
 type UserOrder = Order & {
   items: OrderItem[];
@@ -88,7 +89,7 @@ export async function OrdersListContent({
                     <p className="vibe-mt-3 font-bold vibe-text-3xl">
                       {formatPrice(
                         order.totalAmount,
-                        order.currency as any,
+                        order.currency as SupportedCurrency,
                         locale
                       )}
                     </p>

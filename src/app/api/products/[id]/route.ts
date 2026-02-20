@@ -5,7 +5,6 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getProductBySlug, isProductAvailable } from '@/lib/services/products';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 import { productSlugSchema } from '@/lib/validators/product';
 

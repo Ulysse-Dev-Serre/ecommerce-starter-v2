@@ -93,7 +93,7 @@ export class S3StorageProvider implements StorageProvider {
     );
   }
 
-  getUrl(path: string): string {
+  getUrl(_path: string): string {
     // TODO: Retourner l'URL S3 publique
     // return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${path}`;
     // ou pour DigitalOcean Spaces:

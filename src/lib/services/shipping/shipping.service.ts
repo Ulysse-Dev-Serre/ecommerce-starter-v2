@@ -403,15 +403,15 @@ export class ShippingService {
 
     return {
       name: String(normalized.name),
-      company: normalized.company ? String(normalized.company) : undefined,
+      company: normalized.company ? String(normalized.company) : '',
       street1: String(normalized.street1),
-      street2: normalized.street2 ? String(normalized.street2) : undefined,
+      street2: normalized.street2 ? String(normalized.street2) : '',
       city: String(normalized.city),
-      state: normalized.state ? String(normalized.state) : undefined,
+      state: normalized.state ? String(normalized.state) : '',
       zip: String(normalized.zip).replace(/\s+/g, ''), // Standardize zip
       country,
-      phone: normalized.phone ? String(normalized.phone) : undefined,
-      email: normalized.email ? String(normalized.email) : undefined,
+      phone: normalized.phone ? String(normalized.phone) : '',
+      email: normalized.email ? String(normalized.email) : '',
     } as Address;
   }
 }

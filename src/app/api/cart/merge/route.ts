@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
-import { env } from '@/lib/core/env';
 import { mergeAnonymousCartToUser } from '@/lib/services/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 

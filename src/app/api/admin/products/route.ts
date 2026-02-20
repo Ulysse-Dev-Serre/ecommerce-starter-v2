@@ -39,18 +39,16 @@ async function createProductHandler(
       status: validatedData.status,
       isFeatured: validatedData.isFeatured,
       sortOrder: validatedData.sortOrder,
-      originCountry: validatedData.originCountry ?? undefined,
-      hsCode: validatedData.hsCode ?? undefined,
-      shippingOriginId: validatedData.shippingOriginId || undefined,
-      exportExplanation: validatedData.exportExplanation ?? undefined,
-      weight: validatedData.weight ?? undefined,
-      dimensions: validatedData.dimensions
-        ? {
-            length: validatedData.dimensions.length ?? undefined,
-            width: validatedData.dimensions.width ?? undefined,
-            height: validatedData.dimensions.height ?? undefined,
-          }
-        : undefined,
+      originCountry: validatedData.originCountry,
+      hsCode: validatedData.hsCode,
+      shippingOriginId: validatedData.shippingOriginId,
+      exportExplanation: validatedData.exportExplanation,
+      weight: validatedData.weight,
+      dimensions: {
+        length: validatedData.dimensions.length,
+        width: validatedData.dimensions.width,
+        height: validatedData.dimensions.height,
+      },
       translations: validatedData.translations?.map(t => ({
         ...t,
         language: t.language.toUpperCase() as Language, // Convert 'en'/'fr' to Language enum 'EN'/'FR'

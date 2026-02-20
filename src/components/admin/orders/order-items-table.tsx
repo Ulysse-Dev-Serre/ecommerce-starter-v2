@@ -1,5 +1,5 @@
 import { getTranslations, getLocale } from 'next-intl/server';
-import { Package } from 'lucide-react';
+import Image from 'next/image';
 import { formatPrice } from '@/lib/utils/currency';
 import { SupportedCurrency, DEFAULT_LOCALE } from '@/lib/config/site';
 import { OrderItem } from '@/lib/types/domain/order';
@@ -98,9 +98,11 @@ export async function OrderItemsTable({
           <div key={item.id} className="px-6 py-4 flex items-center">
             <div className="h-12 w-12 flex-shrink-0 admin-bg-subtle rounded overflow-hidden">
               {imageUrl && (
-                <img
+                <Image
                   src={imageUrl}
                   alt={productName}
+                  width={48}
+                  height={48}
                   className="h-full w-full object-cover"
                 />
               )}

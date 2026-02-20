@@ -12,7 +12,7 @@ import { UserRole } from '@/generated/prisma';
  */
 async function getUsersHandler(
   request: NextRequest,
-  authContext: AuthContext
+  _authContext: AuthContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const searchParams = request.nextUrl.searchParams;

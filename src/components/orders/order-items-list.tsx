@@ -3,6 +3,7 @@ import { OrderItem } from '@/lib/types/domain/order';
 import { SupportedCurrency } from '@/lib/config/site';
 
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface OrderItemsListProps {
   items: OrderItem[];
@@ -76,9 +77,11 @@ export function OrderItemsList({
             >
               <div className="vibe-w-24 vibe-h-24 vibe-bg-muted vibe-rounded-2xl vibe-overflow-hidden flex-shrink-0 vibe-border-border vibe-shadow-sm">
                 {imageUrl ? (
-                  <img
+                  <Image
                     src={imageUrl}
                     alt={itemName}
+                    width={96}
+                    height={96}
                     className="vibe-w-full vibe-h-full vibe-object-cover"
                   />
                 ) : (

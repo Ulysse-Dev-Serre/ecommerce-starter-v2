@@ -7,8 +7,10 @@ import { getOrderStatusKey } from '@/lib/utils/order-status';
 import { formatDate } from '@/lib/utils/date';
 import { SupportedCurrency } from '@/lib/config/site';
 
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+
 interface OrderListTableProps {
-  orders: any[];
+  orders: OrderWithIncludes[];
   locale: string;
 }
 
@@ -33,10 +35,13 @@ export async function OrderListTable({ orders, locale }: OrderListTableProps) {
             <th className="admin-table-th text-right">{t('table.actions')}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody className="divide-y admin-border-subtle">
           {orders.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+              <td
+                colSpan={7}
+                className="px-6 py-12 text-center admin-text-subtle"
+              >
                 {t('table.noOrders')}
               </td>
             </tr>
@@ -44,10 +49,10 @@ export async function OrderListTable({ orders, locale }: OrderListTableProps) {
             orders.map(order => (
               <tr key={order.id} className="admin-table-tr">
                 <td className="admin-table-td">
-                  <div className="font-medium text-gray-900">
+                  <div className="font-medium admin-text-main">
                     {order.orderNumber}
                   </div>
-                  <div className="text-gray-500">
+                  <div className="admin-text-subtle">
                     {order.items.length}{' '}
                     {order.items.length > 1
                       ? t('table.items')
@@ -55,20 +60,20 @@ export async function OrderListTable({ orders, locale }: OrderListTableProps) {
                   </div>
                 </td>
                 <td className="admin-table-td">
-                  <div className="text-gray-900">
+                  <div className="admin-text-main">
                     {order.user?.firstName && order.user?.lastName
                       ? `${order.user.firstName} ${order.user.lastName}`
                       : t('table.customerUnknown')}
                   </div>
-                  <div className="text-gray-500">
+                  <div className="admin-text-subtle">
                     {order.user?.email || t('table.noEmail')}
                   </div>
                 </td>
-                <td className="admin-table-td text-gray-500">
+                <td className="admin-table-td admin-text-subtle">
                   {formatDate(order.createdAt, locale)}
                 </td>
                 <td className="admin-table-td">
-                  <div className="font-medium text-gray-900">
+                  <div className="font-medium admin-text-main">
                     {formatPrice(
                       Number(order.totalAmount),
                       order.currency as SupportedCurrency,
@@ -85,10 +90,10 @@ export async function OrderListTable({ orders, locale }: OrderListTableProps) {
                 <td className="admin-table-td">
                   {order.payments[0] && (
                     <div className="text-sm">
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium admin-text-main">
                         {order.payments[0].method}
                       </div>
-                      <div className="text-gray-500">
+                      <div className="admin-text-subtle">
                         {order.payments[0].externalId?.substring(0, 20)}...
                       </div>
                     </div>
@@ -97,7 +102,7 @@ export async function OrderListTable({ orders, locale }: OrderListTableProps) {
                 <td className="admin-table-td text-right font-medium">
                   <Link
                     href={`/${locale}/admin/orders/${order.id}`}
-                    className="inline-flex items-center gap-1 text-primary hover:text-primary/80"
+                    className="admin-link inline-flex items-center gap-1"
                   >
                     <Eye className="h-4 w-4" />
                     {t('table.view')}

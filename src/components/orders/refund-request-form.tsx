@@ -45,7 +45,7 @@ export function RefundRequestForm({
       setIsSubmitted(true);
       showToast(t('successTitle'), 'success');
       window.location.reload();
-    } catch (_) {
+    } catch {
       showToast(t('error'), 'error');
     } finally {
       setIsSubmitting(false);
@@ -69,7 +69,7 @@ export function RefundRequestForm({
       setIsSubmitted(true);
       showToast(t('successTitle'), 'success');
       window.location.reload();
-    } catch (_) {
+    } catch {
       showToast(t('error'), 'error');
     } finally {
       setIsSubmitting(false);

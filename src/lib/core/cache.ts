@@ -20,7 +20,10 @@ export interface CacheProvider {
  * In-memory implementation (Default for Dev/Small scale)
  */
 class MemoryCacheProvider implements CacheProvider {
-  private store = new Map<string, { value: any; expiresAt: number | null }>();
+  private store = new Map<
+    string,
+    { value: unknown; expiresAt: number | null }
+  >();
   private rateLimitStore = new Map<
     string,
     { count: number; resetTime: number }
@@ -107,8 +110,8 @@ class RedisCacheProvider implements CacheProvider {
 
   constructor() {
     this.client = new Redis({
-      url: env.UPSTASH_REDIS_REST_URL!,
-      token: env.UPSTASH_REDIS_REST_TOKEN!,
+      url: env.UPSTASH_REDIS_REST_URL || '',
+      token: env.UPSTASH_REDIS_REST_TOKEN || '',
     });
   }
 
