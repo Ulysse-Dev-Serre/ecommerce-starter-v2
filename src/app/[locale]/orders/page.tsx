@@ -1,9 +1,11 @@
-import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { getCurrentUser } from '@/lib/services/users';
-import { getUserOrders } from '@/lib/services/orders';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { getUserOrders } from '@/lib/services/orders';
+import { getCurrentUser } from '@/lib/services/users';
+
 import { OrdersListContent } from '@/components/orders/orders-list-content';
 
 export const dynamic = 'force-dynamic';

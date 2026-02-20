@@ -1,24 +1,26 @@
 import { notFound } from 'next/navigation';
 
 import { prisma } from '@/lib/core/db';
-import { OrderHeader } from '@/components/admin/orders/order-header';
-import {
-  OrderItemsTable,
-  AdminOrderItem,
-} from '@/components/admin/orders/order-items-table';
-import { OrderSummary } from '@/components/admin/orders/order-summary';
-import { OrderPaymentInfo } from '@/components/admin/orders/order-payment-info';
-import { OrderCustomerCard } from '@/components/admin/orders/order-customer-card';
-import { OrderShippingCard } from '@/components/admin/orders/order-shipping-card';
-import { OrderPackingCard } from '@/components/admin/orders/order-packing-card';
-import { OrderHistoryTimeline } from '@/components/admin/orders/order-history-timeline';
-import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 import {
   OrderWithIncludes,
   Address as OrderAddress,
   OrderPayment,
 } from '@/lib/types/domain/order';
+
 import { User, OrderStatusHistory, Shipment } from '@/generated/prisma';
+
+import { OrderCustomerCard } from '@/components/admin/orders/order-customer-card';
+import { OrderHeader } from '@/components/admin/orders/order-header';
+import { OrderHistoryTimeline } from '@/components/admin/orders/order-history-timeline';
+import {
+  OrderItemsTable,
+  AdminOrderItem,
+} from '@/components/admin/orders/order-items-table';
+import { OrderPackingCard } from '@/components/admin/orders/order-packing-card';
+import { OrderPaymentInfo } from '@/components/admin/orders/order-payment-info';
+import { OrderShippingCard } from '@/components/admin/orders/order-shipping-card';
+import { OrderSummary } from '@/components/admin/orders/order-summary';
+import { ShippingManagement } from '@/components/admin/orders/shipping-management';
 
 export const dynamic = 'force-dynamic';
 

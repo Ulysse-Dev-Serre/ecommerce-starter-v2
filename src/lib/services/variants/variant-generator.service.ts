@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   CreateVariantData,
   GenerateVariantsConfig,
 } from '@/lib/types/domain/variant';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
  * Generates an automatic SKU based on an attribute value.

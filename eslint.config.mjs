@@ -58,13 +58,44 @@ const eslintConfig = [
       '@typescript-eslint/prefer-nullish-coalescing': 'off',
       '@typescript-eslint/prefer-optional-chain': 'off',
       '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      'import/order': 'off',
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            ['parent', 'sibling', 'index'],
+            'type',
+          ],
+          pathGroups: [
+            {
+              pattern: 'react',
+              group: 'external',
+              position: 'before',
+            },
+            {
+              pattern: '@/lib/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: '@/components/**',
+              group: 'internal',
+              position: 'after',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['react'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
       'import/no-unresolved': 'off',
-      'import/no-duplicates': 'off',
-      'prefer-const': 'off',
+      'import/no-duplicates': 'error',
+      'prefer-const': 'error',
       'object-shorthand': 'off',
       'prefer-template': 'off',
-      'no-console': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
 
       // React / JSX
       'react/react-in-jsx-scope': 'off',
@@ -89,11 +120,41 @@ const eslintConfig = [
 
   // Overrides : tests et scripts peuvent être moins stricts
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', 'scripts/**', 'tests/**'],
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
+      'scripts/**',
+      'src/tests/**',
+    ],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
+      'no-console': 'off',
+    },
+  },
+  {
+    files: [
+      'src/lib/core/env.ts',
+      'src/lib/core/logger.ts',
+      'src/middleware.ts',
+      'src/app/api/**/route.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'no-console': 'off',
+    },
+  },
+  {
+    files: [
+      'src/lib/middleware/types.ts',
+      'src/lib/integrations/shippo/client.ts',
+      'src/components/admin/products/product-shipping-info.tsx',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ];

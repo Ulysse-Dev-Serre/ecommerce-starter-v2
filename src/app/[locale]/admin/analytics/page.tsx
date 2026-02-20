@@ -1,8 +1,10 @@
+import { getTranslations } from 'next-intl/server';
+
+import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
+
+import { AnalyticsStatsGrid } from '@/components/admin/analytics/analytics-stats-grid';
 import { ConversionFunnel } from '@/components/admin/analytics/conversion-funnel';
 import { SourceTable } from '@/components/admin/analytics/source-table';
-import { AnalyticsStatsGrid } from '@/components/admin/analytics/analytics-stats-grid';
-import { getTranslations } from 'next-intl/server';
-import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
 
 export const dynamic = 'force-dynamic';
 

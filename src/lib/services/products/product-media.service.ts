@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/core/db';
 import { getStorageProvider } from '@/lib/integrations/storage/storage.service';
-import { MediaType } from '@/generated/prisma';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+
+import { MediaType } from '@/generated/prisma';
 
 export const productMediaService = {
   /**

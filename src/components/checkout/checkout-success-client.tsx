@@ -1,11 +1,8 @@
 'use client';
 
-import {
-  VIBE_ANIMATION_FADE_IN,
-  VIBE_ANIMATION_ZOOM_IN,
-} from '@/lib/config/vibe-styles';
-
 import { useEffect, useState } from 'react';
+
+import { useUser } from '@clerk/nextjs';
 import {
   Loader2,
   CheckCircle,
@@ -13,12 +10,16 @@ import {
   ShoppingBag,
   Mail,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+
 import { verifyOrder } from '@/lib/client/orders';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
-import { useUser } from '@clerk/nextjs';
+import {
+  VIBE_ANIMATION_FADE_IN,
+  VIBE_ANIMATION_ZOOM_IN,
+} from '@/lib/config/vibe-styles';
 
 interface CheckoutSuccessClientProps {
   locale: string;

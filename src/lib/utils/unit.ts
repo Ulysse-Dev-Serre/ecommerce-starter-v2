@@ -1,5 +1,6 @@
-import type { Decimal } from '@prisma/client/runtime/library';
 import { toNum } from '@/lib/utils/number';
+
+import type { Decimal } from '@prisma/client/runtime/library';
 
 /**
  * Formate un poids pour l'affichage.

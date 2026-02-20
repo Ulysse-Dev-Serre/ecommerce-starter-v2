@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { withError } from '@/lib/middleware/withError';
 import { ApiContext } from '@/lib/middleware/types';
+import { withError } from '@/lib/middleware/withError';
 import { getSystemHealth } from '@/lib/services/health';
 
 /**

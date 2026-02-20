@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import Stripe from 'stripe';
+
 import { Product } from '@/generated/prisma';
+
 import {
   getTestSupplierId,
   getOrCreateTestProduct,

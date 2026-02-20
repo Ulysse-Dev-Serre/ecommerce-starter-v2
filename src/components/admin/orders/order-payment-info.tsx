@@ -1,9 +1,10 @@
-import { getTranslations, getLocale } from 'next-intl/server';
 import { CreditCard } from 'lucide-react';
-import { formatPrice } from '@/lib/utils/currency';
-import { formatDate } from '@/lib/utils/date';
+import { getTranslations, getLocale } from 'next-intl/server';
+
 import { SupportedCurrency } from '@/lib/config/site';
 import { OrderPayment } from '@/lib/types/domain/order';
+import { formatPrice } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
 
 interface OrderPaymentInfoProps {
   payments: OrderPayment[];

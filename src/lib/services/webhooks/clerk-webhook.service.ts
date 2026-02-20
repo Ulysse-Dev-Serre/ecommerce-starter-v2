@@ -1,11 +1,13 @@
-import { User } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
-import { UserClerkService } from '../users/user-clerk.service';
+import { ClerkWebhookEventData } from '@/lib/types/domain/webhook';
 import {
   ClerkUserCreatedEvent,
   ClerkUserUpdatedEvent,
 } from '@/lib/validators/clerk-webhook';
-import { ClerkWebhookEventData } from '@/lib/types/domain/webhook';
+
+import { User } from '@/generated/prisma';
+
+import { UserClerkService } from '../users/user-clerk.service';
 
 /**
  * Traite l'événement user.created de Clerk

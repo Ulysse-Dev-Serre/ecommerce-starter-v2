@@ -1,15 +1,16 @@
+import Stripe from 'stripe';
+
+import { SupportedCurrency, DEFAULT_CURRENCY } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
+import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
-import { toStripeAmount } from '@/lib/integrations/stripe/utils';
 import { stripe } from '@/lib/integrations/stripe/client';
+import { toStripeAmount } from '@/lib/integrations/stripe/utils';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   PaymentIntentInput,
   PaymentIntentResult,
 } from '@/lib/types/domain/payment';
-import Stripe from 'stripe';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
-import { env } from '@/lib/core/env';
-import { SupportedCurrency, DEFAULT_CURRENCY } from '@/lib/config/site';
 
 /**
  * Crée un PaymentIntent Stripe

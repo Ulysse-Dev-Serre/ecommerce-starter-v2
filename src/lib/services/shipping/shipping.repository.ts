@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/core/db';
-import { Prisma } from '@/generated/prisma';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+
+import { Prisma } from '@/generated/prisma';
 
 /**
  * Strict definition of the relations required for shipping calculations.

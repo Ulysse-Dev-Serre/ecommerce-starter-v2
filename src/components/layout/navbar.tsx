@@ -1,6 +1,6 @@
 'use client';
 
-import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
+import React, { type MouseEvent } from 'react';
 
 import {
   SignInButton,
@@ -9,16 +9,17 @@ import {
   UserButton,
   useUser,
 } from '@clerk/nextjs';
+import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import React, { type MouseEvent } from 'react';
-import { ShoppingCart } from 'lucide-react';
+
+import { siteConfig } from '@/lib/config/site';
+import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
 import { cn } from '@/lib/utils/cn';
 
 import { logger } from '../../lib/core/logger';
 import { i18n } from '../../lib/i18n/config';
-import { siteConfig } from '@/lib/config/site';
 
 interface NavbarProps {
   locale: string;

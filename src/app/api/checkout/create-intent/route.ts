@@ -1,40 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { withError } from '@/lib/middleware/withError';
+import { SITE_CURRENCY } from '@/lib/config/site';
+import { i18n } from '@/lib/i18n/config';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
-import { withValidation } from '@/lib/middleware/withValidation';
+import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
+import { withValidation } from '@/lib/middleware/withValidation';
 import { getOrCreateCart } from '@/lib/services/cart';
+import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import { reserveStock } from '@/lib/services/inventory';
 import { createPaymentIntent } from '@/lib/services/payments';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { CheckoutCurrency } from '@/lib/types/domain/checkout';
-import { SITE_CURRENCY } from '@/lib/config/site';
-import { i18n } from '@/lib/i18n/config';
 import {
   createIntentSchema,
   type CreateIntentInput,
 } from '@/lib/validators/checkout';
-import { resolveCartIdentity } from '@/lib/services/cart/identity';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 async function createIntentHandler(
   request: NextRequest,
-  { auth, data }: ApiContext<any, CreateIntentInput>
+  { auth, data }: ApiContext<undefined, CreateIntentInput>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const authContext = auth as OptionalAuthContext;
-  const validatedData = data as CreateIntentInput;
   const { userId, anonymousId } = await resolveCartIdentity(authContext);
 
-  const {
-    cartId: bodyCartId,
-    directItem,
-    locale: validatedLocale,
-  } = validatedData;
+  const { cartId: bodyCartId, directItem, locale: validatedLocale } = data!;
 
   const currency: CheckoutCurrency = SITE_CURRENCY;
   const locale = validatedLocale || i18n.defaultLocale;

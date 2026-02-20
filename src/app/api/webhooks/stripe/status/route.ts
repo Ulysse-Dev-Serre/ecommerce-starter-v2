@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-
+import { ApiContext } from '@/lib/middleware/types';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
 
 async function handler(
   _request: NextRequest,

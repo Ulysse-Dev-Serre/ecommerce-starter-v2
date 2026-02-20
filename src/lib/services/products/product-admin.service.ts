@@ -1,13 +1,15 @@
-import { Prisma, ProductStatus, Product } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
 import {
   CreateProductData,
   UpdateProductData,
   ProductWithTranslations,
   AdminProductListResult,
 } from '@/lib/types/domain/product';
+
+import { Prisma, ProductStatus, Product } from '@/generated/prisma';
+
+import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
 
 /**
  * Retrieves all products with translations (simplified version for admin).

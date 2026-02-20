@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { Language } from '../../../../generated/prisma';
-import { logger } from '../../../../lib/core/logger';
-import { AuthContext, withAdmin } from '../../../../lib/middleware/withAuth';
-import { withError } from '../../../../lib/middleware/withError';
 import { ApiContext } from '@/lib/middleware/types';
 import {
   getProductAttributes,
   createProductAttribute,
   type CreateAttributeData,
 } from '@/lib/services/attributes';
-import { withValidation } from '../../../../lib/middleware/withValidation';
 import {
   createAttributeSchema,
   CreateAttributeInput,
 } from '@/lib/validators/admin';
+
+import { Language } from '../../../../generated/prisma';
+import { logger } from '../../../../lib/core/logger';
+import { AuthContext, withAdmin } from '../../../../lib/middleware/withAuth';
+import { withError } from '../../../../lib/middleware/withError';
+import { withValidation } from '../../../../lib/middleware/withValidation';
 
 /**
  * GET /api/admin/attributes
@@ -25,7 +26,7 @@ import {
  */
 async function getAttributesHandler(
   request: NextRequest,
-  { auth }: ApiContext
+  { auth }: ApiContext<undefined, undefined>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const authContext = auth as AuthContext;
@@ -86,12 +87,12 @@ async function getAttributesHandler(
  */
 
 async function createAttributeHandler(
-  request: NextRequest,
-  { auth, data }: ApiContext<any, CreateAttributeInput>
+  _request: NextRequest,
+  { auth, data }: ApiContext<undefined, CreateAttributeInput>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const authContext = auth as AuthContext;
-  const validatedData = data as CreateAttributeInput;
+  const validatedData = data!;
 
   try {
     // Data is validated by middleware

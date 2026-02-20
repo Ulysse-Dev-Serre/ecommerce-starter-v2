@@ -1,5 +1,6 @@
-import { getTranslations } from 'next-intl/server';
 import { MapPin, Phone } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
+
 import { Address } from '@/generated/prisma';
 
 interface CustomerAddressBookProps {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
@@ -8,7 +9,6 @@ import {
   addAttributeValue,
   type AddAttributeValueData,
 } from '@/lib/services/attributes';
-import { ApiHandler, ApiContext } from '@/lib/middleware/types';
 
 /**
  * POST /api/admin/attributes/[id]/values

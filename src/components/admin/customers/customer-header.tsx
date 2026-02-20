@@ -1,6 +1,7 @@
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { ArrowLeft } from 'lucide-react';
+
 import { User } from '@/generated/prisma';
 
 interface CustomerHeaderProps {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { UserRole } from '@/generated/prisma';
 
 export const userSearchSchema = z.object({

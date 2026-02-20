@@ -1,13 +1,14 @@
-import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
-import Link from 'next/link';
-import Image from 'next/image';
-import { PriceDisplay } from '@/components/price-display';
-import { ProductActions } from '@/components/cart/product-actions';
-import { getTranslations } from 'next-intl/server';
 import { Package } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import Image from 'next/image';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
+import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
 import { ProductProjection } from '@/lib/types/domain/product';
+
+import { ProductActions } from '@/components/cart/product-actions';
+import { PriceDisplay } from '@/components/price-display';
+import { Card } from '@/components/ui/card';
 
 interface ProductCardProps {
   product: ProductProjection;

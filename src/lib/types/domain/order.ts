@@ -1,7 +1,9 @@
-import { OrderStatus, Language, Shipment } from '@/generated/prisma';
-import { CartProjection } from './cart';
-import Stripe from 'stripe';
 import { JsonValue } from '@prisma/client/runtime/library';
+import Stripe from 'stripe';
+
+import { OrderStatus, Language, Shipment } from '@/generated/prisma';
+
+import { CartProjection } from './cart';
 
 /**
  * Interface pour les adresses (Shipping/Billing)

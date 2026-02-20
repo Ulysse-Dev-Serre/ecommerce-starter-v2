@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { ApiContext } from '@/lib/middleware/types';
+
+import { MediaType, Prisma } from '../../../../generated/prisma';
+import { prisma } from '../../../../lib/core/db';
 import { logger } from '../../../../lib/core/logger';
 import { AuthContext, withAdmin } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
@@ -7,9 +11,6 @@ import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
-import { prisma } from '../../../../lib/core/db';
-import { MediaType, Prisma } from '../../../../generated/prisma';
 
 /**
  * GET /api/admin/media

@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
 import { createSimpleVariants } from '@/lib/services/variants';
 import type { SimpleVariantData } from '@/lib/types/domain/variant';
-import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 /**
  * POST /api/admin/products/[id]/variants/simple

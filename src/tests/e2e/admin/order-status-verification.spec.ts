@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+
+import { verifyEmailSent } from '../fixtures/resend-helper';
 import {
   createTestOrder,
   resetTestOrders,
@@ -6,7 +8,6 @@ import {
   cleanupTestSupplier,
   disconnectPrisma,
 } from '../fixtures/seed-test-data';
-import { verifyEmailSent } from '../fixtures/resend-helper';
 
 /**
  * Order Status & Email Verification Test

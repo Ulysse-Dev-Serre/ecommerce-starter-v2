@@ -1,20 +1,23 @@
 'use client';
 
 import { useEffect, useMemo } from 'react';
-import { FormInput } from '@/components/ui/form-input';
-import { FormSelect } from '@/components/ui/form-select';
-import { Card } from '@/components/ui/card';
+
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import AddressAutocomplete from './AddressAutocomplete';
-import { Loader2 } from 'lucide-react';
-import { CheckoutAddress } from '@/lib/types/ui/checkout';
 import {
   SITE_CURRENCY,
   COUNTRY_TO_CURRENCY,
   PHONE_PREFIX,
   STORE_ORIGIN_ADDRESS,
 } from '@/lib/config/site';
+import { CheckoutAddress } from '@/lib/types/ui/checkout';
+
+import { Card } from '@/components/ui/card';
+import { FormInput } from '@/components/ui/form-input';
+import { FormSelect } from '@/components/ui/form-select';
+
+import AddressAutocomplete from './AddressAutocomplete';
 
 interface AddressSectionProps {
   tempAddress: CheckoutAddress;

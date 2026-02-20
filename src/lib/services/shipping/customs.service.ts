@@ -1,7 +1,8 @@
-import { Address, CustomsDeclaration } from '@/lib/integrations/shippo';
-import { ShippingItem } from './shipping.repository';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { SHIPPING_UNITS } from '@/lib/config/site';
+import { Address, CustomsDeclaration } from '@/lib/integrations/shippo';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+
+import { ShippingItem } from './shipping.repository';
 
 export class CustomsService {
   /**

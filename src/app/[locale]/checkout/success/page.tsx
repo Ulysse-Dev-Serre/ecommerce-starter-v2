@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
+
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { Suspense } from 'react';
-import { LoadingState } from '@/components/ui/loading-state';
+
 import { CheckoutSuccessClient } from '@/components/checkout/checkout-success-client';
+import { LoadingState } from '@/components/ui/loading-state';
 
 export const dynamic = 'force-dynamic';
 

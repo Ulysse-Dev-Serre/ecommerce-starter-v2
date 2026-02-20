@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useParams } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
@@ -12,6 +10,8 @@ import {
   Home,
   Truck,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 export function AdminSidebar() {

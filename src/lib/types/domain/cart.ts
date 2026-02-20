@@ -1,4 +1,5 @@
 import { CartStatus } from '@/generated/prisma';
+
 import { Dimensions } from './product';
 
 /**

@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+
 import { User } from '@/generated/prisma';
 
 interface CustomerNotesCardProps {

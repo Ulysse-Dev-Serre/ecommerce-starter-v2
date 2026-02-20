@@ -1,5 +1,6 @@
-import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
+
+import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
 // Load env variables using absolute path for synchronization

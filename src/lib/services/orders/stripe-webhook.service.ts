@@ -1,11 +1,8 @@
 import Stripe from 'stripe';
+
+import { SITE_CURRENCY } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { SITE_CURRENCY } from '@/lib/config/site';
-import {
-  parseStripeItems,
-  StripeMetadata,
-} from '@/lib/validators/stripe-webhook';
 import { clearCart, getOrCreateCart } from '@/lib/services/cart';
 import { releaseStock } from '@/lib/services/inventory';
 import {
@@ -14,12 +11,16 @@ import {
   sendAdminNewOrderAlert,
 } from '@/lib/services/orders';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { CartProjection } from '@/lib/types/domain/cart';
 import {
   Address,
   OrderWithIncludes,
   OrderItem,
 } from '@/lib/types/domain/order';
-import { CartProjection } from '@/lib/types/domain/cart';
+import {
+  parseStripeItems,
+  StripeMetadata,
+} from '@/lib/validators/stripe-webhook';
 
 export class StripeWebhookService {
   /**

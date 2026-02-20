@@ -1,7 +1,8 @@
-import { Prisma } from '@/generated/prisma';
+import { DEFAULT_CURRENCY } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { DEFAULT_CURRENCY } from '@/lib/config/site';
+
+import { Prisma } from '@/generated/prisma';
 
 export interface CreateLocationData {
   name: string;

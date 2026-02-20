@@ -1,12 +1,14 @@
 import { Decimal } from '@prisma/client/runtime/library';
+
 import { logger } from '@/lib/core/logger';
-import { CartProjection } from '@/lib/types/domain/cart';
 import {
   Currency,
   CalculatedLineItem,
   CartCalculation,
   SerializedCartCalculation,
 } from '@/lib/types/domain/calculation';
+import { CartProjection } from '@/lib/types/domain/cart';
+
 import { roundHalfEven } from './math-utils.service';
 
 /**

@@ -1,4 +1,5 @@
 import { type Page, type Locator, expect, test } from '@playwright/test';
+
 import { TEST_ROUTES } from '../../config/routes';
 
 export interface LocationData {

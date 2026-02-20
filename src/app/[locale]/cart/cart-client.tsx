@@ -1,20 +1,20 @@
 'use client';
 
-import { removeFromCart } from '@/lib/client/cart';
-import { useToast } from '@/components/ui/toast-provider';
-
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import { useUser } from '@clerk/nextjs';
 import { ShoppingCart } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+
+import { removeFromCart } from '@/lib/client/cart';
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import { Cart } from '@/lib/types/ui/cart';
 
 import { CartItem } from '@/components/cart/cart-item';
 import { CartSummary } from '@/components/cart/cart-summary';
-import { NAV_ROUTES } from '@/lib/config/nav-routes';
-
-import { Cart } from '@/lib/types/ui/cart';
+import { useToast } from '@/components/ui/toast-provider';
 
 interface CartClientProps {
   cart: Cart | null;

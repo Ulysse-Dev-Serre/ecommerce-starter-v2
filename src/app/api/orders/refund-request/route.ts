@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/core/db';
-import { OrderStatus } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
-import { withError } from '@/lib/middleware/withError';
-import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
-import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { ApiContext } from '@/lib/middleware/types';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import {
   updateOrderStatus,
   sendRefundRequestAlert,
 } from '@/lib/services/orders';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+
+import { OrderStatus } from '@/generated/prisma';
 
 async function refundRequestHandler(
   request: NextRequest,
@@ -75,7 +76,7 @@ async function refundRequestHandler(
   });
 
   // 4. Send email alert via specialized service
-  let attachments: { filename: string; content: Buffer }[] = [];
+  const attachments: { filename: string; content: Buffer }[] = [];
   if (file) {
     const buffer = Buffer.from(await file.arrayBuffer());
     attachments.push({

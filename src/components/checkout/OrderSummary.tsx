@@ -1,13 +1,15 @@
+import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+
+import { SupportedCurrency } from '@/lib/config/site';
 import {
   VIBE_ANIMATION_FADE_IN,
   VIBE_ANIMATION_SLIDE_IN_RIGHT,
 } from '@/lib/config/vibe-styles';
-import { formatPrice } from '@/lib/utils/currency';
-import { Card } from '@/components/ui/card';
-import { SupportedCurrency } from '@/lib/config/site';
 import { ShippingRate } from '@/lib/integrations/shippo';
-import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { formatPrice } from '@/lib/utils/currency';
+
+import { Card } from '@/components/ui/card';
 
 interface OrderSummaryProps {
   summaryItems?: Array<{

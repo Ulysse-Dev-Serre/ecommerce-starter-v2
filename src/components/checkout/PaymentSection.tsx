@@ -1,6 +1,6 @@
 import { PaymentElement } from '@stripe/react-stripe-js';
-import { useTranslations } from 'next-intl';
 import { Lock, ShieldCheck } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface PaymentSectionProps {
   stripe: unknown;

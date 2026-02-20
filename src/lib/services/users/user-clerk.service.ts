@@ -1,4 +1,3 @@
-import { UserRole } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import {
@@ -6,6 +5,8 @@ import {
   ClerkUserUpdatedEvent,
   ClerkUserDeletedEvent,
 } from '@/lib/validators/clerk-webhook';
+
+import { UserRole } from '@/generated/prisma';
 
 /**
  * Service handling Clerk Webhook Events.

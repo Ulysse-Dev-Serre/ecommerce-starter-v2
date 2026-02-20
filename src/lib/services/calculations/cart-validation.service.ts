@@ -1,6 +1,7 @@
 import { logger } from '@/lib/core/logger';
-import { CartProjection } from '@/lib/types/domain/cart';
 import { Currency, CartValidationResult } from '@/lib/types/domain/calculation';
+import { CartProjection } from '@/lib/types/domain/cart';
+
 import { getPrice } from './cart-calculation.service';
 
 /**

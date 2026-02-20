@@ -1,8 +1,10 @@
-import { getMessages, setRequestLocale } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, setRequestLocale } from 'next-intl/server';
+
 import { prisma } from '@/lib/core/db';
-import { LogisticsClient } from '@/components/admin/logistics/logistics-client';
 import { AdminSupplier } from '@/lib/types/domain/logistics';
+
+import { LogisticsClient } from '@/components/admin/logistics/logistics-client';
 
 interface LogisticsPageProps {
   params: Promise<{ locale: string }>;

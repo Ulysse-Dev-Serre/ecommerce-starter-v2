@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
-import { prisma } from '@/lib/core/db';
+
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { prisma } from '@/lib/core/db';
 import { env } from '@/lib/core/env';
 
 export const dynamic = 'force-dynamic';

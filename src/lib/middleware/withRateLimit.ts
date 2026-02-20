@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-import { logger } from '@/lib/core/logger';
 import { cache } from '@/lib/core/cache';
+import { logger } from '@/lib/core/logger';
+
 import { ApiHandler, ApiContext } from './types';
+
+import type { NextRequest } from 'next/server';
 
 interface RateLimitConfig {
   windowMs: number; // Fenêtre de temps en ms

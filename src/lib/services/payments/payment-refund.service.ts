@@ -1,15 +1,16 @@
-import { OrderStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { stripe } from '@/lib/integrations/stripe/client';
 import { orderRepository } from '@/lib/repositories/order.repository';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { incrementStock } from '@/lib/services/inventory';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   RefundInput,
   RefundResult,
   UpdateOrderStatusInput,
 } from '@/lib/types/domain/payment';
+
+import { OrderStatus } from '@/generated/prisma';
 
 /**
  * Traite un remboursement complet ou partiel sur Stripe

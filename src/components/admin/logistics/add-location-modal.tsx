@@ -1,14 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { Plus, X, MapPin } from 'lucide-react';
-import { Address } from '@/lib/integrations/shippo';
-import { SupplierType } from '@/generated/prisma';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+
 import { saveLogisticsLocation } from '@/lib/client/admin/logistics';
-import { AdminSupplier } from '@/lib/types/domain/logistics';
 import { STORE_ORIGIN_ADDRESS } from '@/lib/config/site';
+import { Address } from '@/lib/integrations/shippo';
+import { AdminSupplier } from '@/lib/types/domain/logistics';
+
+import { SupplierType } from '@/generated/prisma';
 
 interface AddLocationModalProps {
   onClose: () => void;

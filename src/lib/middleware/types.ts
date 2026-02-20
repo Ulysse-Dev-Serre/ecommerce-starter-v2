@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
+
 import { AuthContext, OptionalAuthContext } from './withAuth';
 
 /**

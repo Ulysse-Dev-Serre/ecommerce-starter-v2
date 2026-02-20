@@ -1,5 +1,6 @@
-import { OrderStatus } from '@/generated/prisma';
 import { cn } from '@/lib/utils/cn';
+
+import { OrderStatus } from '@/generated/prisma';
 
 interface StatusBadgeProps {
   status: string | OrderStatus;

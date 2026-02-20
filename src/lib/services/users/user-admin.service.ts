@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { UserSearchInput } from '@/lib/validators/user';
+
 import { UserRole, Prisma } from '@/generated/prisma';
 
 /**

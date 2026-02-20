@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { vi, expect } from 'vitest';
 import { config } from 'dotenv';
+import { vi, expect } from 'vitest';
 
 // Load environment variables
 config({ path: '.env.local' });

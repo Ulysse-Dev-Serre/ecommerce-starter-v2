@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { withValidation } from '@/lib/middleware/withValidation';
-import { ApiContext } from '@/lib/middleware/types';
+import { createProduct } from '@/lib/services/products/product-admin.service';
+import { CreateProductData } from '@/lib/types/domain/product';
 import {
   CreateProductSchema,
   CreateProductInput,
 } from '@/lib/validators/product';
+
 import { Language } from '@/generated/prisma';
-import { createProduct } from '@/lib/services/products/product-admin.service';
-import { CreateProductData } from '@/lib/types/domain/product';
 
 async function createProductHandler(
-  request: NextRequest,
-  { auth, data }: ApiContext<any, CreateProductInput>
+  _request: NextRequest,
+  { auth, data }: ApiContext<undefined, CreateProductInput>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const authContext = auth as AuthContext;
-  const validatedData = data as CreateProductInput;
+  const validatedData = data!;
 
   try {
     // Data validated by middleware

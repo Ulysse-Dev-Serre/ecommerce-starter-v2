@@ -1,10 +1,12 @@
 import { test, expect } from '@playwright/test';
+
+import { DEFAULT_LOCALE } from '@/lib/config/site';
+import { prisma } from '@/lib/core/db';
+import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
+
+import { verifyProductCreated } from '../fixtures/seed-test-data';
 import { LogisticsPage } from '../pom/admin/LogisticsPage';
 import { ProductPage } from '../pom/admin/ProductPage';
-import { prisma } from '@/lib/core/db';
-import { verifyProductCreated } from '../fixtures/seed-test-data';
-import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
-import { DEFAULT_LOCALE } from '@/lib/config/site';
 
 test.describe('Admin Logistics & Product Workflow', () => {
   // Tests in this file are dependent on each other

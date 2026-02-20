@@ -1,7 +1,9 @@
-import Link from 'next/link';
 import { Search } from 'lucide-react';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+
 import { formatDate } from '@/lib/utils/date';
+
 import { User } from '@/generated/prisma';
 
 interface CustomerListTableProps {

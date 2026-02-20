@@ -1,17 +1,23 @@
-import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
-import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { SITE_CURRENCY, SUPPORTED_LOCALES } from '@/lib/config/site';
-import { Language } from '@/generated/prisma';
+
+import {
+  SITE_CURRENCY,
+  SUPPORTED_LOCALES,
+  siteConfig,
+} from '@/lib/config/site';
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
 import { env } from '@/lib/core/env';
+import { getProductBySlug, getProductViewModel } from '@/lib/services/products';
+
+import { Language } from '@/generated/prisma';
 
 import { ImageGallery } from '@/components/product/image-gallery';
-import { JsonLd } from '@/components/seo/json-ld';
-import { getProductBySlug, getProductViewModel } from '@/lib/services/products';
-import { ProductClient } from './product-client';
 import { RelatedProducts } from '@/components/product/related-products';
-import { siteConfig } from '@/lib/config/site';
+import { JsonLd } from '@/components/seo/json-ld';
+
+import { ProductClient } from './product-client';
 
 export const dynamic = 'force-dynamic';
 

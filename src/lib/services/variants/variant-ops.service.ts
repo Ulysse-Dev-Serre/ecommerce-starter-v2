@@ -1,23 +1,25 @@
-import { Prisma } from '@/generated/prisma';
+import { DEFAULT_CURRENCY } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { DEFAULT_CURRENCY } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
-import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   SimpleVariantData,
   CreateVariantData,
   UpdateVariantData,
   VariantWithRelations,
 } from '@/lib/types/domain/variant';
+
+import { Prisma } from '@/generated/prisma';
+
+import { validateVariantAttributes } from './variant-generator.service';
 import {
   ensureGenericVariantAttribute,
   ensureAttributeValue,
   getVariantById,
 } from './variant-management.service';
-import { validateVariantAttributes } from './variant-generator.service';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { cleanupOrphanedAttributes } from '../attributes/attribute-cleanup.service';
 
 /**
  * Creates simple variants with names in multiple languages using the generic attribute system.

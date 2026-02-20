@@ -1,4 +1,3 @@
-import type { Decimal } from '@prisma/client/runtime/library';
 import {
   SupportedCurrency,
   CURRENCY_DECIMALS,
@@ -6,6 +5,8 @@ import {
 } from '@/lib/config/site';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { toNum } from '@/lib/utils/number';
+
+import type { Decimal } from '@prisma/client/runtime/library';
 
 /**
  * Formate un prix de manière localisée.

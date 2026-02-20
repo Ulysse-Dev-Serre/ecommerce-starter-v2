@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+
+import { ApiContext } from '@/lib/middleware/types';
 import { withError } from '@/lib/middleware/withError';
 import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
-import { ApiContext } from '@/lib/middleware/types';
 
 /**
  * GET /api/internal/cleanup-analytics

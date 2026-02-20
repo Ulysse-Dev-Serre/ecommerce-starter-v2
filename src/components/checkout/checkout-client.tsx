@@ -1,30 +1,33 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useTranslations } from 'next-intl';
-import { trackEvent } from '@/lib/client/analytics';
 
-import { env } from '@/lib/core/env';
-import { logger } from '@/lib/core/logger';
-import { useToast } from '@/components/ui/toast-provider';
-import { siteTokens } from '@/styles/tokens';
-import { CheckoutAddress } from '@/lib/types/ui/checkout';
-import { ShippingRate, Address } from '@/lib/integrations/shippo';
+import { Elements, useStripe, useElements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+
+import { trackEvent } from '@/lib/client/analytics';
 import {
   createPaymentIntent as createPaymentIntentAction,
   updatePaymentIntent as updatePaymentIntentAction,
 } from '@/lib/client/checkout';
 import { getShippingRates } from '@/lib/client/shipping';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
-
-import { OrderSummary } from './OrderSummary';
-import { AddressSection } from './AddressSection';
-import { ShippingSection } from './ShippingSection';
-import { PaymentSection } from './PaymentSection';
 import { SupportedCurrency } from '@/lib/config/site';
+import { env } from '@/lib/core/env';
+import { logger } from '@/lib/core/logger';
+import { ShippingRate, Address } from '@/lib/integrations/shippo';
+import { CheckoutAddress } from '@/lib/types/ui/checkout';
+
+import { siteTokens } from '@/styles/tokens';
+
+import { useToast } from '@/components/ui/toast-provider';
+
+import { AddressSection } from './AddressSection';
+import { OrderSummary } from './OrderSummary';
+import { PaymentSection } from './PaymentSection';
+import { ShippingSection } from './ShippingSection';
 
 // Initialisation de Stripe en dehors du composant pour éviter de le recharger à chaque render
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');

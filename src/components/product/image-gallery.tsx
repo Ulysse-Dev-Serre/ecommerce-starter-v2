@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+
+import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+
 import { cn } from '@/lib/utils/cn';
 
 interface ImageGalleryProps {

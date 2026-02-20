@@ -1,13 +1,13 @@
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { cookies } from 'next/headers';
-
-import { getCheckoutSummary } from '@/lib/services/checkout';
-import { CheckoutClient } from '@/components/checkout/checkout-client';
-import { getCurrentUser } from '@/lib/services/users';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
+import { getCheckoutSummary } from '@/lib/services/checkout';
+import { getCurrentUser } from '@/lib/services/users';
+
+import { CheckoutClient } from '@/components/checkout/checkout-client';
 
 interface CheckoutPageProps {
   params: Promise<{ locale: string }>;

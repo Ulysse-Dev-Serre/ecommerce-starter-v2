@@ -1,9 +1,9 @@
-import { formatPrice } from '@/lib/utils/currency';
-import { OrderItem } from '@/lib/types/domain/order';
-import { SupportedCurrency } from '@/lib/config/site';
-
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+
+import { SupportedCurrency } from '@/lib/config/site';
+import { OrderItem } from '@/lib/types/domain/order';
+import { formatPrice } from '@/lib/utils/currency';
 
 interface OrderItemsListProps {
   items: OrderItem[];

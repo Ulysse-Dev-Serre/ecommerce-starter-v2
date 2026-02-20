@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+
 import { SUPPORTED_COUNTRIES } from '@/lib/config/site';
 
 declare global {

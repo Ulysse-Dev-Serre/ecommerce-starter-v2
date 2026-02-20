@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
 import { productMediaService } from '@/lib/services/products/product-media.service';
 
 /**

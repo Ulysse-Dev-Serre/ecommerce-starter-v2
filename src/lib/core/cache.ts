@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+
 import { env } from './env';
 import { logger } from './logger';
 

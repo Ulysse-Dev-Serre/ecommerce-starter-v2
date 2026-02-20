@@ -1,10 +1,11 @@
-import { Language } from '@/generated/prisma';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { VariantWithRelations } from '@/lib/types/domain/variant';
-import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { i18n } from '@/lib/i18n/config';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { VariantWithRelations } from '@/lib/types/domain/variant';
+
+import { Language } from '@/generated/prisma';
 
 export const GENERIC_ATTRIBUTE_KEY = 'variant_type';
 

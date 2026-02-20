@@ -1,16 +1,15 @@
-import { cookies } from 'next/headers';
+import { auth } from '@clerk/nextjs/server';
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
-import { auth } from '@clerk/nextjs/server';
-
+import { CART_COOKIE_NAME } from '@/lib/config/site';
 import { logger } from '@/lib/core/logger';
 import { getCartPageData } from '@/lib/services/cart';
 import { getCurrentUser } from '@/lib/services/users';
+import { Cart } from '@/lib/types/ui/cart';
 
 import { CartClient } from './cart-client';
-import { Cart } from '@/lib/types/ui/cart';
-import { CART_COOKIE_NAME } from '@/lib/config/site';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
-import { withError } from '@/lib/middleware/withError';
-import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
-import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { ApiContext } from '@/lib/middleware/types';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { getOrderById } from '@/lib/services/orders';
 import {
   OrderWithIncludes,
   OrderItem,
   OrderPayment,
 } from '@/lib/types/domain/order';
-import { getOrderById } from '@/lib/services/orders';
 
 /**
  * Helper to map Prisma order object to API response DTO

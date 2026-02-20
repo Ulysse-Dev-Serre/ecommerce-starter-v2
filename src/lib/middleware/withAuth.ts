@@ -9,10 +9,11 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse, NextRequest } from 'next/server';
 
-import { UserRole } from '../../generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+
 import { ApiHandler, ApiContext } from './types';
+import { UserRole } from '../../generated/prisma';
 
 export interface AuthContext {
   userId: string;

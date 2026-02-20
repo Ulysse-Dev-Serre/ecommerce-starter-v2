@@ -1,14 +1,8 @@
 import { prisma } from '@/lib/core/db';
-import { Prisma } from '@/generated/prisma';
 import { UserWithBasicInfo } from '@/lib/types/domain/user';
-
-/**
- * Récupère tous les utilisateurs avec informations de base
- * Utilisé pour l'admin user management
- *
- * @returns Liste des utilisateurs triée par date de création (desc)
- */
 import { UserSearchInput } from '@/lib/validators/user';
+
+import { Prisma } from '@/generated/prisma';
 
 /**
  * Récupère tous les utilisateurs avec filtres et pagination

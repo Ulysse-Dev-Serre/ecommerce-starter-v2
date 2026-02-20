@@ -1,13 +1,14 @@
-import { prisma } from '@/lib/core/db';
 import { SITE_CURRENCY } from '@/lib/config/site';
-import { getOrCreateCart } from '@/lib/services/cart';
-import { Language } from '@/generated/prisma';
+import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { getOrCreateCart } from '@/lib/services/cart';
 import {
   CheckoutSessionInput,
   CheckoutSummary,
   CheckoutSummaryItem,
 } from '@/lib/types/domain/checkout';
+
+import { Language } from '@/generated/prisma';
 
 /**
  * Calcule le résumé de checkout

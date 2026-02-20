@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
-import { OptionalAuthContext } from '@/lib/middleware/withAuth';
+
 import { CART_COOKIE_NAME } from '@/lib/config/site';
+import { OptionalAuthContext } from '@/lib/middleware/withAuth';
 
 export interface CartIdentity {
   userId?: string;

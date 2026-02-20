@@ -1,8 +1,8 @@
+import { getAllProducts } from '@/lib/services/products';
+
 import { ProductsList } from '@/components/admin/products/products-list';
 
 export const dynamic = 'force-dynamic';
-
-import { getAllProducts } from '@/lib/services/products';
 
 export default async function ProductsPage({
   params,

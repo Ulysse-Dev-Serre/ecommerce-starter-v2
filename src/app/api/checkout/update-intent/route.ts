@@ -1,27 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { withError } from '@/lib/middleware/withError';
-import {
-  OptionalAuthContext,
-  withOptionalAuth,
-} from '@/lib/middleware/withAuth';
-import { withValidation } from '@/lib/middleware/withValidation';
-import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
-import { updatePaymentIntent } from '@/lib/services/payments';
 import { SupportedCurrency } from '@/lib/config/site';
+import { ApiContext } from '@/lib/middleware/types';
+import { withOptionalAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { withValidation } from '@/lib/middleware/withValidation';
+import { updatePaymentIntent } from '@/lib/services/payments';
 import {
   updateIntentSchema,
   UpdateIntentInput,
 } from '@/lib/validators/checkout';
 
 async function updateIntentHandler(
-  request: NextRequest,
-  { data }: ApiContext<any, UpdateIntentInput>
+  _request: NextRequest,
+  { data }: ApiContext<undefined, UpdateIntentInput>
 ): Promise<NextResponse> {
-  const validatedData = data as UpdateIntentInput;
-  const { paymentIntentId, shippingRate, currency, shippingDetails } =
-    validatedData;
+  const { paymentIntentId, shippingRate, currency, shippingDetails } = data!;
 
   const updatedIntent = await updatePaymentIntent(paymentIntentId, {
     shippingAmount: shippingRate.amount.toString(),

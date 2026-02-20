@@ -1,10 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+
+import { requireAdmin } from '@/lib/auth/server';
 import { logger } from '@/lib/core/logger';
 import { updateOrderStatus } from '@/lib/services/orders';
+
 import { OrderStatus } from '@/generated/prisma';
-import { requireAdmin } from '@/lib/auth/server';
 
 /**
  * Update Order Status

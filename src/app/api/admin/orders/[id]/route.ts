@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
-import { withError } from '@/lib/middleware/withError';
-import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
-import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { ApiContext } from '@/lib/middleware/types';
-import { OrderStatus } from '../../../../../generated/prisma';
+import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { getOrderByIdAdmin, updateOrderStatus } from '@/lib/services/orders';
+
+import { OrderStatus } from '../../../../../generated/prisma';
 
 /**
  * GET /api/admin/orders/[id]

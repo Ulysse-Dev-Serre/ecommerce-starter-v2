@@ -1,10 +1,11 @@
 import { prisma } from '@/lib/core/db';
-import { Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
 import {
   CreateAttributeData,
   AddAttributeValueData,
 } from '@/lib/types/domain/attribute';
+
+import { Language } from '@/generated/prisma';
 
 /**
  * Récupère tous les attributs produits avec leurs valeurs et traductions

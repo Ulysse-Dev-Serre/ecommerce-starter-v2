@@ -1,19 +1,19 @@
+import { WebhookEvent } from '@clerk/nextjs/server';
 import { headers } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { Webhook } from 'svix';
-import { WebhookEvent } from '@clerk/nextjs/server';
 
+import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
+import { UserClerkService } from '@/lib/services/users/user-clerk.service';
 import {
   userCreatedSchema,
   userUpdatedSchema,
   userDeletedSchema,
 } from '@/lib/validators/clerk-webhook';
-import { UserClerkService } from '@/lib/services/users/user-clerk.service';
-import { env } from '@/lib/core/env';
 
 const webhookSecret = env.CLERK_WEBHOOK_SECRET;
 

@@ -1,8 +1,9 @@
-import { getTranslations, getLocale } from 'next-intl/server';
 import Image from 'next/image';
-import { formatPrice } from '@/lib/utils/currency';
+import { getTranslations, getLocale } from 'next-intl/server';
+
 import { SupportedCurrency, DEFAULT_LOCALE } from '@/lib/config/site';
 import { OrderItem } from '@/lib/types/domain/order';
+import { formatPrice } from '@/lib/utils/currency';
 
 export interface AdminOrderItem extends OrderItem {
   variant?: {

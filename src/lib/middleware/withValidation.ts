@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodSchema } from 'zod';
+
 import { logger } from '@/lib/core/logger';
-import { ApiHandler, ApiContext } from './types';
 import { formatZodErrors } from '@/lib/validators';
+
+import { ApiHandler, ApiContext } from './types';
 
 /**
  * Middleware de validation Zod pour API Routes.

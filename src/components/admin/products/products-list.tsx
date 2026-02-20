@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Plus, Search } from 'lucide-react';
+
 import {
   DndContext,
   closestCenter,
@@ -19,19 +17,24 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { Plus, Search } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { formatPrice } from '@/lib/utils/currency';
-import { DEFAULT_LOCALE, SUPPORTED_CURRENCIES } from '@/lib/config/site';
+
 import {
   deleteProductAction,
   reorderProductsAction,
 } from '@/lib/actions/products';
-import { ProductStatsGrid } from './product-stats-grid';
-import { SortableProductRow } from './product-row';
+import { DEFAULT_LOCALE, SUPPORTED_CURRENCIES } from '@/lib/config/site';
 import {
   ProductProjection,
   ProductVariantProjection,
 } from '@/lib/types/domain/product';
+import { formatPrice } from '@/lib/utils/currency';
+
+import { SortableProductRow } from './product-row';
+import { ProductStatsGrid } from './product-stats-grid';
 
 // Status colors mapping
 const statusColors: Record<string, string> = {

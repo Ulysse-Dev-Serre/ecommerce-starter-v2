@@ -9,8 +9,10 @@ import {
   Section,
   Text,
 } from '@react-email/components';
-import { formatPrice } from '@/lib/utils/currency';
+
 import { siteConfig, SupportedCurrency } from '@/lib/config/site';
+import { formatPrice } from '@/lib/utils/currency';
+
 import * as styles from './styles';
 
 interface AdminNewOrderEmailProps {

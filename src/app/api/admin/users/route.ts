@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
 import { getAllUsersAdmin } from '@/lib/services/users/user-admin.service';
+
 import { UserRole } from '@/generated/prisma';
 
 /**

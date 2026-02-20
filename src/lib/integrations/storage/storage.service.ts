@@ -1,7 +1,8 @@
-import { StorageProvider, StorageConfig } from './types';
+import { env } from '@/lib/core/env';
+
 import { LocalStorageProvider } from './providers/local.provider';
 import { S3StorageProvider } from './providers/s3.provider';
-import { env } from '@/lib/core/env';
+import { StorageProvider, StorageConfig } from './types';
 
 /**
  * Factory pour créer le bon provider de stockage selon la configuration

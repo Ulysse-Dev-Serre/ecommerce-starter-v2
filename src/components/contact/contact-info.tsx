@@ -1,8 +1,10 @@
-import Link from 'next/link';
 import { Mail, MapPin } from 'lucide-react';
-import { SITE_EMAIL, SITE_ADDRESS } from '@/lib/config/site';
-import { Alert } from '@/components/ui/alert';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+
+import { SITE_EMAIL, SITE_ADDRESS } from '@/lib/config/site';
+
+import { Alert } from '@/components/ui/alert';
 
 interface ContactInfoProps {
   locale: string;

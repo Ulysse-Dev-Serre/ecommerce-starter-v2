@@ -1,4 +1,5 @@
 import Link from 'next/link';
+
 import fr from '@/lib/i18n/dictionaries/fr.json';
 
 export default function NotFound() {

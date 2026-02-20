@@ -2,29 +2,31 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { logger } from '@/lib/core/logger';
 import { requireAdmin } from '@/lib/auth/server';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
 import {
   createProduct,
   updateProduct,
   deleteProduct,
 } from '@/lib/services/products/product-admin.service';
-import { updateVariant, deleteVariant } from '@/lib/services/variants';
-import { createSimpleVariants } from '@/lib/services/variants';
-
-import { prisma } from '@/lib/core/db';
-
+import { productMediaService } from '@/lib/services/products/product-media.service';
 import {
-  CreateProductSchema,
-  UpdateProductSchema,
-} from '@/lib/validators/product';
-import { formatZodErrors } from '@/lib/validators';
-import { Language } from '@/generated/prisma';
+  updateVariant,
+  deleteVariant,
+  createSimpleVariants,
+} from '@/lib/services/variants';
 import {
   UpdateProductData,
   CreateProductData,
 } from '@/lib/types/domain/product';
-import { productMediaService } from '@/lib/services/products/product-media.service';
+import { formatZodErrors } from '@/lib/validators';
+import {
+  CreateProductSchema,
+  UpdateProductSchema,
+} from '@/lib/validators/product';
+
+import { Language } from '@/generated/prisma';
 
 /**
  * Create a new product

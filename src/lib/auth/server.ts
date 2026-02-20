@@ -1,5 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
+
 import { prisma } from '@/lib/core/db';
+
 import { UserRole } from '@/generated/prisma';
 
 /**

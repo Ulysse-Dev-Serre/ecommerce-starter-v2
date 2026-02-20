@@ -3,9 +3,8 @@
  */
 
 import { API_ROUTES } from '@/lib/config/api-routes';
-import { ShippingAddress } from '@/lib/types/domain/shipping';
-
 import { ShippingRate } from '@/lib/integrations/shippo';
+import { ShippingAddress } from '@/lib/types/domain/shipping';
 
 /**
  * Fetch shipping rates for a cart and address

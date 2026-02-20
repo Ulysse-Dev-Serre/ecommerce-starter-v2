@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
+
 import { prisma } from '@/lib/core/db';
+import { getProductForAdmin } from '@/lib/services/products';
+
 import {
   ProductForm,
   AdminProduct,
@@ -11,8 +14,6 @@ export const dynamic = 'force-dynamic';
 interface EditProductPageProps {
   params: Promise<{ id: string; locale: string }>;
 }
-
-import { getProductForAdmin } from '@/lib/services/products';
 
 export default async function EditProductPage({
   params,
@@ -36,27 +37,10 @@ export default async function EditProductPage({
   }
 
   // Serialization for Client Component Props specific requirements
-  // (Prisma returns Date objects, our interface might expect strings or use them as is.
-  // Next.js handles Date serialization but let's prevent type mismatches if interface enforces string)
-  // The local Product interface in ProductForm expects createdAt/updatedAt as string (if defined there, actually I removed them from the interface in ProductForm to simplify? No I checked earlier.)
-  // Let's check ProductForm interface again...
-  // interface Product { ... createdAt: string; updatedAt: string; } was in the ORIGINAL file.
-  // In my NEW ProductForm, I omitted createdAt/updatedAt in the Interface definition because I didn't use them in the form!
-  // So passing the prisma object (which has extra fields) is fine, they will be ignored or passed along.
-  // Next.js serializes Date objects to strings in the RSC payload anyway.
-
-  // Cast to any to avoid strict type checking against the local interfaces of ProductForm
-  // which might be slightly different than Prisma types (e.g. null vs undefined).
-  // In a real optimized project we would use a mapper.
   const serializedProduct = {
     ...product,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
-    // Handle Decimals if any? Prisma Decimals need to be converted to number or string.
-    // weight is Decimal? Prisma schema usually uses Decimal for weight/price.
-    // Next.js RSC can't serialize Prisma Decimal instances directly usually? Or maybe it does now?
-    // Usually we need `JSON.parse(JSON.stringify(product))` or manual mapping.
-    // Safe bet: manual mapping for Decimals.
     weight: product.weight ? product.weight.toNumber() : null,
     variants: product.variants.map(v => ({
       ...v,
@@ -66,8 +50,6 @@ export default async function EditProductPage({
       })),
       weight: v.weight ? v.weight.toNumber() : null,
     })),
-    // dimensions are Json? Prisma types it as InputJsonValue | ...
-    // It should be fine as object.
   };
 
   // Serialize suppliers to handle Decimal fields

@@ -1,6 +1,8 @@
-import { Supplier } from '@/generated/prisma';
-import { Address } from './order';
 import { JsonValue } from '@prisma/client/runtime/library';
+
+import { Supplier } from '@/generated/prisma';
+
+import { Address } from './order';
 
 /**
  * Interface pour un fournisseur (Supplier) avec les types du domaine

@@ -1,6 +1,7 @@
+import { Mail, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { Mail, User as UserIcon } from 'lucide-react';
+
 import { User } from '@/generated/prisma';
 
 interface OrderCustomerCardProps {

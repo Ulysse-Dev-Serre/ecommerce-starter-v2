@@ -1,12 +1,15 @@
+import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ExternalLink } from 'lucide-react';
-import { formatDate } from '@/lib/utils/date';
-import { formatPrice } from '@/lib/utils/currency';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { getOrderStatusKey } from '@/lib/utils/order-status';
-import { Order, Shipment } from '@/generated/prisma';
+
 import { SupportedCurrency } from '@/lib/config/site';
+import { formatPrice } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
+import { getOrderStatusKey } from '@/lib/utils/order-status';
+
+import { Order, Shipment } from '@/generated/prisma';
+
+import { StatusBadge } from '@/components/ui/status-badge';
 
 type OrderWithRelations = Order & { shipments: Shipment[] };
 

@@ -1,11 +1,12 @@
-import { VIBE_ANIMATION_FADE_IN } from '@/lib/config/vibe-styles';
-import { useTranslations } from 'next-intl';
-import { PriceTotal } from '@/components/price-display';
-import Link from 'next/link';
 import { ShieldCheck } from 'lucide-react';
-import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
+import { NAV_ROUTES } from '@/lib/config/nav-routes';
+import { VIBE_ANIMATION_FADE_IN } from '@/lib/config/vibe-styles';
 import { CartPricing } from '@/lib/types/ui/cart';
+
+import { PriceTotal } from '@/components/price-display';
 
 interface CartSummaryProps {
   items: Array<{

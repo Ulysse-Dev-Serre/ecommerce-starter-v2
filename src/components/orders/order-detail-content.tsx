@@ -1,22 +1,22 @@
+import { ArrowLeft } from 'lucide-react';
+import NextLink from 'next/link';
+import { getTranslations } from 'next-intl/server';
+
+import { SupportedCurrency } from '@/lib/config/site';
 import {
   VIBE_HOVER_GROUP,
   VIBE_ANIMATION_FADE_IN,
 } from '@/lib/config/vibe-styles';
-import NextLink from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
-import { formatDate } from '@/lib/utils/date';
-import { formatPrice } from '@/lib/utils/currency';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { SupportedCurrency } from '@/lib/config/site';
-import { OrderStepper } from '@/components/orders/order-stepper';
-import { OrderTracking } from '@/components/orders/order-tracking';
-import { OrderItemsList } from '@/components/orders/order-items-list';
-import { OrderSummary } from '@/components/orders/order-summary';
-import { RefundRequestForm } from '@/components/orders/refund-request-form';
-
-// Ideally we should import OrderWithIncludes from the service or types definition
 import { OrderWithIncludes } from '@/lib/types/domain/order';
+import { formatPrice } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
+
+import { OrderItemsList } from '@/components/orders/order-items-list';
+import { OrderStepper } from '@/components/orders/order-stepper';
+import { OrderSummary } from '@/components/orders/order-summary';
+import { OrderTracking } from '@/components/orders/order-tracking';
+import { RefundRequestForm } from '@/components/orders/refund-request-form';
+import { StatusBadge } from '@/components/ui/status-badge';
 
 type OrderDetail = OrderWithIncludes;
 

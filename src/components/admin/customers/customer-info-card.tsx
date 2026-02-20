@@ -1,6 +1,8 @@
-import { getTranslations, getLocale } from 'next-intl/server';
 import { Mail, Calendar } from 'lucide-react';
+import { getTranslations, getLocale } from 'next-intl/server';
+
 import { formatDate } from '@/lib/utils/date';
+
 import { User } from '@/generated/prisma';
 
 interface CustomerInfoCardProps {

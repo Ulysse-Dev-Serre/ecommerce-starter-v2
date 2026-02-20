@@ -1,8 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { i18n } from '@/lib/i18n/config';
+
 import { env } from '@/lib/core/env';
+import { i18n } from '@/lib/i18n/config';
+
+import type { NextRequest } from 'next/server';
 
 const { locales, defaultLocale } = i18n;
 

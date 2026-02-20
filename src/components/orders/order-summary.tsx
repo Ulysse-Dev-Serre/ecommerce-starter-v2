@@ -1,6 +1,6 @@
-import { formatPrice } from '@/lib/utils/currency';
-import { OrderWithIncludes } from '@/lib/types/domain/order';
 import { SupportedCurrency } from '@/lib/config/site';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+import { formatPrice } from '@/lib/utils/currency';
 
 interface OrderSummaryProps {
   order: OrderWithIncludes;

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export const createLocationSchema = z.object({

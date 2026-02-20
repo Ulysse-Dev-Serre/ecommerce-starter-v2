@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { StockItem } from '@/lib/types/domain/inventory';
+
 import { Prisma } from '@/generated/prisma';
 
 /**

@@ -1,17 +1,19 @@
+import { ArrowRight, PackageOpen } from 'lucide-react';
+import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
+
+import { SupportedCurrency } from '@/lib/config/site';
 import {
   VIBE_HOVER_GROUP,
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
   VIBE_ANIMATION_FADE_IN,
 } from '@/lib/config/vibe-styles';
-import Link from 'next/link';
-import { ArrowRight, PackageOpen } from 'lucide-react';
-import { getTranslations } from 'next-intl/server';
+import { formatPrice } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
+
+import { Order, OrderItem, Payment } from '@/generated/prisma';
 
 import { StatusBadge } from '@/components/ui/status-badge';
-import { formatDate } from '@/lib/utils/date';
-import { formatPrice } from '@/lib/utils/currency';
-import { Order, OrderItem, Payment } from '@/generated/prisma';
-import { SupportedCurrency } from '@/lib/config/site';
 
 type UserOrder = Order & {
   items: OrderItem[];

@@ -1,6 +1,7 @@
 import { getTranslations, getLocale } from 'next-intl/server';
-import { formatPrice } from '@/lib/utils/currency';
+
 import { SupportedCurrency } from '@/lib/config/site';
+import { formatPrice } from '@/lib/utils/currency';
 
 interface AnalyticsStatsGridProps {
   sessions: number;

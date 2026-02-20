@@ -1,15 +1,16 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+
+import { requireAdmin } from '@/lib/auth/server';
 import { logger } from '@/lib/core/logger';
 import {
   logisticsLocationService,
   CreateLocationData,
   UpdateLocationData,
 } from '@/lib/services/logistics/logistics-location.service';
-import { createLocationSchema } from '@/lib/validators/admin';
 import { formatZodErrors } from '@/lib/validators';
-import { requireAdmin } from '@/lib/auth/server';
+import { createLocationSchema } from '@/lib/validators/admin';
 
 /**
  * Create a new location

@@ -1,13 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+
 import { Truck, MapPin, Plus, Trash2, Edit } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+
 import { deleteLogisticsLocation } from '@/lib/client/admin/logistics';
-import { AddLocationModal } from './add-location-modal';
 import { AdminSupplier } from '@/lib/types/domain/logistics';
 import { Address } from '@/lib/types/domain/order';
+
+import { AddLocationModal } from './add-location-modal';
 
 interface LogisticsClientProps {
   suppliers: AdminSupplier[];

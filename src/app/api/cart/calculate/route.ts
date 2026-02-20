@@ -1,23 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { SITE_CURRENCY } from '@/lib/config/site';
+import { NextRequest, NextResponse } from 'next/server';
 
+import { SITE_CURRENCY } from '@/lib/config/site';
 import { logger } from '@/lib/core/logger';
-import { withError } from '@/lib/middleware/withError';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
-import { getOrCreateCart } from '@/lib/services/cart';
-import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import {
   calculateCart,
   validateCartForCheckout,
   serializeCalculation,
   type Currency,
 } from '@/lib/services/calculations';
+import { getOrCreateCart } from '@/lib/services/cart';
+import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import { cartCalculationSchema } from '@/lib/validators/cart';
 
 /**
@@ -26,7 +26,7 @@ import { cartCalculationSchema } from '@/lib/validators/cart';
  */
 async function calculateCartHandler(
   request: NextRequest,
-  { auth }: ApiContext
+  { auth }: ApiContext<undefined, undefined>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const authContext = auth as OptionalAuthContext;

@@ -1,7 +1,8 @@
-import { getTranslations } from 'next-intl/server';
 import { Truck, Phone } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 import { Address } from '@/lib/types/domain/order';
+
 import { User } from '@/generated/prisma';
 
 interface OrderShippingCardProps {

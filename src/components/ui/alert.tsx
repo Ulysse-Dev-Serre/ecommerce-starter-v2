@@ -1,5 +1,7 @@
 import React from 'react';
+
 import { AlertCircle, CheckCircle, Info, TriangleAlert } from 'lucide-react';
+
 import { cn } from '@/lib/utils/cn';
 
 type AlertVariant = 'info' | 'success' | 'warning' | 'error';

@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+
+import { prisma } from '@/lib/core/db';
+
+import { verifyEmailSent } from '../fixtures/resend-helper';
 import {
   createTestOrder,
   resetTestOrders,
@@ -7,9 +11,7 @@ import {
   cleanupTestSupplier,
   disconnectPrisma,
 } from '../fixtures/seed-test-data';
-import { verifyEmailSent } from '../fixtures/resend-helper';
 import { AdminOrderPage } from '../pom/admin/OrderPage';
-import { prisma } from '@/lib/core/db';
 
 /**
  * Complete Order Refund E2E Test (Client + Admin)

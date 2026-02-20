@@ -13,7 +13,7 @@ const getSupplierAddress = (supplier: AdminSupplier) => {
   };
 };
 
-interface ProductShippingFormData {
+export interface ProductShippingFormData {
   originCountry: string;
   hsCode: string;
   shippingOriginId: string;
@@ -25,7 +25,7 @@ interface ProductShippingFormData {
 }
 
 interface ProductShippingInfoProps {
-  formData: ProductShippingFormData;
+  formData: ProductShippingFormData & Record<string, any>;
   setFormData: (fn: (prev: any) => any) => void;
   suppliers: AdminSupplier[];
   fieldErrors?: Record<string, string>;

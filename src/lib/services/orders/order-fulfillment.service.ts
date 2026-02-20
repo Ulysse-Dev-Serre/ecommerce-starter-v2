@@ -1,28 +1,28 @@
-import { prisma } from '@/lib/core/db';
-import { logger } from '@/lib/core/logger';
 import { Decimal } from '@prisma/client/runtime/library';
-import {
-  getReturnShippingRates,
-  createTransaction,
-} from '@/lib/integrations/shippo';
+import { render } from '@react-email/render';
+
 import {
   STORE_ORIGIN_ADDRESS,
   resolveShippingOrigin,
   SHIPPING_UNITS,
 } from '@/lib/config/site';
+import { prisma } from '@/lib/core/db';
+import { logger } from '@/lib/core/logger';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
-import { render } from '@react-email/render';
-
-import type { ShippingAddress } from '@/lib/types/domain/shipping';
+import {
+  getReturnShippingRates,
+  createTransaction,
+} from '@/lib/integrations/shippo';
 import type {
   ShippingRate,
   Transaction as ShippoTransaction,
 } from '@/lib/integrations/shippo';
-
-import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
-import { ShippingService } from '../shipping/shipping.service';
+import type { ShippingAddress } from '@/lib/types/domain/shipping';
+
 import { SHIPPING_VARIANT_INCLUDE } from '../shipping/shipping.repository';
+import { ShippingService } from '../shipping/shipping.service';
 
 /**
  * Crée une étiquette de retour pour une commande

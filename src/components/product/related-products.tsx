@@ -1,6 +1,9 @@
-import { getProducts } from '@/lib/services/products';
-import { Language } from '@/generated/prisma';
 import { getTranslations } from 'next-intl/server';
+
+import { getProducts } from '@/lib/services/products';
+
+import { Language } from '@/generated/prisma';
+
 import { ProductCard } from './product-card';
 
 interface RelatedProductsProps {

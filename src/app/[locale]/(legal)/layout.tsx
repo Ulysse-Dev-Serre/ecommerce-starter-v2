@@ -1,5 +1,6 @@
-import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
 import React from 'react';
+
+import { VIBE_TYPOGRAPHY_PROSE } from '@/lib/config/vibe-styles';
 
 export default function LegalLayout({
   children,

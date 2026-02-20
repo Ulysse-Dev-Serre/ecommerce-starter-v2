@@ -1,9 +1,11 @@
 import { getTranslations } from 'next-intl/server';
+
 import { prisma } from '@/lib/core/db';
 import { getAllUsersAdmin } from '@/lib/services/users/user-admin.service';
+
 import { CustomerListHeader } from '@/components/admin/customers/customer-list-header';
-import { CustomerStatsGrid } from '@/components/admin/customers/customer-stats-grid';
 import { CustomerListTable } from '@/components/admin/customers/customer-list-table';
+import { CustomerStatsGrid } from '@/components/admin/customers/customer-stats-grid';
 
 export const dynamic = 'force-dynamic';
 

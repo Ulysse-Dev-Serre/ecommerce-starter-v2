@@ -1,5 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
+
 import { prisma } from '@/lib/core/db';
+
 import { ProductForm } from '@/components/admin/products/product-form';
 
 export const dynamic = 'force-dynamic';

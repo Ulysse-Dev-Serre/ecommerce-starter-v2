@@ -12,8 +12,9 @@ if (typeof global !== 'undefined') {
 
 // Use require to ensure the shim is set up before loading the library
 /* eslint-disable @typescript-eslint/no-require-imports */
-const packer = require('3d-bin-packing');
 import { SHIPPING_BOX_CATALOG } from '@/lib/config/site';
+
+const packer = require('3d-bin-packing');
 
 export interface PackableItem {
   id: string;

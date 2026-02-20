@@ -1,14 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-import {
-  Upload,
-  GripVertical,
-  Trash2,
-  ImageIcon,
-  Edit2,
-  X,
-} from 'lucide-react';
+import { useState } from 'react';
+
 import {
   DndContext,
   closestCenter,
@@ -25,7 +18,16 @@ import {
   rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState } from 'react';
+import {
+  Upload,
+  GripVertical,
+  Trash2,
+  ImageIcon,
+  Edit2,
+  X,
+} from 'lucide-react';
+import Image from 'next/image';
+
 import { updateMediaMetadataAction } from '@/lib/actions/products';
 
 interface MediaItem {

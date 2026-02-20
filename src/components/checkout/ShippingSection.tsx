@@ -1,15 +1,16 @@
+import { MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
+import { SupportedCurrency } from '@/lib/config/site';
 import {
   VIBE_ANIMATION_SLIDE_IN_BOTTOM,
   VIBE_HOVER_GROUP,
 } from '@/lib/config/vibe-styles';
+import { ShippingRate } from '@/lib/integrations/shippo';
 import { formatPrice } from '@/lib/utils/currency';
-import { useTranslations } from 'next-intl';
 
 import { Card } from '@/components/ui/card';
-import { ShippingRate } from '@/lib/integrations/shippo';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin } from 'lucide-react';
-import { SupportedCurrency } from '@/lib/config/site';
 
 interface ShippingSectionProps {
   shippingRates: ShippingRate[];

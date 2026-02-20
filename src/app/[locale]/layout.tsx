@@ -1,23 +1,30 @@
 // src/app/[locale]/layout.tsx
-import { env } from '@/lib/core/env';
+import React, { Suspense } from 'react';
+
 import { ClerkProvider } from '@clerk/nextjs';
-import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { getTranslations, getMessages } from 'next-intl/server';
+import Script from 'next/script';
 import { NextIntlClientProvider } from 'next-intl';
-import { siteConfig } from '@/lib/config/site';
+import { getTranslations, getMessages } from 'next-intl/server';
+
+import {
+  siteConfig,
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+} from '@/lib/config/site';
+import { env } from '@/lib/core/env';
 import { i18n } from '@/lib/i18n/config';
 import { getCurrentUser } from '@/lib/services/users';
-import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
-import { ConditionalFooter } from '@/components/layout/conditional-footer';
-import GoogleTagManager from '@/components/analytics/google-tag-manager';
-import CookieConsentComponent from '@/components/analytics/cookie-consent';
+
 import { AnalyticsTracker } from '@/components/analytics/analytics-tracker';
-import { ToastProvider } from '@/components/ui/toast-provider';
+import CookieConsentComponent from '@/components/analytics/cookie-consent';
+import GoogleTagManager from '@/components/analytics/google-tag-manager';
 import { CartMergeHandler } from '@/components/cart/cart-merge-handler';
-import Script from 'next/script';
-import { Suspense } from 'react';
-import React from 'react';
+import { ConditionalFooter } from '@/components/layout/conditional-footer';
+import { ConditionalNavbar } from '@/components/layout/conditional-navbar';
+import { ToastProvider } from '@/components/ui/toast-provider';
+
+import type { Metadata } from 'next';
 import '@/styles/globals.css';
 
 const geistSans = Geist({
@@ -29,8 +36,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-
-import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export async function generateMetadata({
   params,

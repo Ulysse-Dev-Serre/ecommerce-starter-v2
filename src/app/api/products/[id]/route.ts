@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { ProductStatus, Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
 import { getProductBySlug, isProductAvailable } from '@/lib/services/products';
-
 import { productSlugSchema } from '@/lib/validators/product';
+
+import { ProductStatus, Language } from '@/generated/prisma';
 
 /**
  * GET /api/products/[id]

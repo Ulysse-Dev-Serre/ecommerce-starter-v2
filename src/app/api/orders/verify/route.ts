@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/core/db';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**

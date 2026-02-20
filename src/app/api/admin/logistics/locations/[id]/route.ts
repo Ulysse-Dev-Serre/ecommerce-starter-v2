@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { logger } from '@/lib/core/logger';
 import { z } from 'zod';
-import { withAdmin, AuthContext } from '@/lib/middleware/withAuth';
-import { withError } from '@/lib/middleware/withError';
+
+import { logger } from '@/lib/core/logger';
 import { ApiContext } from '@/lib/middleware/types';
+import { withAdmin } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import {
+  logisticsLocationService,
+  UpdateLocationData,
+} from '@/lib/services/logistics/logistics-location.service';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -27,11 +31,6 @@ const schema = z.object({
     phone: z.string().min(1),
   }),
 });
-
-import {
-  logisticsLocationService,
-  UpdateLocationData,
-} from '@/lib/services/logistics/logistics-location.service';
 
 async function updateLocationHandler(
   req: NextRequest,

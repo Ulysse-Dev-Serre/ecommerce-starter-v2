@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+
+import { Minus, Plus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Minus, Plus, Loader2 } from 'lucide-react';
+
 import { updateCartItem } from '@/lib/client/cart';
 
 interface QuantitySelectorProps {

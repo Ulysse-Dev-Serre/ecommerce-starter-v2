@@ -1,4 +1,3 @@
-import { ProductStatus, Language, Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
@@ -7,6 +6,8 @@ import {
   ProductListOptions,
   ProductProjection,
 } from '@/lib/types/domain/product';
+
+import { ProductStatus, Language, Prisma } from '@/generated/prisma';
 
 /**
  * Retrieves a list of products with pagination, filters, and sorting.

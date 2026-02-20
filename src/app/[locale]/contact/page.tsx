@@ -1,8 +1,10 @@
-import { getTranslations } from 'next-intl/server';
 import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
+
 import { ContactForm } from '@/components/contact/contact-form';
 import { ContactInfo } from '@/components/contact/contact-info';
-import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 interface Props {
   params: Promise<{ locale: string }>;

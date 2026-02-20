@@ -1,26 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-import { withError } from '@/lib/middleware/withError';
+import { CART_COOKIE_NAME } from '@/lib/config/site';
+import { env } from '@/lib/core/env';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   OptionalAuthContext,
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
-import { env } from '@/lib/core/env';
-import { withValidation } from '@/lib/middleware/withValidation';
+import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
+import { withValidation } from '@/lib/middleware/withValidation';
 import { addToCart } from '@/lib/services/cart';
-import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
-import { CART_COOKIE_NAME } from '@/lib/config/site';
 import { resolveCartIdentity } from '@/lib/services/cart/identity';
+import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
 
 async function addToCartHandler(
   request: NextRequest,
-  { auth, data }: ApiContext<any, AddToCartInput>
+  { auth, data }: ApiContext<undefined, AddToCartInput>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const authContext = auth as OptionalAuthContext;
-  const validatedData = data as AddToCartInput;
+  const validatedData = data!;
 
   // Resolve identity
   const { userId, anonymousId, newAnonymousId } = await resolveCartIdentity(

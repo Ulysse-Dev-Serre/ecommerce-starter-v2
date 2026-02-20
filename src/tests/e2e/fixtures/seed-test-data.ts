@@ -4,11 +4,12 @@
  */
 
 import { prisma } from '@/lib/core/db';
-import { Prisma, Language, Order, Product } from '@/generated/prisma';
-import { CreateProductSchema } from '@/lib/validators/product';
+import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
 import { createLocationSchema } from '@/lib/validators/admin';
 import { updateIntentSchema } from '@/lib/validators/checkout';
-import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
+import { CreateProductSchema } from '@/lib/validators/product';
+
+import { Prisma, Language, Order, Product } from '@/generated/prisma';
 
 /**
  * Seed a test supplier with real Repentigny, QC address

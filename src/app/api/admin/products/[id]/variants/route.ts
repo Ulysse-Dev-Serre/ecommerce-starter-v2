@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
-import { CreateVariantsSchema } from '@/lib/validators/product';
-
+import { withValidation } from '@/lib/middleware/withValidation';
 import {
   getProductVariants,
   createVariants,
@@ -16,6 +15,10 @@ import type {
   CreateVariantData,
   GenerateVariantsConfig,
 } from '@/lib/types/domain/variant';
+import {
+  CreateVariantsSchema,
+  CreateVariantsInput,
+} from '@/lib/validators/product';
 
 /**
  * GET /api/admin/products/[id]/variants
@@ -108,8 +111,6 @@ async function getVariantsHandler(
  *   }
  * }
  */
-import { withValidation } from '@/lib/middleware/withValidation';
-import { CreateVariantsInput } from '@/lib/validators/product';
 
 async function createVariantsHandler(
   request: NextRequest,

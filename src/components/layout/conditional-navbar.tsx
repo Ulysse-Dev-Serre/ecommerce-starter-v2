@@ -1,8 +1,10 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { Navbar } from './navbar';
 import React from 'react';
+
+import { usePathname } from 'next/navigation';
+
+import { Navbar } from './navbar';
 
 interface ConditionalNavbarProps {
   locale: string;

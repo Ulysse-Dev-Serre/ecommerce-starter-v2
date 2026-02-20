@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { OrderStatus } from '@/generated/prisma';
+
 import { Package, RefreshCcw, AlertTriangle, Truck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils/cn';
+
 import {
   updateAdminOrderStatus,
   handleAdminReturnLabel,
 } from '@/lib/client/admin/orders';
+import { cn } from '@/lib/utils/cn';
+
+import { OrderStatus } from '@/generated/prisma';
 
 interface StatusActionsProps {
   orderId: string;

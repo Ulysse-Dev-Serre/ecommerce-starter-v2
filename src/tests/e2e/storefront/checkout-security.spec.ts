@@ -1,4 +1,5 @@
 import { test, Page } from '@playwright/test';
+
 import {
   getTestSupplierId,
   getOrCreateTestProduct,
@@ -6,8 +7,8 @@ import {
   resetTestOrders,
   cleanupTestProduct,
 } from '../fixtures/seed-test-data';
-import { CheckoutPage } from '../pom/storefront/CheckoutPage';
 import { CartPage } from '../pom/storefront/CartPage';
+import { CheckoutPage } from '../pom/storefront/CheckoutPage';
 
 /**
  * Stripe Security & Radar Checkout Test (POM Based)

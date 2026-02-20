@@ -1,11 +1,14 @@
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { ArrowLeft } from 'lucide-react';
-import { StatusBadge } from '@/components/ui/status-badge';
+
+import { OrderWithIncludes } from '@/lib/types/domain/order';
 import { formatDate } from '@/lib/utils/date';
 import { getOrderStatusKey } from '@/lib/utils/order-status';
+
+import { StatusBadge } from '@/components/ui/status-badge';
+
 import { StatusActions } from './status-actions';
-import { OrderWithIncludes } from '@/lib/types/domain/order';
 
 interface OrderHeaderProps {
   order: OrderWithIncludes;

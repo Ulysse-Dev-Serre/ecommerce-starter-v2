@@ -1,4 +1,5 @@
 import { Page, Locator, expect, test } from '@playwright/test';
+
 import { DEFAULT_LOCALE } from '@/lib/config/site';
 
 export class AdminOrderPage {

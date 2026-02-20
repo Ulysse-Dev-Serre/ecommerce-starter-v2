@@ -1,5 +1,7 @@
-import { PaymentMethod, PaymentStatus } from '@/generated/prisma';
 import Stripe from 'stripe';
+
+import { PaymentMethod, PaymentStatus } from '@/generated/prisma';
+
 import { CheckoutCurrency, CheckoutItem } from './checkout';
 
 /**

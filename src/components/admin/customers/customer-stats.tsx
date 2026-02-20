@@ -1,7 +1,8 @@
-import { getTranslations, getLocale } from 'next-intl/server';
 import { DollarSign, ShoppingBag } from 'lucide-react';
-import { formatPrice } from '@/lib/utils/currency';
+import { getTranslations, getLocale } from 'next-intl/server';
+
 import { SupportedCurrency } from '@/lib/config/site';
+import { formatPrice } from '@/lib/utils/currency';
 
 interface CustomerStatsProps {
   totalSpent: number;

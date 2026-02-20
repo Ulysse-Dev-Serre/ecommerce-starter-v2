@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Save, CheckCircle, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+
 import { DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { ArrowLeft, Save, CheckCircle, X } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+
 import {
   uploadMediaAction,
   deleteMediaAction,
@@ -22,18 +23,20 @@ import {
   getProductVariants,
   getProductMedia,
 } from '@/lib/client/admin/products';
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { AdminSupplier } from '@/lib/types/domain/logistics';
+import { formatZodErrors } from '@/lib/validators';
 import {
   CreateProductSchema,
   UpdateProductSchema,
 } from '@/lib/validators/product';
-import { formatZodErrors } from '@/lib/validators';
+
+import { ProductMedia, Language } from '@/generated/prisma';
 
 import { ProductBasicInfo } from './product-basic-info';
 import { ProductMediaManager } from './product-media-manager';
 import { ProductShippingInfo } from './product-shipping-info';
 import { ProductVariantsManager } from './product-variants-manager';
-import { AdminSupplier } from '@/lib/types/domain/logistics';
-import { ProductMedia, Language } from '@/generated/prisma';
 
 // ---- Types ----
 export interface Translation {
@@ -224,7 +227,7 @@ export function ProductForm({
       }
       await loadMedia(productId);
       setSuccessMessage(t('messages.mediaUploaded'));
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('messages.errorUploadingMedia')
@@ -244,7 +247,7 @@ export function ProductForm({
       if (!result.success) throw new Error(result.error);
       setSuccessMessage(t('messages.mediaDeleted'));
       setMedia(media.filter(m => m.id !== mediaId));
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('messages.errorDeletingProduct')
@@ -330,7 +333,7 @@ export function ProductForm({
 
       // 3. Envoi des données validées
       const validatedPayload = validation.data;
-      console.log('📦 Sending Validated Product Payload:', validatedPayload);
+      console.info('📦 Sending Validated Product Payload:', validatedPayload);
 
       let result;
       if (productId) {
@@ -358,6 +361,7 @@ export function ProductForm({
       setSuccessMessage(
         productId ? t('messages.productUpdated') : t('messages.productCreated')
       );
+      setTimeout(() => setSuccessMessage(null), 5000);
 
       if (!productId) {
         router.push(`/${locale}/admin/products`);
@@ -398,7 +402,7 @@ export function ProductForm({
 
       await loadVariants(productId);
       setSuccessMessage(t('messages.variantUpdated'));
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('messages.errorUpdatingProduct')
@@ -418,7 +422,7 @@ export function ProductForm({
 
       await loadVariants(productId);
       setSuccessMessage(t('messages.variantDeleted'));
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('messages.errorDeletingProduct')
@@ -445,7 +449,7 @@ export function ProductForm({
       await loadVariants(productId);
       setNewVariants([]);
       setSuccessMessage(t('messages.variantsAdded'));
-      setTimeout(() => setSuccessMessage(null), 3000);
+      setTimeout(() => setSuccessMessage(null), 5000);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('messages.errorCreatingProduct')

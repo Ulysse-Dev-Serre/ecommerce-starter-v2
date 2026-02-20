@@ -1,7 +1,9 @@
 'use client';
 
 import { Dispatch, SetStateAction } from 'react';
+
 import { CheckCircle, X } from 'lucide-react';
+
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
 
 export interface ProductBasicFormData {

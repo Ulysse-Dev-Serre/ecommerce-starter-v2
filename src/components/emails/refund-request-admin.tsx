@@ -9,7 +9,9 @@ import {
   Section,
   Text,
 } from '@react-email/components';
+
 import { siteConfig } from '@/lib/config/site';
+
 import * as styles from './styles';
 
 interface RefundRequestAdminEmailProps {

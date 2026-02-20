@@ -1,5 +1,6 @@
-import { env } from '@/lib/core/env';
 import { MetadataRoute } from 'next';
+
+import { env } from '@/lib/core/env';
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = (env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { getStorageProvider } from '@/lib/integrations/storage/storage.service';
+import { ApiContext } from '@/lib/middleware/types';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import { ApiContext } from '@/lib/middleware/types';
-import { getStorageProvider } from '@/lib/integrations/storage/storage.service';
-import { prisma } from '@/lib/core/db';
 
 /**
  * DELETE /api/admin/media/[id]

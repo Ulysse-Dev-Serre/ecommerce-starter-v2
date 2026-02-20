@@ -1,10 +1,12 @@
 import { type Page, type Locator, expect, test } from '@playwright/test';
-import { TEST_ROUTES } from '../../config/routes';
+
 import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   DEFAULT_CURRENCY,
 } from '@/lib/config/site';
+
+import { TEST_ROUTES } from '../../config/routes';
 
 export interface ProductData {
   name: string;

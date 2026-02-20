@@ -1,14 +1,14 @@
-import { VIBE_ANIMATION_FADE_IN } from '@/lib/config/vibe-styles';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
-import { PriceDisplay } from '@/components/price-display';
-import { QuantitySelector } from '@/components/cart/quantity-selector';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
-import { Card } from '@/components/ui/card';
-
+import { VIBE_ANIMATION_FADE_IN } from '@/lib/config/vibe-styles';
 import { CartItem as CartItemType } from '@/lib/types/ui/cart';
+
+import { QuantitySelector } from '@/components/cart/quantity-selector';
+import { PriceDisplay } from '@/components/price-display';
+import { Card } from '@/components/ui/card';
 
 interface CartItemProps {
   item: CartItemType;

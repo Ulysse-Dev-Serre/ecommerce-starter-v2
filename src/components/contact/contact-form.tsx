@@ -1,8 +1,10 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
 import { submitContactMessage } from '@/lib/client/contact';
 
 export function ContactForm() {

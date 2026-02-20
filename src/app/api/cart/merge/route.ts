@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
-import { withError } from '@/lib/middleware/withError';
-import { mergeAnonymousCartToUser } from '@/lib/services/cart';
+
 import { CART_COOKIE_NAME } from '@/lib/config/site';
 import { ApiContext } from '@/lib/middleware/types';
+import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { mergeAnonymousCartToUser } from '@/lib/services/cart';
 
 async function mergeCartHandler(
   request: NextRequest,
@@ -37,8 +39,6 @@ async function mergeCartHandler(
 
   return response;
 }
-
-import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 
 export const POST = withError(
   withAuth(withRateLimit(mergeCartHandler, RateLimits.PUBLIC))

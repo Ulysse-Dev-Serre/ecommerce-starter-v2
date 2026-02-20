@@ -1,14 +1,16 @@
-import { CartStatus } from '@/generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
+import { cartRepository } from '@/lib/repositories/cart.repository';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import {
   AddToCartInput,
   UpdateCartLineInput,
   CartProjection,
 } from '@/lib/types/domain/cart';
+
+import { CartStatus } from '@/generated/prisma';
+
 import { getOrCreateCart } from './cart-management.service';
-import { cartRepository } from '@/lib/repositories/cart.repository';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
  * Add product to cart or update quantity if already exists

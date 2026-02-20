@@ -1,10 +1,13 @@
-import { redirect } from 'next/navigation';
-import { Metadata } from 'next';
 import { auth } from '@clerk/nextjs/server';
+import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+
 import { prisma } from '@/lib/core/db';
+
 import { UserRole } from '@/generated/prisma';
-import { AdminSidebar } from '@/components/admin/layout/admin-sidebar';
+
 import { AdminHeader } from '@/components/admin/layout/admin-header';
+import { AdminSidebar } from '@/components/admin/layout/admin-sidebar';
 import '@/styles/admin.css';
 
 export const metadata: Metadata = {

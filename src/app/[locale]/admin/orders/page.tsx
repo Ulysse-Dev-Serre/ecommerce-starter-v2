@@ -1,10 +1,13 @@
 import { getTranslations } from 'next-intl/server';
+
 import { prisma } from '@/lib/core/db';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
+
 import { Prisma, OrderStatus } from '@/generated/prisma';
+
 import { OrderFilters } from '@/components/admin/orders/filters';
 import { OrderListTable } from '@/components/admin/orders/order-list-table';
 import { OrderPagination } from '@/components/admin/orders/order-pagination';
-import { OrderWithIncludes } from '@/lib/types/domain/order';
 
 export const dynamic = 'force-dynamic';
 

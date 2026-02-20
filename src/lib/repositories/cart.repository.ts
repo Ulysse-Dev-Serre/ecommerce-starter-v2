@@ -1,8 +1,9 @@
-import { CartStatus, Language, Prisma } from '@/generated/prisma';
+import { SITE_CURRENCY } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 import { CartProjection } from '@/lib/types/domain/cart';
 import { Cart } from '@/lib/types/ui/cart';
-import { SITE_CURRENCY } from '@/lib/config/site';
+
+import { CartStatus, Language, Prisma } from '@/generated/prisma';
 
 /**
  * Standard include for CartProjection to ensure consistency across methods

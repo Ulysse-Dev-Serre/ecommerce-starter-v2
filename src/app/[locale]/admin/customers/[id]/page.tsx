@@ -1,13 +1,15 @@
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/core/db';
+
 import { SITE_CURRENCY } from '@/lib/config/site';
-import { CustomerHeader } from '@/components/admin/customers/customer-header';
-import { CustomerStats } from '@/components/admin/customers/customer-stats';
-import { CustomerOrderTable } from '@/components/admin/customers/customer-order-table';
-import { CustomerAddressBook } from '@/components/admin/customers/customer-address-book';
-import { CustomerInfoCard } from '@/components/admin/customers/customer-info-card';
+import { prisma } from '@/lib/core/db';
+
 import { CustomerAcquisitionCard } from '@/components/admin/customers/customer-acquisition-card';
+import { CustomerAddressBook } from '@/components/admin/customers/customer-address-book';
+import { CustomerHeader } from '@/components/admin/customers/customer-header';
+import { CustomerInfoCard } from '@/components/admin/customers/customer-info-card';
 import { CustomerNotesCard } from '@/components/admin/customers/customer-notes-card';
+import { CustomerOrderTable } from '@/components/admin/customers/customer-order-table';
+import { CustomerStats } from '@/components/admin/customers/customer-stats';
 
 export const dynamic = 'force-dynamic';
 

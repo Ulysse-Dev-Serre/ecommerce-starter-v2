@@ -1,25 +1,25 @@
 import {
-  getShippingRates,
-  Address,
-  ShippingRate,
-  Parcel,
-  CustomsDeclaration,
-} from '@/lib/integrations/shippo';
-import { logger } from '@/lib/core/logger';
-import { convertCurrency } from '@/lib/utils/currency';
-import { AppError, ErrorCode } from '@/lib/types/api/errors';
-import {
   SITE_CURRENCY,
   SHIPPING_UNITS,
   SHIPPING_PROVIDERS_FILTER,
   SHIPPING_STRATEGIES,
   COUNTRY_TO_CURRENCY,
 } from '@/lib/config/site';
+import { logger } from '@/lib/core/logger';
+import {
+  getShippingRates,
+  Address,
+  ShippingRate,
+  Parcel,
+  CustomsDeclaration,
+} from '@/lib/integrations/shippo';
+import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { convertCurrency } from '@/lib/utils/currency';
+import { ShippingRequestInput } from '@/lib/validators/shipping';
+
+import { CustomsService } from './customs.service';
 import { PackingService, PackableItem, PackedParcel } from './packing.service';
 import { ShippingItem, ShippingRepository } from './shipping.repository';
-import { CustomsService } from './customs.service';
-
-import { ShippingRequestInput } from '@/lib/validators/shipping';
 
 export interface CalculateRatesResult {
   parcels: Parcel[];
@@ -239,7 +239,7 @@ export class ShippingService {
    * Centralizes post-processing of Shippo rates.
    */
   static filterAndLabelRates(rawRates: ShippingRate[]): ShippingRate[] {
-    let filteredRates: ShippingRate[] = [];
+    const filteredRates: ShippingRate[] = [];
 
     let bestStandard: ShippingRate | null = null;
     let bestExpress: ShippingRate | null = null;

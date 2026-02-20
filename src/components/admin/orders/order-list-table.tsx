@@ -1,13 +1,14 @@
-import Link from 'next/link';
 import { Eye } from 'lucide-react';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { formatPrice } from '@/lib/utils/currency';
-import { getOrderStatusKey } from '@/lib/utils/order-status';
-import { formatDate } from '@/lib/utils/date';
-import { SupportedCurrency } from '@/lib/config/site';
 
+import { SupportedCurrency } from '@/lib/config/site';
 import { OrderWithIncludes } from '@/lib/types/domain/order';
+import { formatPrice } from '@/lib/utils/currency';
+import { formatDate } from '@/lib/utils/date';
+import { getOrderStatusKey } from '@/lib/utils/order-status';
+
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface OrderListTableProps {
   orders: OrderWithIncludes[];

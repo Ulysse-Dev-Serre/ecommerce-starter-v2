@@ -1,9 +1,10 @@
-import { Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
-import { CartProjection } from '@/lib/types/domain/cart';
-import { Cart } from '@/lib/types/ui/cart';
 import { cartRepository } from '@/lib/repositories/cart.repository';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
+import { CartProjection } from '@/lib/types/domain/cart';
+import { Cart } from '@/lib/types/ui/cart';
+
+import { Language } from '@/generated/prisma';
 
 /**
  * Get detailed cart data for the cart page (including translations and primary media)

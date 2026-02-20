@@ -1,13 +1,16 @@
-import { OrderStatus } from '@/generated/prisma';
-import { logger } from '@/lib/core/logger';
-import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
-import { render } from '@react-email/render';
-import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
-import { env } from '@/lib/core/env';
-import { SupportedCurrency } from '@/lib/config/site';
-import { getDictionary } from '@/lib/i18n/get-dictionary';
-import { Address, OrderWithIncludes } from '@/lib/types/domain/order';
 import { Decimal } from '@prisma/client/runtime/library';
+import { render } from '@react-email/render';
+
+import { SupportedCurrency } from '@/lib/config/site';
+import { env } from '@/lib/core/env';
+import { logger } from '@/lib/core/logger';
+import { getDictionary } from '@/lib/i18n/get-dictionary';
+import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
+import { Address, OrderWithIncludes } from '@/lib/types/domain/order';
+
+import { OrderStatus } from '@/generated/prisma';
+
+import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
 
 /**
  * Interface simplifiée pour les items de notification (emails)

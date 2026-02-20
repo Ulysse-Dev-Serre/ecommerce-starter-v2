@@ -1,9 +1,9 @@
 'use client';
 
-import { getPriceFromPricingArray } from '@/lib/utils/currency';
-import { formatPrice } from '@/lib/utils/currency';
 import { useLocale } from 'next-intl';
+
 import { SupportedCurrency, SITE_CURRENCY } from '@/lib/config/site';
+import { getPriceFromPricingArray, formatPrice } from '@/lib/utils/currency';
 
 interface PriceDisplayProps {
   pricing: Array<{ price: number; currency: string }>;

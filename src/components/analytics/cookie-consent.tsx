@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import * as CookieConsent from 'vanilla-cookieconsent';
+
 import 'vanilla-cookieconsent/dist/cookieconsent.css';
 import { cookieConfig } from '@/lib/config/cookie-config';
 

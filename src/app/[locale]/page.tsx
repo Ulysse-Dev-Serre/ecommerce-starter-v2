@@ -1,13 +1,15 @@
-import { VIBE_ANIMATION_SLIDE_IN_BOTTOM } from '@/lib/config/vibe-styles';
+import { ArrowRight } from 'lucide-react';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Metadata } from 'next';
-import { ArrowRight } from 'lucide-react';
+
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/config/site';
+import { VIBE_ANIMATION_SLIDE_IN_BOTTOM } from '@/lib/config/vibe-styles';
+import { getProducts } from '@/lib/services/products';
 
 import { Language, ProductStatus } from '@/generated/prisma';
-import { getProducts } from '@/lib/services/products';
+
 import { ProductCard } from '@/components/product/product-card';
-import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from '@/lib/config/site';
 
 // Disable static generation for this page (requires DB)
 export const dynamic = 'force-dynamic';

@@ -1,15 +1,17 @@
 'use client';
 
 import { useState } from 'react';
+
 import { ShoppingCart, Zap, Plus, Minus, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useToast } from '../ui/toast-provider';
-import { trackEvent } from '@/lib/client/analytics';
 
+import { trackEvent } from '@/lib/client/analytics';
 import { addToCart } from '@/lib/client/cart';
-import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
+import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
+
+import { useToast } from '../ui/toast-provider';
 
 interface ProductActionsProps {
   variantId: string;

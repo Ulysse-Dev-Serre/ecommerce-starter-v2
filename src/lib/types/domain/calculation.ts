@@ -1,4 +1,5 @@
 import { Decimal } from '@prisma/client/runtime/library';
+
 import { SupportedCurrency } from '@/lib/config/site';
 
 /**

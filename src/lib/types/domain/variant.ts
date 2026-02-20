@@ -7,6 +7,7 @@ import {
   ProductAttributeValue,
   ProductVariantAttributeValue,
 } from '@/generated/prisma';
+
 import { Dimensions } from './product';
 
 /**

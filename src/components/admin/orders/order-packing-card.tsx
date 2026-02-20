@@ -1,5 +1,6 @@
 import { Package, Box } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+
 import { PackedParcel } from '@/lib/services/shipping/packing.service';
 
 interface OrderPackingCardProps {

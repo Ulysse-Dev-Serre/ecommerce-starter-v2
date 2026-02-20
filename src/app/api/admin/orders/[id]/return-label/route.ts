@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createReturnLabel } from '@/lib/services/orders/order-fulfillment.service';
+
 import { logger } from '@/lib/core/logger';
+import { ApiContext } from '@/lib/middleware/types';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
-import type { AuthContext } from '@/lib/middleware/withAuth';
-import { ApiContext } from '@/lib/middleware/types';
+import { createReturnLabel } from '@/lib/services/orders/order-fulfillment.service';
 
 async function handler(
   req: NextRequest,

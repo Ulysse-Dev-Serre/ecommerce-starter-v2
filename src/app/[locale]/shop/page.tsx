@@ -1,11 +1,14 @@
+import { Search } from 'lucide-react';
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+
+import { SUPPORTED_LOCALES } from '@/lib/config/site';
 import { getProducts } from '@/lib/services/products';
 import { ProductProjection } from '@/lib/types/domain/product';
+
 import { Language } from '@/generated/prisma';
-import { getTranslations } from 'next-intl/server';
-import { Metadata } from 'next';
+
 import { ProductCard } from '@/components/product/product-card';
-import { SUPPORTED_LOCALES } from '@/lib/config/site';
-import { Search } from 'lucide-react';
 import { ShopPagination } from '@/components/shop/shop-pagination';
 
 interface ShopPageProps {

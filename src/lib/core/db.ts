@@ -1,6 +1,8 @@
-import type { PrismaClient } from '../../generated/prisma';
-import { PrismaClient as Client } from '../../generated/prisma';
 import { env } from '@/lib/core/env';
+
+import { PrismaClient as Client } from '../../generated/prisma';
+
+import type { PrismaClient } from '../../generated/prisma';
 
 const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 
