@@ -9,12 +9,14 @@ import { getOrCreateCart } from '@/lib/services/cart';
 import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import { env } from '@/lib/core/env';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
+import { ApiContext } from '@/lib/middleware/types';
 
 async function getCartHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const authContext = auth as OptionalAuthContext;
 
   // Resolve identity
   const { userId, anonymousId, newAnonymousId } = await resolveCartIdentity(

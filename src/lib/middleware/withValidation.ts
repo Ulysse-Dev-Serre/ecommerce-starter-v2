@@ -1,38 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ZodSchema } from 'zod';
 import { logger } from '@/lib/core/logger';
-import { ApiHandler } from './types';
+import { ApiHandler, ApiContext } from './types';
 import { formatZodErrors } from '@/lib/validators';
 
 /**
- * Middleware de validation Zod pour API Routes
- *
- * Parse le body de la requête et le valide contre un schéma Zod.
- * Passe les données validées comme DERNIER argument au handler.
- *
- * Usage:
- * export const POST = withValidation(MySchema, async (req, context, data) => { ... })
- * ou
- * export const POST = withValidation(MySchema, async (req, data) => { ... })
+ * Middleware de validation Zod pour API Routes.
+ * Valide le corps de la requête et injecte les données dans context.data.
  */
-export function withValidation<T>(schema: ZodSchema<T>, handler: ApiHandler) {
-  return async (request: NextRequest, ...args: unknown[]) => {
+export function withValidation<T>(
+  schema: ZodSchema<T>,
+  handler: ApiHandler
+): ApiHandler {
+  return async (request: NextRequest, context: ApiContext) => {
     try {
-      // 1. Parser le body (on doit cloner si on veut le relire ailleurs, mais ici on le consomme)
-      // Note: On assume que c'est du JSON.
       const body = await request.json();
-
-      // 2. Valider avec Zod
       const parseResult = await schema.safeParseAsync(body);
 
       if (!parseResult.success) {
-        // Validation échouée
-        const error = parseResult.error;
-
         logger.warn(
           {
             action: 'validation_error',
-            errors: error.flatten(),
+            errors: parseResult.error.flatten(),
             path: request.nextUrl.pathname,
           },
           'API Validation Failed'
@@ -42,25 +31,20 @@ export function withValidation<T>(schema: ZodSchema<T>, handler: ApiHandler) {
           {
             success: false,
             error: 'Validation Error',
-            details: formatZodErrors(error),
+            details: formatZodErrors(parseResult.error),
           },
           { status: 400 }
         );
       }
 
-      // 3. Passer les données validées au handler
-      // On ajoute 'data' à la fin des arguments existants (contexte de route, authContext, etc.)
-      return await handler(request, ...args, parseResult.data);
+      return await handler(request, { ...context, data: parseResult.data });
     } catch (error) {
-      // Erreur de parsing JSON ou autre
       logger.error(
         {
           action: 'validation_middleware_error',
-          error: error instanceof Error ? error.message : 'Non-Error Object',
-          stack: error instanceof Error ? error.stack : undefined,
-          fullError: error,
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
-        'Middleware execution failed during service call'
+        'Middleware execution failed during validation'
       );
 
       return NextResponse.json(

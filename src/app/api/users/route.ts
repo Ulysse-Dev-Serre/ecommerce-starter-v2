@@ -4,11 +4,15 @@ import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getAllUsers } from '@/lib/services/users';
 
 import { userSearchSchema } from '@/lib/validators/user';
 
-async function getUsers(req: NextRequest): Promise<NextResponse> {
+async function getUsers(
+  req: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   const requestId = req.headers.get('X-Request-ID') || crypto.randomUUID();
   const { searchParams } = new URL(req.url);
 

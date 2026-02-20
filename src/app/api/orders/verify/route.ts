@@ -4,6 +4,7 @@ import { prisma } from '@/lib/core/db';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 /**
@@ -13,9 +14,10 @@ import { AppError, ErrorCode } from '@/lib/types/api/errors';
  */
 async function verifyOrderHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const authContext = auth as AuthContext;
   const userId = authContext.userId;
 
   const { searchParams } = new URL(request.url);

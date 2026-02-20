@@ -7,6 +7,7 @@ import {
 } from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { updatePaymentIntent } from '@/lib/services/payments';
 import { SupportedCurrency } from '@/lib/config/site';
 import {
@@ -16,10 +17,11 @@ import {
 
 async function updateIntentHandler(
   request: NextRequest,
-  _authContext: OptionalAuthContext,
-  data: UpdateIntentInput
+  { data }: ApiContext<any, UpdateIntentInput>
 ): Promise<NextResponse> {
-  const { paymentIntentId, shippingRate, currency, shippingDetails } = data;
+  const validatedData = data as UpdateIntentInput;
+  const { paymentIntentId, shippingRate, currency, shippingDetails } =
+    validatedData;
 
   const updatedIntent = await updatePaymentIntent(paymentIntentId, {
     shippingAmount: shippingRate.amount.toString(),

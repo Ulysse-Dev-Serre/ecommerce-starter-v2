@@ -9,6 +9,7 @@ import {
   withOptionalAuth,
 } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getOrCreateCart } from '@/lib/services/cart';
 import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import {
@@ -25,9 +26,10 @@ import { cartCalculationSchema } from '@/lib/validators/cart';
  */
 async function calculateCartHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as OptionalAuthContext;
   const { searchParams } = new URL(request.url);
 
   // 1. Validation de la devise

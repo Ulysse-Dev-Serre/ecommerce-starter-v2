@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { withError } from '@/lib/middleware/withError';
+import { ApiContext } from '@/lib/middleware/types';
 import { getSystemHealth } from '@/lib/services/health';
 
 /**
  * GET /api/internal/health
  * Performs a basic health check of the application and its dependencies.
  */
-async function healthCheckHandler(request: NextRequest): Promise<NextResponse> {
+async function healthCheckHandler(
+  request: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
 
   const healthInfo = await getSystemHealth();

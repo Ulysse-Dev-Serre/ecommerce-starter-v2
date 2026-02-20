@@ -3,7 +3,7 @@ import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
-import { ApiHandler } from './types';
+import { ApiHandler, ApiContext } from './types';
 
 function isAppError(error: unknown): error is AppError {
   return (
@@ -15,10 +15,14 @@ function isAppError(error: unknown): error is AppError {
   );
 }
 
+/**
+ * Middleware de gestion globale des erreurs pour les routes API.
+ * Capture les erreurs et retourne une réponse JSON formatée.
+ */
 export function withError(handler: ApiHandler): ApiHandler {
-  return async (request, ...args: unknown[]) => {
+  return async (request, context: ApiContext) => {
     try {
-      return await handler(request, ...args);
+      return await handler(request, context);
     } catch (error) {
       if (isAppError(error)) {
         const appError = error as AppError;

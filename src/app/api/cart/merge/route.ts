@@ -3,12 +3,14 @@ import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { mergeAnonymousCartToUser } from '@/lib/services/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
+import { ApiContext } from '@/lib/middleware/types';
 
 async function mergeCartHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const authContext = auth as AuthContext;
   const anonymousId = request.cookies.get(CART_COOKIE_NAME)?.value;
 
   if (!anonymousId) {

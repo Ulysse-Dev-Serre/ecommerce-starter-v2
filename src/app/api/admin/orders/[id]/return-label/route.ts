@@ -5,13 +5,13 @@ import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import type { AuthContext } from '@/lib/middleware/withAuth';
+import { ApiContext } from '@/lib/middleware/types';
 
 async function handler(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  _authContext: AuthContext
+  { params }: ApiContext<{ id: string }>
 ) {
-  const { id } = await context.params;
+  const { id } = await params;
 
   try {
     const { searchParams } = new URL(req.url);

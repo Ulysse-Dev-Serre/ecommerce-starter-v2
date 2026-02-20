@@ -1,38 +1,33 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
-import { analyticsEventSchema } from '@/lib/validators/analytics';
+import {
+  analyticsEventSchema,
+  type AnalyticsEventInput,
+} from '@/lib/validators/analytics';
 import { logger } from '@/lib/core/logger';
+import { withValidation } from '@/lib/middleware/withValidation';
+import { ApiContext } from '@/lib/middleware/types';
 
-async function handler(req: Request) {
-  try {
-    const json = await req.json();
+async function handler(
+  request: NextRequest,
+  { data }: ApiContext<any, AnalyticsEventInput>
+) {
+  const validatedData = data as AnalyticsEventInput;
+  const { userId: clerkId } = await auth();
 
-    // Validate request body
-    const result = analyticsEventSchema.safeParse(json);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: 'Invalid request body', details: result.error.format() },
-        { status: 400 }
-      );
-    }
+  // Delegate to service
+  const event = await AnalyticsService.trackEvent(validatedData, clerkId);
 
-    const { userId: clerkId } = await auth();
-
-    // Delegate to service
-    const event = await AnalyticsService.trackEvent(result.data, clerkId);
-
-    return NextResponse.json({ success: true, id: event.id });
-  } catch (error) {
-    logger.error({ error }, '[ANALYTICS_EVENT_POST] Error');
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({ success: true, id: event.id });
 }
 
-export const POST = withError(withRateLimit(handler, RateLimits.PUBLIC));
+export const POST = withError(
+  withRateLimit(
+    withValidation(analyticsEventSchema, handler),
+    RateLimits.PUBLIC
+  )
+);

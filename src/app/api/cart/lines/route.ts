@@ -8,6 +8,7 @@ import {
 import { env } from '@/lib/core/env';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { addToCart } from '@/lib/services/cart';
 import { addToCartSchema, AddToCartInput } from '@/lib/validators/cart';
 import { CART_COOKIE_NAME } from '@/lib/config/site';
@@ -15,10 +16,11 @@ import { resolveCartIdentity } from '@/lib/services/cart/identity';
 
 async function addToCartHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext,
-  data: AddToCartInput
+  { auth, data }: ApiContext<any, AddToCartInput>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const authContext = auth as OptionalAuthContext;
+  const validatedData = data as AddToCartInput;
 
   // Resolve identity
   const { userId, anonymousId, newAnonymousId } = await resolveCartIdentity(
@@ -26,7 +28,7 @@ async function addToCartHandler(
     true
   );
 
-  const cart = await addToCart(data, userId, anonymousId);
+  const cart = await addToCart(validatedData, userId, anonymousId);
 
   const response = NextResponse.json(
     {

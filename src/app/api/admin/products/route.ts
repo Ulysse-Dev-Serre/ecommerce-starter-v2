@@ -5,6 +5,7 @@ import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { withValidation } from '@/lib/middleware/withValidation';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   CreateProductSchema,
   CreateProductInput,
@@ -15,14 +16,14 @@ import { CreateProductData } from '@/lib/types/domain/product';
 
 async function createProductHandler(
   request: NextRequest,
-  authContext: AuthContext,
-  data: CreateProductInput
+  { auth, data }: ApiContext<any, CreateProductInput>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as AuthContext;
+  const validatedData = data as CreateProductInput;
 
   try {
     // Data validated by middleware
-    const validatedData = data;
 
     logger.info(
       {

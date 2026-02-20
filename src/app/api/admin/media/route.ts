@@ -7,6 +7,7 @@ import {
   withRateLimit,
   RateLimits,
 } from '../../../../lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { prisma } from '../../../../lib/core/db';
 import { MediaType, Prisma } from '../../../../generated/prisma';
 
@@ -23,9 +24,10 @@ import { MediaType, Prisma } from '../../../../generated/prisma';
  */
 async function getMediaHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as AuthContext;
 
   try {
     const { searchParams } = new URL(request.url);

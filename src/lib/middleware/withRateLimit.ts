@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 import { logger } from '@/lib/core/logger';
+import { cache } from '@/lib/core/cache';
+import { ApiHandler, ApiContext } from './types';
 
 interface RateLimitConfig {
   windowMs: number; // Fenêtre de temps en ms
@@ -9,7 +11,19 @@ interface RateLimitConfig {
   message?: string;
 }
 
-import { cache } from '@/lib/core/cache';
+/**
+ * Obtenir un identifiant unique pour le rate limiting
+ */
+function getIdentifier(req: NextRequest): string {
+  const clerkId = req.headers.get('x-clerk-user-id');
+  if (clerkId) return `user:${clerkId}`;
+
+  const forwarded = req.headers.get('x-forwarded-for');
+  const realIp = req.headers.get('x-real-ip');
+  const ip = forwarded?.split(',')[0] ?? realIp ?? 'unknown';
+
+  return `ip:${ip}`;
+}
 
 /**
  * Middleware de rate limiting
@@ -26,7 +40,6 @@ export function createRateLimiter(config: RateLimitConfig) {
     const identifier = getIdentifier(req);
     const key = `ratelimit:${identifier}:${req.nextUrl.pathname}`;
 
-    // Utilisation du service de cache centralisé
     const record = await cache.increment(key, windowMs);
     const now = Date.now();
 
@@ -70,35 +83,22 @@ export function createRateLimiter(config: RateLimitConfig) {
 }
 
 /**
- * Obtenir un identifiant unique pour le rate limiting
- */
-function getIdentifier(req: NextRequest): string {
-  const clerkId = req.headers.get('x-clerk-user-id');
-  if (clerkId) return `user:${clerkId}`;
-
-  const forwarded = req.headers.get('x-forwarded-for');
-  const realIp = req.headers.get('x-real-ip');
-  const ip = forwarded?.split(',')[0] ?? realIp ?? 'unknown';
-
-  return `ip:${ip}`;
-}
-
-import { ApiHandler } from './types';
-
-/**
  * Middleware wrapper pour API routes
  */
-export function withRateLimit(handler: ApiHandler, config: RateLimitConfig) {
+export function withRateLimit(
+  handler: ApiHandler,
+  config: RateLimitConfig
+): ApiHandler {
   const rateLimiter = createRateLimiter(config);
 
   return async (
     req: NextRequest,
-    ...args: unknown[]
+    context: ApiContext
   ): Promise<NextResponse> => {
     const limitResponse = await rateLimiter(req);
     if (limitResponse) return limitResponse;
 
-    return handler(req, ...args);
+    return handler(req, context);
   };
 }
 
@@ -106,45 +106,11 @@ export function withRateLimit(handler: ApiHandler, config: RateLimitConfig) {
  * Configurations prédéfinies
  */
 export const RateLimits = {
-  // Routes publiques (products, cart GET)
-  PUBLIC: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 60, // 60 req/min
-  },
-
-  // Routes d'écriture panier (add/update/delete)
-  CART_WRITE: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 50, // 50 req/min
-  },
-
-  // Routes admin (product CRUD)
-  ADMIN: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30, // 30 req/min
-  },
-
-  // Webhooks
-  WEBHOOK: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 100, // 100 req/min (Clerk peut envoyer plusieurs events)
-  },
-
-  // Très strict (login attempts, etc.)
-  STRICT: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5, // 5 req/15min
-  },
-
-  // Checkout Stripe (protéger contre abus)
-  CHECKOUT: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 5, // 5 checkouts/min max
-  },
-
-  // Order verification (polling)
-  ORDER_VERIFY: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30, // 30 req/min (polling toutes les 2s pendant 60s)
-  },
+  PUBLIC: { windowMs: 60 * 1000, maxRequests: 60 },
+  CART_WRITE: { windowMs: 60 * 1000, maxRequests: 50 },
+  ADMIN: { windowMs: 60 * 1000, maxRequests: 30 },
+  WEBHOOK: { windowMs: 60 * 1000, maxRequests: 100 },
+  STRICT: { windowMs: 15 * 60 * 1000, maxRequests: 5 },
+  CHECKOUT: { windowMs: 60 * 1000, maxRequests: 5 },
+  ORDER_VERIFY: { windowMs: 60 * 1000, maxRequests: 30 },
 } as const;

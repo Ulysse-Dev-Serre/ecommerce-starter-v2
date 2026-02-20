@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { OrderStatus } from '../../../../../generated/prisma';
 import { getOrderByIdAdmin, updateOrderStatus } from '@/lib/services/orders';
 
@@ -13,11 +14,11 @@ import { getOrderByIdAdmin, updateOrderStatus } from '@/lib/services/orders';
  */
 async function getOrderAdminHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { id: orderId } = await params;
+  const authContext = auth as AuthContext;
 
   logger.info(
     {
@@ -53,11 +54,11 @@ async function getOrderAdminHandler(
  */
 async function updateOrderAdminHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
   const { id: orderId } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();

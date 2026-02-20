@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withError } from '@/lib/middleware/withError';
 import { AnalyticsService } from '@/lib/services/analytics/analytics.service';
+import { ApiContext } from '@/lib/middleware/types';
 
 /**
  * GET /api/internal/cleanup-analytics
  * Automated cron job to cleanup old analytics events.
  * It deletes events older than 14 days.
  */
-async function cleanupHandler(request: NextRequest): Promise<NextResponse> {
+async function cleanupHandler(
+  request: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   // Verification for Vercel Cron security
   const authHeader = request.headers.get('authorization');
 

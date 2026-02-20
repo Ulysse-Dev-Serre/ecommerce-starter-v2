@@ -26,9 +26,7 @@ interface ProductShippingFormData {
 
 interface ProductShippingInfoProps {
   formData: ProductShippingFormData;
-  setFormData: (
-    fn: (prev: ProductShippingFormData) => ProductShippingFormData
-  ) => void;
+  setFormData: (fn: (prev: any) => any) => void;
   suppliers: AdminSupplier[];
   fieldErrors?: Record<string, string>;
   t: (key: string) => string;

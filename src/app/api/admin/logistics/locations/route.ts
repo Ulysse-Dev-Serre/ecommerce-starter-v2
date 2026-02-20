@@ -13,11 +13,13 @@ import {
   CreateLocationData,
 } from '@/lib/services/logistics/logistics-location.service';
 
+import { ApiContext } from '@/lib/middleware/types';
+
 async function createLocationHandler(
   req: NextRequest,
-  authContext: AuthContext,
-  data: CreateLocationInput
+  { auth, data }: ApiContext<any, CreateLocationInput>
 ) {
+  const authContext = auth as AuthContext;
   const { userId } = authContext;
 
   const supplier = await logisticsLocationService.createLocation(
@@ -36,7 +38,7 @@ export const POST = withError(
   withAdmin(withValidation(createLocationSchema, createLocationHandler))
 );
 
-async function getLocationsHandler(_req: NextRequest) {
+async function getLocationsHandler(_req: NextRequest, _context: ApiContext) {
   const suppliers = await logisticsLocationService.getLocations();
   return NextResponse.json({ data: suppliers });
 }

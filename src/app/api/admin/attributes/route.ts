@@ -4,11 +4,17 @@ import { Language } from '../../../../generated/prisma';
 import { logger } from '../../../../lib/core/logger';
 import { AuthContext, withAdmin } from '../../../../lib/middleware/withAuth';
 import { withError } from '../../../../lib/middleware/withError';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   getProductAttributes,
   createProductAttribute,
   type CreateAttributeData,
 } from '@/lib/services/attributes';
+import { withValidation } from '../../../../lib/middleware/withValidation';
+import {
+  createAttributeSchema,
+  CreateAttributeInput,
+} from '@/lib/validators/admin';
 
 /**
  * GET /api/admin/attributes
@@ -19,9 +25,10 @@ import {
  */
 async function getAttributesHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as AuthContext;
   const { searchParams } = new URL(request.url);
   const language = searchParams.get('language') as Language | null;
 
@@ -77,26 +84,25 @@ async function getAttributesHandler(
  *   ]
  * }
  */
-import { withValidation } from '../../../../lib/middleware/withValidation';
-import {
-  createAttributeSchema,
-  CreateAttributeInput,
-} from '@/lib/validators/admin';
 
 async function createAttributeHandler(
   request: NextRequest,
-  authContext: AuthContext,
-  data: CreateAttributeInput
+  { auth, data }: ApiContext<any, CreateAttributeInput>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as AuthContext;
+  const validatedData = data as CreateAttributeInput;
 
   try {
     // Data is validated by middleware
     const attributeData: CreateAttributeData = {
-      ...data,
-      translations: data.translations.map(t => ({
-        ...t,
+      key: validatedData.key,
+      inputType: validatedData.inputType,
+      isRequired: validatedData.isRequired,
+      sortOrder: validatedData.sortOrder,
+      translations: validatedData.translations.map(t => ({
         language: t.language.toUpperCase() as Language,
+        name: t.name,
       })),
     };
 

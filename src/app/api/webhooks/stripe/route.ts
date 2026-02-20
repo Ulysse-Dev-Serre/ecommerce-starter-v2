@@ -15,13 +15,17 @@ import {
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { env } from '@/lib/core/env';
 import { withError } from '@/lib/middleware/withError';
+import { ApiContext } from '@/lib/middleware/types';
 import { StripeWebhookService } from '@/lib/services/orders/stripe-webhook.service';
 
 /**
  * Stripe Webhook Handler
  * Delegates business logic to StripeWebhookService
  */
-async function handler(request: NextRequest): Promise<NextResponse> {
+async function handler(
+  request: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   let stripeEvent: Stripe.Event | undefined;
 

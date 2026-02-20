@@ -14,19 +14,25 @@ import {
 } from '@/lib/validators/cart';
 import { resolveCartIdentity } from '@/lib/services/cart/identity';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 
 async function updateCartLineHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: OptionalAuthContext,
-  data: UpdateCartLineInput
+  { params, auth, data }: ApiContext<{ id: string }, UpdateCartLineInput>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
-  const { id: cartItemId } = await context.params;
+  const { id: cartItemId } = await params;
+  const authContext = auth as OptionalAuthContext;
+  const validatedData = data as UpdateCartLineInput;
 
   const { userId, anonymousId } = await resolveCartIdentity(authContext);
 
-  const cart = await updateCartLine(cartItemId, data, userId, anonymousId);
+  const cart = await updateCartLine(
+    cartItemId,
+    validatedData,
+    userId,
+    anonymousId
+  );
 
   return NextResponse.json({
     success: true,
@@ -39,11 +45,11 @@ async function updateCartLineHandler(
 
 async function removeCartLineHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: OptionalAuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
-  const { id: cartItemId } = await context.params;
+  const { id: cartItemId } = await params;
+  const authContext = auth as OptionalAuthContext;
 
   const { userId, anonymousId } = await resolveCartIdentity(authContext);
 

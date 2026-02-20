@@ -6,6 +6,7 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   userCreatedSchema,
   userUpdatedSchema,
@@ -16,7 +17,10 @@ import { env } from '@/lib/core/env';
 
 const webhookSecret = env.CLERK_WEBHOOK_SECRET;
 
-async function handleClerkWebhook(req: NextRequest): Promise<NextResponse> {
+async function handleClerkWebhook(
+  req: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   logger.info(
     {
       action: 'clerk_webhook_received',

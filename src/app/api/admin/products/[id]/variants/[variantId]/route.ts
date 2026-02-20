@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   getVariantById,
   updateVariant,
@@ -17,11 +18,11 @@ import type { UpdateVariantData } from '@/lib/types/domain/variant';
  */
 async function getVariantHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string; variantId: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string; variantId: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: productId, variantId } = await context.params;
+  const { id: productId, variantId } = await params;
+  const authContext = auth as AuthContext;
 
   logger.info(
     {
@@ -156,11 +157,11 @@ async function getVariantHandler(
  */
 async function updateVariantHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string; variantId: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string; variantId: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: productId, variantId } = await context.params;
+  const { id: productId, variantId } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();
@@ -296,11 +297,11 @@ async function updateVariantHandler(
  */
 async function deleteVariantHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string; variantId: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string; variantId: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: productId, variantId } = await context.params;
+  const { id: productId, variantId } = await params;
+  const authContext = auth as AuthContext;
 
   logger.info(
     {

@@ -29,6 +29,12 @@ describe('ProductAdminService', () => {
       const mockInput = {
         slug: 'new-product',
         status: ProductStatus.DRAFT,
+        isFeatured: false,
+        sortOrder: 0,
+        originCountry: 'CA',
+        hsCode: '123456',
+        exportExplanation: 'Test export',
+        shippingOriginId: 'loc_1',
         weight: 1.5,
         dimensions: { length: 10, width: 20, height: 30 },
         translations: [

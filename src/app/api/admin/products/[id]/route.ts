@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { UpdateProductSchema } from '@/lib/validators/product';
 import { formatZodErrors } from '@/lib/validators';
 import { Language } from '@/generated/prisma';
@@ -20,11 +21,11 @@ import { UpdateProductData } from '@/lib/types/domain/product';
  */
 async function getProductHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id } = await context.params;
+  const { id } = await params;
+  const authContext = auth as AuthContext;
 
   logger.info(
     {
@@ -116,11 +117,11 @@ async function getProductHandler(
  */
 async function updateProductHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id } = await context.params;
+  const { id } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();
@@ -348,11 +349,11 @@ async function updateProductHandler(
  */
 async function deleteProductHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id } = await context.params;
+  const { id } = await params;
+  const authContext = auth as AuthContext;
 
   logger.info(
     {

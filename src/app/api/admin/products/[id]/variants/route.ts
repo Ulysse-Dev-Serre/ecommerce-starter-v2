@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { CreateVariantsSchema } from '@/lib/validators/product';
 
 import {
@@ -22,11 +23,11 @@ import type {
  */
 async function getVariantsHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id } = await context.params;
+  const { id } = await params;
+  const authContext = auth as AuthContext;
 
   logger.info(
     {
@@ -112,17 +113,14 @@ import { CreateVariantsInput } from '@/lib/validators/product';
 
 async function createVariantsHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext,
-  data: CreateVariantsInput
+  { params, auth, data }: ApiContext<{ id: string }, CreateVariantsInput>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: productId } = await context.params;
+  const { id: productId } = await params;
+  const authContext = auth as AuthContext;
+  const validatedData = data as CreateVariantsInput;
 
   try {
-    // Data validated by middleware
-    const validatedData = data;
-
     logger.info(
       {
         requestId,

@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { productMediaService } from '@/lib/services/products/product-media.service';
 
 /**
@@ -21,9 +22,10 @@ import { productMediaService } from '@/lib/services/products/product-media.servi
  */
 async function reorderMediaHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();

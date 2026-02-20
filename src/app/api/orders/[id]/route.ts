@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   OrderWithIncludes,
   OrderItem,
@@ -55,11 +56,11 @@ function mapOrderResponse(order: OrderWithIncludes) {
  */
 async function getOrderHandler(
   request: NextRequest,
-  authContext: AuthContext,
-  { params }: { params: Promise<{ id: string }> }
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const { id: orderId } = await params;
+  const authContext = auth as AuthContext;
   const userId = authContext.userId;
 
   logger.info(

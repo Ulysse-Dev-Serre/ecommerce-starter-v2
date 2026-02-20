@@ -4,6 +4,8 @@ import { withError } from '@/lib/middleware/withError';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import type { AuthContext } from '@/lib/middleware/withAuth';
+import { ApiContext } from '@/lib/middleware/types';
+import { NextRequest } from 'next/server';
 import {
   previewShippingRates,
   purchaseShippingLabel,
@@ -13,12 +15,11 @@ import {
  * GET: Prévisualiser les tarifs (Admin)
  */
 async function previewLabelHandler(
-  request: Request,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  request: NextRequest,
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
-  const params = await context.params;
-  const orderId = params.id;
+  const { id: orderId } = await params;
+  const authContext = auth as AuthContext;
 
   // Note: withAdmin déjà checker, mais double-check si besoin
   if (authContext.role !== 'ADMIN') {
@@ -53,12 +54,11 @@ async function previewLabelHandler(
  * POST: Acheter l'étiquette (Admin)
  */
 async function purchaseLabelHandler(
-  request: Request,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  request: NextRequest,
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
-  const params = await context.params;
-  const orderId = params.id;
+  const { id: orderId } = await params;
+  const authContext = auth as AuthContext;
 
   if (authContext.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

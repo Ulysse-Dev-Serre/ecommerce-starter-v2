@@ -4,6 +4,7 @@ import { Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getProducts } from '@/lib/services/products';
 import { productSearchSchema } from '@/lib/validators/product';
 
@@ -11,7 +12,10 @@ import { productSearchSchema } from '@/lib/validators/product';
  * GET /api/products
  * Liste publique des produits avec filtres et pagination
  */
-async function getProductsHandler(request: NextRequest): Promise<NextResponse> {
+async function getProductsHandler(
+  request: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const { searchParams } = new URL(request.url);
 

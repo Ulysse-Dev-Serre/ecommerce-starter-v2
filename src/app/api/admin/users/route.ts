@@ -3,6 +3,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getAllUsersAdmin } from '@/lib/services/users/user-admin.service';
 import { UserRole } from '@/generated/prisma';
 
@@ -12,9 +13,10 @@ import { UserRole } from '@/generated/prisma';
  */
 async function getUsersHandler(
   request: NextRequest,
-  _authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const _authContext = auth as AuthContext;
   const searchParams = request.nextUrl.searchParams;
 
   const page = parseInt(searchParams.get('page') || '1');

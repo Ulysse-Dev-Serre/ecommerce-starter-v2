@@ -192,16 +192,6 @@ export class ShippingService {
 
     // 6. Fetch rates from Shippo
     try {
-      logger.info(
-        {
-          origin: originAddress,
-          destination: addressTo,
-          parcelsCount: parcels.length,
-          hasCustoms: !!customsDeclaration,
-        },
-        'Calling Shippo Integration'
-      );
-
       const shipment = await getShippingRates(
         originAddress,
         addressTo,

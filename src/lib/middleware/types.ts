@@ -1,15 +1,24 @@
-/**
- * Types partagés pour les middleware API
- * Centralise les définitions pour éviter les duplications
- */
-
 import { NextResponse, NextRequest } from 'next/server';
+import { AuthContext, OptionalAuthContext } from './withAuth';
 
 /**
- * Handler type pour les routes API Next.js
- * Accepte request et arguments optionnels (routeContext, authContext, validatedData, etc.)
+ * Interface globale pour le contexte des routes API.
+ * Centralise tous les objets qui peuvent être injectés par les middlewares.
+ *
+ * @template TParams Type des paramètres de route (ex: { id: string })
+ * @template TBody Type du corps de la requête validé (pour withValidation)
  */
-export type ApiHandler = (
+export interface ApiContext<TParams = any, TBody = any> {
+  params: Promise<TParams>;
+  auth?: AuthContext | OptionalAuthContext;
+  data?: TBody;
+}
+
+/**
+ * Handler type pour les routes API Next.js.
+ * Utilise ApiContext pour garantir un typage strict sans arguments positionnels.
+ */
+export type ApiHandler<TParams = any, TBody = any> = (
   request: NextRequest,
-  ...args: unknown[]
+  context: ApiContext<TParams, TBody>
 ) => Promise<NextResponse> | NextResponse;

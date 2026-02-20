@@ -6,8 +6,12 @@ import { logger } from '@/lib/core/logger';
 import { withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 
-async function handler(_request: NextRequest): Promise<NextResponse> {
+async function handler(
+  _request: NextRequest,
+  _context: ApiContext
+): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
 
   // Remove internal try-catch to let withError handle it?

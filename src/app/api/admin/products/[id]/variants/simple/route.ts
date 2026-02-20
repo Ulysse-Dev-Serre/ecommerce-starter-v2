@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { createSimpleVariants } from '@/lib/services/variants';
 import type { SimpleVariantData } from '@/lib/types/domain/variant';
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
@@ -22,11 +23,11 @@ import { SUPPORTED_LOCALES } from '@/lib/config/site';
  */
 async function createSimpleVariantsHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: productId } = await context.params;
+  const { id: productId } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();

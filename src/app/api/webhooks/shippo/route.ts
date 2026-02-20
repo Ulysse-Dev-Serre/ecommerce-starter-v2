@@ -7,8 +7,9 @@ import { env } from '@/lib/core/env';
 
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
 import { withError } from '@/lib/middleware/withError';
+import { ApiContext } from '@/lib/middleware/types';
 
-async function handleShippoWebhook(request: NextRequest) {
+async function handleShippoWebhook(request: NextRequest, _context: ApiContext) {
   const requestId = crypto.randomUUID();
 
   // 1. Vérification de sécurité (Secret Token)

@@ -8,6 +8,7 @@ import {
   addAttributeValue,
   type AddAttributeValueData,
 } from '@/lib/services/attributes';
+import { ApiHandler, ApiContext } from '@/lib/middleware/types';
 
 /**
  * POST /api/admin/attributes/[id]/values
@@ -24,11 +25,11 @@ import {
  */
 async function addValueHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id: attributeId } = await context.params;
+  const { id: attributeId } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();

@@ -12,7 +12,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { UserRole } from '../../generated/prisma';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
-import { ApiHandler } from './types';
+import { ApiHandler, ApiContext } from './types';
 
 export interface AuthContext {
   userId: string;
@@ -24,11 +24,8 @@ export interface AuthContext {
 /**
  * Middleware pour protéger les routes API - utilisateur authentifié requis
  */
-export function withAuth(handler: ApiHandler) {
-  return async (
-    request: NextRequest,
-    routeContext?: { params?: Promise<unknown> }
-  ) => {
+export function withAuth(handler: ApiHandler): ApiHandler {
+  return async (request: NextRequest, context: ApiContext) => {
     try {
       const { userId: clerkId } = await auth();
 
@@ -36,7 +33,7 @@ export function withAuth(handler: ApiHandler) {
         logger.warn(
           {
             action: 'unauthorized_access_attempt',
-            path: (request as Request & { url?: string })?.url,
+            path: request.url,
           },
           'Unauthorized: No Clerk user ID'
         );
@@ -98,11 +95,8 @@ export function withAuth(handler: ApiHandler) {
         'Authenticated request'
       );
 
-      return routeContext?.params
-        ? await handler(request, routeContext, authContext)
-        : await handler(request, authContext);
+      return await handler(request, { ...context, auth: authContext });
     } catch (error) {
-      // Re-throw to let withError middleware handle it correctly (e.g., preservation of status codes)
       throw error;
     }
   };
@@ -112,18 +106,15 @@ export function withAuth(handler: ApiHandler) {
  * Middleware pour protéger les routes admin - rôle ADMIN requis
  */
 export function withAdmin(handler: ApiHandler): ApiHandler {
-  return withAuth(async (request: NextRequest, ...args: unknown[]) => {
-    // authContext est toujours le DERNIER argument (après routeContext pour routes dynamiques)
-    const authContext = args[args.length - 1] as AuthContext;
-    const routeContext =
-      args.length > 1 ? (args[0] as { params?: Promise<unknown> }) : undefined;
+  return withAuth(async (request: NextRequest, context: ApiContext) => {
+    const authContext = context.auth as AuthContext;
 
-    if (authContext.role !== UserRole.ADMIN) {
+    if (!authContext || authContext.role !== UserRole.ADMIN) {
       logger.warn(
         {
           action: 'forbidden_access_attempt',
-          userId: authContext.userId,
-          role: authContext.role,
+          userId: authContext?.userId,
+          role: authContext?.role,
           requiredRole: UserRole.ADMIN,
         },
         'Forbidden: Admin role required'
@@ -148,10 +139,7 @@ export function withAdmin(handler: ApiHandler): ApiHandler {
       'Admin access granted'
     );
 
-    // Passer routeContext si présent (pour routes dynamiques [id])
-    return routeContext
-      ? await handler(request, routeContext, authContext)
-      : await handler(request, authContext);
+    return await handler(request, context);
   });
 }
 
@@ -172,11 +160,8 @@ export interface OptionalAuthContext {
  * Accepte les utilisateurs anonymes ET authentifiés
  * Utilisé pour: panier, checkout (invités autorisés)
  */
-export function withOptionalAuth(handler: ApiHandler) {
-  return async (
-    request: NextRequest,
-    routeContext?: { params?: Promise<unknown> }
-  ) => {
+export function withOptionalAuth(handler: ApiHandler): ApiHandler {
+  return async (request: NextRequest, context: ApiContext) => {
     try {
       const { userId: clerkId } = await auth();
 
@@ -209,9 +194,7 @@ export function withOptionalAuth(handler: ApiHandler) {
             'Authenticated request (optional auth)'
           );
 
-          return routeContext?.params
-            ? await handler(request, routeContext, authContext)
-            : await handler(request, authContext);
+          return await handler(request, { ...context, auth: authContext });
         }
       }
 
@@ -227,11 +210,8 @@ export function withOptionalAuth(handler: ApiHandler) {
         'Anonymous request (optional auth)'
       );
 
-      return routeContext?.params
-        ? await handler(request, routeContext, authContext)
-        : await handler(request, authContext);
+      return await handler(request, { ...context, auth: authContext });
     } catch (error) {
-      // Re-throw to let withError middleware handle it correctly
       throw error;
     }
   };

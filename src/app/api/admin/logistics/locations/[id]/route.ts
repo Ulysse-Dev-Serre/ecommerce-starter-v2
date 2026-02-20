@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { logger } from '@/lib/core/logger';
 import { z } from 'zod';
+import { withAdmin, AuthContext } from '@/lib/middleware/withAuth';
+import { withError } from '@/lib/middleware/withError';
+import { ApiContext } from '@/lib/middleware/types';
 
 const schema = z.object({
   name: z.string().min(1),
@@ -30,16 +33,11 @@ import {
   UpdateLocationData,
 } from '@/lib/services/logistics/logistics-location.service';
 
-export async function PUT(
+async function updateLocationHandler(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: ApiContext<{ id: string }>
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { id } = await params;
     const body = await req.json();
 
@@ -74,34 +72,25 @@ export async function PUT(
 
     return NextResponse.json(supplier);
   } catch (error) {
-    logger.error({ error }, 'Error updating location');
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    throw error;
   }
 }
 
-export async function DELETE(
+export const PUT = withError(withAdmin(updateLocationHandler));
+
+async function deleteLocationHandler(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: ApiContext<{ id: string }>
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { id } = await params;
 
     await logisticsLocationService.deleteLocation(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error({ error }, 'Error deleting location');
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    throw error;
   }
 }
+
+export const DELETE = withError(withAdmin(deleteLocationHandler));

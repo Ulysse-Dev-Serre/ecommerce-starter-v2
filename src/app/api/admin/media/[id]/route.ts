@@ -4,6 +4,7 @@ import { logger } from '@/lib/core/logger';
 import { AuthContext, withAdmin } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getStorageProvider } from '@/lib/integrations/storage/storage.service';
 import { prisma } from '@/lib/core/db';
 
@@ -13,11 +14,11 @@ import { prisma } from '@/lib/core/db';
  */
 async function deleteMediaHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id } = await context.params;
+  const { id } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     logger.info(
@@ -131,11 +132,11 @@ async function deleteMediaHandler(
  */
 async function patchMediaHandler(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-  authContext: AuthContext
+  { params, auth }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
-  const { id } = await context.params;
+  const { id } = await params;
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();

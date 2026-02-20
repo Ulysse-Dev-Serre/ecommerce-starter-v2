@@ -7,6 +7,7 @@ import {
 } from '@/lib/middleware/withAuth';
 import { withValidation } from '@/lib/middleware/withValidation';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getOrCreateCart } from '@/lib/services/cart';
 import { reserveStock } from '@/lib/services/inventory';
 import { createPaymentIntent } from '@/lib/services/payments';
@@ -22,13 +23,18 @@ import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 async function createIntentHandler(
   request: NextRequest,
-  authContext: OptionalAuthContext,
-  data: CreateIntentInput
+  { auth, data }: ApiContext<any, CreateIntentInput>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const authContext = auth as OptionalAuthContext;
+  const validatedData = data as CreateIntentInput;
   const { userId, anonymousId } = await resolveCartIdentity(authContext);
 
-  const { cartId: bodyCartId, directItem, locale: validatedLocale } = data;
+  const {
+    cartId: bodyCartId,
+    directItem,
+    locale: validatedLocale,
+  } = validatedData;
 
   const currency: CheckoutCurrency = SITE_CURRENCY;
   const locale = validatedLocale || i18n.defaultLocale;

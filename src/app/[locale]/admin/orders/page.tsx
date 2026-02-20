@@ -4,6 +4,7 @@ import { Prisma, OrderStatus } from '@/generated/prisma';
 import { OrderFilters } from '@/components/admin/orders/filters';
 import { OrderListTable } from '@/components/admin/orders/order-list-table';
 import { OrderPagination } from '@/components/admin/orders/order-pagination';
+import { OrderWithIncludes } from '@/lib/types/domain/order';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,8 +62,11 @@ export default async function OrdersPage({
       where,
       include: {
         items: true,
-        user: { select: { firstName: true, lastName: true, email: true } },
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true },
+        },
         payments: { take: 1, orderBy: { createdAt: 'desc' } },
+        shipments: true,
       },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -81,7 +85,10 @@ export default async function OrdersPage({
 
       <OrderFilters locale={locale} />
 
-      <OrderListTable orders={orders} locale={locale} />
+      <OrderListTable
+        orders={orders as unknown as OrderWithIncludes[]}
+        locale={locale}
+      />
 
       {totalPages > 1 && (
         <OrderPagination

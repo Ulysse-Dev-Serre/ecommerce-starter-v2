@@ -4,6 +4,7 @@ import { ProductStatus, Language } from '@/generated/prisma';
 import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { getProductBySlug, isProductAvailable } from '@/lib/services/products';
 
 import { productSlugSchema } from '@/lib/validators/product';
@@ -14,7 +15,7 @@ import { productSlugSchema } from '@/lib/validators/product';
  */
 async function getProductHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: ApiContext<{ id: string }>
 ): Promise<NextResponse> {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
   const { id: slug } = await params;

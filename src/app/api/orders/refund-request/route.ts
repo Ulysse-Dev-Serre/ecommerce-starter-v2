@@ -6,6 +6,7 @@ import { logger } from '@/lib/core/logger';
 import { withError } from '@/lib/middleware/withError';
 import { AuthContext, withAuth } from '@/lib/middleware/withAuth';
 import { withRateLimit, RateLimits } from '@/lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import {
   updateOrderStatus,
   sendRefundRequestAlert,
@@ -14,9 +15,10 @@ import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 async function refundRequestHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ) {
   const requestId = request.headers.get('X-Request-ID') || crypto.randomUUID();
+  const authContext = auth as AuthContext;
   const userId = authContext.userId;
 
   const formData = await request.formData();

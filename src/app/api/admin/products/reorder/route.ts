@@ -7,6 +7,7 @@ import {
   withRateLimit,
   RateLimits,
 } from '../../../../../lib/middleware/withRateLimit';
+import { ApiContext } from '@/lib/middleware/types';
 import { prisma } from '../../../../../lib/core/db';
 
 /**
@@ -24,9 +25,10 @@ import { prisma } from '../../../../../lib/core/db';
  */
 async function reorderProductsHandler(
   request: NextRequest,
-  authContext: AuthContext
+  { auth }: ApiContext
 ): Promise<NextResponse> {
   const requestId = crypto.randomUUID();
+  const authContext = auth as AuthContext;
 
   try {
     const body = await request.json();
