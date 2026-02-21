@@ -49,9 +49,23 @@ async function verifyOrderHandler(
     include: {
       order: {
         select: {
-          orderNumber: true,
           id: true,
+          orderNumber: true,
+          totalAmount: true,
+          subtotalAmount: true,
+          taxAmount: true,
+          shippingAmount: true,
+          currency: true,
           createdAt: true,
+          items: {
+            select: {
+              id: true,
+              variantId: true,
+              productSnapshot: true,
+              unitPrice: true,
+              quantity: true,
+            },
+          },
         },
       },
     },
@@ -60,9 +74,24 @@ async function verifyOrderHandler(
   if (payment?.order) {
     return NextResponse.json({
       exists: true,
-      orderNumber: payment.order.orderNumber,
-      orderId: payment.order.id,
-      createdAt: payment.order.createdAt,
+      order: {
+        id: payment.order.id,
+        orderNumber: payment.order.orderNumber,
+        total: Number(payment.order.totalAmount),
+        subtotal: Number(payment.order.subtotalAmount),
+        tax: Number(payment.order.taxAmount),
+        shipping: Number(payment.order.shippingAmount),
+        currency: payment.order.currency,
+        createdAt: payment.order.createdAt,
+        items: payment.order.items.map(item => ({
+          id: item.id,
+          variantId: item.variantId,
+          quantity: item.quantity,
+          price: Number(item.unitPrice),
+          // Extract name from snapshot if possible
+          name: (item.productSnapshot as any)?.name || 'Product',
+        })),
+      },
       requestId,
     });
   }

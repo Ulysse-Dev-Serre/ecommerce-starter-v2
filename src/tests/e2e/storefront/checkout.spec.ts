@@ -98,6 +98,7 @@ async function prepareCheckoutForPayment(
   // ── 1. Add to Cart ──
   console.log('� Adding to cart...');
   await page.goto(`/en/product/${productSlug}`);
+
   await page.click('[data-testid="add-to-cart-button"]');
   await expect(
     page.locator('[data-testid="toast-notification"]')

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { trackEvent } from '@/lib/client/analytics';
+import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 
 import { ProductActions } from '@/components/cart/product-actions';
 import { PriceDisplay } from '@/components/price-display';
@@ -40,7 +41,7 @@ export function ProductClient({
 }: ProductClientProps) {
   useEffect(() => {
     void trackEvent(
-      'view_item',
+      ANALYTICS_EVENTS.VIEW_ITEM,
       {
         productId,
         productName,

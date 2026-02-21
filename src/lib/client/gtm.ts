@@ -21,10 +21,13 @@ export const sendGTMEvent = (
   eventName: string,
   payload: Record<string, unknown>
 ) => {
-  if (typeof window !== 'undefined' && window.dataLayer) {
-    window.dataLayer.push({
-      event: eventName,
-      ...payload,
-    });
-  }
+  if (typeof window === 'undefined') return;
+
+  // Initialize dataLayer if it doesn't exist (robustness)
+  window.dataLayer = window.dataLayer || [];
+
+  window.dataLayer.push({
+    event: eventName,
+    ...payload,
+  });
 };

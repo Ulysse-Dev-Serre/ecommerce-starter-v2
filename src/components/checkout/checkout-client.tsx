@@ -12,6 +12,7 @@ import {
   createPaymentIntent as createPaymentIntentAction,
   updatePaymentIntent as updatePaymentIntentAction,
 } from '@/lib/client/checkout';
+import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { getShippingRates } from '@/lib/client/shipping';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { SupportedCurrency } from '@/lib/config/site';
@@ -190,7 +191,11 @@ export function CheckoutForm({
   );
 
   useEffect(() => {
-    void trackEvent('begin_checkout', { cartId, currency, initialTotal });
+    void trackEvent(ANALYTICS_EVENTS.BEGIN_CHECKOUT, {
+      cartId,
+      currency,
+      initialTotal,
+    });
   }, [cartId, currency, initialTotal]);
 
   const [isLoading, setIsLoading] = useState(false);

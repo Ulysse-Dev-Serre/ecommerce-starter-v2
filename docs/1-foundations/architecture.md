@@ -61,61 +61,22 @@ Structure de navigation du site utilisateur et administrateur.
 ```
 src/app/[locale]
 ├── admin
-│   ├── analytics
-│   │   └── page.tsx
-│   ├── categories
-│   │   └── page.tsx
-│   ├── customers
-│   │   ├── [id]
-│   │   │   └── page.tsx
-│   │   └── page.tsx
-│   ├── logistics
-│   │   └── page.tsx
-│   ├── orders
-│   │   ├── [id]
-│   │   │   └── page.tsx
-│   │   └── page.tsx
-│   ├── products
-│   │   ├── [id]
-│   │   │   └── edit
-│   │   │       └── page.tsx
-│   │   ├── new
-│   │   │   └── page.tsx
-│   │   └── page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-│ 
-├── cart
-│   ├── cart-client.tsx
-│   └── page.tsx
-├── checkout
-│   ├── success
-│   │   └── page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-├── contact
-│   └── page.tsx
-├── (legal)
-│   ├── privacy
-│   │   └── page.tsx
-│   ├── refund
-│   │   └── page.tsx
-│   ├── terms
-│   │   └── page.tsx
+│   ├── analytics/    # Dashboard analytique
+│   ├── categories/   # Gestion des catégories
+│   ├── customers/    # Liste et détails clients
+│   ├── logistics/    # Lieux d'origine et stocks
+│   ├── orders/       # Gestion des commandes admin
+│   ├── products/     # Catalogue et édition produits
+│   ├── settings/     # Paramètres boutique
 │   └── layout.tsx
-├── orders
-│   ├── [id]
-│   │   └── page.tsx
-│   └── page.tsx
-├── product
-│   └── [slug]
-│       ├── page.tsx
-│       └── product-client.tsx
-├── shop
-│   └── page.tsx
-├── layout.tsx
-├── not-found.tsx
-└── page.tsx
+├── cart/           # Panier client
+├── checkout/       # Tunnel d'achat
+├── contact/        # Page contact
+├── (legal)/        # CGV, Confidentialité, Retours
+├── orders/         # Mes commandes (Client)
+├── product/        # Page produit détaillée
+├── shop/           # Catalogue public
+└── layout.tsx
 ```
 
 #### Composants (`src/components`)
@@ -124,77 +85,24 @@ Blocs UI réutilisables organisés par domaine.
 ```
 src/components
 ├── admin
-│   ├── analytics
-│   │   ├── analytics-stats-grid.tsx
-│   │   ├── conversion-funnel.tsx
-│   │   ├── revenue-chart.tsx
-│   │   └── source-table.tsx
-│   ├── customers
-│   │   ├── customer-acquisition-card.tsx
-│   │   ├── ... (tables, listes, stats)
-│   ├── dashboard
-│   │   ├── dashboard-stats-grid.tsx
-│   │   └── recent-orders-list.tsx
-│   ├── layout
-│   │   ├── admin-header.tsx
-│   │   └── admin-sidebar.tsx
-│   ├── logistics
-│   │   ├── add-location-modal.tsx
-│   │   └── logistics-client.tsx
-│   ├── orders
-│   │   ├── filters.tsx
-│   │   ├── order-detail-client.tsx
-│   │   ├── shipping-management.tsx
-│   │   └── status-actions.tsx
-│   └── products
-│       ├── product-form.tsx
-│       ├── product-media-manager.tsx
-│       └── products-list.tsx
-├── analytics
-│   ├── AnalyticsTracker.tsx
-│   ├── CookieConsent.tsx
-│   └── GoogleTagManager.tsx
-├── cart
-│   ├── add-to-cart-button.tsx
-│   ├── cart-merge-handler.tsx
-│   ├── Cart-Item.tsx
-│   ├── Cart-Summary.tsx
-│   ├── product-actions.tsx
-│   └── quantity-selector.tsx
-├── checkout
-│   ├── AddressAutocomplete.tsx
-│   ├── checkout-client.tsx
-│   ├── checkout-success-client.tsx
-│   └── ... (sections: Address, Payment, Shipping)
-├── contact 
-│   ├── ContactForm.tsx
-│   └── ContactInfo.tsx
-├── emails
-│   ├── admin-new-order.tsx
-│   ├── ... (confirmation, shipped, delivered, refunded)
-│   └── styles.ts
-├── layout
-│   ├── conditional-footer.tsx
-│   ├── conditional-navbar.tsx
-│   ├── footer.tsx
-│   └── navbar.tsx
-├── legal 
-│   └── LegalPageTemplate.tsx
-├── orders
-│   └── refund-request-form.tsx
-├── product
-│   ├── image-gallery.tsx
-│   ├── product-card.tsx
-│   └── related-products.tsx
-├── seo
-│   └── json-ld.tsx
-├── shop
-│   └── shop-pagination.tsx
-├── ui
-│   ├── status-badge.tsx
-│   ├── toast-provider.tsx
-│   └── ... (alert, card, input, select, loading-state)
-└── price-display.tsx (Composant racine)
+│   ├── analytics   # Charts (Revenue, Conversion, Sources)
+│   ├── dashboard   # Stats Grid, Recent Orders
+│   ├── layout      # Header et Sidebar Admin
+│   ├── logistics   # Modals et clients logistique
+│   ├── orders      # Tables, Filters, Packing, Timeline, Status
+│   └── products    # Form, Media, Variants, Stats
+├── analytics/      # Tracker, Cookie Consent, GTM
+├── cart/           # Buttons, Items, Summary, Merge Handler
+├── checkout/       # Sections: Address, Payment, Shipping, Summary
+├── contact/        # Formulaire contact
+├── emails/         # Templates Resend (React Email)
+├── layout/         # Navbar et Footer Storefront
+├── legal/          # Templates pages légales
+├── orders/         # Stepper, Tracking, Refund Form
+├── product/        # Gallery, Card, Skeletons
+├── seo/            # JSON-LD Metadata
+├── shop/           # Pagination
+└── ui/             # Design System (Buttons, Badges, Inputs, Modals)
 ```
 
 ### 2. BACKEND
@@ -205,88 +113,20 @@ Points d'entrée REST pour le frontend et les webhooks externes.
 ```
 src/app/api
 ├── admin
-│   ├── attributes
-│   │   └── [id]
-│   │       └── values
-│   │           └── route.ts
-│   ├── logistics
-│   │   └── locations
-│   │       ├── [id]
-│   │       │   └── route.ts
-│   │       └── route.ts
-│   ├── media
-│   │   ├── [id]
-│   │   │   └── route.ts
-│   │   ├── reorder
-│   │   │   └── route.ts
-│   │   └── upload
-│   │       └── route.ts
-│   ├── orders
-│   │   ├── [id]
-│   │   │   ├── purchase-label
-│   │   │   │   └── route.ts
-│   │   │   ├── return-label
-│   │   │   │   └── route.ts
-│   │   │   └── status
-│   │   │       └── route.ts
-│   │   └── route.ts
-│   └── products
-│       ├── [id]
-│       │   ├── variants
-│       │   │   ├── simple
-│       │   │   │   └── route.ts
-│       │   │   └── [variantId]
-│       │   │       └── route.ts
-│       │   └── route.ts
-│       ├── reorder
-│       │   └── route.ts
-│       └── route.ts
-├── analytics
-│   └── events
-│       └── route.ts
-├── cart
-│   ├── calculate
-│   │   └── route.ts
-│   ├── lines
-│   │   ├── [id]
-│   │   │   └── route.ts
-│   │   └── route.ts
-│   ├── merge
-│   │   └── route.ts
-│   └── route.ts
-├── checkout
-│   ├── create-intent
-│   │   └── route.ts
-│   └── update-intent
-│       └── route.ts
-├── internal
-│   └── health
-│       └── route.ts
-├── orders
-│   ├── [id]
-│   │   └── route.ts
-│   ├── refund-request
-│   │   └── route.ts
-│   └── verify
-│       └── route.ts
-├── products
-│   ├── [id]
-│   │   └── route.ts
-│   └── route.ts
-├── shipping
-│   └── rates
-│       └── route.ts
-├── users
-│   └── route.ts
-└── webhooks
-    ├── clerk
-    │   └── route.ts
-    ├── shippo
-    │   └── route.ts
-    └── stripe
-        ├── status
-        │   └── route.ts
-        └── route.ts
+│   ├── logistics/  # Gestion des entrepôts
+│   ├── media/      # Upload/Reorder d'images
+│   ├── orders/     # Status et labels d'expédition
+│   ├── products/   # CRUD Catalogue et variants
+│   └── users/      # Gestion admins
+├── cart/           # Opérations panier (Calculate, Merge, Lines)
+├── checkout/       # Stripe Payment Intents
+├── internal/       # Maintenance (Health, Cleanup)
+├── orders/         # Public Orders & Refunds
+├── products/       # Public Catalog
+├── shipping/       # Shipping Rates calculation
+├── tracking/       # Internal Event Tracking
+├── users/          # Profile & User data
+└── webhooks/       # Clerk, Shippo, Stripe
 ```
 
 #### Configuration & Logique (`src/lib`)
@@ -294,66 +134,25 @@ Configuration centrale, services métier, et utilitaires.
 
 ```
 src/lib
-├── client
-│   ├── analytics.ts         # Tracking et identification (ex-tracker)
-│   ├── cart.ts              # Actions panier centralisées (Add, Update, Remove)
-│   ├── checkout.ts          # Services de paiement (Stripe Intents)
-│   ├── cookies.ts           # Manipulation des cookies côté navigateur
-│   ├── gtm.ts               # Logique Google Tag Manager Browser
-│   ├── orders.ts            # Services de commandes (Verify, Refund)
-│   ├── shipping.ts          # Services de livraison (Rates)
-│   ├── storage.ts           # Wrapper sécurisé pour localStorage/session
-│   └── admin                # Services réservés à la gestion
-│       ├── logistics.ts     # Gestion des stocks et lieux d'origine
-│       ├── orders.ts        # Gestion des commandes (Statuts, Étiquettes)
-│       └── products.ts      # Catalogue, variantes et médias produits
-
-├── config
-│   ├── api-routes.ts        # Définition centrale des routes API
-│   ├── nav-routes.ts        # Définition des menus de navigation
-│   ├── site.ts              # Configuration générale du site (devises, locales)
-│   └── ... (analytics events labels)
-
-├── core
-│   ├── cache.ts             # Service de cache (Memory/Redis)
-│   ├── db.ts                # Client Prisma Singleton
-│   ├── env.ts               # Validation des variables d'environnement
-│   └── logger.ts            # Configuration du logger (Pino)
-
-├── i18n
-│   ├── dictionaries/        # Fichiers JSON de traduction
-│   └── request.ts           # Middleware i18n pour Next.js
-├── integrations
-│   ├── resend/              # Client mail (Resend)
-│   ├── shippo/              # Services et types Shippo
-│   ├── storage/             # Abstraction du stockage (Supabase/S3)
-│   └── stripe/              # Client, webhooks et utils Stripe
-
-├── middleware
-│   ├── types.ts             # Types partagés pour les middlewares
-│   ├── withAuth.ts          # Protection des routes (Clerk + RBAC)
-│   ├── withError.ts         # Gestion globale des erreurs API
-│   ├── withRateLimit.ts     # Limitation de débit (Rate Limiting)
-│   └── withValidation.ts    # Validation Zod des requêtes
-├── services                 # Logique métier organisée par domaine
-│   ├── cart/                # Gestion du panier
-│   ├── orders/              # Gestion des commandes
-│   ├── products/            # Gestion du catalogue
-│   └── ... (payments, users, inventory, logistics)
-├── types                    # Types TypeScript centralisés
-│   ├── api/                 # Structures Req/Res API
-│   ├── domain/              # Entités métier (Order, Product, etc.)
-│   ├── ui/                  # Types dédiés à l'interface
-│   └── index.ts             # Barrel export racine
-├── utils                    # Fonctions utilitaires pures
-│   ├── cn.ts                # Fusion de classes CSS (Tailwind)
-│   ├── currency.ts          # Formatage des prix
-│   └── ... (date, unit)
-
-└── validators               # Schémas de validation Zod
-    ├── index.ts             # Barrel export & formatZodErrors
-    └── ... (product, cart, checkout, admin, etc.)
-
+├── client/          # Services client-side (Cart, Checkout, Shipping)
+├── config/          # Centralized Config (Site, API, Nav, Events)
+├── core/            # Singletons (DB, Logger, Cache, Env)
+├── i18n/            # Translations & Middleware
+├── integrations/    # SDK Wrappers (Stripe, Shippo, Resend, Storage)
+├── middleware/      # API Wrappers (Auth, RateLimit, Validation)
+├── services/        # Business Logic (Domain-Driven)
+│   ├── admin/       # Admin specific ops
+│   ├── cart/        # Cart logic
+│   ├── inventory/   # Stock management
+│   ├── logistics/   # Origin, Tax, Zones
+│   ├── orders/      # Orders & Notifications
+│   ├── shipping/    # Packing (3D), Customs, Rates
+│   ├── users/       # Auth & Profile
+│   ├── variants/    # Variant Ops & Generator
+│   └── webhooks/    # Webhook handlers
+├── types/           # TS Interfaces (API, Domain, UI)
+├── utils/           # Shared Helpers (Currency, Date, Unit)
+└── validators/      # Zod Schemas (Product, Order, Checkout)
 ```
 
 ---
@@ -437,5 +236,5 @@ Le support multi-langues est natif : les URLs sont préfixées par la langue (`/
 
 ---
 
-**Version** : 2.2 (Architecture centralisée & sécurisée)
-**Dernière mise à jour** : Janvier 2026
+**Version** : 2.3 (Architecture synchronisée avec le codebase réel)
+**Dernière mise à jour** : Février 2026

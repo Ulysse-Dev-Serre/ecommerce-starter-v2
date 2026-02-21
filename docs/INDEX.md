@@ -8,25 +8,35 @@ npx prisma studio
 
 | Document | Description | Priorité |
 | :--- | :--- | :--- |
-| **[README.md](./README.md)** | Guide démarrage et commandes essentielles | CRITIQUE |
+| **[README.md](../README.md)** | Guide démarrage et commandes essentielles | CRITIQUE |
 | **[Setup](./1-foundations/setup.md)** | Configuration initiale environnement | CRITIQUE |
 
 ---
 
 ## Documentation par Catégories
 
+### 0. Administration & Opérations
+| Document | Contenu | Usage |
+| :--- | :--- | :--- |
+| **[Admin Setup](./0-admin/ADMIN_SETUP.md)** | Configuration de l'espace administrateur | Setup Admin |
+| **[Admin Orders](./0-admin/admin-orders.md)** | Gestion et workflow des commandes | Opérations |
+| **[Pre-Production](./0-admin/PRE-PRODUCTION.md)** | Checklist avant mise en ligne | Lancement |
+| **[AI Startup Prompt](./0-admin/AI_STARTUP_PROMPT.md)** | Prompt pour initialiser l'assistant IA | Développement |
+
 ### 1. Fondations & Architecture
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Architecture](./1-foundations/architecture.md)** | Structure complète projet + patterns | Architecture système |
 | **[Roadmap](./1-foundations/Roadmap.md)** | Milestones et phases développement | Planification |
+| **[Marketing Plan](./1-foundations/marketing-analytics-plan.md)** | Stratégie analytics et marketing | Business |
 | **[Setup](./1-foundations/setup.md)** | Installation + variables environnement | Installation initiale |
 
-### 2. Outils Développement
+### 2. Outils Développement & CI/CD
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Webhooks Testing](./2-development-tools/webhooks-testing.md)** | Guide centralisé Ngrok + Stripe + Clerk | Tests locaux |
 | **[Logging](./2-development-tools/logging.md)** | Système logs structurés | Debug + monitoring |
+| **[CI/CD](./2-development-tools/ci-cd.md)** | Pipeline d'intégration et déploiement | DevOps |
 | **[Sécurité Headers](./2-development-tools/security-headers.md)** | Protection HTTP headers | Sécurité base |
 | **[Google API](./2-development-tools/google-api.md)** | Config Maps & Places | Adresses |
 
@@ -47,11 +57,13 @@ npx prisma studio
 | :--- | :--- | :--- |
 | **[Flux de Paiement](./5-payment-system/stripe-payment-flow.md)** | Tunnel de paiement et webhooks | Transactions |
 | **[Configuration Taxes](./5-payment-system/stripe-tax-configuration.md)** | Stripe Tax & Automatisation | Fiscalité |
+| **[Troubleshooting](./5-payment-system/stripe-troubleshooting.md)** | Résolution de problèmes Stripe | Debug |
 
-### 6. Expédition (Shippo)
+### 6. Expédition & Emails (Shippo / Resend)
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Overview Shippo](./6-shipping/overview.md)** | Intégration Shippo & Transporteurs | Logistique |
+| **[Email Flow](./6-shipping/resend-email-flow.md)** | Flux d'envoi d'emails via Resend | Communication |
 | **[Retours & Remboursements](./6-shipping/retours-remboursements.md)** | Gestion des étiquettes de retour | SAV |
 
 ### 7. API Reference
@@ -77,8 +89,9 @@ npx prisma studio
 ### 10. Frontend & UI
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
+| **[Vibe Architecture](./10-frontend/01-architecture-vibe.md)** | Principes de design et expérience utilisateur | Design |
+| **[Component Guide](./10-frontend/02-component-guide.md)** | Standard de création des composants | UI Standards |
 | **[Theming](./10-frontend/theming.md)** | Couleurs, tokens et mode sombre | Apparence |
-| **[Guide Construction](./10-frontend/guide-construction.md)** | Création de nouveaux composants | UI Standards |
 
 ### 11. Marketing
 | Document | Contenu | Usage |
@@ -96,22 +109,24 @@ npx prisma studio
 | :--- | :--- | :--- |
 | **[SEO Configuration](./13-SEO/seo-configuration.md)** | Paramètres techniques SEO | Indexation |
 | **[SEO Strategy](./13-SEO/seo-strategy.md)** | Mots-clés et autorité | Visibilité |
+| **[Indexing Policy](./13-SEO/indexing-policy.md)** | Politique d'indexation des pages | SEO |
 
 ### 14. Tests & QA
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Index Tests](./14-test/index-test.md)** | Stratégie globale de test | QA |
-| **[Vitest](./14-test/vitest.md)** | Tests unitaires | Fiabilité |
 | **[Playwright](./14-test/playwright.md)** | Tests E2E automatisés | Parcours client |
+| **[Vitest](./14-test/vitest.md)** | Tests unitaires | Fiabilité |
+| **[Refactor Workflow](./14-test/refactor-workflow.md)** | Guide pour refactoring sécurisé | QA |
 
 ---
 
 ## Guides par Objectif
 
 ### Premier démarrage
-1. [README.md](./README.md) - Vue d'ensemble
+1. [README.md](../README.md) - Vue d'ensemble
 2. [Setup](./1-foundations/setup.md) - Configuration
-3. [Auto-Sync](./4-authentication/authentication-workflow.md) - Flux utilisateurs
+3. [Admin Setup](./0-admin/ADMIN_SETUP.md) - Configuration Admin
 
 ### Compréhension architecture
 1. [Architecture](./1-foundations/architecture.md) - Structure système
@@ -125,12 +140,12 @@ npx prisma studio
 | Besoin | Document | Section |
 | :--- | :--- | :--- |
 | **Installation** | [Setup](./1-foundations/setup.md) | Variables env |
-| **Maintenance DB** | [Maintenance & Prod](./3-database-stack/maintenance-and-production.md) | Sécurité production |
-| **Flux Webhooks** | [Webhooks Testing](./2-development-tools/webhooks-testing.md) | Configuration Ngrok |
+| **Admin Panel** | [Admin Setup](./0-admin/ADMIN_SETUP.md) | Dashboard |
+| **Emails** | [Email Flow](./6-shipping/resend-email-flow.md) | Resend |
 | **Traductions** | [i18n Architecture](./9-Language_internationalization/i18n-architecture.md) | Structure |
 | **Sécurité** | [Security Overview](./8-securite/security-overview.md) | Mesures globales |
 
 ---
 
-**Dernière mise à jour** : Janvier 2026
-**Version documentation** : 2.6 (Architecture complète et Workflow Pro)
+**Dernière mise à jour** : Février 2026
+**Version documentation** : 2.7 (Admin, CI/CD and Email workflows added)

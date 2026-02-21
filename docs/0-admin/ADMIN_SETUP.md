@@ -63,29 +63,7 @@ Navigation avec 8 sections :
 - Content : Gestion du contenu
 - Settings : Paramètres du site
 
-### AdminHeader
-- Titre de bienvenue
-- Badge notifications
-- UserButton Clerk pour la gestion du compte
 
-## Design
-
-**Technologies :**
-- Tailwind CSS pour le styling
-- Lucide React pour les icônes
-- Clerk pour l'authentification
-- Prisma pour la base de données
-
-**Palette de couleurs :**
-- Background : `bg-gray-50`
-- Cards : `bg-white` avec bordure grise
-- Sidebar active : `bg-gray-900 text-white`
-- Sidebar hover : `bg-gray-100`
-
-**Responsive :**
-- Desktop : Sidebar fixe de 256px
-- Mobile : Structure prête pour un menu hamburger
-- Grids adaptatifs selon la taille d'écran
 
 ## Utilisation
 
@@ -113,36 +91,6 @@ http://localhost:3000/en/admin
 
 ## Extension
 
-### Ajouter une nouvelle section
-
-1. Créer la page :
-```typescript
-// src/app/[locale]/admin/nouvelle-section/page.tsx
-export default function NouvelleSectionPage() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Nouvelle Section</h1>
-        <p className="mt-2 text-sm text-gray-600">Description</p>
-      </div>
-      {/* Contenu */}
-    </div>
-  );
-}
-```
-
-2. Ajouter au menu :
-```typescript
-// src/components/admin/layout/admin-sidebar.tsx
-const menuItems = [
-  // ... existants
-  {
-    title: 'Nouvelle Section',
-    href: '/admin/nouvelle-section',
-    icon: IconName,
-  },
-];
-```
 
 ### Structure CRUD recommandée
 
@@ -153,14 +101,6 @@ admin/[section]/
 └── [id]/edit/page.tsx    # Édition
 ```
 
-## État actuel
-
-**Implémenté :**
-- Architecture complète
-- Protection des routes
-- Navigation fonctionnelle
-- Dashboard avec statistiques (données mock)
-- Pages placeholder pour toutes les sections
 
 **À implémenter :**
 - CRUD complet pour chaque section
@@ -179,13 +119,7 @@ Le dashboard s'intègre avec votre infrastructure existante :
 - Aucune modification du code existant nécessaire
 - Aucune nouvelle dépendance requise
 
-## Bonnes pratiques
 
-- Toujours vérifier le rôle côté serveur
-- Utiliser les Server Components par défaut
-- Fournir un feedback visuel pour les actions
-- Tester le responsive sur tous les appareils
-- Utiliser les attributs ARIA pour l'accessibilité
 
 
 

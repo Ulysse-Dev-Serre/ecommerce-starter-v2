@@ -7,12 +7,14 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { addToCart } from '@/lib/client/cart';
+import { trackEvent } from '@/lib/client/analytics';
 import { cn } from '@/lib/utils/cn';
 
 import { useToast } from '@/components/ui/toast-provider';
 
 interface AddToCartButtonProps {
   variantId: string;
+  productName: string;
   disabled?: boolean;
   fullWidth?: boolean;
   quantity?: number;
@@ -20,6 +22,7 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({
   variantId,
+  productName,
   disabled,
   fullWidth,
   quantity = 1,
@@ -35,6 +38,18 @@ export function AddToCartButton({
     setIsLoading(true);
     try {
       await addToCart(variantId, quantity);
+
+      // Tracking Marketing
+      void trackEvent(
+        'add_to_cart',
+        {
+          variantId,
+          quantity,
+          productName,
+        },
+        productName
+      );
+
       showToast(tProduct('addedToCart', { count: quantity }), 'success');
       router.refresh();
     } catch (error) {

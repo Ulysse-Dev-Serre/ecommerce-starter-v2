@@ -50,6 +50,8 @@ export function getStoredUTM(): UTMData {
   }
 }
 
+import { sendGTMEvent } from './gtm';
+
 export async function trackEvent(
   eventType: string,
   metadata?: Record<string, unknown>,
@@ -57,11 +59,17 @@ export async function trackEvent(
 ) {
   if (typeof window === 'undefined') return;
 
+  // 1. Envoyer à Google Tag Manager (Marketing)
+  sendGTMEvent(eventType, {
+    ...metadata,
+    eventName: eventName || eventType,
+  });
+
   const utm = getStoredUTM();
   const anonymousId = getOrSetAnonymousId();
 
   try {
-    // On envoie à notre propre API interne
+    // 2. Envoyer à notre propre API interne (Opérationnel/Logs)
     await fetch(API_ROUTES.TRACKING.EVENTS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

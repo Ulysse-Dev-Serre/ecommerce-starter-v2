@@ -108,17 +108,12 @@ Accès : `http://localhost:3000`
 
 ## Configuration automatique (optionnelle)
 
-Script qui combine étapes 2-4 :
 
 ```bash
 npm run dev:setup
 ```
 
-**Actions automatiques :**
-
-1. `npm run db:push` - Synchronise schéma Prisma
-2. `npm run sync-clerk create` - Crée comptes test Clerk
-3. `npm run db:seed` - Ajoute données exemple
+ `npm run db:push` - Synchronise schéma Prisma
 
 ---
 

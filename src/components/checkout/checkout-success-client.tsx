@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import { useUser } from '@clerk/nextjs';
 import {
@@ -15,6 +15,8 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { verifyOrder } from '@/lib/client/orders';
+import { trackEvent } from '@/lib/client/analytics';
+import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
 import {
   VIBE_ANIMATION_FADE_IN,
@@ -39,6 +41,7 @@ export function CheckoutSuccessClient({
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [isGuestSuccess, setIsGuestSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasTrackedPurchase = useRef(false);
 
   useEffect(() => {
     // On attend que l'état d'auth soit chargé
@@ -70,11 +73,22 @@ export function CheckoutSuccessClient({
         const identifierToVerify = paymentIntentId || identifier;
         const data = await verifyOrder(identifierToVerify);
 
-        if (data.exists && data.orderNumber) {
+        if (data.exists && data.order) {
           setOrderConfirmed(true);
+
+          // Tracking Marketing (Purchase)
+          if (!hasTrackedPurchase.current) {
+            void trackEvent(
+              ANALYTICS_EVENTS.PURCHASE,
+              data.order,
+              data.order.orderNumber
+            );
+            hasTrackedPurchase.current = true;
+          }
+
           // Redirection uniquement pour les utilisateurs connectés
           setTimeout(() => {
-            window.location.href = `/${locale}${NAV_ROUTES.ORDERS}/${data.orderNumber}`;
+            window.location.href = `/${locale}${NAV_ROUTES.ORDERS}/${data.order.orderNumber}`;
           }, 2000);
           return true;
         }
