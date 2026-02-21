@@ -1,111 +1,68 @@
-# 🎨 Guide des Thèmes Vibe (Tailwind v4)
+# 🎨 Guide du Thème (Theming)
 
-> **Source unique de vérité pour la personnalisation des thèmes**
-> **Compatibilité**: Tailwind CSS v4.0+
-
----
-
-## 🎯 Objectif
-
-Ce guide explique comment personnaliser l'apparence de la boutique en toute sécurité, en respectant l'architecture Vibe (Zéro Hardcoding).
+Ce document explique comment personnaliser l'apparence visuelle de votre Starter en modifiant les jetons de design (tokens) centralisés.
 
 ---
 
-## 🔧 Système de Variables (globals.css)
+## 1. Le Cœur du Design : `globals.css`
 
-Le cœur du design se trouve dans `src/app/globals.css`. C'est là que sont définies les palettes de couleurs et les variantes.
+L'identité visuelle est pilotée par des variables CSS situées dans `src/styles/globals.css`. C'est l'unique endroit où vous devez intervenir pour changer l'ambiance du site.
 
-### Structure du système (v4 `theme inline`)
-
-Avec Tailwind v4, nous utilisons la directive `@theme inline` directement dans le CSS, plus besoin de `tailwind.config.js` complexe.
-
-```css
-@theme inline {
-  /* Couleurs Sémantiques */
-  --color-primary: var(--primary);          /* Boutons, Liens actifs */
-  --color-secondary: var(--secondary);      /* Éléments secondaires */
-  --color-destructive: var(--destructive);  /* Erreurs, Suppressions */
-  
-  /* Couleurs Structurelles */
-  --color-background: var(--background);    /* Fond de page */
-  --color-card: var(--card);                /* Fond des cartes */
-  --color-border: var(--border);            /* Lignes de séparation */
-}
-```
+### Les Groupes de Variables :
+- **Colors** : Définit les teintes de la marque (Primary, Success, Error).
+- **Neutrals** : Définit les fonds de page, les bordures et les couleurs de texte.
+- **Aesthetic Tokens** : Pilote les arrondis (`--radius-*`) et les ombres (`--shadow-*`).
 
 ---
 
-## 🚀 Comment modifier le thème ?
+## 2. Personnalisation Rapide
 
-### 1. Changer les couleurs (La méthode facile)
+### Changer les Couleurs de la Marque
+Pour passer d'un bleu classique à un vert forêt, modifiez simplement les variables `--primary` dans le bloc `:root` :
 
-Ouvrez `src/app/globals.css` et modifiez les valeurs hexadécimales dans le bloc `:root`.
-
-**Exemple : Passer au thème "Forêt Sombre"**
 ```css
 :root {
-  /* Vert sapin pour le primaire */
-  --primary: #14532d; 
-  --primary-hover: #166534;
-  
-  /* Fond crème pour adoucir */
-  --background: #fdfbf7; 
+  --primary: #14532d;       /* Votre nouveau vert */
+  --primary-hover: #166534; /* Variante survol */
 }
 ```
 
-### 2. Modifier la forme des composants (La méthode architecte)
-
-Si vous voulez changer l'apparence de **tous** les boutons ou de **toutes** les cartes, vous devez modifier la définition de l'utilitaire Vibe correspondant.
-
-**Exemple : Arrondir tous les boutons**
-Cherchez `@utility vibe-button-primary` dans `globals.css` :
+### Harmoniser les Formes
+Vous pouvez changer l'aspect de tous les boutons et champs de saisie en modifiant une seule ligne :
 
 ```css
-/* AVANT */
-@utility vibe-button-primary {
-  @apply px-4 py-2 rounded-md ...;
-}
-
-/* APRÈS (Boutons pill) */
-@utility vibe-button-primary {
-  @apply px-6 py-2 rounded-full ...; /* Changé rounded-md en rounded-full */
+:root {
+  --radius-button: 9999px; /* Pour des boutons totalement arrondis (pill) */
+  --radius-sm: 0px;        /* Pour des champs de saisie carrés (brutalisme) */
 }
 ```
-*Cette modification se propagera instantanément sur tout le site.*
 
 ---
 
-## ⚠️ Gestion des Animations & Typographie
+## 3. Liaison avec Tailwind v4
 
-Certains styles complexes (comme les animations d'entrée ou la prose riche) ne peuvent pas être définis dans le CSS à cause des limitations de Tailwind v4.
+Le projet utilise le nouveau moteur de thème de Tailwind v4. Les variables CSS définies dans `:root` sont automatiquement injectées dans Tailwind via le bloc `@theme inline`.
 
-Pour ces cas précis, nous utilisons un fichier de constantes JavaScript.
-
-**Fichier** : `src/lib/vibe-styles.ts`
-
-Si vous voulez changer l'animation d'apparition par défaut, modifiez la constante ici :
-
-```typescript
-// src/lib/vibe-styles.ts
-
-// Avant (Fade In simple)
-export const VIBE_ANIMATION_FADE_IN = "animate-in fade-in";
-
-// Après (Zoom In dynamique)
-export const VIBE_ANIMATION_FADE_IN = "animate-in zoom-in duration-500 ease-out";
-```
+**Exemple d'utilisation dans votre code :**
+- La variable `--primary` devient la classe `bg-primary`.
+- La variable `--muted` devient `bg-muted` ou `text-muted`.
 
 ---
 
-## 📝 Checklist de Personnalisation
+## 4. Animations et Styles Complexes
 
-1.  [ ] **Couleurs** : Modifiées dans `:root` de `globals.css`.
-2.  [ ] **Logo** : Remplacé dans `public/`.
-3.  [ ] **Formes** : Utilitaires `vibe-*` ajustés si besoin.
-4.  [ ] **Animations** : Vérifiées dans `vibe-styles.ts`.
+Pour les styles qui ne peuvent pas être mis en CSS (animations groupées, typographie riche), nous utilisons un fichier de configuration JavaScript.
+
+**Fichier** : `src/lib/config/vibe-styles.ts`
+
+Si vous souhaitez changer l'animation d'apparition globale (ex: passer de "glissement" à "zoom"), modifiez la constante correspondante dans ce fichier.
 
 ---
 
-**Ressources :**
-- [Architecture Vibe](./01-architecture-vibe.md)
-- [Documentation Tailwind v4](https://tailwindcss.com/docs)
+## 5. Checklist de Branding
+
+Pour déployer une nouvelle version personnalisée de la boutique :
+1. [ ] **Couleurs** : Ajuster les codes HEX dans `globals.css`.
+2. [ ] **Typographie** : Modifier les familles de polices (`--font-heading`, `--font-body`).
+3. [ ] **Arrondis** : Définir le degré de "rondeur" via `--radius-*`.
+4. [ ] **Logo** : Remplacer les fichiers dans `/public`.

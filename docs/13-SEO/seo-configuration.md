@@ -1,74 +1,57 @@
-# Documentation SEO et Indexation
+# ⚙️ Configuration SEO & Métadonnées
 
-Ce document récapitule l'organisation du SEO dans le projet et explique comment maintenir les redirections et les métadonnées.
-
----
-
-## 1. Redirections (Migration et SEO)
-
-Pour protéger le référencement, nous utilisons deux types de redirections :
-
-### A. Redirections Automatiques (Middleware)
-Le fichier `src/middleware.ts` gère l'ajout automatique de la locale (`/fr` ou `/en`) si elle est manquante dans l'URL.
-- **Statut** : Redirection 301 (Permanente).
-- **Fonctionnement** : `boutique.com/produits` -> 301 -> `boutique.com/fr/produits`.
-
-### B. Redirections Manuelles (Mapping)
-Si vous modifiez le nom d'un produit (Slug) ou si vous migres d'une ancienne plateforme, vous devez configurer les redirections manuellement.
-- **Fichier** : `next.config.ts`
-- **Emplacement** : Dans la fonction `redirects()`.
-- **Exemple** :
-```typescript
-async redirects() {
-  return [
-    {
-      source: '/anciennes-graines',
-      destination: '/fr/produits/graines-bio-premium',
-      permanent: true, // Applique le code 301
-    },
-  ];
-}
-```
+Ce document est un guide opérationnel pour gérer le référencement, les redirections et l'apparence sociale de votre boutique.
 
 ---
 
-## 2. Internationalisation (i18n)
+## 1. Gestion des Redirections (SEO 301)
 
-### Balises Hreflang et Canonical
-- **Fichier principal** : `src/app/[locale]/layout.tsx`
-- **Logique** : Le système utilise `generateMetadata` dans le fichier layout racine pour injecter les balises `<link rel="alternate" hreflang="...">` pour chaque langue et définit une `x-default` vers la langue par défaut.
-- **Canonical** : L'URL canonique est générée dynamiquement pour chaque page afin d'éviter le contenu dupliqué.
+Les redirections sont essentielles pour ne pas perdre de trafic lors d'un changement de nom de produit ou d'une migration.
 
-### Métadonnées Dynamiques
-- Utilisation de `generateMetadata` dans les layouts et pages.
-- Support des balises Open Graph et Twitter Cards pour le partage sur les réseaux sociaux.
+### Redirections Manuelles
+Pour rediriger définitivement une ancienne URL vers une nouvelle :
+- **Fichier** : `next.config.ts`.
+- **Méthode** : Ajoutez un objet dans la fonction `redirects()`.
+- **Note** : Utilisez toujours `permanent: true` pour envoyer un code **301** (indispensable pour que Google transfère "le jus SEO" à la nouvelle page).
 
----
-
-## 3. Indexation et Visibilité
-
-### Sitemap et Robots
-- **Sitemap dynamique** : `src/app/sitemap.ts` génère automatiquement la liste des pages statiques et de tous les produits.
-- **URL** : `/sitemap.xml`
-- **Robots.txt** : `src/app/robots.ts` autorise l'indexation et pointe vers le sitemap.
-
-### Données Structurées (Schema.org)
-- **Fichier** : `src/components/seo/json-ld.tsx`
-- **Type** : `Product` et `Organization`.
-- **Bénéfice** : Permet l'affichage des informations produits (prix, avis) directement dans les résultats de recherche Google.
+### Redirections de Langue
+Le système gère automatiquement l'ajout de la locale (`/fr` ou `/en`). Une visite sur `boutique.com/shop` sera redirigée de manière permanente vers la version linguistique par défaut.
 
 ---
 
-## 4. Maintenance Rapide
+## 2. Métadonnées et Réseaux Sociaux
 
-| Besoin | Fichier à modifier |
+Le site génère automatiquement les balises nécessaires pour une apparence "Premium" lors du partage de liens.
+
+- **Fichier Central** : `src/app/[locale]/layout.tsx`.
+- **Open Graph (Facebook/LinkedIn)** : Titre, description et images de partage sont configurés dynamiquement.
+- **Twitter Cards** : Formatage optimisé pour le partage sur X (ex-Twitter).
+- **Traductions SEO** : Les textes des balises (Title, Description) sont stockés dans les dictionnaires JSON (`messages/fr.json` et `en.json`) sous la clé `metadata`.
+
+---
+
+## 3. Données Structurées (Rich Snippets)
+
+Pour obtenir des résultats enrichis dans Google (prix, stock, avis), nous utilisons le format **JSON-LD**.
+
+- **Composant** : `src/components/seo/json-ld.tsx`.
+- **Types Implémentés** :
+    - `Product` : Pour les fiches produits (enrichit la recherche avec le prix).
+    - `BreadcrumbList` : Pour afficher le chemin de navigation dans Google.
+    - `Organization` : Pour lier le site à l'identité officielle de la marque.
+
+---
+
+## 4. Guide de Maintenance
+
+| Tâche | Localisation / Fichier |
 | :--- | :--- |
-| Ajouter une redirection 301 | `next.config.ts` |
-| Modifier les titres/descriptions par défaut | `messages/fr.json` ou `en.json` |
-| Exclure une page de l'indexation | `src/app/robots.ts` |
-| Modifier la structure du Sitemap | `src/app/sitemap.ts` |
+| **Modifier le titre global** | `messages/[locale].json` -> `metadata.title` |
+| **Ajouter une page au sitemap** | Automatique pour les Produits. Manuel dans `src/app/sitemap.ts` pour les autres. |
+| **Changer le logo dans Google** | `src/components/seo/json-ld.tsx` (Organization) |
+| **Bloquer une page sensible** | `src/app/robots.ts` (Disallow) |
 
 ---
 
-## 5. IA et Agents
-- **llms.txt** : Ce fichier à la racine (`/public/llms.txt`) aide les outils d'IA à comprendre rapidement la structure du projet.
+## 5. IA et Indexation Moderne
+Le fichier `/public/llms.txt` est présent pour aider les agents d'intelligence artificielle (comme les futurs moteurs de recherche basés sur l'IA) à comprendre instantanément la structure et le but de votre boutique.

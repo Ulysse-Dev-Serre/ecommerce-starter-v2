@@ -1,229 +1,59 @@
-# 🔒 RBAC - Role-Based Access Control
+# 🔐 Gestion des Rôles (RBAC)
 
-## Vue d'ensemble
-
-Système de contrôle d'accès basé sur les rôles pour protéger les routes API et les pages de l'application.
-
-**Rôles disponibles** :
-- `CLIENT` : Utilisateur standard
-- `ADMIN` : Administrateur avec accès complet
+Ce document détaille la politique de contrôle d'accès basée sur les rôles (Role-Based Access Control) de l'application.
 
 ---
 
-## Middlewares de sécurité
+## 1. Définition des Rôles
 
-### withAuth()
+Le système s'appuie sur deux niveaux d'autorisation distincts :
 
-Protège les routes nécessitant une authentification (n'importe quel utilisateur connecté).
-
-**Fichier** : `src/lib/middleware/withAuth.ts` (lignes 1-50)
-
-**Utilisation** :
-```typescript
-import { withAuth } from '@/lib/middleware/withAuth';
-
-async function handler(request: Request, authContext: AuthContext) {
-  // authContext contient: userId, clerkId, email, role
-  return NextResponse.json({ user: authContext });
-}
-
-export const GET = withError(withAuth(handler));
-```
-
-**Flux** :
-1. Vérifie la session Clerk via `auth()`
-2. Charge l'utilisateur depuis la DB
-3. Passe `authContext` au handler
-4. Codes de réponse : 401 (non auth) | 403 (pas synchronisé) | 200 (OK)
-
-### withAdmin()
-
-Protège les routes réservées aux administrateurs uniquement.
-
-**Fichier** : `src/lib/middleware/withAuth.ts` (lignes 51-120)
-
-**Utilisation** :
-```typescript
-import { withAdmin } from '@/lib/middleware/withAuth';
-
-async function adminHandler(request: Request, authContext: AuthContext) {
-  // Seuls les ADMIN peuvent accéder ici
-  return NextResponse.json({ data: 'Admin data' });
-}
-
-export const POST = withError(withAdmin(adminHandler));
-```
-
-**Flux** :
-1. Appelle `withAuth()` en interne
-2. Vérify que `role === UserRole.ADMIN`
-3. Codes de réponse : 401 (non auth) | 403 (rôle != ADMIN) | 200 (OK)
+| Rôle | Cible | Description des Droits |
+| :--- | :--- | :--- |
+| **CLIENT** | Utilisateur final | Peut acheter, gérer ses paniers, voir son historique de commandes personnelles. |
+| **ADMIN** | Gestionnaire | Accès total au catalogue, à la gestion des ventes, aux médias et à l'annuaire client. |
 
 ---
 
-## Tableau des routes protégées
+## 2. Hiérarchie et Permissions
 
-### Routes API Publiques (pas de middleware)
+### 🔓 Accès Public
+Certaines données sont accessibles sans authentification pour favoriser le SEO et l'expérience utilisateur :
+- Catalogue produits (consultation uniquement).
+- Panier d'achat temporaire.
+- Santé du système (Health Check).
 
-| Route | Méthode | Description |
-|-------|---------|-------------|
-| `/api/products` | GET | Liste des produits |
-| `/api/products/[slug]` | GET | Détail d'un produit |
-| `/api/categories` | GET | Liste des catégories |
-| `/api/categories/[slug]` | GET | Détail d'une catégorie |
-| `/api/webhooks/clerk` | POST | Webhook Clerk (signature vérifiée) |
-| `/api/webhooks/stripe` | POST | Webhook Stripe (signature vérifiée) |
-| `/api/internal/health` | GET | Health check |
+### 🔑 Accès Client (Standard)
+Requiert une connexion via Clerk :
+- Consultation des détails personnels de commande.
+- Demande de remboursement.
+- Accès aux préférences de profil utilisateur.
 
-### Routes authentifiées (withAuth)
-
-| Route | Méthode | Description |
-|-------|---------|-------------|
-| `/api/orders` | GET | Liste commandes utilisateur |
-| `/api/orders/[id]` | GET | Détail commande (vérif propriété) |
-| `/api/cart` | GET | Récupérer panier utilisateur |
-| `/api/cart/lines` | POST/PUT/DELETE | Gérer panier |
-
-### Routes Admin (withAdmin)
-
-| Route | Méthode | Description |
-|-------|---------|-------------|
-| `/api/admin/products` | GET/POST | Liste/crée produits |
-| `/api/admin/products/[id]` | GET/PUT/DELETE | Édite/supprime produit |
-| `/api/admin/attributes` | GET/POST | Gère attributs |
-| `/api/admin/orders` | GET | Liste toutes les commandes |
-| `/api/admin/orders/[id]` | GET | Détail commande (admin) |
-| `/api/admin/orders/[id]/status` | PATCH | Change statut commande |
-| `/api/users` | GET | Liste utilisateurs |
-| `/api/users/[id]/promote` | POST | Changer rôle utilisateur |
+### 🛡️ Accès Admin (Restreint)
+Protégé par le middleware `withAdmin` :
+- Modification des prix et des stocks.
+- Génération d'étiquettes de transport Shippo.
+- Promotion d'autres utilisateurs au rang d'Admin.
 
 ---
 
-## Bonnes pratiques
+## 3. Mécanisme Technique
 
-### 1. Middleware stack order
+Le rôle d'un utilisateur est géré de deux manières pour garantir performance et sécurité :
 
-Toujours appliquer `withError` en dernier :
-
-```typescript
-// ✅ Correct
-export const POST = withError(withAdmin(withRateLimit(handler, RateLimits.ADMIN)));
-
-// ❌ Incorrect
-export const POST = withAdmin(withError(handler));
-```
-
-### 2. AuthContext dans les handlers
-
-Le contexte d'authentification est passé en dernier paramètre :
-
-```typescript
-async function handler(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-  authContext: AuthContext  // Ajouté par withAuth/withAdmin
-) {
-  console.log(authContext.userId);
-  console.log(authContext.role);
-}
-```
-
-### 3. Vérification de propriété
-
-Pour les ressources utilisateur, vérifier que l'utilisateur en est propriétaire :
-
-```typescript
-async function getOrder(request: Request, { params }: {...}, authContext: AuthContext) {
-  const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id } });
-  
-  // CLIENT peut voir seulement ses commandes
-  if (authContext.role === 'CLIENT' && order.userId !== authContext.userId) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-  
-  // ADMIN peut tout voir
-  return NextResponse.json({ data: order });
-}
-
-export const GET = withError(withAuth(getOrder));
-```
-
-### 4. Routes publiques vs privées
-
-**Publiques** (pas de middleware) :
-- Listing produits/catégories
-- Détail produit
-- Health checks
-- Webhooks (avec vérification de signature)
-
-**Authentifiées** (`withAuth`) :
-- Panier utilisateur
-- Commandes utilisateur
-- Profil utilisateur
-
-**Admin** (`withAdmin`) :
-- Gestion utilisateurs
-- CRUD produits
-- Dashboard admin
-- Vue globale commandes
+1.  **Dans Clerk (Source de Vérité)** : Le rôle est stocké dans les `public_metadata` de l'utilisateur sur Clerk. Cela permet au client (frontend) de savoir instantanément s'il doit afficher le menu Admin.
+2.  **En BDD locale (Vérification)** : Lors de chaque requête API sensible, le système vérifie le rôle enregistré dans notre base de données PostgreSQL pour empêcher toute usurpation via le client.
 
 ---
 
-## Synthèse du workflow
+## 4. Promotion au rang d'Admin
 
-```
-Requête API
-  ↓
-Non protégé ? → Traiter directement
-  ↓
-withAuth/withAdmin présent ?
-  ↓
-Clerk session valide ?
-  ↓
-User synchronisé en DB ?
-  ↓
-withAdmin check : role = ADMIN ?
-  ↓
-✅ Accès autorisé → Traiter requête
-```
-
-**Résultats possibles** :
-- 401 : Non authentifié ou session Clerk expirée
-- 403 : Authentifié mais rôle insuffisant ou pas propriétaire de la ressource
-- 200 : Autorisé
+Pour transformer un compte Client en compte Administrateur :
+- **Via l'API/Admin** : Un administrateur existant utilise le bouton "Promouvoir" sur la fiche client.
+- **Effet** : Le système met à jour simultanément les métadonnées Clerk et la base de données locale.
 
 ---
 
-## Fichiers sources
-
-- **Middlewares** : `src/lib/middleware/withAuth.ts`
-- **Exemple route admin** : `src/app/api/users/route.ts`
-- **Exemple promotion utilisateur** : `src/app/api/users/[id]/promote/route.ts`
-- **Exemple protégé avec propriété** : `src/app/api/orders/[id]/route.ts`
-
----
-
-## Testing
-
-**Tester une route admin sans auth** (401) :
-```bash
-curl http://localhost:3000/api/admin/products
-# Attendu : 401 Unauthorized
-```
-
-**Tester une route admin avec CLIENT** (403) :
-```bash
-# Se connecter comme CLIENT dans Clerk, puis :
-curl http://localhost:3000/api/admin/products
-# Attendu : 403 Forbidden
-```
-
-**Tester une route admin avec ADMIN** (200) :
-```bash
-# Se connecter comme ADMIN dans Clerk, puis :
-curl http://localhost:3000/api/admin/products
-# Attendu : 200 OK
-```
-
-Pour tester avec API keys de test, voir `test-authentication.md`.
+## 5. Sécurité Transversale : Ownership
+En plus du rôle, le système vérifie toujours la **propriété** des données.
+*Exemple : Un utilisateur ayant le rôle `CLIENT` ne pourra JAMAIS voir la commande d'un autre `CLIENT`, car le service vérifie que l'`userId` de la commande correspond à l'utilisateur connecté.*

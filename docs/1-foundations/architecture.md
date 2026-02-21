@@ -204,6 +204,17 @@ Stripe notifie l'API d'un paiement réussi. Le système vérifie la signature de
 
 ---
 
+## Workflow de Développement (Service Layer)
+
+Pour garantir une application robuste et testable, chaque nouvelle fonctionnalité ou route API doit suivre ce cycle en 4 étapes :
+
+1.  **Validation (`src/lib/validators/`)** : Définissez un schéma **Zod** pour valider les données entrantes.
+2.  **Service (`src/lib/services/`)** : Extrayez la logique métier du contrôleur vers une classe de service statique (indépendante du HTTP).
+3.  **Test Unitaire (`src/lib/services/`)** : Créez un test Vitest à côté du service pour valider les règles métier avec des mocks.
+4.  **Route API (`src/app/api/`)** : La route ne sert que de "boîte aux lettres" : elle valide avec Zod, appelle le Service, et gère la réponse HTTP.
+
+---
+
 ## Performance & Scalabilité
 
 L'application utilise des stratégies éprouvées :

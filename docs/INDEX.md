@@ -15,20 +15,19 @@ npx prisma studio
 
 ## Documentation par Catégories
 
-### 0. Administration & Opérations
+### 0. Administration & Lancement
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
-| **[Admin Setup](./0-admin/ADMIN_SETUP.md)** | Configuration de l'espace administrateur | Setup Admin |
-| **[Admin Orders](./0-admin/admin-orders.md)** | Gestion et workflow des commandes | Opérations |
-| **[Pre-Production](./0-admin/PRE-PRODUCTION.md)** | Checklist avant mise en ligne | Lancement |
-| **[AI Startup Prompt](./0-admin/AI_STARTUP_PROMPT.md)** | Prompt pour initialiser l'assistant IA | Développement |
+| **[1. Config Initiale](./0-admin/1-CONFIG-INITIALE.md)** | .env, site.ts et premier Admin | JOUR 1 |
+| **[2. Protocole IA](./0-admin/2-AI-STARTUP-PROTOCOLE.md)** | Personnalisation niche & design | Setup Visuel |
+| **[3. Dashboard Admin](./0-admin/3-DASHBOARD-ADMIN.md)** | Gestion catalogue, stocks et ventes | Opérations |
+| **[4. Lancement Prod](./0-admin/4-LANCEMENT-PRODUCTION.md)** | Checklist finale et Stripe Live | Go-Live |
 
 ### 1. Fondations & Architecture
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Architecture](./1-foundations/architecture.md)** | Structure complète projet + patterns | Architecture système |
 | **[Roadmap](./1-foundations/Roadmap.md)** | Milestones et phases développement | Planification |
-| **[Marketing Plan](./1-foundations/marketing-analytics-plan.md)** | Stratégie analytics et marketing | Business |
 | **[Setup](./1-foundations/setup.md)** | Installation + variables environnement | Installation initiale |
 
 ### 2. Outils Développement & CI/CD
@@ -39,12 +38,13 @@ npx prisma studio
 | **[CI/CD](./2-development-tools/ci-cd.md)** | Pipeline d'intégration et déploiement | DevOps |
 | **[Sécurité Headers](./2-development-tools/security-headers.md)** | Protection HTTP headers | Sécurité base |
 | **[Google API](./2-development-tools/google-api.md)** | Config Maps & Places | Adresses |
+| **[AI Guide](./2-development-tools/msg-ai.md)** | Instructions pour les assistants IA | IA |
 
 ### 3. Base de Données
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Maintenance & Prod](./3-database-stack/maintenance-and-production.md)** | Guide pro (Migrations vs Push) | Maintenance safely |
-| **[Schéma DB](./3-database-stack/database_schema.md)** | Modèle de données Prisma | Structure SQL |
+| **[Schéma DB](./3-database-stack/database-schema.md)** | Modèle de données Prisma | Structure SQL |
 | **[Media Storage](./3-database-stack/MEDIA_STORAGE.md)** | Gestion des images et stockage | Cloudinary |
 
 ### 4. Authentification
@@ -58,6 +58,7 @@ npx prisma studio
 | **[Flux de Paiement](./5-payment-system/stripe-payment-flow.md)** | Tunnel de paiement et webhooks | Transactions |
 | **[Configuration Taxes](./5-payment-system/stripe-tax-configuration.md)** | Stripe Tax & Automatisation | Fiscalité |
 | **[Troubleshooting](./5-payment-system/stripe-troubleshooting.md)** | Résolution de problèmes Stripe | Debug |
+| **[Quick Test](./5-payment-system/stripe-quick-test.md)** | Tester le flux de paiement (CLI/cURL) | Setup |
 
 ### 6. Expédition & Emails (Shippo / Resend)
 | Document | Contenu | Usage |
@@ -117,7 +118,6 @@ npx prisma studio
 | **[Index Tests](./14-test/index-test.md)** | Stratégie globale de test | QA |
 | **[Playwright](./14-test/playwright.md)** | Tests E2E automatisés | Parcours client |
 | **[Vitest](./14-test/vitest.md)** | Tests unitaires | Fiabilité |
-| **[Refactor Workflow](./14-test/refactor-workflow.md)** | Guide pour refactoring sécurisé | QA |
 
 ---
 
@@ -125,8 +125,8 @@ npx prisma studio
 
 ### Premier démarrage
 1. [README.md](../README.md) - Vue d'ensemble
-2. [Setup](./1-foundations/setup.md) - Configuration
-3. [Admin Setup](./0-admin/ADMIN_SETUP.md) - Configuration Admin
+2. [Config Initiale](./0-admin/1-CONFIG-INITIALE.md) - Setup JOUR 1
+3. [Protocole IA](./0-admin/2-AI-STARTUP-PROTOCOLE.md) - Design & Niche
 
 ### Compréhension architecture
 1. [Architecture](./1-foundations/architecture.md) - Structure système
@@ -139,8 +139,8 @@ npx prisma studio
 
 | Besoin | Document | Section |
 | :--- | :--- | :--- |
-| **Installation** | [Setup](./1-foundations/setup.md) | Variables env |
-| **Admin Panel** | [Admin Setup](./0-admin/ADMIN_SETUP.md) | Dashboard |
+| **Installation** | [Config Initiale](./0-admin/1-CONFIG-INITIALE.md) | Variables env |
+| **Admin Panel** | [Dashboard Admin](./0-admin/3-DASHBOARD-ADMIN.md) | Dashboard |
 | **Emails** | [Email Flow](./6-shipping/resend-email-flow.md) | Resend |
 | **Traductions** | [i18n Architecture](./9-Language_internationalization/i18n-architecture.md) | Structure |
 | **Sécurité** | [Security Overview](./8-securite/security-overview.md) | Mesures globales |

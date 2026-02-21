@@ -1,252 +1,97 @@
-# 🔧 Dépannage Stripe
+# 🔧 Dépannage Stripe (Payment Elements)
 
-> Avant de dépanner, assurez-vous de bien comprendre le fonctionnement normal : [🔄 Flux de Paiement (Workflow)](stripe-payment-flow.md).
+Ce guide permet de diagnostiquer et résoudre les problèmes liés au flux de paiement intégré (Stripe Elements).
 
-## Problème 1 : Le paiement réussit mais pas de commande créée
-
-### Symptôme
-Un client se plaint que son paiement a été accepté sur Stripe mais qu'il n'a pas reçu de confirmation de commande.
-
-### Étapes de diagnostic
-
-#### 1. Vérifier dans Stripe Dashboard
-- Aller sur [Stripe Dashboard > Paiements](https://dashboard.stripe.com/test/payments)
-- Chercher le paiement par email client ou montant
-- Vérifier le statut : Est-il "Succeeded" ?
-- Noter le **Payment Intent ID** (ex: `pi_xxxxx`)
-
-#### 2. Vérifier si le webhook a été envoyé
-- Aller sur [Stripe Dashboard > Webhooks](https://dashboard.stripe.com/test/webhooks)
-- Chercher l'événement `payment_intent.succeeded` correspondant
-- Vérifier s'il a été envoyé à votre endpoint
-- Regarder le code de réponse HTTP (200 = OK, 4xx/5xx = erreur)
-
-#### 3. Vérifier dans votre base de données
-
-```sql
--- Vérifier si le webhook a été reçu
-SELECT * FROM webhook_events 
-WHERE source = 'stripe' 
-  AND event_type = 'payment_intent.succeeded'
-  AND payload LIKE '%pi_xxxxx%'  -- Remplacer par votre Payment Intent ID
-ORDER BY created_at DESC;
-```
-
-**Si le webhook existe :**
-- Vérifier `processed = true` → Le webhook a été traité
-- Vérifier `processed = false` → Il y a eu une erreur
-
-```sql
--- Vérifier si une commande a été créée
-SELECT * FROM orders 
-WHERE created_at >= '2025-01-15'  -- Date approximative
-ORDER BY created_at DESC;
-```
-
-#### 4. Vérifier les logs de votre serveur
-
-Chercher dans vos logs (terminal où `npm run dev` tourne) :
-
-```
-[ERROR] Webhook processing failed
-[ERROR] Failed to create order
-```
-
-Si vous voyez une erreur, elle vous dira exactement ce qui a échoué (ex: stock insuffisant, DB erreur, etc.)
-
-#### 5. Vérifier manuellement l'état du webhook
-
-Si le webhook existe mais `processed = false` :
-
-```sql
--- Voir l'erreur détaillée (si loggée)
-SELECT * FROM webhook_events 
-WHERE event_id = 'evt_xxxxx';  -- L'ID de l'événement Stripe
-```
-
-### Solutions possibles
-
-| Cause | Solution |
-|-------|----------|
-| Webhook pas envoyé | Vérifier que l'endpoint est configuré dans Stripe Dashboard |
-| Webhook échoué (4xx/5xx) | Vérifier les logs serveur, corriger l'erreur, retry le webhook |
-| Stock insuffisant | Vérifier `ProductVariantInventory.stock` |
-| Erreur DB | Vérifier les contraintes de la DB, les logs d'erreur |
-| Webhook traité mais pas de commande | Bug dans `handlePaymentIntentSucceeded()` |
-
-### Retry manuel d'un webhook
-
-Si le webhook a échoué, vous pouvez le renvoyer depuis Stripe Dashboard :
-1. Aller dans l'événement concerné
-2. Cliquer sur "Resend event"
-3. Vérifier que cette fois il retourne 200 OK
+> Pour comprendre l'architecture : [🔄 Flux de Paiement (Workflow)](stripe-payment-flow.md).
 
 ---
 
-## Problème 2 : Session Stripe créée mais client ne voit rien
+## Problème 1 : Paiement réussi sur Stripe, mais aucune commande en base
 
 ### Symptôme
-Le client clique sur "Passer commande" et rien ne se passe.
+Le client a été débité (vu dans le Dashboard Stripe), mais il n'a pas d'email de confirmation et la commande n'apparaît pas dans l'admin.
 
 ### Étapes de diagnostic
 
-#### 1. Vérifier dans la console du navigateur (F12)
-- Ouvrir les DevTools (F12)
-- Onglet "Network"
-- Chercher la requête `POST /api/checkout/create-session`
-- Vérifier le code de réponse :
-  - 200 OK → La session a été créée
-  - 400/409 → Erreur (panier vide, stock insuffisant, etc.)
-  - 500 → Erreur serveur
+#### 1. Identification dans Stripe
+- Allez sur [Stripe Dashboard > Payments](https://dashboard.stripe.com/payments).
+- Cherchez le **Payment Intent ID** (ex: `pi_3Q...`).
+- Vérifiez que le statut est bien **Succeeded**.
 
-#### 2. Vérifier la réponse de l'API
+#### 2. Vérification du Webhook (Le suspect n°1)
+- Allez sur [Stripe Dashboard > Webhooks](https://dashboard.stripe.com/webhooks).
+- Cherchez l'événement `payment_intent.succeeded`.
+- **Code 200** : Le serveur a reçu le message. Le problème est dans la logique métier.
+- **Code 4xx/5xx** : Le serveur a rejeté le message. Vérifiez les logs d'erreur.
 
-Si la réponse est 200, elle devrait contenir :
-```json
-{
-  "success": true,
-  "sessionId": "cs_test_xxxxx",
-  "url": "https://checkout.stripe.com/c/pay/cs_test_xxxxx"
-}
+#### 3. Diagnostic Base de Données
+```sql
+-- Le webhook a-t-il été enregistré ?
+SELECT * FROM "webhook_events" 
+WHERE "eventId" = 'evt_xxxxx'; -- ID de l'événement Stripe
+
+-- La commande a-t-elle été créée ?
+SELECT * FROM "orders" 
+WHERE "stripePaymentIntentId" = 'pi_xxxxx';
 ```
 
-Si l'URL manque → Bug dans le backend.
-
-#### 3. Vérifier le code frontend
-
-Dans `cart-client.tsx`, vérifier que la redirection se fait bien :
-```typescript
-if (data.success && data.url) {
-  window.location.href = data.url; // ← Cette ligne doit s'exécuter
-}
-```
-
-Ajouter un `console.log` pour débugger :
-```typescript
-console.log('Stripe URL:', data.url);
-window.location.href = data.url;
-```
+**Fichier à vérifier :** `src/lib/services/orders/stripe-webhook.service.ts`
 
 ---
 
-## Problème 3 : Stock pas décrémenté après paiement
+## Problème 2 : Erreur "Invalid signature" (Webhooks)
 
 ### Symptôme
-Un paiement réussit mais le stock ne baisse pas.
+Les logs affichent : `Webhook signature validation failed` ou `Invalid signature`.
+
+### Causes & Solutions
+1.  **Secret incorrect** : Vérifiez que `STRIPE_WEBHOOK_SECRET` dans votre `.env` correspond exactement au secret affiché dans le Dashboard Stripe (ou celui fourni par `stripe listen` en local).
+2.  **Raw Body** : L'endpoint `/api/webhooks/stripe` doit lire le corps de la requête en format **RAW (texte brut)**. Si un middleware transforme le JSON avant la validation, la signature sera invalide.
+
+---
+
+## Problème 3 : Échec de création du "Payment Intent"
+
+### Symptôme
+Au moment de passer au paiement, le loader tourne indéfiniment ou une erreur "Payment failed" s'affiche avant même que le client saisisse sa carte.
+
+### Diagnostic Frontend
+- Ouvrez l'onglet **Network** (F12) du navigateur.
+- Cherchez l'appel à `/api/checkout/create-intent`.
+- **Erreurs courantes** :
+    - `400 Bad Request` : Panier vide ou données manquantes.
+    - `404 Not Found` : Un produit du panier a été supprimé ou désactivé entre-temps.
+    - `429 Too Many Requests` : L'utilisateur a déclenché le **Rate Limiting**.
+
+---
+
+## Problème 4 : Taxes non calculées
+
+### Symptôme
+Le montant total ne change pas malgré une adresse de livraison saisie.
 
 ### Diagnostic
-
-```sql
--- Vérifier l'état du stock
-SELECT * FROM product_variant_inventory 
-WHERE variant_id = 'cmhsi9ekp000gksfj0fsr7adk';  -- Remplacer par votre variant ID
-```
-
-Comparer `stock` et `reservedStock` :
-- Si `reservedStock` a augmenté mais pas `stock` décrémenté → Le webhook n'a pas décrémenté
-- Si rien n'a changé → Le stock n'a jamais été réservé (erreur lors de la création de session)
-
-### Solution
-
-Vérifier dans `handlePaymentIntentSucceeded()` si la fonction `decrementStock()` est bien appelée et s'exécute sans erreur.
+1.  **Mode Test** : Vérifiez si vous êtes en mode Test. [Stripe Tax a des limitations majeures en Sandbox](stripe-tax-configuration.md).
+2.  **Logs Serveur** : Cherchez `Stripe Tax activation failed, falling back`. Si ce log apparaît, Stripe a refusé le calcul (souvent dû à une adresse incomplète ou invalide).
+3.  **Config Dashboard** : Assurez-vous que les "Registrations" sont configurées dans vos paramètres Stripe Tax.
 
 ---
 
-## Problème 4 : Erreur "Invalid webhook signature"
+## Problème 5 : Stock non décrémenté
 
 ### Symptôme
-Logs : `Webhook signature validation failed`
+La commande est créée mais le stock reste inchangé.
 
-### Cause
-Le `STRIPE_WEBHOOK_SECRET` dans `.env` ne correspond pas au secret du webhook configuré.
-
-### Solutions
-
-#### Si vous utilisez Stripe CLI (développement local)
-1. Relancer `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
-2. Copier le nouveau `whsec_xxxxx` affiché
-3. Mettre à jour `.env` :
-   ```bash
-   STRIPE_WEBHOOK_SECRET=[REDACTED:webhook-secret]
-   ```
-4. Redémarrer le serveur (`npm run dev`)
-
-#### Si vous utilisez un webhook configuré dans Stripe Dashboard
-1. Aller sur [Stripe Dashboard > Webhooks](https://dashboard.stripe.com/test/webhooks)
-2. Cliquer sur votre endpoint
-3. Cliquer sur "Reveal" pour voir le signing secret
-4. Copier dans `.env` → `STRIPE_WEBHOOK_SECRET=whsec_xxxxx`
-5. Redémarrer le serveur
+### Analyse
+Le stock est **réservé** lors de la création de l'intent (`create-intent`) et **confirmé/décrémenté** lors du succès du webhook.
+- Si la réservation échoue : Vérifiez `src/lib/services/inventory/stock-reservation.service.ts`.
+- Si la décrémentation échoue : Vérifiez les logs du webhook `payment_intent.succeeded`.
 
 ---
 
-## Problème 5 : Paiements en double (même commande créée 2 fois)
+## Checklist de survie rapide
 
-### Symptôme
-Un client a 2 commandes identiques pour un seul paiement.
-
-### Cause
-L'idempotence n'est pas implémentée correctement dans le webhook.
-
-### Solution
-Vérifier que le code vérifie si le webhook a déjà été traité :
-
-```typescript
-// Dans handlePaymentIntentSucceeded()
-const existing = await prisma.webhookEvent.findUnique({
-  where: { eventId: event.id }
-});
-
-if (existing?.processed) {
-  return; // Ne pas retraiter
-}
-```
-
-**Note :** Si ce code n'existe pas encore, il faut l'ajouter dans `src/lib/stripe/webhooks.ts`.
-
----
-
-## Problème 6 : Rate limit dépassé
-
-### Symptôme
-Erreur 429 : "Too many requests"
-
-### Cause
-Un utilisateur essaie de créer trop de sessions de paiement en peu de temps.
-
-### Solution
-C'est normal, le rate limiting protège votre API. L'utilisateur doit attendre 1 minute.
-
-Si c'est vous qui testez, vous pouvez temporairement désactiver le rate limiting en commentant le middleware :
-
-```typescript
-// src/app/api/checkout/create-session/route.ts
-export const POST = withError(
-  // withRateLimit(createCheckoutSessionHandler, RateLimits.PUBLIC)  // ← Commenté
-  createCheckoutSessionHandler  // ← Sans rate limit (dev seulement!)
-);
-```
-
-**⚠️ Attention :** Réactiver avant la production !
-
----
-
-## Checklist de dépannage rapide
-
-- [ ] Vérifier Stripe Dashboard (paiement réussi ?)
-- [ ] Vérifier Stripe Dashboard (webhook envoyé ?)
-- [ ] Vérifier la table `webhook_events` (webhook reçu ?)
-- [ ] Vérifier la table `orders` (commande créée ?)
-- [ ] Vérifier les logs serveur (erreurs ?)
-- [ ] Vérifier la console navigateur (erreurs frontend ?)
-- [ ] Vérifier le `STRIPE_WEBHOOK_SECRET` (correct ?)
-
----
-
-## Contact support
-
-Si aucune de ces solutions ne fonctionne :
-1. Copier l'ID du paiement Stripe (`pi_xxxxx`)
-2. Copier les logs d'erreur de votre serveur
-3. Copier le contenu de la table `webhook_events` pour cet événement
-4. Contacter votre équipe technique avec ces informations
+- [ ] **Secret Webhook** : Est-il à jour ? (Surtout après un redémarrage de `stripe listen`).
+- [ ] **Logs Prisma** : Y a-t-il une erreur de base de données (ex: contrainte d'unicité sur l'ID de commande) ?
+- [ ] **Emails** : Le service Resend est-il configuré ? (Parfois la commande est créée mais c'est l'envoi d'email qui fait crash le webhook).
+- [ ] **Stripe Dashboard** : L'événement est-il en "Pending" ? Stripe réessaie automatiquement pendant 3 jours.

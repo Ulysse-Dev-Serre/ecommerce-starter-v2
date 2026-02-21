@@ -42,7 +42,7 @@ async function addValueHandler(
         attributeId,
         value: body.value,
       },
-      `Ajout d'une valeur à l'attribut: ${attributeId}`
+      `Adding value to attribute: ${attributeId}`
     );
 
     const valueData: AddAttributeValueData = {
@@ -60,7 +60,7 @@ async function addValueHandler(
         valueId: attributeValue.id,
         value: attributeValue.value,
       },
-      `Valeur d'attribut ajoutée: ${attributeValue.value}`
+      `Attribute value added: ${attributeValue.value}`
     );
 
     return NextResponse.json(attributeValue, { status: 201 });
@@ -72,7 +72,7 @@ async function addValueHandler(
         attributeId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      "Erreur lors de l'ajout de la valeur d'attribut"
+      'Error while adding attribute value'
     );
 
     // Gérer les erreurs de contrainte unique

@@ -136,7 +136,7 @@ Modifier les variables CSS dans `src/app/globals.css` :
 }
 ```
 
-Voir: [Guide des thèmes](../8-frontend/theming.md)
+Voir: [Guide des thèmes](../10-frontend/theming.md)
 
 ### 7. Configurer Analytics & Marketing (GTM/GA4)
 
@@ -440,7 +440,7 @@ Avant de lancer en production, vérifier que **tous** les éléments suivants so
 
 2. **Revenir aux clés test** le temps de corriger
 
-3. **Consulter** [Dépannage Stripe](./9-payment-system/TROUBLESHOOTING.md)
+3. **Consulter** [Dépannage Stripe](../5-payment-system/stripe-troubleshooting.md)
 
 4. **Contacter le support Stripe** : [https://support.stripe.com](https://support.stripe.com)
 
@@ -449,9 +449,8 @@ Avant de lancer en production, vérifier que **tous** les éléments suivants so
 ## 📞 Support et ressources
 
 - **Architecture du projet** : [Architecture](../1-foundations/architecture.md)
-- **Configuration i18n** : [i18n](../2-Language_internationalization/language-config.md)
-- **Thèmes CSS** : [Theming](../8-frontend/theming.md)
-- **Dépannage Stripe** : [Troubleshooting](../9-payment-system/TROUBLESHOOTING.md)
-- **Documentation Stripe** : [https://stripe.com/docs](https://stripe.com/docs)
+- **Configuration i18n** : [i18n](../9-Language_internationalization/i18n-architecture.md)
+- **Thèmes CSS** : [Theming](../10-frontend/theming.md)
+- **Dépannage Stripe** : [Troubleshooting](../5-payment-system/stripe-troubleshooting.md)
 - **Dashboard Stripe** : [https://dashboard.stripe.com](https://dashboard.stripe.com)
 - **Support Stripe** : Disponible 24/7 en mode live

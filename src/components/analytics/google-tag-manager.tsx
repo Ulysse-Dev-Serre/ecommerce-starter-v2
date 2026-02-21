@@ -17,12 +17,13 @@ export default function GoogleTagManager() {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             
-            // Default Consent Mode (Deny Everything by default)
+            // Default Consent Mode (Set to 'granted' for launch phase)
+            // Change to 'denied' later for strict GDPR/Law 25 compliance
             gtag('consent', 'default', {
-              'ad_storage': 'denied',
-              'analytics_storage': 'denied',
-              'ad_user_data': 'denied',
-              'ad_personalization': 'denied',
+              'ad_storage': 'granted',
+              'analytics_storage': 'granted',
+              'ad_user_data': 'granted',
+              'ad_personalization': 'granted',
               'wait_for_update': 500
             });
             

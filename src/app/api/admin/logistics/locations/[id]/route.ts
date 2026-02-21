@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { logger } from '@/lib/core/logger';
 import { ApiContext } from '@/lib/middleware/types';
-import { withAdmin } from '@/lib/middleware/withAuth';
+import { withAdmin, AuthContext } from '@/lib/middleware/withAuth';
 import { withError } from '@/lib/middleware/withError';
 import {
   logisticsLocationService,
@@ -34,15 +34,18 @@ const schema = z.object({
 
 async function updateLocationHandler(
   req: NextRequest,
-  { params }: ApiContext<{ id: string }>
+  { params, auth }: ApiContext<{ id: string }>
 ) {
+  const requestId = crypto.randomUUID();
+  const { id } = await params;
+  const { userId } = auth as AuthContext;
+
   try {
-    const { id } = await params;
     const body = await req.json();
 
     // Log incoming data for debugging
     logger.info(
-      { supplierId: id, data: body },
+      { requestId, supplierId: id, userId, data: body },
       'Processing logistics location update'
     );
 
@@ -50,12 +53,17 @@ async function updateLocationHandler(
 
     if (!result.success) {
       logger.warn(
-        { supplierId: id, errors: result.error.format() },
+        { requestId, supplierId: id, errors: result.error.format() },
         'Logistics location validation failed'
       );
       return NextResponse.json(
-        { error: 'Invalid data', details: result.error.format() },
-        { status: 400 }
+        {
+          success: false,
+          requestId,
+          error: 'Invalid data',
+          details: result.error.format(),
+        },
+        { status: 400, headers: { 'X-Request-ID': requestId } }
       );
     }
 
@@ -65,12 +73,28 @@ async function updateLocationHandler(
     );
 
     logger.info(
-      { supplierId: supplier.id, savedData: supplier.address },
+      { requestId, supplierId: supplier.id, savedData: supplier.address },
       'Updated logistics location saved to database'
     );
 
-    return NextResponse.json(supplier);
+    return NextResponse.json(
+      {
+        success: true,
+        requestId,
+        data: supplier,
+        timestamp: new Date().toISOString(),
+      },
+      { headers: { 'X-Request-ID': requestId } }
+    );
   } catch (error) {
+    logger.error(
+      {
+        requestId,
+        supplierId: id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      'Failed to update logistics location'
+    );
     throw error;
   }
 }
@@ -79,15 +103,43 @@ export const PUT = withError(withAdmin(updateLocationHandler));
 
 async function deleteLocationHandler(
   req: NextRequest,
-  { params }: ApiContext<{ id: string }>
+  { params, auth }: ApiContext<{ id: string }>
 ) {
+  const requestId = crypto.randomUUID();
+  const { id } = await params;
+  const { userId } = auth as AuthContext;
+
   try {
-    const { id } = await params;
+    logger.info(
+      { requestId, supplierId: id, userId },
+      'Admin deleting logistics location'
+    );
 
     await logisticsLocationService.deleteLocation(id);
 
-    return NextResponse.json({ success: true });
+    logger.info(
+      { requestId, supplierId: id },
+      'Logistics location deleted successfully'
+    );
+
+    return NextResponse.json(
+      {
+        success: true,
+        requestId,
+        message: 'Location deleted successfully',
+        timestamp: new Date().toISOString(),
+      },
+      { headers: { 'X-Request-ID': requestId } }
+    );
   } catch (error) {
+    logger.error(
+      {
+        requestId,
+        supplierId: id,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      'Failed to delete logistics location'
+    );
     throw error;
   }
 }

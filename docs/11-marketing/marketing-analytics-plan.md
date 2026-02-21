@@ -1,46 +1,64 @@
-# Plan de Tracking & Analytics Marketing
+# 📊 Plan de Tracking & Stratégie Analytics
 
-Ce document explique comment le site capture les données de vente et les envoie aux outils marketing (Google, TikTok, Facebook, etc.).
-
-## 🏗️ Architecture "Multiprise" (Centralisée)
-
-Pour éviter de ralentir le site et simplifier la maintenance, tout le tracking passe par un seul point d'entrée.
-
-### 1. Le Point de Branchement Unique
-Le fichier **`src/lib/client/analytics.ts`** est le cerveau. La fonction `trackEvent` est appelée pour chaque action (vue produit, ajout panier, achat). 
-
-Quand cette fonction est appelée, elle envoie l'info à deux endroits :
-- **Audit Interne** : Ton propre serveur (pour tes logs).
-- **Google Tag Manager (GTM)** : Via le `dataLayer` (pour ton marketing).
-
-### 2. Comment ajouter un nouveau Pixel (ex: TikTok, Pinterest) ?
-Tu as deux options, mais la première est recommandée :
-
-- **Option A (Recommandée - Sans code)** : Va dans ton interface [Google Tag Manager](https://tagmanager.google.com). Ajoute une nouvelle balise TikTok. Comme le site envoie déjà tous les événements (`purchase`, `add_to_cart`), tu as juste à les "écouter" dans GTM.
-- **Option B (Code personnalisé)** : Si tu dois coder un tracking spécifique, modifie simplement `src/lib/client/analytics.ts`. Ajoute ton appel API à l'intérieur de la fonction `trackEvent`. Cela se répercutera instantanément sur tout le site.
+Ce document détaille l'architecture de capture de données du Starter, conçue pour réconcilier performance publicitaire et souveraineté des données.
 
 ---
 
-## 📊 Où voir tes données ?
+## 1. Architecture "Dual-Stream"
 
-### 📈 Google Analytics 4 (GA4)
-C'est là que tu analyseras tes performances de vente et l'origine de tes clients.
+Contrairement à une installation classique, notre système envoie les données simultanément vers deux flux distincts via une seule fonction centralisée (`trackEvent`).
 
-- **Accès** : [analytics.google.com](https://analytics.google.com)
-- **Menu Performances** : 
-    - `Rapports > Monétisation > Achats e-commerce` : Pour voir ton chiffre d'affaires, tes produits stars et ton taux de conversion.
-    - `Rapports > Acquisition > Acquisition de trafic` : Pour savoir d'où viennent tes acheteurs (Google Ads, Facebook, Recherche Naturelle).
+### Flux A : Marketing (Google Tag Manager)
+- **Cible** : Plateformes publicitaires externes (Google Ads, Meta, TikTok).
+- **Rôle** : Optimisation des campagnes et reciblage (retargeting).
+- **Moteur** : `dataLayer` de GTM.
 
-### 🛠️ Mode Debug (Vérification)
-Pour vérifier que tout fonctionne avant de lancer tes pubs :
-- Utilise l'extension Chrome **Tag Assistant**.
-- Les tags doivent apparaître en **Bleu** ou **Vert**.
-- Dans GA4, consulte `Administration > DebugView` pour voir tes clics en temps réel.
+### Flux B : Opérationnel (Audit Interne)
+- **Cible** : Votre base de données locale.
+- **Rôle** : Analyse de performance brute, détection d'erreurs de tunnel d'achat et logs de sécurité.
+- **Moteur** : API interne `/api/tracking/events`.
 
 ---
 
-## 📂 Fichiers Clés à Connaître
-- `src/lib/client/analytics.ts` : Centralisation du tracking.
-- `src/lib/client/gtm.ts` : Configuration technique de Google Tag Manager.
-- `.env` : Contient ton `NEXT_PUBLIC_GTM_ID`.
-- `next.config.ts` : Gère la sécurité (CSP) pour autoriser les scripts Google.
+## 2. Centralisation du Code
+
+Tous les événements du site convergent vers un point unique. Cela évite d'éparpiller des scripts de tracking dans vos composants UI.
+
+**Emplacement Clé** : `src/lib/client/analytics.ts`
+
+Lorsqu'un développeur appelle `trackEvent('purchase')`, le système se charge automatiquement de :
+1. Récupérer les données **UTM** (source de la visite).
+2. Récupérer l'**ID Anonyme** (pour l'analyse de parcours).
+3. Envoyer l'information à GTM.
+4. Archiver l'événement dans nos logs internes.
+
+---
+
+## 3. Analyse des Performances (GA4)
+
+Le site est configuré pour alimenter nativement **Google Analytics 4**. Les rapports recommandés pour le pilotage du shop sont :
+
+- **Rapport de Monétisation** : Pour suivre le Chiffre d'Affaires (CA), le panier moyen et les produits les plus performants.
+- **Rapport d'Acquisition** : Pour Identifier quels canaux (SEO, Médias Sociaux, Email) génèrent le meilleur Retour sur Investissement (ROI).
+- **Exploration du Chemin** : Pour identifier où les clients abandonnent leur panier.
+
+---
+
+## 4. Maintenance Technique
+
+| Composant | Rôle | Fichier / Lieu |
+| :--- | :--- | :--- |
+| **GTM ID** | Identifiant du conteneur | `.env` (`NEXT_PUBLIC_GTM_ID`) |
+| **Sécurité scripts** | Autorisation des domaines | `next.config.ts` (CSP Headers) |
+| **Consentement** | Blocage/Autorisation cookies | `components/analytics/cookie-consent.tsx` |
+| **Dictionnaire** | Liste des événements | `lib/config/analytics-events.ts` |
+
+---
+
+## 5. Mode Debug et Validation
+
+Pour tester la chaîne de tracking :
+1. Activez le mode **Preview** dans GTM.
+2. Ouvrez la **DebugView** dans l'administration de Google Analytics 4.
+3. Effectuez un parcours complet (Home > Produit > Panier > Achat).
+4. Vérifiez que chaque étape apparaît en temps réel dans les consoles de débogage.

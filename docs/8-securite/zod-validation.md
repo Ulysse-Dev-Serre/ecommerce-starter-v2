@@ -1,139 +1,55 @@
-# 🛡️ Validation Zod - Sécurité des données
+# 🛡️ Validation des Données (Zod)
 
-## Vue d'ensemble
-
-Zod est une librairie de validation TypeScript qui vérifie les données **à l'exécution**. Elle complète le RBAC (qui contrôle *qui* peut accéder) en validant *quoi* est envoyé.
-
-**Version utilisée :** `zod@4.1.13`
+Ce document détaille l'utilisation de **Zod** comme couche de défense impénétrable pour garantir l'intégrité de la base de données et la stabilité de l'application.
 
 ---
 
-## Pourquoi Zod ?
+## 1. Philosophie de "Défense en Profondeur"
 
-| Sans validation | Avec Zod |
-|-----------------|----------|
-| Prix négatif accepté → vente à perte | `z.number().positive()` → rejet |
-| Stock décimal → bug inventaire | `z.number().int().min(0)` → rejet |
-| Slug avec espaces → URL cassée | `z.regex(/^[a-z0-9-]+$/)` → rejet |
-| SKU vide → confusion commandes | `z.string().min(1)` → rejet |
+Alors que le **RBAC** vérifie *qui* a le droit d'agir, **Zod** vérifie *quoi* est envoyé au serveur. Il s'agit de la dernière barrière avant que les données n'atteignent nos services métier et la base de données.
 
----
+### Pourquoi Zod est indispensable :
 
-## Schémas implémentés
-
-**Fichier :** `src/lib/schemas/product.schema.ts`
-
-### CreateProductSchema
-
-```typescript
-{
-  slug: string,           // lowercase, hyphens, 1-100 chars
-  status?: ProductStatus, // DRAFT | ACTIVE | INACTIVE | ARCHIVED
-  isFeatured?: boolean,
-  sortOrder?: number,     // >= 0
-  translations?: [{
-    language: 'EN' | 'FR' | ...,
-    name: string,         // 1-200 chars
-    description?: string, // max 5000 chars
-    metaTitle?: string,   // max 70 chars (SEO)
-    metaDescription?: string // max 160 chars (SEO)
-  }]
-}
-```
-
-### CreateVariantSchema
-
-```typescript
-{
-  sku: string,            // UPPERCASE, alphanumeric, 1-50 chars
-  pricing: {
-    price: number,        // > 0, max 999,999.99
-    currency: string,     // 3 lettres (CAD, USD, EUR)
-  },
-  inventory?: {
-    stock: number,        // entier >= 0
-    lowStockThreshold?: number,
-    trackInventory?: boolean,
-    allowBackorder?: boolean
-  }
-}
-```
+| Risque métier | Protection Zod | Résultat |
+| :--- | :--- | :--- |
+| **Vente à perte** | `z.number().positive()` | Rejet de tout prix négatif ou nul. |
+| **Bug Inventaire** | `z.number().int().min(0)` | Rejet des stocks décimaux ou négatifs. |
+| **URL Cassée** | `z.regex(/^[a-z0-9-]+$/)` | Garantie que les slugs sont valides pour le SEO. |
+| **Data Corrompue** | `z.string().min(1)` | Empêche la création d'objets vides ou incomplets. |
 
 ---
 
-## Routes protégées
+## 2. Domaines de Validation
 
-| Route | Méthode | Schéma |
-|-------|---------|--------|
-| `/api/admin/products` | POST | `CreateProductSchema` |
-| `/api/admin/products/[id]` | PUT | `UpdateProductSchema` |
-| `/api/admin/products/[id]/variants` | POST | `CreateVariantsSchema` |
+Le système de validation est organisé par domaine fonctionnel dans `src/lib/validators/`. Chaque action critique possède son propre contrat technique :
 
----
-
-## Réponse d'erreur
-
-Quand la validation échoue, l'API retourne :
-
-```json
-{
-  "success": false,
-  "error": "Validation failed",
-  "details": [
-    { "field": "slug", "message": "Slug must be lowercase with hyphens only" },
-    { "field": "sortOrder", "message": "Sort order must be >= 0" }
-  ],
-  "timestamp": "2025-11-29T21:18:31.261Z"
-}
-```
-
-**Status code :** `400 Bad Request`
+- **📦 Catalogue** : Validation des prix, des poids (pour le shipping), des dimensions et des traductions multilingues.
+- **🛒 Panier** : Vérification des types de variantes et des quantités cohérentes (entiers positifs).
+- **💳 Checkout** : Validation des adresses (format code postal, pays ISO) et des devises autorisées.
+- **🚚 Logistique** : Conformité des données envoyées à Shippo pour éviter les erreurs de calcul de tarifs.
+- **👤 Utilisateurs** : Validation des emails et des rôles lors des promotions Admin.
 
 ---
 
-## Utilisation dans une route
+## 3. Workflow de Traitement
 
-```typescript
-import { CreateProductSchema, formatZodErrors } from '@/lib/schemas/product.schema';
+Le pipeline de sécurité s'exécute dans cet ordre strict pour chaque requête entrante :
 
-async function handler(request: NextRequest) {
-  const body = await request.json();
-  
-  const validation = CreateProductSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json({
-      success: false,
-      error: 'Validation failed',
-      details: formatZodErrors(validation.error),
-    }, { status: 400 });
-  }
-  
-  // validation.data contient les données validées et typées
-  const product = await createProduct(validation.data);
-}
-```
+1.  **Limitation** (`withRateLimit`) : On bloque les attaques par force brute.
+2.  **Identité** (`withAuth`) : On vérifie que l'utilisateur est bien celui qu'il prétend être.
+3.  **Contrat technique** (**Zod**) : On s'assure que les données sont saines.
+4.  **Logique Métier** : Le service s'exécute en toute confiance, sachant que la donnée est valide.
 
 ---
 
-## Couche de sécurité complète
+## 4. Gestion des Erreurs
 
-```
-Requête API
-    ↓
-[1] withRateLimit() → limite les requêtes par IP
-    ↓
-[2] withAdmin()     → vérifie le rôle ADMIN (RBAC)
-    ↓
-[3] Zod.safeParse() → valide le format des données
-    ↓
-[4] Service Layer   → logique métier
-    ↓
-[5] Prisma          → base de données
-```
+En cas de non-conformité, le serveur rejette la requête avec un code **HTTP 400 (Bad Request)**.
+- **Transparence** : Le serveur retourne une liste précise des champs invalides et la raison du rejet.
+- **Logging** : Chaque erreur de validation est logguée (`AppError`) pour permettre de détecter des anomalies ou des tentatives d'exploitation de failles (Injections).
 
 ---
 
-## Voir aussi
+## 5. Maintenance des Contrats
 
-- [RBAC.md](./RBAC.md) - Contrôle d'accès par rôle
-- [rate-limiting.md](./rate-limiting.md) - Protection contre les abus
+Tous les schémas de validation sont centralisés dans le dossier `src/lib/validators/`. Toute modification d'un modèle de données (Prisma) doit être répercutée dans le schéma Zod correspondant pour maintenir une protection à 100%.

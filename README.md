@@ -91,9 +91,9 @@ npm run dev              # Démarrer l'app (localhost:3000)
 npm run db:studio        # Interface database (localhost:5555)
 
 # Base de données
-npm run db:push          # Synchroniser schéma Prisma
-npm run db:seed          # Données de test
-npm run sync-clerk       # Synchroniser utilisateurs Clerk
+npm run db:push          # Synchroniser le schéma (sans migrations)
+npm run db:migrate       # Appliquer les migrations (Production)
+npm run sync-clerk sync # Synchroniser les utilisateurs Clerk vers la DB
 
 # Qualité
 npm run lint             # ESLint + correction auto

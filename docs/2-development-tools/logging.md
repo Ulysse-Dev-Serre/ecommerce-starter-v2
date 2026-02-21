@@ -1,44 +1,26 @@
 # Système de Logging - Guide Simple
 
-Ce document décrit le système de logging structuré du projet pour un monitoring efficace et un debugging facilité.
+Ce document décrit le système de logging structuré du projet pour un monitoring efficace et un debugging facilité. 
 
 ---
 
-## 🎓 **Comment ça fonctionne - Guide débutant**
+## 🎓 **Comment ça fonctionne - Guide technique**
 
 ### **🔄 Processus étape par étape**
 
 **Étape 1 :** Une action se produit dans l'application (erreur, action utilisateur, etc.)  
-**Étape 2 :** Le logger vérifie si ce niveau de log est autorisé dans l'environnement actuel  
-**Étape 3 :** Si autorisé → Création d'un objet JSON avec toutes les informations  
-**Étape 4 :** Affichage dans la console (dev) ou envoi vers monitoring (production)
+**Étape 2 :** Le logger vérifie si ce niveau de log est autorisé dans l'environnement actuel (`LOG_LEVEL` dans `.env`)  
+**Étape 3 :** **Anonymisation automatique** → Toutes les données sensibles (passwords, tokens, Stripe keys) sont masquées par `[REDACTED]`.  
+**Étape 4 :** Création d'un objet JSON structuré (format standard cloud).  
+**Étape 5 :** Affichage dans le terminal ou envoi vers un service de centralisation des logs.
 
-### **⚡ Quand les logs se déclenchent**
+---
 
-**🤖 Automatiquement :**
+## 🛡️ **Sécurité & Confidentialité (Règle d'Or)**
 
-- ✅ **Erreurs API** → `withError.ts` attrape et log toutes les erreurs
-- ✅ **Performance lente** → `logPerformance()` génère un warning si > 2 secondes
-
-**👤 Manuellement :**
-
-- ✅ **Actions utilisateur** → `logUserAction('purchase', { userId: '123' })`
-- ✅ **Erreurs métier** → `logError('Paiement échoué', { orderId: '456' })`
-- ✅ **Informations** → `logger.info({ step: 'validation' }, 'Début validation')`
-
-### **🎯 Rôle des fichiers**
-
-**🧠 `src/lib/logger.ts` - Le cerveau**
-
-- Décide quels logs afficher selon l'environnement
-- Formate tout en JSON avec `timestamp`, `requestId`, etc.
-- Fournit les fonctions helper (`logUserAction`, `logError`, etc.)
-
-**🛡️ `src/lib/middleware/withError.ts` - Le garde du corps**
-
-- Protection automatique des API routes
-- Capture TOUTES les erreurs non gérées
-- Log l'erreur + retourne une réponse d'erreur propre
+Notre logger possède une sécurité intégrée : il **masque automatiquement** les données sensibles.
+- **Masqués par défaut** : `password`, `token`, `secret`, `authorization`, `cookie`, `stripe-signature`.
+- **Règle** : Si vous ajoutez un nouveau champ sensible, vérifiez qu'il est bien inclus dans `SENSITIVE_KEYS` dans `src/lib/core/logger.ts`.
 
 ---
 
@@ -52,42 +34,33 @@ import {
   logUserAction,
   logError,
   createRequestLogger,
-} from '@/lib/logger';
+} from '@/lib/core/logger';
 
-// Logger de base
+// 1. Logger de base (Utilisation de l'objet de données + Message)
 logger.info({ userId: '123' }, 'Action réussie');
-logger.error({ error: 'Connection failed' }, 'Erreur de connexion');
 
-// Logger avec contexte (recommandé pour APIs)
-const requestLogger = createRequestLogger();
+// 2. Logger avec ID de requête (Recommandé pour les APIs)
+// Permet de tracer TOUTES les étapes d'une même requête
+const requestLogger = createRequestLogger(); 
 requestLogger.info({ step: 'validation' }, 'Début validation');
 
-// Helpers spécialisés
-logUserAction('product_view', { userId: '123', productId: '456' });
-logError(error, { userId: '123', component: 'checkout' });
+// 3. Helpers spécialisés (Ajoutent automatiquement la catégorie)
+logUserAction('purchase', { userId: '123', orderId: 'ord_1' });
+logError(error, { component: 'checkout' });
 ```
 
-### **Exemple concret dans une API**
+### **🎯 Rôle des fichiers**
 
-```typescript
-import { createRequestLogger, logUserAction } from '@/lib/logger';
+- **`src/lib/core/logger.ts`** : Le cerveau. Gère le formatage JSON, l'anonymisation et les niveaux.
+- **`src/lib/middleware/withError.ts`** : Le garde du corps. Capture automatiquement les crashes API et les log avec le niveau `error`.
+- **`src/lib/middleware/withLogging.ts`** : (Optionnel) Log le temps de réponse et le statut HTTP de chaque requête.
 
-export async function POST(request: Request) {
-  const logger = createRequestLogger(); // 🆔 ID unique pour tracer
+---
 
-  logUserAction('purchase_attempt', { userId: '123', productId: 'abc' });
+## 📋 **Référence & Standards**
 
-  try {
-    logger.info({ step: 'validation' }, 'Début validation commande');
-    // ... logique métier
-  } catch (error) {
-    // 🚨 withError.ts va automatiquement logger cette erreur
-    throw error;
-  }
-}
-```
-
-**Ce qui s'affiche :**
+### **Format de sortie (JSON)**
+Chaque log génère une ligne JSON unique, facile à analyser par des outils comme Datadog ou CloudWatch :
 
 ```json
 {
@@ -96,87 +69,29 @@ export async function POST(request: Request) {
   "service": "ecommerce-frontend",
   "requestId": "id_1727516215123_xyz789",
   "userId": "123",
-  "action": "purchase_attempt",
   "category": "user_action",
-  "message": "User action: purchase_attempt"
+  "message": "User action: purchase"
 }
 ```
 
+### **Niveaux par environnement**
+- 🟢 **Local** : `debug`, `info`, `warn`, `error`
+- 🟡 **Production** : `warn`, `error` (pour éviter le bruit et réduire les coûts)
+- 🔴 **Tests** : `error`
+
+### **✅ Règle ESLint (`no-console`)**
+Nous avons configuré ESLint pour **interdire `console.log`**.
+- **Pourquoi ?** `console.log` n'est pas structuré, n'est pas anonymisé et pollue la production.
+- **Exception** : Utilisez `logger.info`, `logger.warn` ou `logger.error`.
+
 ---
 
-## ⚙️ **Commandes pratiques**
-
-### **Lancer avec différents niveaux de logs**
+## ⚙️ **Commandes utiles (Terminal)**
 
 ```bash
-# Développement - TOUS les logs (recommandé)
-npm run dev
-
-# Production - Seulement warnings et erreurs
-npm run build && npm run start
-
-# Tests - Seulement erreurs
-npm run test
-```
-
-### **Filtrer les logs en développement**
-
-```bash
-# Voir uniquement les erreurs
+# Voir uniquement les erreurs dans vos logs
 npm run dev | grep '"level":"error"'
 
-# Voir les actions utilisateur
+# Extraire les actions utilisateur
 npm run dev | grep '"category":"user_action"'
-
-# Voir les performances
-npm run dev | grep '"category":"performance"'
-```
-
----
-
-## 📋 **Référence rapide**
-
-### **Niveaux par environnement**
-
-- 🟢 **Développement** : debug, info, warn, error
-- 🟡 **Production** : warn, error
-- 🔴 **Tests** : error
-
-### **Catégories disponibles**
-
-- `user_action` - Actions utilisateur
-- `system` - Événements système
-- `error` - Erreurs applicatives
-- `performance` - Métriques de performance
-- `security` - Événements sécurité
-
-### **✅ Bonnes pratiques**
-
-1. **Toujours utiliser `requestId`** pour tracer les requêtes
-2. **Inclure le contexte métier** (userId, productId, etc.)
-3. **Ne jamais logger de données sensibles** (passwords, tokens, etc.)
-4. **Utiliser les helpers** (`logUserAction`, `logError`) plutôt que `logger` direct
-
-### **❌ À éviter**
-
-```typescript
-// Pas assez de contexte
-logger.info({}, 'Something happened');
-
-// Données sensibles
-logger.info({ password: 'secret123' }, 'User login');
-```
-
-### **✅ Recommandé**
-
-```typescript
-// Contexte riche et sécurisé
-logger.info(
-  {
-    userId: '123',
-    action: 'login_success',
-    requestId: 'req-456',
-  },
-  'User successfully authenticated'
-);
 ```

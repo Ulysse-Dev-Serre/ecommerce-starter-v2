@@ -1,60 +1,60 @@
-# 🎯 Comment ajouter des Pixels (Facebook, TikTok, Pinterest)
+# 🎯 Guide des Pixels Publicitaires (Meta, TikTok, Pinterest)
 
-Grâce à notre architecture **Google Tag Manager (GTM)**, vous n'avez **PLUS JAMAIS** besoin de modifier le code du site pour ajouter un outil publicitaire. Tout se fait dans l'interface de Google.
-
----
-
-## 1. Le Principe
-
-Le site envoie des signaux standard ("Page Vue", "Achat", "Ajout Panier") au conteneur GTM.
-C'est GTM qui se charge ensuite de traduire ces signaux pour Facebook, TikTok, etc.
-
-**Avantages :**
-*   ✅ Pas de déploiement de code nécessaire.
-*   ✅ Respect automatique du consentement (Cookies).
-*   ✅ Performance (scripts chargés en différé).
+Ce document explique comment intégrer et configurer vos outils de suivi marketing (Pixels) via **Google Tag Manager (GTM)**.
 
 ---
 
-## 2. Exemple : Ajouter le Pixel Facebook (Meta)
+## 1. Philosophie : Zéro Code
 
-1.  **Récupérer l'ID** : Allez dans Facebook Business Manager > Events Manager. Copiez votre `Pixel ID`.
-2.  **Ouvrir GTM** : Allez sur [tagmanager.google.com](https://tagmanager.google.com).
+Grâce à notre architecture centralisée, vous n'avez **jamais** besoin de modifier le code source du site pour ajouter un nouveau Pixel. Tout le déploiement se fait via l'interface de Google Tag Manager.
+
+### Avantages :
+- **Agilité** : Lancez une nouvelle campagne en quelques minutes sans attendre un développeur.
+- **Conformité RGPD** : Le site est configuré en **Consent Mode**. Les pixels ne s'activent que si l'utilisateur accepte les cookies.
+- **Performance** : Les scripts sont chargés de manière asynchrone pour ne pas ralentir la boutique.
+
+---
+
+## 2. Configuration Standard (Exemple : Meta/Facebook)
+
+1.  **Récupérer votre ID** : Dans votre Business Manager, copiez votre `Pixel ID`.
+2.  **Ouvrir GTM** : Accédez à votre conteneur [Tag Manager](https://tagmanager.google.com).
 3.  **Créer la Balise** :
-    *   Menu **Balises (Tags)** > **Nouvelle**.
-    *   Configuration : Chercher "Facebook Pixel" (ou "Custom HTML" et coller le script Facebook si le modèle n'existe pas).
-    *   *Astuce : Utilisez les modèles de la "Community Gallery" dans GTM, ils sont fiables.*
+    - Menu **Balises** > **Nouvelle**.
+    - Recherchez le modèle "Facebook Pixel" dans la galerie communautaire (fiable et maintenu).
+    - Collez votre ID.
 4.  **Déclencheur (Trigger)** :
-    *   Pour voir toutes les pages : Choisir **Initialization - All Pages**.
-5.  **Sauvegarder & Publier**.
-
-👉 C'est tout. Le Pixel est actif sur le site immédiatement.
+    - Pour le suivi de base : Choisissez **Initialization - All Pages**.
+5.  **Publier** : Cliquez sur "Envoyer" pour mettre en ligne.
 
 ---
 
-## 3. Exemple : Ajouter le Pixel TikTok
+## 3. Liste des Événements Trackés
 
-1.  **Récupérer l'ID** : Depuis TikTok Ads Manager.
-2.  **Ouvrir GTM** : Nouvelle Balise.
-3.  **Configuration** : Chercher le modèle officiel "TikTok Pixel" dans la galerie.
-4.  **Configurer** : Coller simplement le `Pixel ID`.
-5.  **Déclencheur** : **Initialization - All Pages**.
-6.  **Publier**.
+Notre boutique envoie automatiquement des signaux standard ("DataLayer Events") que vous pouvez utiliser dans GTM pour vos campagnes de conversion :
 
----
-
-## 4. Gérer les événements spécifiques (Achat, Panier)
-
-Pour tracker des actions précises (ex: "Purchase"), le principe est le même mais le déclencheur change.
-
-1.  **Créer un Déclencheur** dans GTM :
-    *   Type : **Événement Personnalisé (Custom Event)**.
-    *   Nom de l'événement : `purchase` (c'est le nom standard que notre code envoie).
-2.  **Créer la Balise** (ex: Facebook Purchase) :
-    *   Lier ce nouveau déclencheur.
+| Événement GTM | Action Client | Données envoyées (Metadata) |
+| :--- | :--- | :--- |
+| `page_view` | Consultation d'une page | URL, Titre de la page. |
+| `view_item` | Consultation d'un produit | ID, Nom, Prix, Catégorie. |
+| `add_to_cart` | Ajout d'un produit au panier | ID, Nom, Quantité, Prix. |
+| `begin_checkout` | Début du processus de paiement | Montant du panier. |
+| `purchase` | Paiement réussi | ID Commande, Total, Taxe, Liste des produits. |
 
 ---
 
-## ⚠️ Rappel Important
+## 4. Consentement et Cookies
 
-N'oubliez jamais de cliquer sur **"Envoyer" (Submit)** en haut à droite dans GTM. Tant que ce n'est pas fait, vos changements restent en mode "Brouillon" et ne sont pas visibles sur le site.
+**Point Critique :** Le site utilise un mode de consentement strict. 
+- Par défaut, GTM bloque l'envoi de données publicitaires (`ad_storage: denied`).
+- Lorsqu'un utilisateur clique sur "Accepter" dans la bannière de cookies du site, le signal de consentement est mis à jour.
+- Vos balises dans GTM doivent être configurées pour respecter ce consentement (c'est le cas par défaut des modèles officiels Meta/TikTok).
+
+---
+
+## 5. Maintenance et Débogage
+
+Pour vérifier que vos pixels fonctionnent correctement :
+1. Utilisez le bouton **"Prévisualiser"** dans GTM.
+2. Naviguez sur votre site.
+3. Vérifiez dans la console GTM que vos balises (`purchase`, `add_to_cart`) se déclenchent lors des actions correspondantes.

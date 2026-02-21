@@ -1,116 +1,65 @@
 # 🔄 Flux de Paiement & Sécurité Stripe
 
-> Pour un audit approfondi et technique (RBAC, analyse de vulnérabilités), voir le dossier [7-securite](../7-securite).
+Ce document décrit le cycle de vie d'un paiement, de l'initialisation du panier à la confirmation de la commande via les webhooks, ainsi que les mesures de sécurité critiques mises en place.
 
-## Comment c'est sécurisé ?
+---
 
-### 1. Les clés API sont séparées
+## 1. Comment c'est sécurisé ?
 
-- **Clé publique** (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`) → Utilisée côté client, pas de danger si elle est exposée
-- **Clé secrète** (`STRIPE_SECRET_KEY`) → Utilisée côté serveur uniquement, jamais exposée au client
-- **Secret webhook** (`STRIPE_WEBHOOK_SECRET`) → Utilisé pour vérifier que les webhooks viennent vraiment de Stripe
+### A. Séparation des Responsabilités (Clés API)
+- **Clé publique** (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`) : Utilisée côté client (Stripe Elements) pour collecter les informations de carte de manière sécurisée sans que les données ne transitent par notre serveur.
+- **Clé secrète** (`STRIPE_SECRET_KEY`) : Utilisée uniquement côté serveur pour créer les sessions de paiement.
+- **Secret Webhook** (`STRIPE_WEBHOOK_SECRET`) : Clé cryptographique unique permettant de vérifier que les messages reçus sur l'endpoint `/api/webhooks/stripe` viennent réellement de Stripe.
 
-### 2. Le client ne touche jamais aux paiements
+### B. Validation Cryptographique
+**Fichiers :** `src/lib/integrations/stripe/webhooks.ts` et `src/app/api/webhooks/stripe/route.ts`
 
-Toute la logique de paiement se passe côté serveur. Le client ne fait que :
-1. Demander une URL de paiement
-2. Être redirigé vers Stripe
-3. Revenir après le paiement
+Chaque webhook envoyé par Stripe possède une signature `stripe-signature`. Notre serveur recalcule cette signature avec son secret local pour valider l'authenticité de l'expéditeur. Si la signature ne correspond pas, la requête est rejetée (400 Bad Request).
 
-Le client ne peut pas créer de commandes directement, ni manipuler les montants.
+### C. Protection contre les Doublons (Idempotence)
+Stripe peut renvoyer plusieurs fois le même événement en cas de problème réseau (retry automatique). Pour éviter de créer deux commandes ou de décrémenter le stock deux fois :
+1. Chaque webhook reçu est enregistré dans la table `WebhookEvent`.
+2. Nous vérifions si l'ID d'événement de Stripe a déjà été marqué comme `processed`.
+3. Si oui, nous répondons `200 OK` sans rien faire de plus.
 
-### 3. Validation cryptographique des webhooks
+### D. Rate Limiting & Validation
+- **Rate Limit** : Un utilisateur est limité dans la création de sessions de paiement pour éviter les attaques par force brute ou le spam.
+- **Validation Backend** : Avant de rediriger vers Stripe, nous vérifions à nouveau les stocks et les prix en base de données. Le client ne peut pas "injecter" un prix modifié.
 
-**Fichier :** `src/lib/stripe/webhooks.ts`
+---
 
-Quand Stripe envoie un webhook, il l'accompagne d'une signature cryptographique. On vérifie cette signature pour être sûr que le webhook vient vraiment de Stripe et n'a pas été falsifié.
+## 2. Le Flux du Paiement (Step-by-Step)
 
-```typescript
-const signature = headers.get('stripe-signature');
-const event = stripe.webhooks.constructEvent(
-  body, 
-  signature, 
-  STRIPE_WEBHOOK_SECRET
-);
-```
+### Étape 1 : Initialisation
+Le client clique sur "Payer". Le serveur crée une `Checkout Session` Stripe en envoyant uniquement les IDs de produits. Stripe utilise ses propres données de prix (configurées via dashboard ou passées via signature sécurisée).
 
-Si la signature est invalide, on rejette le webhook immédiatement.
+### Étape 2 : Redirection
+Le client est redirigé vers l'hébergement sécurisé de Stripe (`checkout.stripe.com`). À ce stade, le stock est souvent **réservé** temporairement en base de données locale pour garantir la disponibilité.
 
-### 4. Protection contre les doublons (idempotence)
+### Étape 3 : Le Webhook (Source de Vérité)
+Une fois le paiement validé par la banque, Stripe envoie un message à notre serveur. C'est l'étape la plus fiable du processus.
 
-**Fichier :** `src/lib/stripe/webhooks.ts`
+**Fichier central :** `src/lib/services/orders/stripe-webhook.service.ts`
 
-Stripe peut envoyer le même webhook plusieurs fois (retry automatique). Pour éviter de créer 2 commandes pour le même paiement, on :
+| Événement | Action métier |
+| :--- | :--- |
+| `checkout.session.completed` | Analyse de la session et préparation de la commande. |
+| `payment_intent.succeeded` | **Confirmation finale** : Création de la commande, envoi de l'email de confirmation, et décrémentation définitive du stock. |
+| `payment_intent.payment_failed` | Alerte sur le tableau de bord et libération du stock réservé. |
+| `checkout.session.expired` | Libération du stock réservé (le client a abandonné son panier). |
 
-1. Calcule un hash unique du webhook
-2. Vérifie dans la table `WebhookEvent` si on l'a déjà traité
-3. Si oui, on ignore et retourne 200 OK
-4. Si non, on traite et on marque comme "processed"
+---
 
-### 5. Rate limiting
+## 3. Traçabilité et Audit
 
-**Fichier :** `src/app/api/checkout/create-session/route.ts`
+Pour chaque transaction, nous gardons une trace indélébile en base de données :
+- **Table `WebhookEvent`** : Historique technique de tous les échanges avec Stripe (utile pour le débuggage).
+- **Table `AuditLog`** : Journalisation de toutes les actions sensibles (ex: "Commande #123 créée suite au paiement Stripe ID X").
+- **Table `Payment`** : Lien entre notre commande interne et la transaction externe.
 
-On limite le nombre de sessions de paiement qu'un utilisateur peut créer (max 10 par minute) pour éviter :
-- Le spam
-- Les attaques DDoS
-- Les abus
+---
 
-Middleware utilisé : `withRateLimit` (déjà configuré dans le projet).
+## 4. En Résumé
 
-### 6. Validation des données
-
-Avant de créer une session Stripe, on vérifie :
-- Que le panier n'est pas vide
-- Que tous les produits existent
-- Que le stock est disponible
-- Que les prix sont cohérents
-
-## Les webhooks : pourquoi c'est important ?
-
-Les webhooks sont **la seule source de vérité** pour les paiements. Voici pourquoi :
-
-### Pourquoi ne pas créer la commande sur la page `/checkout/success` ?
-
-❌ **Problème :** Le client peut modifier l'URL, rafraîchir la page, ou partir avant que la page ne charge.
-
-✅ **Solution :** Le webhook est envoyé par Stripe directement à votre serveur, de manière fiable et sécurisée. C'est lui qui crée la commande.
-
-### Les événements webhook gérés
-
-**Fichier :** `src/lib/stripe/webhooks.ts`
-
-| Événement | Action |
-|-----------|--------|
-| `payment_intent.succeeded` | Paiement réussi → Créer la commande + décrémenter le stock |
-| `payment_intent.payment_failed` | Paiement échoué → Libérer le stock réservé |
-| `checkout.session.expired` | Session expirée → Libérer le stock réservé |
-
-### Comment on traite un webhook ?
-
-1. **Valider la signature** (authentification)
-2. **Vérifier l'idempotence** (éviter les doublons)
-3. **Traiter l'événement** (créer commande, etc.)
-4. **Répondre 200 OK** rapidement (< 5 secondes)
-5. **Logger tout** dans `WebhookEvent` et `AuditLog`
-
-## Logs et traçabilité
-
-Tout est enregistré dans la base de données :
-
-- **WebhookEvent** → Tous les webhooks reçus (avec hash, date, statut)
-- **AuditLog** → Toutes les actions (création commande, décrémentation stock, etc.)
-- **Payment** → Chaque paiement avec son ID Stripe (`externalId`)
-
-Ça permet de débugger, de vérifier les paiements, et de prouver qu'une transaction a eu lieu.
-
-## En résumé
-
-**3 niveaux de sécurité :**
-
-1. **Authentification** → Validation signature webhook + clés API séparées
-2. **Protection** → Rate limiting + idempotence + validation des données
-3. **Traçabilité** → Logs complets dans WebhookEvent et AuditLog
-
-Si quelqu'un vous demande comment c'est sécurisé, vous répondez :
-> "Les paiements passent par Stripe qui est certifié PCI-DSS. Côté serveur, on vérifie cryptographiquement que les webhooks viennent de Stripe grâce à une signature secrète. On a aussi du rate limiting pour empêcher le spam, et toutes les actions sont loggées dans la base de données."
+Si un auditeur de sécurité vous interroge :
+> "Notre flux de paiement est basé sur le modèle asynchrone sécurisé de Stripe. Aucune donnée de carte ne touche nos serveurs (Conformité PCI-DSS simplifiée). La sécurité repose sur la validation cryptographique des signatures de webhooks, une protection contre l'idempotence pour éviter les doubles commandes, et une centralisation de la logique métier dans des services backend protégés par rate-limiting."

@@ -1,72 +1,54 @@
-# Strategie SEO et Maintenance
+# 🎯 Stratégie SEO & Plan de Réussite
 
-Ce document définit les bonnes pratiques de contenu et le plan de suivi pour optimiser le référencement de la boutique.
-
----
-
-## 1. Liste de verification pre-lancement
-
-### URLs et Structure
-- URLs distinctes par langue (/fr/, /en/).
-- Absence de parametres inutiles (ex: ?lang=fr).
-- Structure coherente : /fr/produits/categorie/nom-produit.
-- Slugs traduits proprement.
-
-### Metadonnees
-- Titres uniques par page (50-60 caracteres).
-- Meta descriptions uniques (150-160 caracteres).
-- Open Graph locale configuree (fr_CA, en_US).
-- Textes alternatifs des images traduits.
-
-### Performance
-- Score PageSpeed > 90 sur mobile et desktop.
-- Core Web Vitals dans le vert.
-- Images compressees et nommees de facon descriptive.
+Ce document définit les bonnes pratiques éditoriales et le plan de suivi pour dominer les résultats de recherche et convertir vos visiteurs en clients.
 
 ---
 
-## 2. Contenu par Niche
+## 1. Rédaction de Contenu "Haute Performance"
 
-### Mots-cles cibles (Exemples)
-- **Plantes** : plantes d'interieur, plante facile entretien, livraison plantes Quebec, indoor plants.
-- **Animaux** : accessoires chien, collier personnalise, premium cat toys.
-- **Jouets** : jouets educatifs, safe baby toys, idees cadeaux enfant.
+Pour chaque fiche produit, suivez cette structure pour plaire à la fois à vos clients et aux algorithmes de Google :
 
-### Structure des pages produits
-- H1 : Nom du produit - Benefice principal.
-- H2 : Description (150-300 mots).
-- H2 : Caracteristiques techniques.
-- H2 : Guide d'utilisation ou d'entretien.
-- H2 : Avis clients.
+- **Titre (H1)** : Nom du Produit + Bénéfice émotionnel (ex: "Graines de Tomates Bio - Récolte Abondante").
+- **Structure H2** : Utilisez des sous-titres descriptifs (Description, Caractéristiques, Guide d'Entretien).
+- **Volume** : Visez au moins **200 à 300 mots** de texte unique par produit. Évitez de copier-coller les descriptions des fournisseurs.
+- **Images** : Chaque image doit avoir un texte alternatif (`alt text`) descriptif et traduit dans la langue de la page.
 
 ---
 
-## 3. Suivi et Analyse (KPIs)
+2. Checklist Pré-Lancement
+
+Avant de mettre un produit en ligne ("ACTIVE"), vérifiez ces 4 points :
+1. [ ] **Slug** : Est-il court, sans caractères spéciaux et contient-il le mot-clé principal ? (ex: `tomates-bio-premium`).
+2. [ ] **Métadonnées** : Le titre (50-60 car.) et la description (150-160 car.) sont-ils accrocheurs ?
+3. [ ] **Traductions** : Le contenu est-il présent à 100% en Français ET en Anglais ?
+4. [ ] **Images** : Sont-elles optimisées (WebP) pour garantir un chargement instantané ?
+
+---
+
+## 3. Pilotage et KPIs (Suivi)
 
 ### Google Search Console
-- Surveiller les erreurs d'indexation.
-- Analyser la progression des mots-cles.
-- Verifier les performances par page (CTR).
+C'est votre tableau de bord de santé. Surveillez :
+- **Impressions** : Est-ce que les gens voient votre site dans les résultats ?
+- **CTR (Taux de Clic)** : Est-ce que vos titres donnent envie de cliquer ?
+- **Erreurs d'indexation** : Corrigez immédiatement toute URL signalée comme "introuvable" (404).
 
 ### Google Analytics 4
-- Segmenter le trafic par langue.
-- Analyser les entonnoirs de conversion par source.
-- Suivre les revenus organiques vs payants.
+- **Conversion par Source** : Quel canal (Instagram, Google, Email) génère le plus de ventes RÉELLES ?
+- **Comportement** : Quelle est la page où les gens passent le plus de temps ?
 
 ---
 
-## 4. Actions de maintenance
+## 4. Calendrier de Maintenance SEO
 
-### Hebdomadaire
-- Verifier les erreurs dans la Search Console.
-- Corriger les liens casses eventuels.
+### Hebdomadaire (Routine)
+- Vérifier les erreurs critiques dans la Search Console.
+- S'assurer que les nouvelles pages produits sont bien présentes dans le sitemap.
 
-### Mensuel
-- Optimiser les pages ayant un faible taux de clic (CTR).
-- Ajouter du contenu saisonnier.
-- Mettre a jour les metadonnees des pages les plus performantes.
+### Mensuel (Optimisation)
+- Modifier les titres/descriptions des pages qui ont beaucoup d'impressions mais peu de clics.
+- Ajouter des articles de blog ou des guides d'achat pour renforcer l'autorité du site.
 
-### Trimestriel
-- Effectuer un audit technique complet.
-- Developper de nouveaux mots-cles de longue traine.
-- Revoir la strategie de contenu globale.
+### Trimestriel (Audit)
+- Analyse complète de la concurrence sur vos mots-clés stratégiques.
+- Mise à jour technique (Performance, Sécurité, Accessibilité).

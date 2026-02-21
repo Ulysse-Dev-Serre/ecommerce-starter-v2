@@ -25,7 +25,7 @@ const serverSchema = z.object({
   SHIPPO_API_KEY: z.string().min(1),
   SHIPPO_UPS_ACCOUNT_ID: z.string().optional(),
   SHIPPO_FROM_PHONE: z.string().optional(),
-  SHIPPO_WEBHOOK_SECRET: z.string().optional(),
+  SHIPPO_WEBHOOK_SECRET: z.string().optional().or(z.string().min(1).optional()), // Supports both naming conventions
   SHIPPO_EXPORT_B13A_OPTION: z.string().optional(),
   SHIPPO_EXPORT_B13A_NUMBER: z.string().optional(),
   SHIPPO_FROM_NAME: z.string().optional(),
@@ -135,7 +135,8 @@ export const env = {
   SHIPPO_API_KEY: process.env.SHIPPO_API_KEY!,
   SHIPPO_UPS_ACCOUNT_ID: process.env.SHIPPO_UPS_ACCOUNT_ID,
   SHIPPO_FROM_PHONE: process.env.SHIPPO_FROM_PHONE,
-  SHIPPO_WEBHOOK_SECRET: process.env.SHIPPO_WEBHOOK_SECRET,
+  SHIPPO_WEBHOOK_SECRET:
+    process.env.SHIPPO_WEBHOOK_SECRET || process.env.SHIPPO_WEBHOOK_TOKEN,
   SHIPPO_EXPORT_B13A_OPTION: process.env.SHIPPO_EXPORT_B13A_OPTION,
   SHIPPO_EXPORT_B13A_NUMBER: process.env.SHIPPO_EXPORT_B13A_NUMBER,
   SHIPPO_FROM_NAME: process.env.SHIPPO_FROM_NAME,

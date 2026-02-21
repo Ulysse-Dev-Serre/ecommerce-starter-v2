@@ -1,68 +1,70 @@
-#  Maintenance & Production (DB)
+# Maintenance & Production (DB)
 
-Ce guide détaille les commandes de maintenance de la base de données et le protocole à suivre pour faire évoluer le schéma sans risquer de perdre les données clients.
+Ce guide détaille les protocoles de maintenance et les bonnes pratiques pour faire évoluer votre base de données sans interruption de service ni perte de données.
 
 ---
 
 ## 1. Phase de Développement (Le "Bac à Sable")
 
-En développement, on modifie souvent le schéma. On peut se permettre de "casser" la base car les données sont fictives.
+En développement, l'objectif est la rapidité. On peut se permettre de réinitialiser la base pour tester de nouvelles structures.
 
-### Commandes Radicales
-- **`npm run db:push`** : Synchronise immédiatement le schéma `schema.prisma` avec la DB. **Attention** : Peut supprimer des données si une table est renommée ou supprimée.
-- **`npm run db:reset`** : Efface TOUT, recrée les tables et relance le seed (données de test). À utiliser pour repartir sur une base propre.
-- **`npm run db:studio`** : Ouvre une interface visuelle pour manipuler les données.
+### Commandes Utiles
+- **`npm run db:push`** : Synchronise immédiatement le schéma `schema.prisma` avec votre base locale. Utile pour prototyper rapidement. **Attention** : Peut supprimer des données si un champ est supprimé.
+- **`npm run db:reset`** : Efface TOUTES les données, recrée les tables et relance le script de seed (via `scripts/reset-database.ts`). Idéal pour repartir sur un état propre et connu.
+- **`npm run db:studio`** : Ouvre l'interface visuelle Prisma Studio pour visualiser et éditer vos données.
 
 ---
 
 ## 2. Phase de Production (Le Protocole "Zéro Perte")
 
-Lorsque vous avez des clients réels (ex: 300 clients fidèles), vous ne pouvez plus utiliser `db:push`. Il faut utiliser les **Migrations**.
+Dès que votre application est en ligne avec de vrais utilisateurs, l'utilisation de `db:push` est **interdite**. Vous devez passer par les **Migrations**.
 
 ### Pourquoi utiliser les Migrations ?
-Une migration est un script SQL qui décrit précisément le changement (ex: *"Ajouter une colonne 'phone' sans supprimer les autres"*). Cela permet de garder un historique et de tester le changement avant de l'appliquer en production.
+Une migration est un script SQL versionné qui décrit précisément le changement. Cela permet de tester la transition sur une base de test avant de l'appliquer à la production.
 
 ### Protocole de mise à jour sécurisé :
-1. **Modifier le schéma** dans `schema.prisma`.
+1. **Modifier le schéma** dans `prisma/schema.prisma`.
 2. **Générer la migration** (en local) :
    ```bash
-   # Remplacez 'nom_du_changement' par une description courte (ex: ajouter_tel)
-   npx prisma migrate dev --name nom_du_changement
+   # Utilise le script configuré dans package.json
+   npm run db:migrate -- --name nom_du_changement
    ```
-3. **Vérifier le fichier généré** : Allez dans le dossier `/prisma/migrations/DATE_NOM/migration.sql` pour vérifier que Prisma ne va pas supprimer de données par erreur.
-4. **Déployer** : Poussez votre code sur Git (le build Vercel appliquera la migration en sécurité).
+3. **Vérifier le fichier SQL** : Inspectez le fichier généré dans `/prisma/migrations/DATE_NOM/migration.sql`. Assurez-vous qu'il ne contient pas de `DROP COLUMN` inattendu.
+4. **Déploiement** : Poussez votre code sur Git. Le pipeline de déploiement (Vercel/GitHub Actions) appliquera automatiquement la migration via `prisma migrate deploy`.
 
 ---
 
-## 3.  Règles d'Or pour la Production (300+ clients)
+## 3. Règles d'Or de l'Évolution de Schéma
 
-Pour ne jamais perdre de données client lors d'une évolution :
+Pour garantir une transition fluide avec des milliers d'utilisateurs :
 
-*   **Règle #1 (Ajout)** : Toujours définir une valeur par défaut (`@default`) lors de l'ajout d'un champ obligatoire sur une table qui contient déjà des données.
-*   **Règle #2 (Suppression)** : Ne jamais supprimer une colonne (`DROP COLUMN`) en même temps que tu ajoutes sa remplaçante. Fais-le en deux migrations séparées (une pour ajouter, une pour supprimer une semaine plus tard après avoir migré les données).
-*   **Règle #3 (Renommage)** : Prisma peut parfois interpréter un renommage comme "Supprimer + Créer". **Vérifie toujours le fichier .sql** avant de valider.
-
----
-
-## 4. Nettoyage et Optimisation
-
-### Données Orphelines
-Parfois, des utilisateurs Clerk ne sont pas présents en DB (ou vice versa). 
-- Utilisez `npm run sync-clerk sync` pour rééquilibrer sans rien casser.
-
-### Stratégie de Backup (Neon)
-Votre base de données sur Neon.tech inclut des snapshots automatiques. Avant toute grosse mise à jour de schéma en production, il est conseillé de :
-1. Déclencher un snapshot manuel sur le dashboard Neon.
-2. Tester la migration sur une branche de base de données séparée (Preview branch).
+- **Règle #1 (Ajout)** : Si vous ajoutez un champ obligatoire (`required`), définissez toujours une valeur par défaut (`@default`) pour que les lignes existantes restent valides.
+- **Règle #2 (Destruction)** : Ne supprimez jamais une colonne en même temps que vous ajoutez sa remplaçante. Faites-le en deux étapes : 
+    1. Ajoutez le nouveau champ et migrez les données via un script.
+    2. Une fois que l'app utilise le nouveau champ, supprimez l'ancien dans une migration ultérieure.
+- **Règle #3 (Backup)** : Neon.tech permet de créer des **Branches de base de données**. Testez toujours vos migrations lourdes sur une branche de preview avant de toucher à la branche `main`.
 
 ---
 
-## 5. Commandes de "Secours" & Référence
-| Besoin | Commande | Contexte | Danger |
+## 4. Outils de Maintenance & Nettoyage
+
+### Synchronisation Clerk
+Si vous constatez un décalage entre vos utilisateurs Clerk et votre base de données locale (ex: suite à une erreur de webhook) :
+- **`npm run sync-clerk`** : Lance le script de synchronisation manuelle.
+
+### Nettoyage des Analytics
+Les événements de marketing (tracking) peuvent s'accumuler rapidement :
+- **`npm run db:cleanup-analytics`** : Supprime les anciens événements marketing selon votre politique de rétention (défini dans `scripts/cleanup-analytics.ts`).
+
+---
+
+## 5. Récapitulatif des Commandes
+
+| Besoin | Commande | Environnement | Risque |
 | :--- | :--- | :--- | :--- |
-| Voir les données | `npm run db:studio` | Dev/Prod | Faible |
-| **Archiver changements** | `npx prisma migrate dev` | **Dev** | Moyen |
-| **Sécuriser Schéma** | `npx prisma migrate dev --name sync_state` | **Dev** | Aucun |
-| Appliquer Migrations | `npx prisma migrate deploy` | **Production** | Faible |
-| Forcer le schéma | `npm run db:push` | Dev uniquement | **EXTRÊME** |
-| Réparer Clerk Sync | `npm run sync-clerk sync` | Maintenance | Aucun |
+| **Pousser schéma (rapide)** | `npm run db:push` | Dev | **ÉLEVÉ** |
+| **Créer une migration** | `npm run db:migrate` | Dev | Moyen |
+| **Réinitialiser tout** | `npm run db:reset` | Dev | Critique (Données) |
+| **Voir les données** | `npm run db:studio` | Tous | Faible |
+| **Sync utilisateurs** | `npm run sync-clerk` | Maintenance | Aucun |
+| **Nettoyer logs** | `npm run db:cleanup-analytics` | Maintenance | Aucun |

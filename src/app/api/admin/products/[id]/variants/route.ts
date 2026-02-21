@@ -39,7 +39,7 @@ async function getVariantsHandler(
       userId: authContext.userId,
       productId: id,
     },
-    `Récupération des variantes du produit: ${id}`
+    `Fetching product variants for: ${id}`
   );
 
   try {
@@ -52,7 +52,7 @@ async function getVariantsHandler(
         productId: id,
         count: variants.length,
       },
-      `${variants.length} variante(s) récupérée(s)`
+      `${variants.length} variant(s) retrieved`
     );
 
     return NextResponse.json(
@@ -77,7 +77,7 @@ async function getVariantsHandler(
         productId: id,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Erreur lors de la récupération des variantes'
+      'Error while fetching variants'
     );
     throw error;
   }
@@ -133,7 +133,7 @@ async function createVariantsHandler(
             ? 'auto-generation'
             : 'manual',
       },
-      `Création de variantes pour le produit: ${productId}`
+      `Creating variants for product: ${productId}`
     );
 
     let variantsToCreate: CreateVariantData[];
@@ -151,7 +151,7 @@ async function createVariantsHandler(
           productId,
           generatedCount: variantsToCreate.length,
         },
-        `${variantsToCreate.length} combinaisons générées`
+        `${variantsToCreate.length} combinations generated`
       );
     } else {
       // Mode manuel - validatedData.variants est déjà validé par Zod
@@ -170,7 +170,7 @@ async function createVariantsHandler(
         productId,
         count: createdVariants.length,
       },
-      `${createdVariants.length} variante(s) créée(s) avec succès`
+      `${createdVariants.length} variant(s) created successfully`
     );
 
     return NextResponse.json(
@@ -197,7 +197,7 @@ async function createVariantsHandler(
         productId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Erreur lors de la création des variantes'
+      'Error while creating variants'
     );
 
     // Gérer les erreurs de contrainte unique (SKU duplicate)

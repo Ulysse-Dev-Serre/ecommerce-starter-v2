@@ -15,21 +15,51 @@ import {
 } from '@/lib/validators/admin';
 
 async function createLocationHandler(
-  _req: NextRequest,
+  request: NextRequest,
   { auth, data }: ApiContext<undefined, CreateLocationInput>
 ) {
+  const requestId = crypto.randomUUID();
   const { userId } = auth as AuthContext;
+
+  logger.info(
+    {
+      requestId,
+      action: 'admin_create_location',
+      userId,
+      locationName: data!.name,
+    },
+    'Admin creating logistics location'
+  );
 
   const supplier = await logisticsLocationService.createLocation(
     data as CreateLocationData
   );
 
   logger.info(
-    { supplierId: supplier.id, userId },
-    'Created new logistics location'
+    {
+      requestId,
+      action: 'location_created_successfully',
+      supplierId: supplier.id,
+      userId,
+    },
+    'Created new logistics location successfully'
   );
 
-  return NextResponse.json(supplier);
+  return NextResponse.json(
+    {
+      success: true,
+      requestId,
+      data: supplier,
+      message: 'Location created successfully',
+      timestamp: new Date().toISOString(),
+    },
+    {
+      status: 201,
+      headers: {
+        'X-Request-ID': requestId,
+      },
+    }
+  );
 }
 
 export const POST = withError(

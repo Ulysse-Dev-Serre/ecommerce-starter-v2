@@ -32,7 +32,7 @@ async function getVariantHandler(
       productId,
       variantId,
     },
-    `Récupération de la variante: ${variantId}`
+    `Fetching variant: ${variantId}`
   );
 
   try {
@@ -45,7 +45,7 @@ async function getVariantHandler(
           action: 'variant_not_found',
           variantId,
         },
-        `Variante non trouvée: ${variantId}`
+        `Variant not found: ${variantId}`
       );
 
       return NextResponse.json(
@@ -74,7 +74,7 @@ async function getVariantHandler(
           variantProductId: variant.product?.id,
           requestedProductId: productId,
         },
-        "La variante n'appartient pas à ce produit"
+        'Variant does not belong to this product'
       );
 
       return NextResponse.json(
@@ -101,7 +101,7 @@ async function getVariantHandler(
         variantId,
         sku: variant.sku,
       },
-      `Variante récupérée: ${variant.sku}`
+      `Variant retrieved: ${variant.sku}`
     );
 
     return NextResponse.json(
@@ -125,7 +125,7 @@ async function getVariantHandler(
         variantId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Erreur lors de la récupération de la variante'
+      'Error while fetching variant'
     );
     throw error;
   }
@@ -174,7 +174,7 @@ async function updateVariantHandler(
         productId,
         variantId,
       },
-      `Mise à jour de la variante: ${variantId}`
+      `Updating variant: ${variantId}`
     );
 
     // Vérifier que la variante existe et appartient au produit
@@ -236,7 +236,7 @@ async function updateVariantHandler(
         sku: updatedVariant?.sku,
         updatedFields: Object.keys(updateData),
       },
-      `Variante mise à jour: ${updatedVariant?.sku}`
+      `Variant updated: ${updatedVariant?.sku}`
     );
 
     return NextResponse.json(
@@ -261,7 +261,7 @@ async function updateVariantHandler(
         variantId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Erreur lors de la mise à jour de la variante'
+      'Error while updating variant'
     );
 
     // Gérer les erreurs de contrainte unique (SKU duplicate)
@@ -311,7 +311,7 @@ async function deleteVariantHandler(
       productId,
       variantId,
     },
-    `Suppression de la variante: ${variantId}`
+    `Deleting variant: ${variantId}`
   );
 
   try {
@@ -361,7 +361,7 @@ async function deleteVariantHandler(
         variantId,
         sku: deletedVariant.sku,
       },
-      `Variante supprimée définitivement: ${deletedVariant.sku}`
+      `Variant permanently deleted: ${deletedVariant.sku}`
     );
 
     return NextResponse.json(
@@ -386,7 +386,7 @@ async function deleteVariantHandler(
         variantId,
         error: error instanceof Error ? error.message : 'Unknown error',
       },
-      'Erreur lors de la suppression de la variante'
+      'Error while deleting variant'
     );
     throw error;
   }
