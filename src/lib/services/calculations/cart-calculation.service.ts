@@ -1,4 +1,4 @@
-import { Decimal } from '@prisma/client/runtime/library';
+import { Decimal } from '@/generated/prisma';
 
 import { logger } from '@/lib/core/logger';
 import {

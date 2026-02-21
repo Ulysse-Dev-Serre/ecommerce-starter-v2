@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { formatWeight, formatDimensions } from './unit';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
+import Decimal = Prisma.Decimal;
 
 describe('Unit Utils', () => {
   describe('formatWeight', () => {

@@ -75,7 +75,7 @@ Ce mode crée trois profils types dans votre instance Clerk :
 ## 5. Sécurité et Sessions
 
 ### Validation en Temps Réel
-Notre Middleware (`middleware.ts`) valide les sessions Clerk de manière atomique à chaque requête. Si un utilisateur est supprimé sur Clerk, son accès est immédiatement révoqué sur le site, puis supprimé en base locale lors de la réception du webhook `user.deleted`.
+Notre Proxy (`proxy.ts`) valide les sessions Clerk de manière atomique à chaque requête. Si un utilisateur est supprimé sur Clerk, son accès est immédiatement révoqué sur le site, puis supprimé en base locale lors de la réception du webhook `user.deleted`.
 
 ### Priorité à l'ID Clerk
 Dans tout le code source, l'utilisateur n'est jamais identifié par son email ou un ID incrémental SQL, mais par son **`clerkId`**. C'est le contrat de confiance qui lie votre base de données à l'autorité d'authentification.

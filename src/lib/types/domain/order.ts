@@ -1,7 +1,8 @@
-import { JsonValue } from '@prisma/client/runtime/library';
 import Stripe from 'stripe';
 
-import { OrderStatus, Language, Shipment } from '@/generated/prisma';
+import { OrderStatus, Language, Shipment, Prisma } from '@/generated/prisma';
+
+type JsonValue = Prisma.JsonValue;
 
 import { CartProjection } from './cart';
 

@@ -1,4 +1,5 @@
-import { JsonValue } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
+type JsonValue = Prisma.JsonValue;
 
 import { Supplier } from '@/generated/prisma';
 

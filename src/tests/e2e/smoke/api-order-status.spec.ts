@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { prisma } from '@/lib/core/db';
+import { prisma } from '../fixtures/db';
 
 import {
   createTestOrder,

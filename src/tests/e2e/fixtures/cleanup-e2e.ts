@@ -3,7 +3,7 @@
  * Cleans ONLY test data safely
  */
 
-import { prisma } from '@/lib/core/db';
+import { prisma } from './db';
 
 /**
  * Complete cleanup of ALL E2E test data
@@ -29,7 +29,9 @@ export async function cleanupAllE2EData(testEmail?: string) {
     });
 
     if (e2eProducts.length > 0) {
-      const variantIds = e2eProducts.flatMap(p => p.variants.map(v => v.id));
+      const variantIds = e2eProducts.flatMap((p: any) =>
+        p.variants.map((v: any) => v.id)
+      );
 
       if (variantIds.length > 0) {
         const cartsWithE2E = await prisma.cartItem.findMany({
@@ -39,7 +41,7 @@ export async function cleanupAllE2EData(testEmail?: string) {
         });
 
         if (cartsWithE2E.length > 0) {
-          const cartIds = cartsWithE2E.map(c => c.cartId);
+          const cartIds = cartsWithE2E.map((c: any) => c.cartId);
           const deletedCarts = await prisma.cart.deleteMany({
             where: { id: { in: cartIds } },
           });
@@ -62,7 +64,7 @@ export async function cleanupAllE2EData(testEmail?: string) {
       select: { attributeValueId: true },
       distinct: ['attributeValueId'],
     });
-    const usedValueIds = usedValues.map(v => v.attributeValueId);
+    const usedValueIds = usedValues.map((v: any) => v.attributeValueId);
 
     // Delete all values NOT in use
     const deletedValues = await prisma.productAttributeValue.deleteMany({
@@ -84,7 +86,7 @@ export async function cleanupAllE2EData(testEmail?: string) {
 
     if (attributesWithoutValues.length > 0) {
       const deletedAttrs = await prisma.productAttribute.deleteMany({
-        where: { id: { in: attributesWithoutValues.map(a => a.id) } },
+        where: { id: { in: attributesWithoutValues.map((a: any) => a.id) } },
       });
       console.log(`✅ Deleted ${deletedAttrs.count} orphaned attributes`);
     }

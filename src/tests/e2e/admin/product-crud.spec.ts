@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 import { DEFAULT_LOCALE } from '@/lib/config/site';
-import { prisma } from '@/lib/core/db';
-import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
+import { prisma } from '../fixtures/db';
+import { cleanupOrphanedAttributes } from '../fixtures/test-cleanup';
 
 import { verifyProductCreated } from '../fixtures/seed-test-data';
 import { LogisticsPage } from '../pom/admin/LogisticsPage';
@@ -124,7 +124,7 @@ test.describe('Admin Logistics & Product Workflow', () => {
         });
         console.log(
           '❌ Product not found by slug. Latest products in DB:',
-          allProducts.map(p => ({ slug: p.slug, id: p.id }))
+          allProducts.map((p: any) => ({ slug: p.slug, id: p.id }))
         );
       }
 

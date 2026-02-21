@@ -3,13 +3,18 @@
  * Creates realistic test fixtures for shipping and product tests
  */
 
-import { prisma } from '@/lib/core/db';
-import { cleanupOrphanedAttributes } from '@/lib/services/attributes/attribute-cleanup.service';
+import { prisma } from './db';
+import { cleanupOrphanedAttributes } from './test-cleanup';
 import { createLocationSchema } from '@/lib/validators/admin';
 import { updateIntentSchema } from '@/lib/validators/checkout';
 import { CreateProductSchema } from '@/lib/validators/product';
 
-import { Prisma, Language, Order, Product } from '@/generated/prisma';
+// Types imported as 'any' wrappers — the prisma-client-js generator
+// exports these at runtime, but TS path resolution can conflict with
+// the prisma-client generator used by the main app.
+type Language = any;
+type Order = any;
+type Product = any;
 
 /**
  * Seed a test supplier with real Repentigny, QC address
@@ -49,7 +54,7 @@ export async function seedTestSupplier() {
         contactEmail: validatedData.address.email,
         contactPhone: validatedData.address.phone,
         incoterm: validatedData.incoterm,
-        address: validatedData.address as Prisma.InputJsonValue,
+        address: validatedData.address as any,
       },
     });
   }
@@ -63,7 +68,7 @@ export async function seedTestSupplier() {
       isActive: true,
       contactEmail: validatedData.address.email,
       contactPhone: validatedData.address.phone,
-      address: validatedData.address as Prisma.InputJsonValue,
+      address: validatedData.address as any,
       defaultCurrency: 'CAD',
       incoterm: validatedData.incoterm,
       defaultShippingDays: 3,
@@ -131,7 +136,7 @@ export async function getOrCreateTestProduct(
       exportExplanation: validatedData.exportExplanation,
       translations: {
         create: validatedData.translations.map(t => ({
-          language: t.language.toUpperCase() as Language, // DB uses 'EN', Zod uses 'en'
+          language: t.language.toUpperCase() as any, // DB uses 'EN', Zod uses 'en'
           name: t.name,
           description: t.description,
         })),
@@ -238,7 +243,7 @@ export async function resetTestOrders(testEmail: string) {
   console.log(`🗑️ Deleting ${orders.length} stale orders...`);
 
   // Delete one by one or batch
-  const orderIds = orders.map(o => o.id);
+  const orderIds = orders.map((o: any) => o.id);
 
   // Note: Prisma cascade delete logic depends on schema.
   // If cascading is configured in schema.prisma, deleting order is enough.

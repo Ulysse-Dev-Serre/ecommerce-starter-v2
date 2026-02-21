@@ -1,4 +1,5 @@
-import { InputJsonValue } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
+type InputJsonValue = Prisma.InputJsonValue;
 
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';

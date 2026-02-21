@@ -1,163 +1,79 @@
-# E-Commerce Starter V2
+#  E-Commerce Starter V2
 
-## Vision 
-architecture Multi-Tenant (isolée)
+**Le starter kit ultime pour déployer des boutiques e-commerce haute performance en quelques jours.**
 
-**Starter e-commerce universel, flexible et prêt à l'emploi** pour lancer rapidement des boutiques en ligne dans n'importe quelle niche et pays.
-
-### Philosophie
-
-Base technique solide et modulaire pour déployer des **boutiques dédiées** par marché :
-
-- **Un Site = Un Pays** : Chaque déploiement cible un marché spécifique avec sa propre devise et configuration fiscale.
-- **Architecture Duplicable** : Le même code source peut propulser `mon-shop.ca` (CAD) et `mon-shop.fr` (EUR) simplement en changeant la configuration.
-- **Multi-niches** : Animaux, plantes, jouets, vêtements, électronique...
-- **Multi-langues** : Support bilingue (ex: FR/EN au Canada) mais devises fixes par instance.
-- **Déploiement rapide** : De l'idée à la boutique en ligne en quelques jours.
+Ce projet n'est pas juste un "template", c'est une infrastructure **Multi-Tenant** pensée pour la scalabilité internationale et la gestion multi-marchés.
 
 ---
 
-## Démarrage rapide
+## Vision : Un Starter Universel
+
+Le Starter a été conçu autour de quatre piliers fondamentaux :
+
+1.  **Un Site = Un Pays / Une Devise** : Chaque instance cible un marché spécifique (ex: Canada en CAD, France en EUR) avec sa propre logique fiscale et logistique.
+2.  **Centralisation Totale** : Une seule base de données Postgres pour tous vos déploiements. Les produits sont créés une seule fois et partagés entre tous vos sites.
+3.  **Localisation Native** : Support bilingue (ex: FR/EN pour le Canada) avec des URLs propres et une gestion intelligente des dictionnaires.
+4.  **Zéro Hardcoding** : Toute la logique métier est centralisée dans `site.ts`. Modifiez une ligne, et toute la boutique s'adapte.
+
+---
+
+##  Architecture des Données
+
+*   **Produits Centralisés** : Traductions automatiques via `ProductTranslation`.
+*   **Pricing Dynamique** : Stratégies de prix indépendantes par devise (ex: 100 CAD != 72 USD) via `ProductVariantPricing`.
+*   **Logistique Réelle** : Calcul des frais de port en temps réel via l'intégration native de **Shippo**.
+*   **Paiement Global** : Tunnel de paiement sécurisé avec **Stripe** (incluant Stripe Tax).
+
+---
+
+##  Démarrage Rapide
 
 ```bash
-git clone [repo]
-cd ecommerce-starter-v2
+git clone [repo-url] my-shop
+cd my-shop
 npm install
 cp .env.exemple .env
-# Éditer .env avec les clés (Neon + Clerk)
+# Configurez Neon & Clerk dans le .env
 npm run dev
 ```
 
-**Prêt en 5 minutes** -> [Guide installation détaillé](docs/setup.md)
+---
+
+##  Centre de Commandes (Documentation)
+
+Ne vous perdez pas dans le code. Toute la puissance du Starter est documentée et organisée.
+
+###  [L'INDEX COMPLET DES GUIDES](./docs/INDEX.md)
+
+###  Le Cockpit Admin (Les 4 Piliers) :
+1.  **[Configuration Initiale](./docs/0-admin/1-CONFIG-INITIALE.md)** : Votre .env, votre `site.ts` et votre premier accès Admin.
+2.  **[Protocole IA](./docs/0-admin/2-AI-STARTUP-PROTOCOLE.md)** : Comment utiliser une IA pour transformer ce starter selon votre niche.
+3.  **[Dashboard Admin](./docs/0-admin/3-DASHBOARD-ADMIN.md)** : Guide de gestion du catalogue, des stocks et des commandes.
+4.  **[Lancement Prod](./docs/0-admin/4-LANCEMENT-PRODUCTION.md)** : La checklist ultime avant de passer en "Live".
 
 ---
 
-## Fonctionnalités incluses
+## Stack Technique
 
-### E-commerce complet
-
-- Catalogue produits avec variantes
-- Panier intelligent (invité + connecté)
-- Checkout sécurisé Stripe
-- Gestion commandes et emails automatiques
-
-### International par design
-
-- **Architecture Multi-Marchés** : Conçu pour gérer des déploiements distincts (ex: USA vs Canada).
-- **URLs bilingues** : `/fr/` et `/en/` gérés nativement pour les pays bilingues.
-- **Localisation Statique** : Calculs de taxes et expédition calibrés pour le pays de l'instance.
-
-### Production-ready
-
-- Authentification robuste (Clerk)
-- Sécurité avancée (rate limiting, CSRF, XSS)
-- Monitoring et logs structurés
-- Tests automatisés
-
-### Personnalisation rapide
-
-- Système de thèmes CSS en quelques clics
-- Configuration par variables d'environnement
-- Architecture modulaire extensible
-
-**Exemples** : Boutique de plantes, accessoires pour chiens, jouets éducatifs
+*   **Frontend** : React 19 + Next.js 15 (App Router) + Tailwind CSS 4.
+*   **Backend** : Service Layer (Business Logic isolée) + Prisma ORM.
+*   **Auth** : Clerk (RBAC natif Admin/Client).
+*   **Database** : PostgreSQL (Neon).
+*   **Emails** : Resend (React Email).
 
 ---
 
-## Stack technique
+##  Commandes Essentielles
 
-- **Frontend** : Next.js 15 + TypeScript + Tailwind CSS
-- **Backend** : Next.js API Routes + Prisma ORM
-- **Base de données** : PostgreSQL
-- **Auth** : Clerk
-- **Paiements** : Stripe
-- **Traductions** : next-intl (FR/EN)
-- **Déploiement** : Vercel/Railway/DigitalOcean
-- **Données** : Base de données PostgreSQL centralisée (Neon)
-
-### Architecture des Données
-
-- **Base de Données Unique** : Tous les sites/pays se connectent à la même base de données.
-- **Produits Centralisés** : Les produits sont définis une seule fois avec des traductions (`ProductTranslation`) pour chaque langue.
-- **Prix Multi-Devises** : Chaque variante a des prix spécifiques par devise (`ProductVariantPricing`), permettant des stratégies de prix indépendantes par marché (ex: 100 CAD != 72 USD).
+| Commande | Action |
+| :--- | :--- |
+| `npm run dev` | Lancer le serveur local |
+| `npm run db:push` | Synchroniser le schéma Prisma |
+| `npm run db:studio` | Interface visuelle pour la base de données |
+| `npm run sync-clerk sync` | Synchroniser les utilisateurs Clerk → DB |
+| `npm run test` | Lancer la suite de tests Vitest / Playwright |
 
 ---
 
-## Commandes essentielles
-
-```bash
-# Développement
-npm run dev              # Démarrer l'app (localhost:3000)
-npm run db:studio        # Interface database (localhost:5555)
-
-# Base de données
-npm run db:push          # Synchroniser le schéma (sans migrations)
-npm run db:migrate       # Appliquer les migrations (Production)
-npm run sync-clerk sync # Synchroniser les utilisateurs Clerk vers la DB
-
-# Qualité
-npm run lint             # ESLint + correction auto
-npm run test             # Tests Jest
-npm run build            # Build production
-```
-
----
-
-## Documentation
-
-### Premier démarrage
-
-- **[Installation & Setup](docs/setup.md)** - Guide complet étape par étape
-- **[Clerk ↔ PostgreSQL](docs/4-database-stack/clerk-postgres-sync.md)** - Synchronisation utilisateurs
-
-### Compréhension du projet
-
-- **[Navigation documentation](docs/INDEX.md)** - Table des matières
-- **[Architecture](docs/1-foundations/architecture.md)** - Structure technique complète
-- **[Roadmap](docs/1-foundations/Roadmap.md)** - Évolution et milestones
-
-### Guides techniques
-
-- **[Architecture i18n](docs/2-Language_internationalization/i18n-architecture.md)** - Ajouter des langues
-- **[Thèmes CSS](docs/8-frontend/theming.md)** - Personnaliser l'apparence
-- **[Logging & Debug](docs/3-development-tools/logging.md)** - Monitoring avancé
-
----
-
-## Objectifs du starter
-
-### Pour l'entreprise
-
-- **Time-to-market** : Boutique en 1 semaine au lieu de 6 mois
-- **Coûts réduits** : Base technique éprouvée
-- **Scalabilité** : Architecture pensée pour grandir
-
-### Pour le développement
-
-- **Code quality** : TypeScript, tests, documentation
-- **Maintenabilité** : Architecture modulaire
-- **Extensibilité** : APIs bien définies
-
-### Pour les projets clients
-
-- **Réutilisabilité** : Base pour plusieurs projets e-commerce
-- **Personnalisation** : Thèmes par client
-- **Support** : Documentation complète
-
----
-
-## ⚙️ Configuration Centralisée
-
-Le starter adopte une philosophie de **"Zéro Hardcoding"**.
-- **SSOT (Single Source of Truth)** : Toute la configuration métier (devises, pays, adresses d'origine, frais de port) est centralisée dans `src/lib/config/site.ts`.
-- **Zéro Fallback** : Le système est conçu pour échouer de manière explicite si une configuration vitale est manquante, garantissant l'intégrité des données transactionnelles.
-
----
-
-## Licence
-
-MIT License - Utilisation libre pour projets commerciaux.
-
----
-
-**Besoin d'aide ?** Consulter la [navigation documentation](docs/INDEX.md) ou créer une issue.
+**Licence** : MIT – Utilisation libre pour projets commerciaux.
+**Support** : Consultez l'**[Index de la Documentation](./docs/INDEX.md)**.

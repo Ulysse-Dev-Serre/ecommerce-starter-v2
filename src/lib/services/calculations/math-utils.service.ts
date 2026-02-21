@@ -1,4 +1,4 @@
-import { Decimal } from '@prisma/client/runtime/library';
+import { Decimal } from '@/generated/prisma';
 
 /**
  * Arrondi banquier (half-even) pour les calculs financiers

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { formatPrice, getPriceForCurrency, convertCurrency } from './currency';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
+import Decimal = Prisma.Decimal;
 
 describe('Currency Utils', () => {
   describe('formatPrice', () => {

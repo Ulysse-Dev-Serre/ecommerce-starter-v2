@@ -4,7 +4,8 @@ import {
   getPrice,
   serializeCalculation,
 } from './cart-calculation.service';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Prisma } from '@/generated/prisma';
+import Decimal = Prisma.Decimal;
 import { CartProjection } from '@/lib/types/domain/cart';
 import { Currency } from '@/lib/types/domain/calculation';
 

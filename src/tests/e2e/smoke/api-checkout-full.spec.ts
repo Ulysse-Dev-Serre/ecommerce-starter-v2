@@ -1,8 +1,6 @@
 import { test, expect } from '@playwright/test';
 import Stripe from 'stripe';
 
-import { Product } from '@/generated/prisma';
-
 import {
   getTestSupplierId,
   getOrCreateTestProduct,
@@ -25,7 +23,7 @@ import {
 test.describe('Full API Checkout Flow (Shippo + Stripe + Resend)', () => {
   let testSupplierId: string;
   let testVariantId: string;
-  let testProduct: Product & { variants: Array<{ id: string }> };
+  let testProduct: any;
   const testEmail = process.env.TEST_ADMIN_EMAIL || 'agtechnest@gmail.com';
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {

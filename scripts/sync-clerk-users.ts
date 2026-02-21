@@ -2,12 +2,11 @@
 import { createClerkClient } from '@clerk/backend';
 import * as dotenv from 'dotenv';
 
-import { PrismaClient, UserRole } from '../src/generated/prisma';
+import { prisma } from '../src/lib/core/db';
+import { UserRole } from '../src/generated/prisma';
 
 // Charger les variables d'environnement
 dotenv.config({ path: '.env.local' });
-
-const prisma = new PrismaClient();
 
 // Créer le client Clerk avec les variables d'environnement
 const clerkClient = createClerkClient({

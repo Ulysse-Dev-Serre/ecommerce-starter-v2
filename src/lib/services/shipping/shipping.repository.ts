@@ -2,22 +2,22 @@ import { prisma } from '@/lib/core/db';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 
 import { Prisma } from '@/generated/prisma';
+import { ProductVariantInclude } from '@/generated/prisma/models/ProductVariant';
 
 /**
  * Strict definition of the relations required for shipping calculations.
- * Using Prisma.validator ensures that any change in the schema that breaks
+ * Using a constant and satisfying the type ensures that any changes to
  * these requirements will be caught at compile time.
  */
-export const SHIPPING_VARIANT_INCLUDE =
-  Prisma.validator<Prisma.ProductVariantInclude>()({
-    pricing: { orderBy: { validFrom: 'desc' as Prisma.SortOrder }, take: 1 },
-    product: {
-      include: {
-        translations: true,
-        shippingOrigin: true,
-      },
+export const SHIPPING_VARIANT_INCLUDE = {
+  pricing: { orderBy: { validFrom: 'desc' as any }, take: 1 },
+  product: {
+    include: {
+      translations: true,
+      shippingOrigin: true,
     },
-  });
+  },
+} satisfies ProductVariantInclude;
 
 export type ShippingVariantWithRelations = Prisma.ProductVariantGetPayload<{
   include: typeof SHIPPING_VARIANT_INCLUDE;

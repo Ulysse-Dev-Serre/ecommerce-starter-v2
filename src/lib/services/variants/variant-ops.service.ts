@@ -11,7 +11,7 @@ import {
   VariantWithRelations,
 } from '@/lib/types/domain/variant';
 
-import { Prisma } from '@/generated/prisma';
+import { Prisma, Decimal, InputJsonValue } from '@/generated/prisma';
 
 import { validateVariantAttributes } from './variant-generator.service';
 import {
@@ -101,7 +101,7 @@ export async function createSimpleVariants(
 
     // Prepare pricing data dynamically
     const pricingData: Array<{
-      price: Prisma.Decimal;
+      price: Decimal;
       currency: string;
       priceType: string;
       isActive: boolean;
@@ -241,7 +241,7 @@ export async function createVariants(
             ? new Prisma.Decimal(variantData.weight)
             : undefined,
           dimensions: variantData.dimensions
-            ? (variantData.dimensions as unknown as Prisma.InputJsonValue)
+            ? (variantData.dimensions as unknown as InputJsonValue)
             : undefined,
           attributeValues: {
             create: variantData.attributeValueIds.map(attributeValueId => ({
@@ -322,7 +322,7 @@ export async function updateVariant(
       updateData.weight !== null ? new Prisma.Decimal(updateData.weight) : null;
   if (updateData.dimensions !== undefined)
     variantUpdate.dimensions =
-      updateData.dimensions as unknown as Prisma.InputJsonValue;
+      updateData.dimensions as unknown as InputJsonValue;
 
   await prisma.$transaction(async tx => {
     await tx.productVariant.update({

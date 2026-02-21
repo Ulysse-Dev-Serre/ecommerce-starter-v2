@@ -44,8 +44,8 @@ function applySecurityHeaders(response: NextResponse) {
   return response;
 }
 
-// Logger minimal pour middleware
-function logMiddleware(
+// Logger minimal pour le Proxy
+function logProxy(
   level: 'INFO' | 'WARN' | 'ERROR',
   data: Record<string, unknown>,
   message: string
@@ -59,7 +59,7 @@ function logMiddleware(
     const logEntry = {
       timestamp: new Date().toISOString(),
       level: level.toLowerCase(),
-      service: 'middleware',
+      service: 'proxy',
       ...data,
       message,
     };
@@ -100,7 +100,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       targetLocale = env.ADMIN_LOCALE;
     }
 
-    logMiddleware(
+    logProxy(
       'WARN',
       {
         requestId,
