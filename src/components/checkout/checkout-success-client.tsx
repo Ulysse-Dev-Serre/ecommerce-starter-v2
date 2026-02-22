@@ -14,8 +14,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { verifyOrder } from '@/lib/client/orders';
 import { trackEvent } from '@/lib/client/analytics';
+import { verifyOrder } from '@/lib/client/orders';
 import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { NAV_ROUTES } from '@/lib/config/nav-routes';
 import {

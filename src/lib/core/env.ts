@@ -13,29 +13,16 @@ const serverSchema = z.object({
   // Stripe (Paiements)
   STRIPE_SECRET_KEY: z.string().min(1),
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
-  STRIPE_AUTOMATIC_TAX: z.string().transform(val => val === 'true'),
 
   // Resend (Emails)
   RESEND_API_KEY: z.string().min(1),
-  FROM_EMAIL: z.string().min(1),
-  ADMIN_EMAIL: z.string().email(),
-  ADMIN_LOCALE: z.string().default('fr'),
 
   // Shippo (Livraison)
   SHIPPO_API_KEY: z.string().min(1),
   SHIPPO_UPS_ACCOUNT_ID: z.string().optional(),
-  SHIPPO_FROM_PHONE: z.string().optional(),
   SHIPPO_WEBHOOK_SECRET: z.string().optional().or(z.string().min(1).optional()), // Supports both naming conventions
   SHIPPO_EXPORT_B13A_OPTION: z.string().optional(),
   SHIPPO_EXPORT_B13A_NUMBER: z.string().optional(),
-  SHIPPO_FROM_NAME: z.string().optional(),
-  SHIPPO_FROM_COMPANY: z.string().optional(),
-  SHIPPO_FROM_STREET1: z.string().optional(),
-  SHIPPO_FROM_CITY: z.string().optional(),
-  SHIPPO_FROM_STATE: z.string().optional(),
-  SHIPPO_FROM_ZIP: z.string().optional(),
-  SHIPPO_FROM_COUNTRY: z.string().optional(),
-  SHIPPO_FROM_EMAIL: z.string().optional(),
 
   // External Services
   SLACK_WEBHOOK_URL: z.string().url().optional(),
@@ -127,26 +114,13 @@ export const env = {
   CLERK_TEST_USER_ID: process.env.CLERK_TEST_USER_ID,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY!,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET!,
-  STRIPE_AUTOMATIC_TAX: process.env.STRIPE_AUTOMATIC_TAX === 'true',
   RESEND_API_KEY: process.env.RESEND_API_KEY!,
-  FROM_EMAIL: process.env.FROM_EMAIL!,
-  ADMIN_EMAIL: process.env.ADMIN_EMAIL!,
-  ADMIN_LOCALE: process.env.ADMIN_LOCALE || 'fr',
   SHIPPO_API_KEY: process.env.SHIPPO_API_KEY!,
   SHIPPO_UPS_ACCOUNT_ID: process.env.SHIPPO_UPS_ACCOUNT_ID,
-  SHIPPO_FROM_PHONE: process.env.SHIPPO_FROM_PHONE,
   SHIPPO_WEBHOOK_SECRET:
     process.env.SHIPPO_WEBHOOK_SECRET || process.env.SHIPPO_WEBHOOK_TOKEN,
   SHIPPO_EXPORT_B13A_OPTION: process.env.SHIPPO_EXPORT_B13A_OPTION,
   SHIPPO_EXPORT_B13A_NUMBER: process.env.SHIPPO_EXPORT_B13A_NUMBER,
-  SHIPPO_FROM_NAME: process.env.SHIPPO_FROM_NAME,
-  SHIPPO_FROM_COMPANY: process.env.SHIPPO_FROM_COMPANY,
-  SHIPPO_FROM_STREET1: process.env.SHIPPO_FROM_STREET1,
-  SHIPPO_FROM_CITY: process.env.SHIPPO_FROM_CITY,
-  SHIPPO_FROM_STATE: process.env.SHIPPO_FROM_STATE,
-  SHIPPO_FROM_ZIP: process.env.SHIPPO_FROM_ZIP,
-  SHIPPO_FROM_COUNTRY: process.env.SHIPPO_FROM_COUNTRY,
-  SHIPPO_FROM_EMAIL: process.env.SHIPPO_FROM_EMAIL,
   SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,

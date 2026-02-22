@@ -1,8 +1,11 @@
 import Stripe from 'stripe';
 
-import { SupportedCurrency, DEFAULT_CURRENCY } from '@/lib/config/site';
+import {
+  SupportedCurrency,
+  DEFAULT_CURRENCY,
+  STRIPE_AUTOMATIC_TAX,
+} from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
-import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { stripe } from '@/lib/integrations/stripe/client';
 import { toStripeAmount } from '@/lib/integrations/stripe/utils';
@@ -239,7 +242,7 @@ export async function updatePaymentIntent(
   let updatedIntent: Stripe.PaymentIntent;
 
   try {
-    if (env.STRIPE_AUTOMATIC_TAX) {
+    if (STRIPE_AUTOMATIC_TAX) {
       try {
         updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
           ...updatePayload,

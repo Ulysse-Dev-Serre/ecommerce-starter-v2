@@ -1,4 +1,3 @@
-import { Prisma, Decimal } from '@/generated/prisma';
 import { render } from '@react-email/render';
 
 import {
@@ -20,6 +19,8 @@ import type {
 } from '@/lib/integrations/shippo';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import type { ShippingAddress } from '@/lib/types/domain/shipping';
+
+import { Decimal } from '@/generated/prisma';
 
 import { SHIPPING_VARIANT_INCLUDE } from '../shipping/shipping.repository';
 import { ShippingService } from '../shipping/shipping.service';

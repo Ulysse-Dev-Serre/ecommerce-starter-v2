@@ -3,16 +3,16 @@
  * Creates realistic test fixtures for shipping and product tests
  */
 
-import { prisma } from './db';
-import { cleanupOrphanedAttributes } from './test-cleanup';
 import { createLocationSchema } from '@/lib/validators/admin';
 import { updateIntentSchema } from '@/lib/validators/checkout';
 import { CreateProductSchema } from '@/lib/validators/product';
 
+import { prisma } from './db';
+import { cleanupOrphanedAttributes } from './test-cleanup';
+
 // Types imported as 'any' wrappers — the prisma-client-js generator
 // exports these at runtime, but TS path resolution can conflict with
 // the prisma-client generator used by the main app.
-type Language = any;
 type Order = any;
 type Product = any;
 

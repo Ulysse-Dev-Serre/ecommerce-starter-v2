@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
+import { ADMIN_LOCALE } from '@/lib/config/site';
 import { env } from '@/lib/core/env';
 import { i18n } from '@/lib/i18n/config';
 
@@ -63,9 +64,13 @@ function logProxy(
       ...data,
       message,
     };
-    console[level.toLowerCase() as 'info' | 'warn' | 'error'](
-      JSON.stringify(logEntry)
-    );
+    if (level === 'ERROR') {
+      console.error(JSON.stringify(logEntry));
+    } else if (level === 'WARN') {
+      console.warn(JSON.stringify(logEntry));
+    } else {
+      console.info(JSON.stringify(logEntry));
+    }
   }
 }
 
@@ -97,7 +102,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
     // Si c'est une route admin, on force ADMIN_LOCALE
     if (pathname.startsWith('/admin')) {
-      targetLocale = env.ADMIN_LOCALE;
+      targetLocale = ADMIN_LOCALE;
     }
 
     logProxy(

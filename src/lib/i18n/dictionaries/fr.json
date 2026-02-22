@@ -485,6 +485,9 @@
     "shipped": {
       "subject": "Votre commande {orderNumber} est en route !"
     },
+    "contact_form": {
+      "subject": "[Contact] {name} - {siteName}"
+    },
     "refunded": {
       "subject": "Remboursement commande {orderNumber}"
     },

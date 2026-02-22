@@ -85,7 +85,6 @@ npx prisma studio
 | Document | Contenu | Usage |
 | :--- | :--- | :--- |
 | **[Architecture](./9-Language_internationalization/i18n-architecture.md)** | Structure bilingue et ajout de langues | Organisation i18n |
-| **[Implementation Next-intl](./9-Language_internationalization/next-intl-implementation.md)** | Détails techniques et hooks | Maintenance code |
 
 ### 10. Frontend & UI
 | Document | Contenu | Usage |

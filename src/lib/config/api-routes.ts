@@ -21,7 +21,7 @@ export const API_ROUTES = {
   TRACKING: {
     EVENTS: '/api/tracking/events',
   },
-  CONTACT: '/api/contact', // À créer
+  CONTACT: '/api/contact',
   ADMIN: {
     PRODUCTS: {
       BASE: '/api/admin/products',

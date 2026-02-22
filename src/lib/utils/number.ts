@@ -1,4 +1,4 @@
-import { Prisma, Decimal } from '@/generated/prisma';
+import { Decimal } from '@/generated/prisma';
 
 /**
  * Convertit une valeur numérique (number, string ou Decimal Prisma) en number de manière sécurisée.

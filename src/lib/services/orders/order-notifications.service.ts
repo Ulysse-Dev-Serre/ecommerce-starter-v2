@@ -1,14 +1,17 @@
-import { Prisma, Decimal } from '@/generated/prisma';
 import { render } from '@react-email/render';
 
-import { SupportedCurrency } from '@/lib/config/site';
+import {
+  SupportedCurrency,
+  ADMIN_EMAIL,
+  ADMIN_LOCALE,
+} from '@/lib/config/site';
 import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { resend, FROM_EMAIL } from '@/lib/integrations/resend/client';
 import { Address, OrderWithIncludes } from '@/lib/types/domain/order';
 
-import { OrderStatus } from '@/generated/prisma';
+import { Decimal, OrderStatus } from '@/generated/prisma';
 
 import { OrderConfirmationEmail } from '@/components/emails/order-confirmation';
 
@@ -113,14 +116,14 @@ export async function sendAdminNewOrderAlert(
   calculation: { items: NotificationLineItem[] },
   shippingAddress: Address | null
 ) {
-  if (!env.ADMIN_EMAIL) return;
+  if (!ADMIN_EMAIL) return;
 
   try {
     const { AdminNewOrderEmail } = await import(
       '@/components/emails/admin-new-order'
     );
 
-    const dict = await getDictionary(env.ADMIN_LOCALE);
+    const dict = await getDictionary(ADMIN_LOCALE);
     const siteUrl = env.NEXT_PUBLIC_SITE_URL;
 
     const adminHtml = await render(
@@ -137,7 +140,7 @@ export async function sendAdminNewOrderAlert(
         currency: order.currency as SupportedCurrency,
         itemsCount: calculation.items.length,
         siteUrl,
-        locale: env.ADMIN_LOCALE as string,
+        locale: ADMIN_LOCALE,
       })
     );
 
@@ -148,7 +151,7 @@ export async function sendAdminNewOrderAlert(
 
     await resend.emails.send({
       from: FROM_EMAIL,
-      to: env.ADMIN_EMAIL,
+      to: ADMIN_EMAIL,
       subject,
       html: adminHtml,
     });
@@ -427,7 +430,7 @@ export async function sendRefundRequestAlert(params: {
     contentType?: string;
   }>;
 }) {
-  const adminEmail = env.ADMIN_EMAIL;
+  const adminEmail = ADMIN_EMAIL;
 
   logger.info(
     {
@@ -448,7 +451,7 @@ export async function sendRefundRequestAlert(params: {
       '@/components/emails/refund-request-admin'
     );
 
-    const dict = await getDictionary(env.ADMIN_LOCALE);
+    const dict = await getDictionary(ADMIN_LOCALE);
 
     const emailHtml = await render(
       RefundRequestAdminEmail({
@@ -457,7 +460,7 @@ export async function sendRefundRequestAlert(params: {
         customerEmail: params.customerEmail,
         reason: params.reason,
         imageUrl: params.hasAttachment ? 'Attached' : undefined,
-        locale: env.ADMIN_LOCALE as string,
+        locale: ADMIN_LOCALE,
       })
     );
 

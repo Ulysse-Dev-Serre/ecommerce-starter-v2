@@ -20,3 +20,12 @@ package-lock.json
 
 # Tests - formatage moins strict
 tests/**/*.js
+
+# Fichiers sans parser
+prisma/schema.prisma
+prisma/migrations/**/*.toml
+public/llms.txt
+public/*.svg
+src/app/favicon.ico
+scripts/**/*.sh
+src/generated/prisma/

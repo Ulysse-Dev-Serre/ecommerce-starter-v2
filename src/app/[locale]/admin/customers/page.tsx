@@ -1,7 +1,9 @@
 import { getTranslations } from 'next-intl/server';
 
-import { prisma } from '@/lib/core/db';
-import { getAllUsersAdmin } from '@/lib/services/users/user-admin.service';
+import {
+  getAllUsersAdmin,
+  getCustomerStatsAdmin,
+} from '@/lib/services/users/user-admin.service';
 
 import { CustomerListHeader } from '@/components/admin/customers/customer-list-header';
 import { CustomerListTable } from '@/components/admin/customers/customer-list-table';
@@ -25,29 +27,15 @@ export default async function CustomersPage({
     namespace: 'adminDashboard.customers',
   });
 
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const thisWeek = new Date(now);
-  thisWeek.setDate(now.getDate() - 7);
-  const thisMonth = new Date(now);
-  thisMonth.setMonth(now.getMonth() - 1);
-
-  // 1. Fetch Stats
-
-  // TODO: Add getUserStats to service to avoid this direct call too,
-  // but for now let's focus on the list.
-  const [totalCount, newToday, newWeek, newMonth] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { createdAt: { gte: today } } }),
-    prisma.user.count({ where: { createdAt: { gte: thisWeek } } }),
-    prisma.user.count({ where: { createdAt: { gte: thisMonth } } }),
-  ]);
-
-  // 2. Fetch Customers List via Service
-  const { users: customers } = await getAllUsersAdmin({
-    search: query,
-    limit: 50,
-  });
+  // 1. Fetch Stats & Customers List
+  const [{ totalCount, newToday, newWeek, newMonth }, { users: customers }] =
+    await Promise.all([
+      getCustomerStatsAdmin(),
+      getAllUsersAdmin({
+        search: query,
+        limit: 50,
+      }),
+    ]);
 
   const stats = [
     {

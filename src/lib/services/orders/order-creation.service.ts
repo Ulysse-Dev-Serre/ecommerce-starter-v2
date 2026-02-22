@@ -1,13 +1,12 @@
-import { Prisma } from '@/generated/prisma';
-type InputJsonValue = Prisma.InputJsonValue;
-
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { i18n } from '@/lib/i18n/config';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { CreateOrderFromCartInput } from '@/lib/types/domain/order';
 
-import { OrderStatus, Language } from '@/generated/prisma';
+import { Prisma, OrderStatus, Language } from '@/generated/prisma';
+
+type InputJsonValue = Prisma.InputJsonValue;
 
 import { calculateCart, type Currency } from '../calculations';
 import { decrementStock } from '../inventory';

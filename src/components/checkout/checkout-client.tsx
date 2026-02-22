@@ -12,8 +12,8 @@ import {
   createPaymentIntent as createPaymentIntentAction,
   updatePaymentIntent as updatePaymentIntentAction,
 } from '@/lib/client/checkout';
-import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { getShippingRates } from '@/lib/client/shipping';
+import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { SupportedCurrency } from '@/lib/config/site';
 import { env } from '@/lib/core/env';

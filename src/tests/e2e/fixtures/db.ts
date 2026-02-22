@@ -8,12 +8,12 @@
  * with a `@prisma/adapter-pg` adapter, mirroring the app's `db.ts`
  * setup but without importing any ESM code.
  */
-import dotenv from 'dotenv';
 import path from 'path';
-import pg from 'pg';
 
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
+import dotenv from 'dotenv';
+import pg from 'pg';
 
 // Ensure env vars are loaded (Playwright doesn't always load .env)
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') });

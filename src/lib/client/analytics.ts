@@ -1,6 +1,5 @@
 import { API_ROUTES } from '@/lib/config/api-routes';
 import { UTMData } from '@/lib/types/domain/analytics';
-
 import { getCookie, setCookie } from './cookies';
 
 const UTM_COOKIE_NAME = 'last_utm_data';

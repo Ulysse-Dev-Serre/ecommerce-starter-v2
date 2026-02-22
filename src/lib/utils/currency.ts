@@ -6,7 +6,7 @@ import {
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { toNum } from '@/lib/utils/number';
 
-import { Prisma, Decimal } from '@/generated/prisma';
+import { Decimal } from '@/generated/prisma';
 
 /**
  * Formate un prix de manière localisée.

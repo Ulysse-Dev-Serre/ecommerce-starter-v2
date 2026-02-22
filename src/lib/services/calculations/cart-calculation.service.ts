@@ -1,5 +1,3 @@
-import { Decimal } from '@/generated/prisma';
-
 import { logger } from '@/lib/core/logger';
 import {
   Currency,
@@ -8,6 +6,8 @@ import {
   SerializedCartCalculation,
 } from '@/lib/types/domain/calculation';
 import { CartProjection } from '@/lib/types/domain/cart';
+
+import { Decimal } from '@/generated/prisma';
 
 import { roundHalfEven } from './math-utils.service';
 

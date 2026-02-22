@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 
+import { FROM_EMAIL as SITE_FROM_EMAIL } from '@/lib/config/site';
 import { env } from '@/lib/core/env';
 
 const resendApiKey = env.RESEND_API_KEY;
@@ -15,4 +16,4 @@ if (!resendApiKey) {
 // The service will fail at runtime if the key is invalid, which is expected behavior.
 export const resend = new Resend(resendApiKey || 're_dummy_key_for_build');
 
-export const FROM_EMAIL = env.FROM_EMAIL;
+export const FROM_EMAIL = SITE_FROM_EMAIL;

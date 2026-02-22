@@ -86,6 +86,9 @@ export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
  * =============================================================================
  */
 export const SITE_EMAIL = 'agtechnest@gmail.com';
+export const ADMIN_EMAIL = 'agtechnest@gmail.com'; // Où vous recevez les alertes
+export const ADMIN_LOCALE = 'fr'; // Langue de vos alertes admin
+export const FROM_EMAIL = `AgTechNest <onboarding@resend.dev>`; // Expéditeur des emails clients
 
 /**
  * Structured Origin Address (Single Source of Truth)
@@ -94,11 +97,11 @@ export const SITE_EMAIL = 'agtechnest@gmail.com';
 export const STORE_ORIGIN_ADDRESS = {
   name: SITE_NAME,
   company: 'AgTechNest Inc.',
-  street1: '123 Avenue de la Technologie', // TODO: Remplacer par votre adresse réelle
+  street1: '123 Avenue de la Technologie',
   street2: '',
   city: 'Montreal',
   state: 'QC',
-  zip: 'H1A 1A1', // TODO: Remplacer par votre code postal
+  zip: 'H1A 1A1',
   country: 'CA',
   phone: '5140000000',
   email: SITE_EMAIL,
@@ -208,6 +211,19 @@ export const SHIPPING_PROVIDERS_FILTER: string[] = ['ups'];
  * Change to 'DDP' if you handle duties/taxes for the customer.
  */
 export const DEFAULT_SHIPPING_INCOTERM = 'DDP';
+
+/**
+ * =============================================================================
+ * PAYMENT CONFIGURATION
+ * =============================================================================
+ */
+
+/**
+ * Enable/Disable Stripe Automatic Tax.
+ * When true, Stripe will calculate taxes based on the customer's address.
+ * Note: Requires Stripe Tax to be configured in your Stripe Dashboard.
+ */
+export const STRIPE_AUTOMATIC_TAX = true;
 
 /**
  * Filter keywords to categorize shipping rates (lowercase).
