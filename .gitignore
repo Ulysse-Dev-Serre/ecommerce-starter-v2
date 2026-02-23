@@ -62,4 +62,5 @@ scripts/debug-logistics.ts
 # Test outputs
 /test-results*/
 /my-results/
+.agent/
 
