@@ -16,6 +16,9 @@ const serverSchema = z.object({
 
   // Resend (Emails)
   RESEND_API_KEY: z.string().min(1),
+  FROM_EMAIL: z.string().optional(),
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_LOCALE: z.string().optional(),
 
   // Shippo (Livraison)
   SHIPPO_API_KEY: z.string().min(1),
@@ -23,6 +26,7 @@ const serverSchema = z.object({
   SHIPPO_WEBHOOK_SECRET: z.string().optional().or(z.string().min(1).optional()), // Supports both naming conventions
   SHIPPO_EXPORT_B13A_OPTION: z.string().optional(),
   SHIPPO_EXPORT_B13A_NUMBER: z.string().optional(),
+  SHIPPING_PROVIDERS: z.string().optional(), // Comma-separated, e.g. 'ups,usps'
 
   // External Services
   SLACK_WEBHOOK_URL: z.string().url().optional(),
@@ -57,6 +61,14 @@ const clientSchema = z.object({
   // Instance Identity (URLs change between environments)
   NEXT_PUBLIC_SITE_URL: z.string().url(),
   NEXT_PUBLIC_CORS_ORIGIN: z.string().url(),
+  NEXT_PUBLIC_SITE_NAME: z.string().optional(),
+  NEXT_PUBLIC_SITE_DESCRIPTION: z.string().optional(),
+
+  // Multi-Country Configuration
+  NEXT_PUBLIC_COUNTRY: z.string().length(2).optional(), // ISO 3166-1 alpha-2
+  NEXT_PUBLIC_CURRENCY: z.string().length(3).optional(), // ISO 4217
+  NEXT_PUBLIC_DEFAULT_LOCALE: z.string().optional(), // e.g. 'en', 'fr'
+  NEXT_PUBLIC_LOCALES: z.string().optional(), // Comma-separated, e.g. 'en,fr'
 
   // Clerk Public
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
@@ -73,6 +85,12 @@ const clientSchema = z.object({
 const _clientEnv = clientSchema.safeParse({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_CORS_ORIGIN: process.env.NEXT_PUBLIC_CORS_ORIGIN,
+  NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
+  NEXT_PUBLIC_SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION,
+  NEXT_PUBLIC_COUNTRY: process.env.NEXT_PUBLIC_COUNTRY,
+  NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
+  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
+  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES,
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
@@ -148,6 +166,12 @@ export const env = {
   // Variables Client
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL!,
   NEXT_PUBLIC_CORS_ORIGIN: process.env.NEXT_PUBLIC_CORS_ORIGIN!,
+  NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
+  NEXT_PUBLIC_SITE_DESCRIPTION: process.env.NEXT_PUBLIC_SITE_DESCRIPTION,
+  NEXT_PUBLIC_COUNTRY: process.env.NEXT_PUBLIC_COUNTRY,
+  NEXT_PUBLIC_CURRENCY: process.env.NEXT_PUBLIC_CURRENCY,
+  NEXT_PUBLIC_DEFAULT_LOCALE: process.env.NEXT_PUBLIC_DEFAULT_LOCALE,
+  NEXT_PUBLIC_LOCALES: process.env.NEXT_PUBLIC_LOCALES,
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
     process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!,
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:

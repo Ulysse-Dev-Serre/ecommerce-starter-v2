@@ -2,46 +2,61 @@ import { env } from '@/lib/core/env';
 
 /**
  * =============================================================================
- * 🏬 IDENTITÉ DU SITE
+ * 🏬 IDENTITÉ DU SITE (piloté par .env)
  * =============================================================================
- * Configuration de base affichée sur le storefront et utilisée pour le SEO.
+ * Chaque instance Vercel définit ces valeurs dans ses variables d'environnement.
+ * Un seul code source → N déploiements (un par pays/région).
  */
-export const SITE_NAME = 'AgTechNest';
+export const SITE_NAME =
+  process.env.NEXT_PUBLIC_SITE_NAME || 'Ecommerce Starter';
 
 export const siteConfig = {
   name: SITE_NAME,
   url: env.NEXT_PUBLIC_SITE_URL,
-  description: "Starter e-commerce universel, flexible et prêt à l'emploi.",
+  description:
+    process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
+    "Starter e-commerce universel, flexible et prêt à l'emploi.",
 } as const;
 
 /**
  * =============================================================================
- * 📧 COMMUNICATIONS & ADMINISTRATION
+ * 📧 COMMUNICATIONS & ADMINISTRATION (piloté par .env)
  * =============================================================================
- * Adresses emails et préférences pour les notifications système.
  */
-export const SITE_EMAIL = 'agtechnest@gmail.com';
-export const ADMIN_EMAIL = 'agtechnest@gmail.com'; // Réception des alertes commandes/logs
-export const ADMIN_LOCALE = 'fr'; // Langue utilisée pour les emails envoyés à l'admin
-export const FROM_EMAIL = `AgTechNest <onboarding@resend.dev>`; // Expéditeur des emails clients
+export const SITE_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
+export const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
+export const ADMIN_LOCALE = process.env.ADMIN_LOCALE || 'en';
+export const FROM_EMAIL =
+  process.env.FROM_EMAIL || `${SITE_NAME} <onboarding@resend.dev>`;
 
 /**
  * =============================================================================
- * 🌍 INTERNATIONALISATION (I18N) & MONNAIE
+ * 🌍 INTERNATIONALISATION (I18N) & MONNAIE (piloté par .env)
  * =============================================================================
- * Configuration des langues, devises et détections géographiques.
+ *
+ * Architecture Multi-Pays :
+ *   1 codebase → N projets Vercel → N domaines
+ *   Chaque projet Vercel définit NEXT_PUBLIC_COUNTRY, NEXT_PUBLIC_CURRENCY,
+ *   NEXT_PUBLIC_DEFAULT_LOCALE et NEXT_PUBLIC_LOCALES.
  */
 
+// --- Pays principal ---
+export const SITE_COUNTRY = process.env.NEXT_PUBLIC_COUNTRY || 'CA';
+
 // --- Langues ---
-export const SUPPORTED_LOCALES = ['en', 'fr'] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-export const DEFAULT_LOCALE = 'en' as SupportedLocale;
+const rawLocales = process.env.NEXT_PUBLIC_LOCALES || 'en,fr';
+export const SUPPORTED_LOCALES = rawLocales.split(',') as SupportedLocale[];
+export type SupportedLocale = string;
+export const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE ||
+  SUPPORTED_LOCALES[0] ||
+  'en') as SupportedLocale;
 
 // --- Devises ---
-export const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;
+export const SUPPORTED_CURRENCIES = ['CAD', 'USD', 'EUR', 'GBP'] as const;
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
-export const DEFAULT_CURRENCY = 'CAD' as SupportedCurrency;
-export const SITE_CURRENCY = DEFAULT_CURRENCY; // Devise active pour la boutique
+export const DEFAULT_CURRENCY = (process.env.NEXT_PUBLIC_CURRENCY ||
+  'CAD') as SupportedCurrency;
+export const SITE_CURRENCY = DEFAULT_CURRENCY;
 
 /**
  * Précision décimale par devise.
@@ -57,30 +72,61 @@ export const CURRENCY_DECIMALS: Record<string, number> = {
 };
 
 /**
- * Détection automatique de la devise par pays (Code ISO 3166-1 alpha-2).
- * Utilisé par le middleware pour personnaliser l'expérience.
+ * Mapping Pays → Devise (Code ISO 3166-1 alpha-2).
+ * Utilisé pour la détection automatique de devise dans le middleware.
  */
 export const COUNTRY_TO_CURRENCY: Record<string, SupportedCurrency> = {
-  US: 'USD',
   CA: 'CAD',
+  US: 'USD',
+  FR: 'EUR',
+  DE: 'EUR',
+  BE: 'EUR',
+  CH: 'EUR',
+  ES: 'EUR',
+  IT: 'EUR',
+  NL: 'EUR',
+  PT: 'EUR',
+  AT: 'EUR',
+  IE: 'EUR',
+  GB: 'GBP',
+  MX: 'USD',
 };
 
 export const SUPPORTED_COUNTRIES = Object.keys(COUNTRY_TO_CURRENCY);
 
 /**
  * Pays principal d'exploitation du site.
- * Déduit automatiquement de la devise active (SITE_CURRENCY).
- * Définit la règle "Un Site = Un Pays".
+ * Défini directement par la variable d'environnement NEXT_PUBLIC_COUNTRY.
+ * Vérifie que le pays a une devise correspondante.
  */
-const _mainCountryEntry = Object.entries(COUNTRY_TO_CURRENCY).find(
-  ([_, curr]) => curr === SITE_CURRENCY
-);
-if (!_mainCountryEntry) {
-  throw new Error(
-    `Critical Configuration Error: SITE_CURRENCY "${SITE_CURRENCY}" has no matching country in COUNTRY_TO_CURRENCY table.`
+const _countryCurrency = COUNTRY_TO_CURRENCY[SITE_COUNTRY];
+if (!_countryCurrency) {
+  // Si le pays n'est pas dans le mapping, on accepte la devise manuelle
+  console.warn(
+    `⚠️ SITE_COUNTRY "${SITE_COUNTRY}" n'a pas de devise dans COUNTRY_TO_CURRENCY. Utilisation de NEXT_PUBLIC_CURRENCY="${SITE_CURRENCY}".`
   );
 }
-export const SITE_MAIN_COUNTRY = _mainCountryEntry[0];
+export const SITE_MAIN_COUNTRY = SITE_COUNTRY;
+
+/**
+ * Préfixes téléphoniques par pays.
+ */
+export const COUNTRY_PHONE_PREFIXES: Record<string, string> = {
+  CA: '+1',
+  US: '+1',
+  FR: '+33',
+  DE: '+49',
+  BE: '+32',
+  CH: '+41',
+  ES: '+34',
+  IT: '+39',
+  NL: '+31',
+  PT: '+351',
+  AT: '+43',
+  IE: '+353',
+  GB: '+44',
+  MX: '+52',
+};
 
 /**
  * Taux de conversion manuels (Fallback).
@@ -97,12 +143,11 @@ export const EXCHANGE_RATES: Record<string, Record<string, number>> = {
  * =============================================================================
  * 📦 LOGISTIQUE & EXPÉDITION
  * =============================================================================
- * Configuration technique globale pour les envois.
  */
 
-export const SITE_ADDRESS = ''; // Sera récupéré dynamiquement depuis la DB
+export const SITE_ADDRESS = ''; // Récupéré dynamiquement depuis la DB (LogisticsLocations)
 
-export const PHONE_PREFIX = '+1'; // Préfixe par défaut pour les formulaires d'adresse
+export const PHONE_PREFIX = COUNTRY_PHONE_PREFIXES[SITE_COUNTRY] || '+1';
 
 export const SHIPPING_UNITS = {
   DISTANCE: 'cm',
@@ -113,7 +158,10 @@ export const SHIPPING_UNITS = {
  * Filtre des transporteurs Shippo.
  * Laissez vide [] pour tout afficher, ou spécifiez ['ups', 'usps'].
  */
-export const SHIPPING_PROVIDERS_FILTER: string[] = ['ups'];
+export const SHIPPING_PROVIDERS_FILTER: string[] = process.env
+  .SHIPPING_PROVIDERS
+  ? process.env.SHIPPING_PROVIDERS.split(',')
+  : [];
 
 /**
  * Incoterm par défaut pour l'international.
@@ -200,7 +248,8 @@ export const SHIPPING_BOX_CATALOG = [
  * Si activé, Stripe calculera les taxes selon l'adresse du client.
  * Note : Nécessite l'activation de Stripe Tax dans votre dashboard Stripe.
  */
-export const STRIPE_AUTOMATIC_TAX = true;
+export const STRIPE_AUTOMATIC_TAX =
+  process.env.STRIPE_AUTOMATIC_TAX !== 'false';
 
 /**
  * =============================================================================

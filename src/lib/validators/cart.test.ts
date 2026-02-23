@@ -12,7 +12,7 @@ describe('Cart Validator', () => {
   });
 
   it('should reject invalid currencies with a friendly message', () => {
-    const invalidData = { currency: 'EUR' };
+    const invalidData = { currency: 'JPY' };
     const result = cartCalculationSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
     if (!result.success) {
