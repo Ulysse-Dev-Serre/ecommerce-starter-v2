@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 import { DEFAULT_LOCALE } from '@/lib/config/site';
-import { prisma } from '../fixtures/db';
-import { cleanupOrphanedAttributes } from '../fixtures/test-cleanup';
 
+import { prisma } from '../fixtures/db';
 import { verifyProductCreated } from '../fixtures/seed-test-data';
+import { cleanupOrphanedAttributes } from '../fixtures/test-cleanup';
 import { LogisticsPage } from '../pom/admin/LogisticsPage';
 import { ProductPage } from '../pom/admin/ProductPage';
 

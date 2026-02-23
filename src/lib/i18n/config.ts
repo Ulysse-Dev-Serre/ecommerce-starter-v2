@@ -2,13 +2,13 @@ import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   SupportedLocale,
+  ADMIN_LOCALE,
 } from '@/lib/config/site';
-import { env } from '@/lib/core/env';
 
 export const i18n = {
   defaultLocale: DEFAULT_LOCALE,
   locales: SUPPORTED_LOCALES,
-  adminLocale: env.ADMIN_LOCALE || 'fr',
+  adminLocale: ADMIN_LOCALE,
 } as const;
 
 export type Locale = string;

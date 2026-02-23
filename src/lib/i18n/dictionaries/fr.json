@@ -146,6 +146,17 @@
       "version": "Tableau de bord Admin v1.0",
       "backToSite": "Retour au site"
     },
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Configurez les variables globales et l'affichage de votre boutique",
+      "storefrontDisplay": "Affichage de la boutique",
+      "mainStorefrontAddress": "Adresse principale de la boutique",
+      "mainStorefrontAddressHelp": "Cette adresse sera affichée sur votre page \"Contact\".",
+      "none": "Aucune (Masquer l'adresse)",
+      "save": "Enregistrer les paramètres",
+      "saved": "Paramètres enregistrés avec succès",
+      "error": "Échec de l'enregistrement des paramètres"
+    },
     "header": {
       "welcome": "Bon retour",
       "notifications": "Notifications"
@@ -363,6 +374,7 @@
     "orderSummary": "Résumé de la commande",
     "subtotal": "Sous-total",
     "shipping": "Livraison",
+    "tax": "Taxes",
     "totalToPay": "Total à payer",
     "confirmAddress": "Confirmer l'adresse et voir la livraison",
     "calculating": "Calcul en cours...",
@@ -386,7 +398,8 @@
     "continueToPayment": "Continuer vers le paiement",
     "email": "Adresse Email",
     "emailPlaceholder": "votre@email.com",
-    "errorFetchingRates": "Impossible de calculer les frais de port. Veuillez vérifier votre adresse."
+    "errorFetchingRates": "Impossible de calculer les frais de port. Veuillez vérifier votre adresse.",
+    "errorShippingUpdate": "Échec de la mise à jour des frais de port. Veuillez réessayer."
   },
   "footer": {
     "about": "À propos",
@@ -484,6 +497,9 @@
     },
     "shipped": {
       "subject": "Votre commande {orderNumber} est en route !"
+    },
+    "contact_form": {
+      "subject": "[Contact] {name} - {siteName}"
     },
     "refunded": {
       "subject": "Remboursement commande {orderNumber}"

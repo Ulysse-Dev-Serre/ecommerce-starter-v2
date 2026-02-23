@@ -19,6 +19,7 @@ import { ShippingRequestInput } from '@/lib/validators/shipping';
 
 import { CustomsService } from './customs.service';
 import { PackingService, PackableItem, PackedParcel } from './packing.service';
+import { ShippingTestService } from './shipping-test.service';
 import { ShippingItem, ShippingRepository } from './shipping.repository';
 
 export interface CalculateRatesResult {
@@ -66,13 +67,18 @@ export class ShippingService {
       );
     }
 
-    // 2. Fetch raw rates via 3D packing and Shippo
+    // 2. Check for test scenarios first (Bypass real calculation if test zip)
+    if (ShippingTestService.isTestAddress(addressTo)) {
+      return ShippingTestService.getTestRates();
+    }
+
+    // 3. Fetch raw rates via 3D packing and Shippo
     const { rates: rawRates } = await this.calculateRates(
       addressTo,
       shippingItems
     );
 
-    // 3. Filter, convert currency and label the rates
+    // 4. Filter, convert currency and label the rates
     return this.filterAndLabelRates(rawRates);
   }
 

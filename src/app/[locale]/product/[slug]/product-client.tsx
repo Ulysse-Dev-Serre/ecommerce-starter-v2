@@ -8,7 +8,7 @@ import { trackEvent } from '@/lib/client/analytics';
 import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 
 import { ProductActions } from '@/components/cart/product-actions';
-import { PriceDisplay } from '@/components/price-display';
+import { PriceDisplay } from '@/components/ui/price-display';
 import { VariantButton } from '@/components/ui/variant-button';
 
 interface Variant {

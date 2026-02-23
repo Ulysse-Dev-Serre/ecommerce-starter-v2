@@ -5,12 +5,7 @@ import { useEffect, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import {
-  SITE_CURRENCY,
-  COUNTRY_TO_CURRENCY,
-  PHONE_PREFIX,
-  STORE_ORIGIN_ADDRESS,
-} from '@/lib/config/site';
+import { PHONE_PREFIX, SITE_MAIN_COUNTRY } from '@/lib/config/site';
 import { CheckoutAddress } from '@/lib/types/ui/checkout';
 
 import { Card } from '@/components/ui/card';
@@ -54,12 +49,7 @@ export function AddressSection({
   const g = useTranslations('geography');
 
   // Determine the target country for this instance based on SITE_CURRENCY
-  const instanceCountryCode = useMemo(() => {
-    const entry = Object.entries(COUNTRY_TO_CURRENCY).find(
-      ([_, currency]) => currency === SITE_CURRENCY
-    );
-    return entry ? entry[0] : STORE_ORIGIN_ADDRESS.country;
-  }, []);
+  const instanceCountryCode = SITE_MAIN_COUNTRY;
 
   // Ensure country is set to the instance default on mount or if missing
   useEffect(() => {

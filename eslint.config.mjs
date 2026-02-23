@@ -80,6 +80,11 @@ const eslintConfig = [
               position: 'before',
             },
             {
+              pattern: '@/generated/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
               pattern: '@/components/**',
               group: 'internal',
               position: 'after',

@@ -1,6 +1,6 @@
 import { toNum } from '@/lib/utils/number';
 
-import { Prisma, Decimal } from '@/generated/prisma';
+import { Decimal } from '@/generated/prisma';
 
 /**
  * Formate un poids pour l'affichage.

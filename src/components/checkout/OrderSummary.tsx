@@ -21,6 +21,8 @@ interface OrderSummaryProps {
   }>;
   initialTotal: number;
   total: number;
+  taxAmount?: number;
+  taxLines?: Array<{ name: string; amount: number }>;
   currency: SupportedCurrency;
   locale: string;
   selectedRate: ShippingRate | null;
@@ -30,6 +32,8 @@ export function OrderSummary({
   summaryItems,
   initialTotal,
   total,
+  taxAmount = 0,
+  taxLines = [],
   currency,
   locale,
   selectedRate,
@@ -113,6 +117,26 @@ export function OrderSummary({
               )}
             </span>
           </div>
+          {taxLines.length > 0
+            ? taxLines.map((tax, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center text-muted-foreground animate-in fade-in slide-in-from-top-1"
+                >
+                  <span>{tax.name}</span>
+                  <span className="font-medium text-foreground">
+                    {formatPrice(tax.amount / 100, currency, locale)}
+                  </span>
+                </div>
+              ))
+            : taxAmount > 0 && (
+                <div className="flex justify-between items-center text-muted-foreground animate-in fade-in slide-in-from-top-1">
+                  <span>{t('tax')}</span>
+                  <span className="font-medium text-foreground">
+                    {formatPrice(taxAmount, currency, locale)}
+                  </span>
+                </div>
+              )}
         </div>
 
         <div className="border-t border-border pt-4 mt-4">

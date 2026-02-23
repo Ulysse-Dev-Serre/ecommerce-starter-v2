@@ -10,7 +10,7 @@ import { ProductVariantInclude } from '@/generated/prisma/models/ProductVariant'
  * these requirements will be caught at compile time.
  */
 export const SHIPPING_VARIANT_INCLUDE = {
-  pricing: { orderBy: { validFrom: 'desc' as any }, take: 1 },
+  pricing: { orderBy: { validFrom: 'desc' }, take: 1 },
   product: {
     include: {
       translations: true,

@@ -146,6 +146,17 @@
       "version": "Admin Dashboard v1.0",
       "backToSite": "Back to site"
     },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Configure your store global variables and display",
+      "storefrontDisplay": "Storefront Display",
+      "mainStorefrontAddress": "Main Storefront Address",
+      "mainStorefrontAddressHelp": "This address will be displayed on your \"Contact\" page.",
+      "none": "None (Hide address)",
+      "save": "Save Settings",
+      "saved": "Settings saved successfully",
+      "error": "Failed to save settings"
+    },
     "header": {
       "welcome": "Welcome back",
       "notifications": "Notifications"
@@ -363,6 +374,7 @@
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
+    "tax": "Taxes",
     "totalToPay": "Total to pay",
     "confirmAddress": "Confirm address & see shipping options",
     "calculating": "Calculating...",
@@ -386,7 +398,8 @@
     "continueToPayment": "Continue to Payment",
     "email": "Email Address",
     "emailPlaceholder": "your@email.com",
-    "errorFetchingRates": "Unable to calculate shipping rates. Please check your address."
+    "errorFetchingRates": "Unable to calculate shipping rates. Please check your address.",
+    "errorShippingUpdate": "Failed to update shipping cost. Please try again."
   },
   "footer": {
     "about": "About",
@@ -484,6 +497,9 @@
     },
     "shipped": {
       "subject": "Your order {orderNumber} is on its way!"
+    },
+    "contact_form": {
+      "subject": "[Contact] {name} - {siteName}"
     },
     "refunded": {
       "subject": "Refund for order {orderNumber}"

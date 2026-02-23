@@ -111,3 +111,34 @@ export async function updateUserRole(userId: string, role: UserRole) {
     throw error;
   }
 }
+
+/**
+ * Récupère les statistiques globales des clients pour le dashboard
+ */
+export async function getCustomerStatsAdmin() {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const thisWeek = new Date(now);
+  thisWeek.setDate(now.getDate() - 7);
+  const thisMonth = new Date(now);
+  thisMonth.setMonth(now.getMonth() - 1);
+
+  try {
+    const [totalCount, newToday, newWeek, newMonth] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { createdAt: { gte: today } } }),
+      prisma.user.count({ where: { createdAt: { gte: thisWeek } } }),
+      prisma.user.count({ where: { createdAt: { gte: thisMonth } } }),
+    ]);
+
+    return {
+      totalCount,
+      newToday,
+      newWeek,
+      newMonth,
+    };
+  } catch (error) {
+    logger.error({ error }, 'Failed to fetch customer stats');
+    throw error;
+  }
+}

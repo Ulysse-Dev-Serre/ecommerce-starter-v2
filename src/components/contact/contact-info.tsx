@@ -2,15 +2,16 @@ import { Mail, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { SITE_EMAIL, SITE_ADDRESS } from '@/lib/config/site';
+import { SITE_EMAIL } from '@/lib/config/site';
 
 import { Alert } from '@/components/ui/alert';
 
 interface ContactInfoProps {
   locale: string;
+  address?: string;
 }
 
-export function ContactInfo({ locale }: ContactInfoProps) {
+export function ContactInfo({ locale, address }: ContactInfoProps) {
   const t = useTranslations('contact');
 
   return (
@@ -42,19 +43,21 @@ export function ContactInfo({ locale }: ContactInfoProps) {
           </div>
         </div>
 
-        <div className="vibe-flex-items-start-gap-5">
-          <div className="bg-muted text-foreground p-3 rounded-lg border border-border mt-1">
-            <MapPin className="h-16 w-16" />
+        {address && (
+          <div className="vibe-flex-items-start-gap-5">
+            <div className="bg-muted text-foreground p-3 rounded-lg border border-border mt-1">
+              <MapPin className="h-16 w-16" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground vibe-mb-1">
+                {t('addressLabel')}
+              </p>
+              <p className="text-xl font-bold text-foreground whitespace-pre-line leading-snug">
+                {address}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground vibe-mb-1">
-              {t('addressLabel')}
-            </p>
-            <p className="text-xl font-bold text-foreground whitespace-pre-line leading-snug">
-              {SITE_ADDRESS}
-            </p>
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="pt-6">

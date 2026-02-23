@@ -35,7 +35,7 @@ const securityHeaders = [
       "img-src 'self' data: https://*.stripe.com https://maps.gstatic.com https://*.googleapis.com https://img.clerk.com https://images.clerk.dev https://res.cloudinary.com https://github.com https://*.googletagmanager.com https://*.google-analytics.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
       "worker-src 'self' blob:; " +
-      "connect-src 'self' https://api.stripe.com https://maps.googleapis.com https://*.googleapis.com https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://vitals.vercel-insights.com https://api.shippo.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; " +
+      "connect-src 'self' https://api.stripe.com https://maps.googleapis.com https://*.googleapis.com https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://clerk-telemetry.com https://vitals.vercel-insights.com https://api.shippo.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; " +
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://challenges.cloudflare.com; " +
       "object-src 'none'; " +
       "base-uri 'self';",

@@ -1,6 +1,6 @@
-import { Prisma, Decimal } from '@/generated/prisma';
-
 import { SupportedCurrency } from '@/lib/config/site';
+
+import { Decimal } from '@/generated/prisma';
 
 /**
  * Types centralisés pour le domaine Calculation

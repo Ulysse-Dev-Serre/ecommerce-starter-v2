@@ -29,7 +29,12 @@ async function main() {
     },
   });
 
-  eventTypes.forEach(et => {
+  interface EventTypeGroup {
+    eventType: string;
+    _count: { _all: number };
+  }
+
+  (eventTypes as unknown as EventTypeGroup[]).forEach(et => {
     console.log(`${et.eventType.padEnd(20)} : ${et._count._all}`);
   });
 

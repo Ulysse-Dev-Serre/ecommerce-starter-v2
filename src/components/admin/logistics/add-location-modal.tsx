@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { saveLogisticsLocation } from '@/lib/client/admin/logistics';
-import { STORE_ORIGIN_ADDRESS } from '@/lib/config/site';
+import { SITE_MAIN_COUNTRY } from '@/lib/config/site';
 import { Address } from '@/lib/integrations/shippo';
 import { AdminSupplier } from '@/lib/types/domain/logistics';
 
@@ -42,7 +42,7 @@ export function AddLocationModal({
       city: initialAddress?.city || '',
       state: initialAddress?.state || '',
       zip: initialAddress?.zip || '',
-      country: initialAddress?.country || STORE_ORIGIN_ADDRESS.country,
+      country: initialAddress?.country || SITE_MAIN_COUNTRY,
       email: initialAddress?.email || '',
       phone: initialAddress?.phone || '',
     },

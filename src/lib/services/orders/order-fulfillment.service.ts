@@ -1,11 +1,6 @@
-import { Prisma, Decimal } from '@/generated/prisma';
 import { render } from '@react-email/render';
 
-import {
-  STORE_ORIGIN_ADDRESS,
-  resolveShippingOrigin,
-  SHIPPING_UNITS,
-} from '@/lib/config/site';
+import { SITE_MAIN_COUNTRY, SHIPPING_UNITS } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
@@ -20,6 +15,8 @@ import type {
 } from '@/lib/integrations/shippo';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import type { ShippingAddress } from '@/lib/types/domain/shipping';
+
+import { Decimal } from '@/generated/prisma';
 
 import { SHIPPING_VARIANT_INCLUDE } from '../shipping/shipping.repository';
 import { ShippingService } from '../shipping/shipping.service';
@@ -76,9 +73,19 @@ export async function createReturnLabel(
     `Customer Order: ${order.orderNumber}`
   );
 
-  // 2. Resolve Warehouse Address (Decision logic centralized in site.ts)
-  const warehouseAddress = resolveShippingOrigin(
-    order.items[0]?.product?.shippingOrigin
+  // 2. Resolve Warehouse Address (Strict Policy: No Fallback to site.ts)
+  const shippingOrigin = order.items[0]?.product?.shippingOrigin;
+  if (!shippingOrigin || !shippingOrigin.address) {
+    throw new AppError(
+      ErrorCode.SHIPPING_DATA_MISSING,
+      'Logistics configuration missing: No warehouse address assigned to this product.',
+      400
+    );
+  }
+
+  const warehouseAddress = ShippingService.validateAddress(
+    { ...(shippingOrigin.address as object), name: shippingOrigin.name },
+    `Warehouse: ${shippingOrigin.name}`
   );
 
   // 0 Fallback Validation: Final stop if NO valid address is resolved
@@ -152,7 +159,7 @@ export async function createReturnLabel(
 
   // International Return Customs (e.g. US -> Origin)
   let customsDeclaration = undefined;
-  if (customerAddress.country !== STORE_ORIGIN_ADDRESS.country) {
+  if (customerAddress.country !== SITE_MAIN_COUNTRY) {
     customsDeclaration = {
       contentsType: 'RETURN_MERCHANDISE' as const,
       contentsExplanation: 'Customer return',
@@ -181,7 +188,7 @@ export async function createReturnLabel(
           massUnit: SHIPPING_UNITS.MASS,
           valueAmount: item.unitPrice.toString(),
           valueCurrency: order.currency,
-          originCountry: product.originCountry || STORE_ORIGIN_ADDRESS.country,
+          originCountry: product.originCountry || SITE_MAIN_COUNTRY,
         };
       }),
     };

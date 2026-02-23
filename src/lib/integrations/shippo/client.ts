@@ -1,6 +1,6 @@
 import { Shippo } from 'shippo';
 
-import { STORE_ORIGIN_ADDRESS } from '@/lib/config/site';
+import { SITE_MAIN_COUNTRY } from '@/lib/config/site';
 import { env } from '@/lib/core/env';
 
 import type {
@@ -74,8 +74,7 @@ export async function getReturnShippingRates(
   try {
     // If shipping from outside the store's origin country, don't restrict to the origin UPS account
     const carrierAccounts =
-      addressFrom.country === STORE_ORIGIN_ADDRESS.country &&
-      env.SHIPPO_UPS_ACCOUNT_ID
+      addressFrom.country === SITE_MAIN_COUNTRY && env.SHIPPO_UPS_ACCOUNT_ID
         ? [env.SHIPPO_UPS_ACCOUNT_ID]
         : undefined;
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
 import { SupportedCurrency } from '@/lib/config/site';
 import { ApiContext } from '@/lib/middleware/types';
@@ -36,9 +37,23 @@ async function updateIntentHandler(
       : undefined,
   });
 
+  interface EnrichedPaymentIntent extends Stripe.PaymentIntent {
+    total_details?: {
+      amount_tax?: number;
+      breakdown?: Array<{ name: string; amount: number }>;
+    };
+  }
+
+  const enrichedIntent = updatedIntent as EnrichedPaymentIntent;
+  const taxAmount = enrichedIntent.total_details?.amount_tax || 0;
+  const taxLines = enrichedIntent.total_details?.breakdown || [];
+
   return NextResponse.json({
     success: true,
     amount: updatedIntent.amount,
+    taxAmount: taxAmount,
+    taxLines: taxLines,
+    totalAmount: updatedIntent.amount,
   });
 }
 

@@ -2,8 +2,9 @@ import { env } from '@/lib/core/env';
 
 /**
  * =============================================================================
- * SITE IDENTITY
+ * 🏬 IDENTITÉ DU SITE
  * =============================================================================
+ * Configuration de base affichée sur le storefront et utilisée pour le SEO.
  */
 export const SITE_NAME = 'AgTechNest';
 
@@ -11,27 +12,40 @@ export const siteConfig = {
   name: SITE_NAME,
   url: env.NEXT_PUBLIC_SITE_URL,
   description: "Starter e-commerce universel, flexible et prêt à l'emploi.",
-};
+} as const;
 
 /**
  * =============================================================================
- * I18N & CURRENCY CONFIGURATION
+ * 📧 COMMUNICATIONS & ADMINISTRATION
  * =============================================================================
- * Single source of truth for internationalization and monetary settings.
+ * Adresses emails et préférences pour les notifications système.
+ */
+export const SITE_EMAIL = 'agtechnest@gmail.com';
+export const ADMIN_EMAIL = 'agtechnest@gmail.com'; // Réception des alertes commandes/logs
+export const ADMIN_LOCALE = 'fr'; // Langue utilisée pour les emails envoyés à l'admin
+export const FROM_EMAIL = `AgTechNest <onboarding@resend.dev>`; // Expéditeur des emails clients
+
+/**
+ * =============================================================================
+ * 🌍 INTERNATIONALISATION (I18N) & MONNAIE
+ * =============================================================================
+ * Configuration des langues, devises et détections géographiques.
  */
 
-// --- LOCALES ---
+// --- Langues ---
 export const SUPPORTED_LOCALES = ['en', 'fr'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const DEFAULT_LOCALE = 'en' as SupportedLocale;
 
-// --- CURRENCIES ---
+// --- Devises ---
 export const SUPPORTED_CURRENCIES = ['CAD', 'USD'] as const;
 export type SupportedCurrency = (typeof SUPPORTED_CURRENCIES)[number];
 export const DEFAULT_CURRENCY = 'CAD' as SupportedCurrency;
+export const SITE_CURRENCY = DEFAULT_CURRENCY; // Devise active pour la boutique
 
 /**
- * Decimal precision per currency.
+ * Précision décimale par devise.
+ * Indispensable pour les calculs de taxes et Stripe.
  */
 export const CURRENCY_DECIMALS: Record<string, number> = {
   CAD: 2,
@@ -43,175 +57,73 @@ export const CURRENCY_DECIMALS: Record<string, number> = {
 };
 
 /**
- * Mapping of Country Codes (ISO 3166-1 alpha-2) to Currencies.
- * Used for auto-detection in middleware.
+ * Détection automatique de la devise par pays (Code ISO 3166-1 alpha-2).
+ * Utilisé par le middleware pour personnaliser l'expérience.
  */
 export const COUNTRY_TO_CURRENCY: Record<string, SupportedCurrency> = {
   US: 'USD',
   CA: 'CAD',
-  // Add other countries here:
-  // FR: 'EUR',
-  // GB: 'GBP',
 };
 
-/**
- * List of supported countries for shipping and address validation.
- * Derived from COUNTRY_TO_CURRENCY for single source of truth.
- */
 export const SUPPORTED_COUNTRIES = Object.keys(COUNTRY_TO_CURRENCY);
 
 /**
- * Site-wide active currency for this specific deployment.
- * Use this for checkout and primary price displays.
+ * Pays principal d'exploitation du site.
+ * Déduit automatiquement de la devise active (SITE_CURRENCY).
+ * Définit la règle "Un Site = Un Pays".
  */
-export const SITE_CURRENCY = DEFAULT_CURRENCY;
-
-/**
- * =============================================================================
- * PRODUCT & BUSINESS CONSTANTS
- * =============================================================================
- */
-
-export const PRODUCT_STATUSES = [
-  'DRAFT',
-  'ACTIVE',
-  'INACTIVE',
-  'ARCHIVED',
-] as const;
-export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
-
-/**
- * =============================================================================
- * SITE INFORMATION
- * =============================================================================
- */
-export const SITE_EMAIL = 'agtechnest@gmail.com';
-
-/**
- * Structured Origin Address (Single Source of Truth)
- * Used for both shipping calculations and return labels.
- */
-export const STORE_ORIGIN_ADDRESS = {
-  name: SITE_NAME,
-  company: 'AgTechNest Inc.',
-  street1: '123 Avenue de la Technologie', // TODO: Remplacer par votre adresse réelle
-  street2: '',
-  city: 'Montreal',
-  state: 'QC',
-  zip: 'H1A 1A1', // TODO: Remplacer par votre code postal
-  country: 'CA',
-  phone: '5140000000',
-  email: SITE_EMAIL,
-} as const;
-
-export const SITE_ADDRESS = `${STORE_ORIGIN_ADDRESS.street1}, ${STORE_ORIGIN_ADDRESS.city}, ${STORE_ORIGIN_ADDRESS.state} ${STORE_ORIGIN_ADDRESS.zip}, ${STORE_ORIGIN_ADDRESS.country}`;
-
-/**
- * Resolves the shipping origin address based on hierarchy:
- * 1. Global Store Origin (if configured in site.ts)
- * 2. Product-specific Origin (Fallback from database)
- * 3. Global Store Origin (Final placeholder if nothing else exists)
- */
-export function resolveShippingOrigin(
-  productOrigin?: {
-    name: string | null;
-    address: unknown;
-    contactPhone: string | null;
-    contactEmail: string | null;
-  } | null
-) {
-  const isGlobalConfigured =
-    STORE_ORIGIN_ADDRESS.street1 &&
-    !STORE_ORIGIN_ADDRESS.street1.includes('Technology');
-
-  if (isGlobalConfigured) {
-    return {
-      ...STORE_ORIGIN_ADDRESS,
-      zip: STORE_ORIGIN_ADDRESS.zip.replace(/\s+/g, ''),
-    };
-  }
-
-  if (productOrigin?.address) {
-    const addr = productOrigin.address as Record<string, string | undefined>;
-    return {
-      name: productOrigin.name || STORE_ORIGIN_ADDRESS.name,
-      street1: addr.street1 || addr.line1 || STORE_ORIGIN_ADDRESS.street1,
-      street2: addr.street2 || addr.line2 || '',
-      city: addr.city || STORE_ORIGIN_ADDRESS.city,
-      state: addr.state || STORE_ORIGIN_ADDRESS.state,
-      zip: (addr.postalCode || addr.zip || '').replace(/\s+/g, ''),
-      country: addr.country || STORE_ORIGIN_ADDRESS.country,
-      phone: productOrigin.contactPhone || STORE_ORIGIN_ADDRESS.phone,
-      email: productOrigin.contactEmail || STORE_ORIGIN_ADDRESS.email,
-    };
-  }
-
-  return {
-    ...STORE_ORIGIN_ADDRESS,
-    zip: STORE_ORIGIN_ADDRESS.zip.replace(/\s+/g, ''),
-  };
+const _mainCountryEntry = Object.entries(COUNTRY_TO_CURRENCY).find(
+  ([_, curr]) => curr === SITE_CURRENCY
+);
+if (!_mainCountryEntry) {
+  throw new Error(
+    `Critical Configuration Error: SITE_CURRENCY "${SITE_CURRENCY}" has no matching country in COUNTRY_TO_CURRENCY table.`
+  );
 }
+export const SITE_MAIN_COUNTRY = _mainCountryEntry[0];
 
 /**
- * Manual exchange rate fallback.
- * Used primarily for shipping calculations between Shippo (CAD) and site currency.
+ * Taux de conversion manuels (Fallback).
+ * Utilisé pour les conversions rapides (ex: Shippo CAD -> Site USD).
  */
 export const CAD_TO_USD_RATE = 0.72;
 
-/**
- * Centralized exchange rates for internal conversion.
- * Key: Source Currency -> { Target Currency: Rate }
- */
 export const EXCHANGE_RATES: Record<string, Record<string, number>> = {
-  CAD: {
-    USD: CAD_TO_USD_RATE,
-  },
-  USD: {
-    CAD: Number((1 / CAD_TO_USD_RATE).toFixed(4)),
-  },
+  CAD: { USD: CAD_TO_USD_RATE },
+  USD: { CAD: Number((1 / CAD_TO_USD_RATE).toFixed(4)) },
 };
 
 /**
- * Default phone prefix for the site region.
- * Used in checkout address forms.
+ * =============================================================================
+ * 📦 LOGISTIQUE & EXPÉDITION
+ * =============================================================================
+ * Configuration technique globale pour les envois.
  */
-export const PHONE_PREFIX = '+1';
 
-export const CART_COOKIE_NAME = 'cart_anonymous_id';
+export const SITE_ADDRESS = ''; // Sera récupéré dynamiquement depuis la DB
 
-/**
- * =============================================================================
- * LEGAL
- * =============================================================================
- */
-export const LEGAL_LAST_UPDATED = new Date('2025-01-01');
+export const PHONE_PREFIX = '+1'; // Préfixe par défaut pour les formulaires d'adresse
 
-/**
- * =============================================================================
- * SHIPPING CONFIGURATION
- * =============================================================================
- */
 export const SHIPPING_UNITS = {
   DISTANCE: 'cm',
   MASS: 'kg',
 } as const;
 
 /**
- * Filter to only show rates from specific providers (lowercase).
- * If empty, all providers are shown.
- * Example: ['ups', 'fedex']
+ * Filtre des transporteurs Shippo.
+ * Laissez vide [] pour tout afficher, ou spécifiez ['ups', 'usps'].
  */
 export const SHIPPING_PROVIDERS_FILTER: string[] = ['ups'];
 
 /**
- * Default Incoterm for shipping (DDU = Delivered Duty Unpaid).
- * Change to 'DDP' if you handle duties/taxes for the customer.
+ * Incoterm par défaut pour l'international.
+ * DDP : Droits et taxes payés par le vendeur.
+ * DDU : Droits et taxes payés par le client à la livraison.
  */
 export const DEFAULT_SHIPPING_INCOTERM = 'DDP';
 
 /**
- * Filter keywords to categorize shipping rates (lowercase).
- * Used to group rates into "Standard" and "Express" categories.
+ * Stratégies de regroupement des tarifs de livraison.
  */
 export const SHIPPING_STRATEGIES = {
   STANDARD: {
@@ -227,8 +139,20 @@ export const SHIPPING_STRATEGIES = {
 } as const;
 
 /**
- * Standard box sizes for shipping (Dimensions in cm, weight in kg).
- * Used by the 3D Bin Packing algorithm to optimize parcel selection.
+ * Code postal spécial pour déclencher le bypass de test (1$ shipping).
+ */
+export const SHIPPING_TEST_ZIP = '1DLR';
+
+/**
+ * Activer ou désactiver globalement le mode de test pour la logistique.
+ * Pour la sécurité, doit être à FALSE en production.
+ */
+export const ENABLE_SHIPPING_TEST_MODE =
+  process.env.ENABLE_SHIPPING_TEST_MODE === 'true';
+
+/**
+ * Catalogue des boîtes standards pour l'emballage 3D.
+ * Utilisé par l'algorithme de bin-packing pour optimiser les envois.
  */
 export const SHIPPING_BOX_CATALOG = [
   {
@@ -264,3 +188,34 @@ export const SHIPPING_BOX_CATALOG = [
     maxWeight: 1,
   },
 ] as const;
+
+/**
+ * =============================================================================
+ * 💳 CONFIGURATION DES PAIEMENTS
+ * =============================================================================
+ */
+
+/**
+ * Gestion automatique des taxes via Stripe Tax.
+ * Si activé, Stripe calculera les taxes selon l'adresse du client.
+ * Note : Nécessite l'activation de Stripe Tax dans votre dashboard Stripe.
+ */
+export const STRIPE_AUTOMATIC_TAX = true;
+
+/**
+ * =============================================================================
+ * 🛠️ CONSTANTES TECHNIQUES & DOMAINE
+ * =============================================================================
+ */
+export const PRODUCT_STATUSES = [
+  'DRAFT',
+  'ACTIVE',
+  'INACTIVE',
+  'ARCHIVED',
+] as const;
+
+export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
+
+export const CART_COOKIE_NAME = 'cart_anonymous_id';
+
+export const LEGAL_LAST_UPDATED = new Date('2025-01-01');

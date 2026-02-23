@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 import { prisma } from '../fixtures/db';
-
 import { verifyEmailSent } from '../fixtures/resend-helper';
 import {
   createTestOrder,

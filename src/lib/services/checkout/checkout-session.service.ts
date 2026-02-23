@@ -1,8 +1,7 @@
 import Stripe from 'stripe';
 
-import { DEFAULT_CURRENCY } from '@/lib/config/site';
+import { DEFAULT_CURRENCY, STRIPE_AUTOMATIC_TAX } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
-import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { stripe } from '@/lib/integrations/stripe/client';
 import { toStripeAmount } from '@/lib/integrations/stripe/utils';
@@ -119,7 +118,7 @@ export async function createCheckoutSession(
 
   // Stripe Tax nécessite une adresse d'origine configurée dans le dashboard
   // https://dashboard.stripe.com/settings/tax
-  const enableAutomaticTax = env.STRIPE_AUTOMATIC_TAX;
+  const enableAutomaticTax = STRIPE_AUTOMATIC_TAX;
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',

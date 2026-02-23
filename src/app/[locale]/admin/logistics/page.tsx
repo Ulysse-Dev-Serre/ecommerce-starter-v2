@@ -30,6 +30,8 @@ export default async function LogisticsPage({
   const suppliers = rawSuppliers.map(s => ({
     ...s,
     minimumOrderAmount: s.minimumOrderAmount.toNumber(),
+    createdAt: s.createdAt.toISOString(),
+    updatedAt: s.updatedAt.toISOString(),
   }));
 
   return (

@@ -1,13 +1,12 @@
-import { Prisma } from '@/generated/prisma';
-type InputJsonValue = Prisma.InputJsonValue;
-
 import { prisma } from '@/lib/core/db';
 import { logger } from '@/lib/core/logger';
 import { i18n } from '@/lib/i18n/config';
 import { AppError, ErrorCode } from '@/lib/types/api/errors';
 import { CreateOrderFromCartInput } from '@/lib/types/domain/order';
 
-import { OrderStatus, Language } from '@/generated/prisma';
+import { Prisma, OrderStatus, Language } from '@/generated/prisma';
+
+type InputJsonValue = Prisma.InputJsonValue;
 
 import { calculateCart, type Currency } from '../calculations';
 import { decrementStock } from '../inventory';
@@ -50,9 +49,13 @@ export async function createOrderFromCart({
   const calculation = calculateCart(cart, currency);
 
   const subtotalAmount = parseFloat(calculation.subtotal.toString());
-  const taxAmount = 0; // Géré par Stripe Tax
 
-  // Récupérer la langue depuis les metadata (fail if missing is strictly enforced by 0 Fallback policy if we want, but default locale is usually safe)
+  // Extraire le montant exact des taxes calculées par Stripe
+  const taxAmount = paymentIntent.total_details?.amount_tax
+    ? paymentIntent.total_details.amount_tax / 100
+    : 0;
+
+  // Récupérer la langue depuis les metadata
   const locale = (
     paymentIntent.metadata?.locale || i18n.defaultLocale
   ).toLowerCase();

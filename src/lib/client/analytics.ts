@@ -1,7 +1,8 @@
 import { API_ROUTES } from '@/lib/config/api-routes';
-import { UTMData } from '@/lib/types/domain/analytics';
+import type { UTMData } from '@/lib/types/domain/analytics';
 
 import { getCookie, setCookie } from './cookies';
+import { sendGTMEvent } from './gtm';
 
 const UTM_COOKIE_NAME = 'last_utm_data';
 const ANONYMOUS_ID_COOKIE = 'analytics_anon_id';
@@ -49,8 +50,6 @@ export function getStoredUTM(): UTMData {
     return {};
   }
 }
-
-import { sendGTMEvent } from './gtm';
 
 export async function trackEvent(
   eventType: string,

@@ -12,8 +12,8 @@ import {
   createPaymentIntent as createPaymentIntentAction,
   updatePaymentIntent as updatePaymentIntentAction,
 } from '@/lib/client/checkout';
-import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { getShippingRates } from '@/lib/client/shipping';
+import { ANALYTICS_EVENTS } from '@/lib/config/analytics-events';
 import { NAV_ROUTES, CHECKOUT_URL_PARAMS } from '@/lib/config/nav-routes';
 import { SupportedCurrency } from '@/lib/config/site';
 import { env } from '@/lib/core/env';
@@ -229,16 +229,21 @@ export function CheckoutForm({
   }, [tempName, phone, tempAddress, email]);
 
   const [total, setTotal] = useState(initialTotal);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [taxLines, setTaxLines] = useState<
+    Array<{ name: string; amount: number }>
+  >([]);
 
   // Recalculate total when shipping rate changes
+  // Note: Stripe total (from API) is the source of truth if available
   useEffect(() => {
     if (selectedRate) {
       const shippingCost = parseFloat(selectedRate.amount);
-      setTotal(initialTotal + shippingCost);
+      setTotal(initialTotal + shippingCost + taxAmount);
     } else {
       setTotal(initialTotal);
     }
-  }, [selectedRate, initialTotal]);
+  }, [selectedRate, initialTotal, taxAmount]);
 
   const updatePaymentIntent = async (
     rate: ShippingRate,
@@ -266,12 +271,19 @@ export function CheckoutForm({
         country: detailsToSend.country || '',
       };
 
-      await updatePaymentIntentAction({
+      const response = await updatePaymentIntentAction({
         paymentIntentId,
         shippingRate: rate,
         currency,
         shippingDetails: finalShippingDetails,
       });
+
+      if (response.taxAmount !== undefined) {
+        // Stripe returns tax in cents
+        const taxInDevise = response.taxAmount / 100;
+        setTaxAmount(taxInDevise);
+        setTaxLines(response.taxLines || []);
+      }
     } catch (err) {
       logger.error({ err }, 'Failed to update shipping cost');
       showToast(t('errorShippingUpdate'), 'error');
@@ -429,6 +441,8 @@ export function CheckoutForm({
             summaryItems={summaryItems}
             initialTotal={initialTotal}
             total={total}
+            taxAmount={taxAmount}
+            taxLines={taxLines}
             currency={currency}
             locale={locale}
             selectedRate={selectedRate}

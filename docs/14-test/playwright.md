@@ -28,6 +28,7 @@ Pour les étapes critiques, nous maintenons deux versions du même test pour une
 | **4 (Checkout)** | `api-checkout-full.spec.ts` | `checkout.spec.ts` |
 | **5 (Status)** | `api-order-status.spec.ts` | `order-lifecycle.spec.ts` |
 | **6 (Refund)** | `api-refund.spec.ts` | `cancel-order.spec.ts` |
+| **7 (Contact)** | `api-contact.spec.ts` | - |
 
 ---
 
@@ -80,6 +81,11 @@ Pour les étapes critiques, nous maintenons deux versions du même test pour une
 - **Objectifs** : Valide le formulaire de demande de remboursement côté client et la confirmation visuelle côté admin.
 - **Commande** : `npx playwright test src/tests/e2e/storefront/cancel-order.spec.ts --project=chromium`
 - **Note** : ⚠️ *Instabilités UI connues - Préférer la version Backend.*
+
+### Test 7 : Formulaire de Contact (Backend - Smoke)
+- **Fichier** : `src/tests/e2e/smoke/api-contact.spec.ts`
+- **Objectifs** : Valide l'envoi de messages via l'API, la validation des champs et le rate limiting.
+- **Commande** : `npx playwright test src/tests/e2e/smoke/api-contact.spec.ts --project=chromium`
 
 ---
 

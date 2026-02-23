@@ -6,7 +6,7 @@ import { NAV_ROUTES } from '@/lib/config/nav-routes';
 import { VIBE_ANIMATION_FADE_IN } from '@/lib/config/vibe-styles';
 import { CartPricing } from '@/lib/types/ui/cart';
 
-import { PriceTotal } from '@/components/price-display';
+import { PriceTotal } from '@/components/ui/price-display';
 
 interface CartSummaryProps {
   items: Array<{

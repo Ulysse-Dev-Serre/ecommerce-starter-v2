@@ -26,13 +26,23 @@ export interface Address {
 }
 
 /**
+ * Extended Stripe PaymentIntent to include session details if available
+ */
+export type StripePaymentContext = Stripe.PaymentIntent & {
+  total_details?: {
+    amount_tax: number;
+    amount_shipping: number;
+  };
+};
+
+/**
  * Input pour la création d'une commande depuis un panier
  */
 export interface CreateOrderFromCartInput {
   cart: CartProjection;
   userId?: string | null;
   orderEmail: string;
-  paymentIntent: Stripe.PaymentIntent;
+  paymentIntent: StripePaymentContext;
   shippingAddress?: Address;
   billingAddress?: Address;
 }

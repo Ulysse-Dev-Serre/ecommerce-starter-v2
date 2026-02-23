@@ -134,12 +134,20 @@ export interface PaymentStats {
 /**
  * Résultat de création de PaymentIntent
  */
+export interface TaxLine {
+  name: string;
+  amount: number;
+}
+
 export interface PaymentIntentResult {
   clientSecret: string;
   paymentIntentId: string;
   amount: number;
   currency: string;
   status: string;
+  taxAmount?: number;
+  taxLines?: TaxLine[];
+  totalWithTax?: number;
 }
 
 /**

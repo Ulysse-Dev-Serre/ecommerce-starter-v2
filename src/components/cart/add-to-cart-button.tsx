@@ -6,8 +6,8 @@ import { Loader2, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { addToCart } from '@/lib/client/cart';
 import { trackEvent } from '@/lib/client/analytics';
+import { addToCart } from '@/lib/client/cart';
 import { cn } from '@/lib/utils/cn';
 
 import { useToast } from '@/components/ui/toast-provider';

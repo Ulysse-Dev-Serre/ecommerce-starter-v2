@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack | pino-pretty",
-    "build": "prisma generate && printf \"export * from './browser';\\nimport { Prisma as P } from './browser';\\nimport type { Prisma as PrismaServer } from './client';\\n\\nexport const Decimal = P.Decimal;\\nexport type Decimal = PrismaServer.Decimal;\\nexport type JsonValue = PrismaServer.JsonValue;\\nexport type InputJsonValue = PrismaServer.InputJsonValue;\\n\" > src/generated/prisma/index.ts && next build",
+    "build": "npm run db:generate-fix && next build",
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
@@ -12,6 +12,7 @@
     "db:studio": "prisma studio",
     "db:reset": "npx tsx scripts/reset-database.ts",
     "db:cleanup-analytics": "npx tsx scripts/cleanup-analytics.ts",
+    "db:generate-fix": "prisma generate && printf \"export * from './browser';\\nimport { Prisma as P } from './browser';\\nimport type { Prisma as PrismaServer } from './client';\\n\\nexport const Decimal = P.Decimal;\\nexport type Decimal = PrismaServer.Decimal;\\nexport type JsonValue = PrismaServer.JsonValue;\\nexport type InputJsonValue = PrismaServer.InputJsonValue;\\n\" > src/generated/prisma/index.ts",
     "sync-clerk": "npx tsx scripts/sync-clerk-users.ts",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
@@ -20,7 +21,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "ci": "npm run typecheck && npm run lint && npm run format:check && npm run build",
+    "ci": "npm run db:generate-fix && npm run typecheck && npm run lint && npm run format:check && next build",
     "ci:fix": "npm run format && npm run lint --fix",
     "prepare": "husky"
   },

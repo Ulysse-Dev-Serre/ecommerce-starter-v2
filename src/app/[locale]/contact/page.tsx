@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 
 import { SUPPORTED_LOCALES } from '@/lib/config/site';
+import { Address } from '@/lib/integrations/shippo';
+import { logisticsLocationService } from '@/lib/services/logistics/logistics-location.service';
+import { SettingsService } from '@/lib/services/settings/settings.service';
 
 import { ContactForm } from '@/components/contact/contact-form';
 import { ContactInfo } from '@/components/contact/contact-info';
@@ -34,6 +37,21 @@ export default async function ContactPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'contact' });
 
+  // Fetch main storefront location address
+  const mainLocationId = await SettingsService.getSetting(
+    'storefront_main_location_id'
+  );
+  let storefrontAddress = '';
+
+  if (mainLocationId) {
+    const location =
+      await logisticsLocationService.getLocationById(mainLocationId);
+    if (location?.address) {
+      const addr = location.address as unknown as Address;
+      storefrontAddress = `${addr.street1}${addr.street2 ? `, ${addr.street2}` : ''}\n${addr.zip} ${addr.city}, ${addr.country}`;
+    }
+  }
+
   return (
     <div className="py-8 lg:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 vibe-container-max-4xl">
@@ -41,7 +59,7 @@ export default async function ContactPage({ params }: Props) {
 
         <div className="vibe-container p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            <ContactInfo locale={locale} />
+            <ContactInfo locale={locale} address={storefrontAddress} />
 
             <div className="bg-background/50 p-6 rounded-xl border border-border/50">
               <ContactForm />

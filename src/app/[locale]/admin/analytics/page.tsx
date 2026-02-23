@@ -50,9 +50,22 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
   ];
 
   // 2. Process Source Data
-  const tableData = sourceVisitors
+  interface SourceVisitor {
+    utmSource: string | null;
+    _count: { _all: number };
+  }
+
+  interface SourceStat {
+    utmSource: string | null;
+    _count: { _all: number };
+    _sum: { totalAmount: number | null }; // Decimal from Prisma
+  }
+
+  const tableData = (sourceVisitors as SourceVisitor[])
     .map(v => {
-      const stats = sourceStats.find(s => s.utmSource === v.utmSource);
+      const stats = (sourceStats as SourceStat[]).find(
+        s => s.utmSource === v.utmSource
+      );
       const visitors = v._count._all;
       const orders = stats?._count?._all || 0;
       const revenue = Number(stats?._sum?.totalAmount || 0);

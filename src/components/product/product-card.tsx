@@ -7,8 +7,8 @@ import { VIBE_HOVER_GROUP } from '@/lib/config/vibe-styles';
 import { ProductProjection } from '@/lib/types/domain/product';
 
 import { ProductActions } from '@/components/cart/product-actions';
-import { PriceDisplay } from '@/components/price-display';
 import { Card } from '@/components/ui/card';
+import { PriceDisplay } from '@/components/ui/price-display';
 
 interface ProductCardProps {
   product: ProductProjection;

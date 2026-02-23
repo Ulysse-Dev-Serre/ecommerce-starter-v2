@@ -7,8 +7,8 @@ import { VIBE_ANIMATION_FADE_IN } from '@/lib/config/vibe-styles';
 import { CartItem as CartItemType } from '@/lib/types/ui/cart';
 
 import { QuantitySelector } from '@/components/cart/quantity-selector';
-import { PriceDisplay } from '@/components/price-display';
 import { Card } from '@/components/ui/card';
+import { PriceDisplay } from '@/components/ui/price-display';
 
 interface CartItemProps {
   item: CartItemType;

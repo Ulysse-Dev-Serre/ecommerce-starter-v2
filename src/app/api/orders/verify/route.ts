@@ -83,14 +83,17 @@ async function verifyOrderHandler(
         shipping: Number(payment.order.shippingAmount),
         currency: payment.order.currency,
         createdAt: payment.order.createdAt,
-        items: payment.order.items.map(item => ({
-          id: item.id,
-          variantId: item.variantId,
-          quantity: item.quantity,
-          price: Number(item.unitPrice),
-          // Extract name from snapshot if possible
-          name: (item.productSnapshot as any)?.name || 'Product',
-        })),
+        items: payment.order.items.map(item => {
+          const snapshot = item.productSnapshot as Record<string, unknown>;
+          return {
+            id: item.id,
+            variantId: item.variantId,
+            quantity: item.quantity,
+            price: Number(item.unitPrice),
+            // Extract name from snapshot if possible
+            name: (snapshot?.name as string) || 'Product',
+          };
+        }),
       },
       requestId,
     });

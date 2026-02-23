@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SITE_CURRENCY } from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
 
+import { Decimal } from '@/generated/prisma';
+
 import { CustomerAcquisitionCard } from '@/components/admin/customers/customer-acquisition-card';
 import { CustomerAddressBook } from '@/components/admin/customers/customer-address-book';
 import { CustomerHeader } from '@/components/admin/customers/customer-header';
@@ -39,7 +41,11 @@ export default async function CustomerDetailPage({
     notFound();
   }
 
-  const totalSpent = customer.orders.reduce(
+  interface OrderTotal {
+    totalAmount: Decimal;
+  }
+
+  const totalSpent = (customer.orders as unknown as OrderTotal[]).reduce(
     (sum, order) => sum + Number(order.totalAmount),
     0
   );

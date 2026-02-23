@@ -1,8 +1,11 @@
 import Stripe from 'stripe';
 
-import { SupportedCurrency, DEFAULT_CURRENCY } from '@/lib/config/site';
+import {
+  SupportedCurrency,
+  DEFAULT_CURRENCY,
+  STRIPE_AUTOMATIC_TAX,
+} from '@/lib/config/site';
 import { prisma } from '@/lib/core/db';
-import { env } from '@/lib/core/env';
 import { logger } from '@/lib/core/logger';
 import { stripe } from '@/lib/integrations/stripe/client';
 import { toStripeAmount } from '@/lib/integrations/stripe/utils';
@@ -230,45 +233,84 @@ export async function updatePaymentIntent(
     }
   }
 
-  // 3. Appliquer la mise à jour (avec fallback Taxe)
-  logger.info(
-    { paymentIntentId, amount: newTotalCents },
-    'Updating PaymentIntent'
-  );
+  // 3. Calculer les taxes RÉELLES via la Tax API si activé
+  let taxAmountCents = 0;
+  let taxLines: Array<{ name: string; amount: number }> = [];
 
-  let updatedIntent: Stripe.PaymentIntent;
+  if (STRIPE_AUTOMATIC_TAX && shippingDetails) {
+    try {
+      const calculation = await stripe.tax.calculations.create({
+        currency: resolvedCurrency.toLowerCase(),
+        line_items: [
+          {
+            amount: subtotal, // Montant des produits en centimes
+            reference: 'product_subtotal',
+            tax_behavior: 'exclusive',
+          },
+          {
+            amount: shippingAmountCents, // Montant de la livraison en centimes
+            reference: 'shipping_fee',
+            tax_behavior: 'exclusive',
+          },
+        ],
+        customer_details: {
+          address: {
+            line1: shippingDetails.street1,
+            line2: shippingDetails.street2 || undefined,
+            city: shippingDetails.city,
+            state: shippingDetails.state,
+            postal_code: shippingDetails.zip,
+            country: shippingDetails.country,
+          },
+          address_source: 'shipping',
+        },
+      });
 
-  try {
-    if (env.STRIPE_AUTOMATIC_TAX) {
-      try {
-        updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
-          ...updatePayload,
-          automatic_tax: { enabled: true },
-        } as Stripe.PaymentIntentUpdateParams);
-      } catch (taxError) {
-        logger.warn(
-          { error: taxError },
-          'Stripe Tax activation failed, falling back'
-        );
-        updatedIntent = await stripe.paymentIntents.update(
-          paymentIntentId,
-          updatePayload
-        );
-      }
-    } else {
-      updatedIntent = await stripe.paymentIntents.update(
-        paymentIntentId,
-        updatePayload
+      taxAmountCents = calculation.tax_amount_exclusive;
+
+      // Extraire le détail des taxes (TPS, TVQ, etc.) sans casts "any" inutiles
+      taxLines = calculation.tax_breakdown.map(tax => {
+        logger.debug({ tax: tax }, 'Individual tax breakdown item');
+        return {
+          name:
+            (tax.tax_rate_details as { display_name?: string })?.display_name ||
+            'Tax',
+          amount: tax.amount,
+        };
+      });
+
+      logger.info(
+        { taxAmountCents, calculationId: calculation.id, taxLines },
+        'Stripe Tax calculated successfully'
       );
+    } catch (taxError) {
+      logger.error({ error: taxError }, 'Stripe Tax API calculation failed');
     }
-  } catch (error) {
-    throw new AppError(
-      ErrorCode.PAYMENT_FAILED,
-      'Failed to update payment intent',
-      500,
-      { originalError: error }
-    );
   }
 
-  return updatedIntent;
+  const finalTotalCents = subtotal + shippingAmountCents + taxAmountCents;
+
+  // 4. Appliquer la mise à jour finale
+  logger.info(
+    { paymentIntentId, amount: finalTotalCents, taxAmountCents },
+    'Updating PaymentIntent with final total'
+  );
+
+  const updatedIntent = await stripe.paymentIntents.update(paymentIntentId, {
+    ...updatePayload,
+    amount: finalTotalCents,
+    metadata: {
+      ...updatePayload.metadata,
+      tax_amount_cents: taxAmountCents.toString(),
+    },
+  });
+
+  // Pour le retour API, on attache les infos de taxe
+  // On utilise Object.assign pour ne pas enfreindre le type Stripe.PaymentIntent
+  return Object.assign(updatedIntent, {
+    total_details: {
+      amount_tax: taxAmountCents,
+      breakdown: taxLines,
+    },
+  });
 }
